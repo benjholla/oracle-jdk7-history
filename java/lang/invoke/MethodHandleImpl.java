@@ -2,7 +2,6 @@
 
 package java.lang.invoke;
 
-import sun.invoke.util.VerifyType;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
@@ -12,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import sun.invoke.empty.Empty;
 import sun.invoke.util.ValueConversions;
+import sun.invoke.util.VerifyType;
 import sun.invoke.util.Wrapper;
 import sun.misc.Unsafe;
 import static java.lang.invoke.MethodHandleStatics.*;
@@ -1202,4 +1202,162 @@ import static java.lang.invoke.MethodHandles.Lookup.IMPL_LOOKUP;
         return THROW_EXCEPTION;
     }
     static <T extends Throwable> Empty throwException(T t) throws T { throw t; }
+
+    
+    static
+    MethodHandle bindCaller(MethodHandle mh, Class<?> hostClass) {
+        return BindCaller.bindCaller(mh, hostClass);
+    }
+
+    
+    
+    private static class BindCaller {
+        static
+        MethodHandle bindCaller(MethodHandle mh, Class<?> hostClass) {
+            
+            if (hostClass == null) {
+                hostClass = C_Trampoline;
+            } else if (hostClass.isArray() ||
+                       hostClass.isPrimitive() ||
+                       hostClass.getName().startsWith("java.") ||
+                       hostClass.getName().startsWith("sun.")) {
+                throw new InternalError();  
+            }
+            
+            MethodHandle vamh = prepareForInvoker(mh);
+            
+            MethodHandle bccInvoker = CV_makeInjectedInvoker.get(hostClass);
+            return restoreToType(bccInvoker.bindTo(vamh), mh.type());
+        }
+
+        
+        
+        private static Class<?> C_Trampoline;
+        static {
+            Class<?> tramp = null;
+            try {
+                final int FRAME_COUNT_ARG = 1;  
+                java.lang.reflect.Method gcc = sun.reflect.Reflection.class.getMethod("getCallerClass", int.class);
+                tramp = (Class<?>) sun.reflect.misc.MethodUtil.invoke(gcc, null, new Object[]{ FRAME_COUNT_ARG });
+                if (tramp.getClassLoader() == BindCaller.class.getClassLoader())
+                    throw new RuntimeException(tramp.getName()+" class loader");
+            } catch (Throwable ex) {
+                throw new InternalError(ex.toString());
+            }
+            C_Trampoline = tramp;
+        }
+
+        private static final Unsafe UNSAFE = Unsafe.getUnsafe();
+
+        private static MethodHandle makeInjectedInvoker(Class<?> hostClass) {
+            Class<?> bcc = UNSAFE.defineAnonymousClass(hostClass, T_BYTES, null);
+            if (hostClass.getClassLoader() != bcc.getClassLoader())
+                throw new InternalError(hostClass.getName()+" (CL)");
+            try {
+                if (hostClass.getProtectionDomain() != bcc.getProtectionDomain())
+                    throw new InternalError(hostClass.getName()+" (PD)");
+            } catch (SecurityException ex) {
+                
+                
+            }
+            try {
+                MethodHandle init = IMPL_LOOKUP.findStatic(bcc, "init", MethodType.methodType(void.class));
+                init.invokeExact();  
+            } catch (Throwable ex) {
+                throw uncaughtException(ex);
+            }
+            MethodHandle bccInvoker;
+            try {
+                MethodType invokerMT = MethodType.methodType(Object.class, MethodHandle.class, Object[].class);
+                bccInvoker = IMPL_LOOKUP.findStatic(bcc, "invoke_V", invokerMT);
+            } catch (ReflectiveOperationException ex) {
+                throw uncaughtException(ex);
+            }
+            
+            try {
+                MethodHandle vamh = prepareForInvoker(MH_checkCallerClass);
+                Object ok = bccInvoker.invokeExact(vamh, new Object[]{hostClass, bcc});
+            } catch (Throwable ex) {
+                throw new InternalError(ex.toString());
+            }
+            return bccInvoker;
+        }
+        private static ClassValue<MethodHandle> CV_makeInjectedInvoker = new ClassValue<MethodHandle>() {
+            @Override protected MethodHandle computeValue(Class<?> hostClass) {
+                return makeInjectedInvoker(hostClass);
+            }
+        };
+
+        
+        private static MethodHandle prepareForInvoker(MethodHandle mh) {
+            mh = mh.asFixedArity();
+            MethodType mt = mh.type();
+            int arity = mt.parameterCount();
+            MethodHandle vamh = mh.asType(mt.generic());
+            vamh = vamh.asSpreader(Object[].class, arity);
+            return vamh;
+        }
+
+        
+        private static MethodHandle restoreToType(MethodHandle vamh, MethodType type) {
+            return vamh.asCollector(Object[].class, type.parameterCount()).asType(type);
+        }
+
+        private static final MethodHandle MH_checkCallerClass;
+        static {
+            final Class<?> THIS_CLASS = BindCaller.class;
+            assert(checkCallerClass(THIS_CLASS, THIS_CLASS));
+            try {
+                MH_checkCallerClass = IMPL_LOOKUP
+                    .findStatic(THIS_CLASS, "checkCallerClass",
+                                MethodType.methodType(boolean.class, Class.class, Class.class));
+                assert((boolean) MH_checkCallerClass.invokeExact(THIS_CLASS, THIS_CLASS));
+            } catch (Throwable ex) {
+                throw new InternalError(ex.toString());
+            }
+        }
+
+        private static boolean checkCallerClass(Class<?> expected, Class<?> expected2) {
+            final int FRAME_COUNT_ARG = 2;  
+            Class<?> actual = sun.reflect.Reflection.getCallerClass(FRAME_COUNT_ARG);
+            if (actual != expected && actual != expected2)
+                throw new InternalError("found "+actual.getName()+", expected "+expected.getName()
+                                        +(expected == expected2 ? "" : ", or else "+expected2.getName()));
+            return true;
+        }
+
+        private static final byte[] T_BYTES;
+        static {
+            final Object[] values = {null};
+            AccessController.doPrivileged(new PrivilegedAction<Void>() {
+                    public Void run() {
+                        try {
+                            Class<T> tClass = T.class;
+                            String tName = tClass.getName();
+                            String tResource = tName.substring(tName.lastIndexOf('.')+1)+".class";
+                            java.net.URLConnection uconn = tClass.getResource(tResource).openConnection();
+                            int len = uconn.getContentLength();
+                            byte[] bytes = new byte[len];
+                            try (java.io.InputStream str = uconn.getInputStream()) {
+                                int nr = str.read(bytes);
+                                if (nr != len)  throw new java.io.IOException(tResource);
+                            }
+                            values[0] = bytes;
+                        } catch (java.io.IOException ex) {
+                            throw new InternalError(ex.toString());
+                        }
+                        return null;
+                    }
+                });
+            T_BYTES = (byte[]) values[0];
+        }
+
+        
+        private static class T {
+            static void init() { }  
+            static Object invoke_V(MethodHandle vamh, Object[] args) throws Throwable {
+                return vamh.invokeExact(args);
+            }
+        }
+    }
 }

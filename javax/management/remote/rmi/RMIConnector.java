@@ -180,9 +180,9 @@ public class RMIConnector implements JMXConnector, Serializable, JMXAddressable 
             
             
             
-            boolean checkStub = EnvHelp.computeBooleanFromString(
-                    usemap,
-                    "jmx.remote.x.check.stub",false);
+            String stringBoolean =  (String) usemap.get("jmx.remote.x.check.stub");
+            boolean checkStub = EnvHelp.computeBooleanFromString(stringBoolean);
+
             if (checkStub) checkStub(stub, rmiServerImplStubClass);
 
             

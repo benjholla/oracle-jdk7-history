@@ -5,6 +5,8 @@ package java.net;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 import sun.security.util.SecurityConstants;
@@ -458,6 +460,22 @@ public final class URL implements java.io.Serializable {
     private static Object streamHandlerLock = new Object();
 
     
+    private static final String GOPHER = "gopher";
+    private static final String ENABLE_GOPHER_PROP = "jdk.net.registerGopherProtocol";
+    private static final boolean enableGopher = AccessController.doPrivileged(
+                new PrivilegedAction<Boolean>() {
+                    @Override
+                    public Boolean run() {
+                        String prop = System.getProperty(ENABLE_GOPHER_PROP);
+                        return prop == null ? false :
+                                   (prop.equalsIgnoreCase("false") ? false : true);
+                    }
+                });
+
+    
+    private static final String JDK_PACKAGE_PREFIX =  "sun.net.www.protocol";
+
+    
     static URLStreamHandler getURLStreamHandler(String protocol) {
 
         URLStreamHandler handler = (URLStreamHandler)handlers.get(protocol);
@@ -485,7 +503,7 @@ public final class URL implements java.io.Serializable {
 
                 
                 
-                packagePrefixList += "sun.net.www.protocol";
+                packagePrefixList += JDK_PACKAGE_PREFIX;
 
                 StringTokenizer packagePrefixIter =
                     new StringTokenizer(packagePrefixList, "|");
@@ -495,6 +513,14 @@ public final class URL implements java.io.Serializable {
 
                     String packagePrefix =
                       packagePrefixIter.nextToken().trim();
+
+                    
+                    
+                    if (protocol.equalsIgnoreCase(GOPHER) &&
+                        packagePrefix.equals(JDK_PACKAGE_PREFIX) &&
+                        !enableGopher) {
+                            continue;
+                    }
                     try {
                         String clsName = packagePrefix + "." + protocol +
                           ".Handler";

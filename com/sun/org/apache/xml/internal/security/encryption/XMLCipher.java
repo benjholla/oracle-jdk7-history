@@ -1078,7 +1078,7 @@ public class XMLCipher {
                 
                 
 
-                if (sourceParent instanceof Document) {
+                if (sourceParent != null && sourceParent.getNodeType() == Node.DOCUMENT_NODE) {
 
                     
 

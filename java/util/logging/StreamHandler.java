@@ -140,7 +140,7 @@ public class StreamHandler extends Handler {
     }
 
     private synchronized void flushAndClose() throws SecurityException {
-        checkAccess();
+        checkPermission();
         if (writer != null) {
             try {
                 if (!doneHeader) {

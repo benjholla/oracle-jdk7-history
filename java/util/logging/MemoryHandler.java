@@ -118,7 +118,7 @@ public class MemoryHandler extends Handler {
             throw new NullPointerException();
         }
         LogManager manager = LogManager.getLogManager();
-        checkAccess();
+        checkPermission();
         pushLevel = newLevel;
     }
 

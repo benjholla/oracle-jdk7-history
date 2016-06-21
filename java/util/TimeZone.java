@@ -9,7 +9,8 @@ import java.lang.ref.SoftReference;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.concurrent.ConcurrentHashMap;
-import sun.awt.AppContext;
+import sun.misc.SharedSecrets;
+import sun.misc.JavaAWTAccess;
 import sun.security.action.GetPropertyAction;
 import sun.util.TimeZoneNameUtility;
 import sun.util.calendar.ZoneInfo;
@@ -31,6 +32,9 @@ abstract public class TimeZone implements Serializable, Cloneable {
     private static final int ONE_MINUTE = 60*1000;
     private static final int ONE_HOUR   = 60*ONE_MINUTE;
     private static final int ONE_DAY    = 24*ONE_HOUR;
+
+    
+    private static JavaAWTAccess javaAWTAccess;
 
     
     static final long serialVersionUID = 3581463369166924961L;
@@ -317,30 +321,34 @@ abstract public class TimeZone implements Serializable, Cloneable {
 
     
     private synchronized static TimeZone getDefaultInAppContext() {
-        if (!hasSetInAppContext) {
-            return null;
-        }
-
-        AppContext ac = AppContext.getAppContext();
-        if (ac != null && !ac.isDisposed()) {
-            return (TimeZone) ac.get(TimeZone.class);
+        javaAWTAccess = SharedSecrets.getJavaAWTAccess();
+        if (javaAWTAccess == null) {
+            return mainAppContextDefault;
+        } else {
+            if (!javaAWTAccess.isDisposed()) {
+                TimeZone tz = (TimeZone)
+                    javaAWTAccess.get(TimeZone.class);
+                if (tz == null && javaAWTAccess.isMainAppContext()) {
+                    return mainAppContextDefault;
+                } else {
+                    return tz;
+                }
+            }
         }
         return null;
     }
 
     
     private synchronized static void setDefaultInAppContext(TimeZone tz) {
-        if (!hasSetInAppContext && tz == null) {
-            return;
-        }
-
-        AppContext ac = AppContext.getAppContext();
-        if (ac != null && !ac.isDisposed()) {
-            if (tz != null) {
-                ac.put(TimeZone.class, tz);
-                hasSetInAppContext = true;
-            } else {
-                ac.remove(TimeZone.class);
+        javaAWTAccess = SharedSecrets.getJavaAWTAccess();
+        if (javaAWTAccess == null) {
+            mainAppContextDefault = tz;
+        } else {
+            if (!javaAWTAccess.isDisposed()) {
+                javaAWTAccess.put(TimeZone.class, tz);
+                if (javaAWTAccess.isMainAppContext()) {
+                    mainAppContextDefault = null;
+                }
             }
         }
     }
@@ -376,7 +384,7 @@ abstract public class TimeZone implements Serializable, Cloneable {
     private static final int    GMT_ID_LENGTH = 3;
 
     
-    private static boolean hasSetInAppContext;
+    private static TimeZone mainAppContextDefault;
 
     
     private static final TimeZone parseCustomTimeZone(String id) {

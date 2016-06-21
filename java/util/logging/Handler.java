@@ -34,7 +34,7 @@ public abstract class Handler {
 
     
     public void setFormatter(Formatter newFormatter) throws SecurityException {
-        checkAccess();
+        checkPermission();
         
         newFormatter.getClass();
         formatter = newFormatter;
@@ -48,7 +48,7 @@ public abstract class Handler {
     
     public void setEncoding(String encoding)
                         throws SecurityException, java.io.UnsupportedEncodingException {
-        checkAccess();
+        checkPermission();
         if (encoding != null) {
             try {
                 if(!java.nio.charset.Charset.isSupported(encoding)) {
@@ -68,7 +68,7 @@ public abstract class Handler {
 
     
     public void setFilter(Filter newFilter) throws SecurityException {
-        checkAccess();
+        checkPermission();
         filter = newFilter;
     }
 
@@ -79,7 +79,7 @@ public abstract class Handler {
 
     
     public void setErrorManager(ErrorManager em) {
-        checkAccess();
+        checkPermission();
         if (em == null) {
            throw new NullPointerException();
         }
@@ -88,7 +88,7 @@ public abstract class Handler {
 
     
     public ErrorManager getErrorManager() {
-        checkAccess();
+        checkPermission();
         return errorManager;
     }
 
@@ -107,7 +107,7 @@ public abstract class Handler {
         if (newLevel == null) {
             throw new NullPointerException();
         }
-        checkAccess();
+        checkPermission();
         logLevel = newLevel;
     }
 
@@ -133,9 +133,9 @@ public abstract class Handler {
     
     
     
-    void checkAccess() throws SecurityException {
+    void checkPermission() throws SecurityException {
         if (sealed) {
-            manager.checkAccess();
+            manager.checkPermission();
         }
     }
 }

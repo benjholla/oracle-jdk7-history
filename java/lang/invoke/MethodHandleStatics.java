@@ -79,7 +79,7 @@ import java.security.PrivilegedAction;
      static RuntimeException newIllegalArgumentException(String message, Object obj, Object obj2) {
         return new IllegalArgumentException(message(message, obj, obj2));
     }
-     static Error uncaughtException(Exception ex) {
+     static Error uncaughtException(Throwable ex) {
         Error err = new InternalError("uncaught exception");
         err.initCause(ex);
         return err;

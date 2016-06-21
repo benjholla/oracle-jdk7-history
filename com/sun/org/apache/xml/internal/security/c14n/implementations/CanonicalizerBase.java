@@ -146,7 +146,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
         try {
          NameSpaceSymbTable ns=new NameSpaceSymbTable();
          int nodeLevel=NODE_BEFORE_DOCUMENT_ELEMENT;
-         if (rootNode instanceof Element) {
+         if (rootNode != null && rootNode.getNodeType() == Node.ELEMENT_NODE) {
                 
                 getParentNameSpaces((Element)rootNode,ns);
                 nodeLevel=NODE_NOT_BEFORE_OR_AFTER_DOCUMENT_ELEMENT;
@@ -268,7 +268,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
                                 return;
                         sibling=parentNode.getNextSibling();
                         parentNode=parentNode.getParentNode();
-                        if (!(parentNode instanceof Element)) {
+                        if (parentNode !=null && parentNode.getNodeType() != Node.ELEMENT_NODE) {
                                 documentLevel=NODE_AFTER_DOCUMENT_ELEMENT;
                                 parentNode=null;
                         }
@@ -316,7 +316,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
                 return;
         boolean currentNodeIsVisible = false;
         NameSpaceSymbTable ns=new  NameSpaceSymbTable();
-        if (currentNode instanceof Element)
+        if (currentNode != null && currentNode.getNodeType() == Node.ELEMENT_NODE)
                 getParentNameSpaces((Element)currentNode,ns);
         Node sibling=null;
         Node parentNode=null;
@@ -437,7 +437,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
                                 return;
                         sibling=parentNode.getNextSibling();
                         parentNode=parentNode.getParentNode();
-                        if (!(parentNode instanceof Element)) {
+                        if (parentNode != null && parentNode.getNodeType() != Node.ELEMENT_NODE) {
                                 parentNode=null;
                                 documentLevel=NODE_AFTER_DOCUMENT_ELEMENT;
                         }
@@ -515,18 +515,14 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
         final void getParentNameSpaces(Element el,NameSpaceSymbTable ns)  {
                 List parents=new ArrayList(10);
                 Node n1=el.getParentNode();
-                if (!(n1 instanceof Element)) {
+                if (n1 == null || n1.getNodeType() != Node.ELEMENT_NODE) {
                         return;
                 }
                 
-                Element parent=(Element) n1;
-                while (parent!=null) {
-                        parents.add(parent);
-                        Node n=parent.getParentNode();
-                        if (!(n instanceof Element )) {
-                                break;
-                        }
-                        parent=(Element)n;
+                Node parent = n1;
+                while (parent!=null && parent.getNodeType() == Node.ELEMENT_NODE) {
+                        parents.add((Element)parent);
+                        parent = parent.getParentNode();
                 }
                 
                 ListIterator it=parents.listIterator(parents.size());

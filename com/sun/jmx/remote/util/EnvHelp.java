@@ -459,30 +459,13 @@ public class EnvHelp {
     }
 
     
-    public static boolean computeBooleanFromString(
-            Map<String, ?> env, String prop, boolean systemProperty) {
-
-        if (env == null)
-            throw new IllegalArgumentException("env map cannot be null");
-
+    public static boolean computeBooleanFromString(String stringBoolean) {
         
-        return computeBooleanFromString(env,prop,systemProperty,false);
+        return computeBooleanFromString(stringBoolean,false);
     }
 
     
-    public static boolean computeBooleanFromString(
-            Map<String, ?> env, String prop,
-            boolean systemProperty, boolean defaultValue) {
-
-        if (env == null)
-            throw new IllegalArgumentException("env map cannot be null");
-
-        String stringBoolean = (String) env.get(prop);
-        if (stringBoolean == null && systemProperty) {
-            stringBoolean =
-                    AccessController.doPrivileged(new GetPropertyAction(prop));
-        }
-
+    public static boolean computeBooleanFromString( String stringBoolean, boolean defaultValue) {
         if (stringBoolean == null)
             return defaultValue;
         else if (stringBoolean.equalsIgnoreCase("true"))
@@ -490,8 +473,8 @@ public class EnvHelp {
         else if (stringBoolean.equalsIgnoreCase("false"))
             return false;
         else
-            throw new IllegalArgumentException(prop +
-                " must be \"true\" or \"false\" instead of \"" +
+            throw new IllegalArgumentException(
+                "Property value must be \"true\" or \"false\" instead of \"" +
                 stringBoolean + "\"");
     }
 

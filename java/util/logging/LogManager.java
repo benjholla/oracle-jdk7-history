@@ -165,13 +165,13 @@ public class LogManager {
         if (l == null) {
             throw new NullPointerException();
         }
-        checkAccess();
+        checkPermission();
         changes.addPropertyChangeListener(l);
     }
 
     
     public void removePropertyChangeListener(PropertyChangeListener l) throws SecurityException {
-        checkAccess();
+        checkPermission();
         changes.removePropertyChangeListener(l);
     }
 
@@ -551,7 +551,7 @@ public class LogManager {
 
     
     public void readConfiguration() throws IOException, SecurityException {
-        checkAccess();
+        checkPermission();
 
         
         String cname = System.getProperty("java.util.logging.config.class");
@@ -600,7 +600,7 @@ public class LogManager {
     
 
     public void reset() throws SecurityException {
-        checkAccess();
+        checkPermission();
         synchronized (this) {
             props = new Properties();
             
@@ -673,7 +673,7 @@ public class LogManager {
 
     
     public void readConfiguration(InputStream ins) throws IOException, SecurityException {
-        checkAccess();
+        checkPermission();
         reset();
 
         
@@ -830,15 +830,17 @@ public class LogManager {
     }
 
 
-    private Permission ourPermission = new LoggingPermission("control", null);
+    private final Permission controlPermission = new LoggingPermission("control", null);
+
+    void checkPermission() {
+        SecurityManager sm = System.getSecurityManager();
+        if (sm != null)
+            sm.checkPermission(controlPermission);
+    }
 
     
     public void checkAccess() throws SecurityException {
-        SecurityManager sm = System.getSecurityManager();
-        if (sm == null) {
-            return;
-        }
-        sm.checkPermission(ourPermission);
+        checkPermission();
     }
 
     

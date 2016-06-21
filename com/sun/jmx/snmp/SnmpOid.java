@@ -9,6 +9,10 @@ import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
 
 
+import sun.misc.JavaAWTAccess;
+import sun.misc.SharedSecrets;
+
+
 
 public class SnmpOid extends SnmpValue {
 
@@ -343,19 +347,20 @@ public class SnmpOid extends SnmpValue {
             return handleLong(s, index);
         } catch(NumberFormatException e) {}
 
+        SnmpOidTable table = getSnmpOidTable();
         
         
-        if (meta == null)
+        if (table == null)
           throw new SnmpStatusException(SnmpStatusException.noSuchName);
 
         
         
         if (index <= 0) {
-            SnmpOidRecord rec = meta.resolveVarName(s);
+            SnmpOidRecord rec = table.resolveVarName(s);
             return rec.getOid();
 
         } else {
-            SnmpOidRecord rec = meta.resolveVarName(s.substring(0, index));
+            SnmpOidRecord rec = table.resolveVarName(s.substring(0, index));
             return (rec.getOid()+ s.substring(index));
 
         }
@@ -368,12 +373,26 @@ public class SnmpOid extends SnmpValue {
 
     
     public static SnmpOidTable getSnmpOidTable() {
-        return meta;
+        JavaAWTAccess awtAccess = SharedSecrets.getJavaAWTAccess();
+        if (awtAccess == null) {
+            return meta;
+        } else {
+            return (SnmpOidTable) awtAccess.get(SnmpOidTable.class);
+        }
     }
 
     
     public static void setSnmpOidTable(SnmpOidTable db) {
-        meta = db;
+        JavaAWTAccess awtAccess = SharedSecrets.getJavaAWTAccess();
+        if (awtAccess == null) {
+            meta = db;
+        } else {
+            if (db == null) {
+                awtAccess.remove(SnmpOidTable.class);
+            } else {
+                awtAccess.put(SnmpOidTable.class, db);
+            }
+        }
     }
 
     
@@ -396,7 +415,6 @@ public class SnmpOid extends SnmpValue {
         }
         return result ;
     }
-
 
     
     private void enlargeIfNeeded(int n) {
@@ -441,7 +459,7 @@ public class SnmpOid extends SnmpValue {
     final static String  name = "Object Identifier";
 
     
-     private static SnmpOidTable meta= null;
+    private static SnmpOidTable meta= null;
 
     
     static final long serialVersionUID = 8956237235607885096L;

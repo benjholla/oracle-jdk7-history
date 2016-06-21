@@ -1,6 +1,8 @@
 
 package javax.swing.text;
 
+import sun.reflect.misc.ConstructorUtil;
+
 import java.io.Serializable;
 import java.lang.reflect.*;
 import java.text.ParseException;
@@ -100,7 +102,7 @@ public class DefaultFormatter extends JFormattedTextField.AbstractFormatter
             Constructor cons;
 
             try {
-                cons = vc.getConstructor(new Class[] { String.class });
+                cons = ConstructorUtil.getConstructor(vc, new Class[]{String.class});
 
             } catch (NoSuchMethodException nsme) {
                 cons = null;

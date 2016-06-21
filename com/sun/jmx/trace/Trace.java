@@ -8,14 +8,14 @@ import java.util.Properties;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.io.IOException;
+import sun.misc.JavaAWTAccess;
+import sun.misc.SharedSecrets;
 
 
 @Deprecated
 public final class Trace implements TraceTags {
 
-    private static TraceDestination out = initDestination();
-    
-    
+    private static TraceDestination out;
 
     
     private Trace() {
@@ -55,7 +55,13 @@ public final class Trace implements TraceTags {
 
     
     public static synchronized void setDestination(TraceDestination output) {
-        out = output;
+        JavaAWTAccess javaAWTAccess = SharedSecrets.getJavaAWTAccess();
+        if (javaAWTAccess == null) {
+            out = output; 
+        } else {
+                          
+           javaAWTAccess.put(TraceDestination.class, output);
+        }
     }
 
     
@@ -115,7 +121,22 @@ public final class Trace implements TraceTags {
 
     
     private static synchronized TraceDestination out() {
-        return out;
+        JavaAWTAccess javaAWTAccess = SharedSecrets.getJavaAWTAccess();
+        if (javaAWTAccess == null) {
+            if (out == null) {
+                
+                out = initDestination();
+            }
+            return out; 
+        }
+        
+        TraceDestination output = (TraceDestination)javaAWTAccess.get(TraceDestination.class);
+        if (output == null) {
+            
+            output = initDestination();
+            javaAWTAccess.put(TraceDestination.class, output);
+        }
+        return output;
     }
 
 }
