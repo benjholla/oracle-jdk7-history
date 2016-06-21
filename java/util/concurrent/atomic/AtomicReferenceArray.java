@@ -3,20 +3,32 @@
 
 
 package java.util.concurrent.atomic;
+
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import sun.misc.Unsafe;
-import java.util.*;
 
 
 public class AtomicReferenceArray<E> implements java.io.Serializable {
     private static final long serialVersionUID = -6209656149925076980L;
 
-    private static final Unsafe unsafe = Unsafe.getUnsafe();
-    private static final int base = unsafe.arrayBaseOffset(Object[].class);
+    private static final Unsafe unsafe;
+    private static final int base;
     private static final int shift;
-    private final Object[] array;
+    private static final long arrayFieldOffset;
+    private final Object[] array; 
 
     static {
-        int scale = unsafe.arrayIndexScale(Object[].class);
+        int scale;
+        try {
+            unsafe = Unsafe.getUnsafe();
+            arrayFieldOffset = unsafe.objectFieldOffset
+                (AtomicReferenceArray.class.getDeclaredField("array"));
+            base = unsafe.arrayBaseOffset(Object[].class);
+            scale = unsafe.arrayIndexScale(Object[].class);
+        } catch (Exception e) {
+            throw new Error(e);
+        }
         if ((scale & (scale - 1)) != 0)
             throw new Error("data type scale not a power of two");
         shift = 31 - Integer.numberOfLeadingZeros(scale);
@@ -41,7 +53,7 @@ public class AtomicReferenceArray<E> implements java.io.Serializable {
     
     public AtomicReferenceArray(E[] array) {
         
-        this.array = array.clone();
+        this.array = Arrays.copyOf(array, array.length, Object[].class);
     }
 
     
@@ -73,7 +85,7 @@ public class AtomicReferenceArray<E> implements java.io.Serializable {
     public final E getAndSet(int i, E newValue) {
         long offset = checkedByteOffset(i);
         while (true) {
-            E current = (E) getRaw(offset);
+            E current = getRaw(offset);
             if (compareAndSetRaw(offset, current, newValue))
                 return current;
         }
@@ -95,7 +107,7 @@ public class AtomicReferenceArray<E> implements java.io.Serializable {
 
     
     public String toString() {
-           int iMax = array.length - 1;
+        int iMax = array.length - 1;
         if (iMax == -1)
             return "[]";
 
@@ -107,6 +119,18 @@ public class AtomicReferenceArray<E> implements java.io.Serializable {
                 return b.append(']').toString();
             b.append(',').append(' ');
         }
+    }
+
+    
+    private void readObject(java.io.ObjectInputStream s)
+        throws java.io.IOException, ClassNotFoundException {
+        
+        Object a = s.readFields().get("array", null);
+        if (a == null || !a.getClass().isArray())
+            throw new java.io.InvalidObjectException("Not array type");
+        if (a.getClass() != Object[].class)
+            a = Arrays.copyOf((Object[])a, Array.getLength(a), Object[].class);
+        unsafe.putObjectVolatile(this, arrayFieldOffset, a);
     }
 
 }

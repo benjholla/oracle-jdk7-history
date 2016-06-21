@@ -9,6 +9,7 @@ import java.lang.ref.SoftReference;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.concurrent.ConcurrentHashMap;
+import sun.awt.AppContext;
 import sun.security.action.GetPropertyAction;
 import sun.util.TimeZoneNameUtility;
 import sun.util.calendar.ZoneInfo;
@@ -223,7 +224,7 @@ abstract public class TimeZone implements Serializable, Cloneable {
 
     
     static TimeZone getDefaultRef() {
-        TimeZone defaultZone = defaultZoneTL.get();
+        TimeZone defaultZone = getDefaultInAppContext();
         if (defaultZone == null) {
             defaultZone = defaultTimeZone;
             if (defaultZone == null) {
@@ -307,10 +308,40 @@ abstract public class TimeZone implements Serializable, Cloneable {
         if (hasPermission()) {
             synchronized (TimeZone.class) {
                 defaultTimeZone = zone;
-                defaultZoneTL.set(null);
+                setDefaultInAppContext(null);
             }
         } else {
-            defaultZoneTL.set(zone);
+            setDefaultInAppContext(zone);
+        }
+    }
+
+    
+    private synchronized static TimeZone getDefaultInAppContext() {
+        if (!hasSetInAppContext) {
+            return null;
+        }
+
+        AppContext ac = AppContext.getAppContext();
+        if (ac != null && !ac.isDisposed()) {
+            return (TimeZone) ac.get(TimeZone.class);
+        }
+        return null;
+    }
+
+    
+    private synchronized static void setDefaultInAppContext(TimeZone tz) {
+        if (!hasSetInAppContext && tz == null) {
+            return;
+        }
+
+        AppContext ac = AppContext.getAppContext();
+        if (ac != null && !ac.isDisposed()) {
+            if (tz != null) {
+                ac.put(TimeZone.class, tz);
+                hasSetInAppContext = true;
+            } else {
+                ac.remove(TimeZone.class);
+            }
         }
     }
 
@@ -340,11 +371,12 @@ abstract public class TimeZone implements Serializable, Cloneable {
     
     private String           ID;
     private static volatile TimeZone defaultTimeZone;
-    private static final InheritableThreadLocal<TimeZone> defaultZoneTL
-                                        = new InheritableThreadLocal<TimeZone>();
 
     static final String         GMT_ID        = "GMT";
     private static final int    GMT_ID_LENGTH = 3;
+
+    
+    private static boolean hasSetInAppContext;
 
     
     private static final TimeZone parseCustomTimeZone(String id) {
