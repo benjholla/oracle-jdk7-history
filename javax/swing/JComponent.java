@@ -40,6 +40,7 @@ import javax.swing.plaf.*;
 import static javax.swing.ClientPropertyKey.*;
 import javax.accessibility.*;
 
+import sun.awt.SunToolkit;
 import sun.swing.SwingUtilities2;
 import sun.swing.UIClientPropertyKey;
 
@@ -2654,7 +2655,8 @@ public abstract class JComponent extends Container implements Serializable,
 
     
     public void repaint(long tm, int x, int y, int width, int height) {
-        RepaintManager.currentManager(this).addDirtyRegion(this, x, y, width, height);
+        RepaintManager.currentManager(SunToolkit.targetToAppContext(this))
+                      .addDirtyRegion(this, x, y, width, height);
     }
 
 
@@ -2675,7 +2677,7 @@ public abstract class JComponent extends Container implements Serializable,
             
             return;
         }
-        if (SwingUtilities.isEventDispatchThread()) {
+        if (SunToolkit.isDispatchThreadForAppContext(this)) {
             invalidate();
             RepaintManager.currentManager(this).addInvalidComponent(this);
         }
@@ -2697,7 +2699,7 @@ public abstract class JComponent extends Container implements Serializable,
                     revalidate();
                 }
             };
-            SwingUtilities.invokeLater(callRevalidate);
+            SunToolkit.executeOnEventHandlerThread(this, callRevalidate);
         }
     }
 

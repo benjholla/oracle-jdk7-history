@@ -240,7 +240,7 @@ class MulticastSocket extends DatagramSocket {
     public NetworkInterface getNetworkInterface() throws SocketException {
         NetworkInterface ni
             = (NetworkInterface)getImpl().getOption(SocketOptions.IP_MULTICAST_IF2);
-        if (ni.getIndex() == 0) {
+        if ((ni.getIndex() == 0) || (ni.getIndex() == -1)) {
             InetAddress[] addrs = new InetAddress[1];
             addrs[0] = InetAddress.anyLocalAddress();
             return new NetworkInterface(addrs[0].getHostName(), 0, addrs);
