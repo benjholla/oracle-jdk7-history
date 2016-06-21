@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2011, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2014, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
  *
@@ -1043,11 +1043,11 @@ public class EventQueue {
                             t.setContextClassLoader(classLoader);
                             t.setPriority(Thread.NORM_PRIORITY + 1);
                             t.setDaemon(false);
+                            AWTAutoShutdown.getInstance().notifyThreadBusy(t);
                             return t;
                         }
                     }
                 );
-                AWTAutoShutdown.getInstance().notifyThreadBusy(dispatchThread);
                 dispatchThread.start();
             }
         } finally {
@@ -1138,6 +1138,10 @@ public class EventQueue {
                         }
                         if (entry.event instanceof SentEvent) {
                             ((SentEvent)entry.event).dispose();
+                        }
+                        if (entry.event instanceof InvocationEvent) {
+                            AWTAccessor.getInvocationEventAccessor()
+                                    .dispose((InvocationEvent)entry.event);
                         }
                         if (prev == null) {
                             queues[i].head = entry.next;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011-2014, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
 /*
@@ -57,7 +57,7 @@ public final class SecuritySupport {
         return securitySupport;
     }
 
-    static ClassLoader getContextClassLoader() {
+    public static ClassLoader getContextClassLoader() {
         return (ClassLoader) AccessController.doPrivileged(new PrivilegedAction() {
             public Object run() {
                 ClassLoader cl = null;

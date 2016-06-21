@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
  *
@@ -69,7 +69,7 @@ import java.util.Map;
 @XmlType(name="EndpointReferenceType",namespace=W3CEndpointReference.NS)
 public final class W3CEndpointReference extends EndpointReference {
 
-    private final static JAXBContext w3cjc = getW3CJaxbContext();
+    private final JAXBContext w3cjc = getW3CJaxbContext();
 
     protected W3CEndpointReference() {
     }

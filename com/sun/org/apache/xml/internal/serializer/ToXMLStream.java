@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2012, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011-2014, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
 /*
@@ -58,7 +58,7 @@ public final class ToXMLStream extends ToStream
      */
     private static CharInfo m_xmlcharInfo =
 //      new CharInfo(CharInfo.XML_ENTITIES_RESOURCE);
-        CharInfo.getCharInfo(CharInfo.XML_ENTITIES_RESOURCE, Method.XML);
+        CharInfo.getCharInfoInternal(CharInfo.XML_ENTITIES_RESOURCE, Method.XML);
 
     /**
      * Default constructor.

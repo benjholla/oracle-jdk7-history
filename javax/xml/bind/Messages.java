@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2014, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
  *
@@ -88,4 +88,6 @@ class Messages
 
     static final String ILLEGAL_CAST = // 2 args
         "JAXBContext.IllegalCast";
+
+    static final String FAILED_TO_INITIALE_DATATYPE_FACTORY = "FAILED_TO_INITIALE_DATATYPE_FACTORY";
 }
