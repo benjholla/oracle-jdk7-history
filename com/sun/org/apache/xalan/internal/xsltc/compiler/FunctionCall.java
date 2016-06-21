@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2007, 2015, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
 /*
@@ -103,6 +103,9 @@ class FunctionCall extends Expression {
 
     protected final static String EXSLT_STRINGS =
         "http://exslt.org/strings";
+
+    protected final static String XALAN_CLASSPACKAGE_NAMESPACE =
+        "xalan://";
 
     // Namespace format constants
     protected final static int NAMESPACE_FORMAT_JAVA = 0;
@@ -900,8 +903,22 @@ class FunctionCall extends Expression {
           if (_className != null && _className.length() > 0) {
             final int nArgs = _arguments.size();
             try {
-              if (_clazz == null) {
-                _clazz = ObjectFactory.findProviderClass(_className, true);
+                if (_clazz == null) {
+                    final boolean isSecureProcessing = getXSLTC().isSecureProcessing();
+                    final boolean isExtensionFunctionEnabled = getXSLTC()
+                            .getFeature(FeatureManager.Feature.ORACLE_ENABLE_EXTENSION_FUNCTION);
+
+                    //Check if FSP and SM - only then proceed with loading
+                    if (namespace != null && isSecureProcessing
+                            && isExtensionFunctionEnabled
+                            && (namespace.equals(JAVA_EXT_XALAN)
+                            || namespace.equals(JAVA_EXT_XSLTC)
+                            || namespace.equals(JAVA_EXT_XALAN_OLD)
+                            || namespace.startsWith(XALAN_CLASSPACKAGE_NAMESPACE))) {
+                        _clazz = getXSLTC().loadExternalFunction(_className);
+                    } else {
+                        _clazz = ObjectFactory.findProviderClass(_className, true);
+                    }
 
                 if (_clazz == null) {
                   final ErrorMsg msg =

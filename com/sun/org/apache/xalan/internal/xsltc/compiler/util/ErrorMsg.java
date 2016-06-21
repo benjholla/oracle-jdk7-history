@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2007, 2015, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
 /*
@@ -117,6 +117,7 @@ public final class ErrorMsg {
     public static final String JAXP_NO_SOURCE_ERR = "JAXP_NO_SOURCE_ERR";
     public static final String JAXP_COMPILE_ERR = "JAXP_COMPILE_ERR";
     public static final String JAXP_INVALID_ATTR_ERR = "JAXP_INVALID_ATTR_ERR";
+    public static final String JAXP_INVALID_ATTR_VALUE_ERR = "JAXP_INVALID_ATTR_VALUE_ERR";
     public static final String JAXP_SET_RESULT_ERR = "JAXP_SET_RESULT_ERR";
     public static final String JAXP_NO_TRANSLET_ERR = "JAXP_NO_TRANSLET_ERR";
     public static final String JAXP_NO_HANDLER_ERR = "JAXP_NO_HANDLER_ERR";

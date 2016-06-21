@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2007, 2015, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
 /*
@@ -601,6 +601,9 @@ public class ErrorMessages extends ListResourceBundle {
          */
         {ErrorMsg.JAXP_INVALID_ATTR_ERR,
         "TransformerFactory does not recognise attribute ''{0}''."},
+
+        {ErrorMsg.JAXP_INVALID_ATTR_VALUE_ERR,
+        "Incorrect value specified for ''{0}'' attribute."},
 
         /*
          * Note to translators:  "setResult()" and "startDocument()" are Java
