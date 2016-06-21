@@ -1,4 +1,4 @@
-# oracle-jdk7-history
+# Oracle JDK 7 Source History
 
 This repository contains two other branches containing the release history of this version of Java.
 - oracle-jdk7-history
