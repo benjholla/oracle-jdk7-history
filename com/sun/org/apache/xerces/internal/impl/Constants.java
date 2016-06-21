@@ -133,8 +133,6 @@ public final class Constants {
     
     public static final String SCHEMA_LANGUAGE = "schemaLanguage";
 
-    public static final String SYSTEM_PROPERTY_ELEMENT_ATTRIBUTE_LIMIT = "elementAttributeLimit" ;
-
     
     public static final String JAXPAPI_PROPERTY_PREFIX =
         "http://javax.xml.XMLConstants/property/";
@@ -160,6 +158,69 @@ public final class Constants {
 
     
     public static final boolean IS_JDK8_OR_ABOVE = isJavaVersionAtLeast(8);
+
+    
+    
+    
+    
+    
+    public static final String JDK_ENTITY_EXPANSION_LIMIT =
+            ORACLE_JAXP_PROPERTY_PREFIX + "entityExpansionLimit";
+
+    
+    public static final String JDK_ELEMENT_ATTRIBUTE_LIMIT =
+            ORACLE_JAXP_PROPERTY_PREFIX + "elementAttributeLimit";
+
+    
+    public static final String JDK_MAX_OCCUR_LIMIT =
+            ORACLE_JAXP_PROPERTY_PREFIX + "maxOccurLimit";
+
+    
+    public static final String JDK_TOTAL_ENTITY_SIZE_LIMIT =
+            ORACLE_JAXP_PROPERTY_PREFIX + "totalEntitySizeLimit";
+
+    
+    public static final String JDK_GENEAL_ENTITY_SIZE_LIMIT =
+            ORACLE_JAXP_PROPERTY_PREFIX + "maxGeneralEntitySizeLimit";
+    
+    public static final String JDK_PARAMETER_ENTITY_SIZE_LIMIT =
+            ORACLE_JAXP_PROPERTY_PREFIX + "maxParameterEntitySizeLimit";
+    
+    public static final String JDK_XML_NAME_LIMIT =
+            ORACLE_JAXP_PROPERTY_PREFIX + "maxXMLNameLimit";
+    
+    public static final String JDK_ENTITY_COUNT_INFO =
+            ORACLE_JAXP_PROPERTY_PREFIX + "getEntityCountInfo";
+
+    
+    
+    
+    
+    public static final String SP_ENTITY_EXPANSION_LIMIT = "jdk.xml.entityExpansionLimit";
+
+    
+    public static final String SP_ELEMENT_ATTRIBUTE_LIMIT =  "jdk.xml.elementAttributeLimit";
+
+    
+    public static final String SP_MAX_OCCUR_LIMIT = "jdk.xml.maxOccurLimit";
+
+    
+    public static final String SP_TOTAL_ENTITY_SIZE_LIMIT = "jdk.xml.totalEntitySizeLimit";
+
+    
+    public static final String SP_GENEAL_ENTITY_SIZE_LIMIT = "jdk.xml.maxGeneralEntitySizeLimit";
+    
+    public static final String SP_PARAMETER_ENTITY_SIZE_LIMIT = "jdk.xml.maxParameterEntitySizeLimit";
+    
+    public static final String SP_XML_NAME_LIMIT = "jdk.xml.maxXMLNameLimit";
+
+    
+    public final static String ENTITY_EXPANSION_LIMIT = "entityExpansionLimit";
+    public static final String ELEMENT_ATTRIBUTE_LIMIT = "elementAttributeLimit" ;
+    public final static String MAX_OCCUR_LIMIT = "maxOccurLimit";
+
+    
+    public static final String JDK_YES = "yes";
 
     
     
@@ -385,7 +446,7 @@ public final class Constants {
     public static final String LOCALE_PROPERTY = "locale";
 
     
-    protected static final String SECURITY_MANAGER =
+    public static final String SECURITY_MANAGER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.SECURITY_MANAGER_PROPERTY;
 
 
@@ -449,9 +510,6 @@ public final class Constants {
     
     public final static String ATTRIBUTE_DECLARED = "ATTRIBUTE_DECLARED";
 
-        public final static String ENTITY_EXPANSION_LIMIT = "entityExpansionLimit";
-
-        public final static String MAX_OCCUR_LIMIT = "maxOccurLimit";
 
     
     public final static String TYPEINFO = "org.w3c.dom.TypeInfo";

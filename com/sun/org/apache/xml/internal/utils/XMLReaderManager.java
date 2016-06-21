@@ -6,12 +6,15 @@ package com.sun.org.apache.xml.internal.utils;
 import com.sun.org.apache.xalan.internal.XalanConstants;
 import com.sun.org.apache.xalan.internal.utils.FactoryImpl;
 import com.sun.org.apache.xalan.internal.utils.SecuritySupport;
+import com.sun.org.apache.xalan.internal.utils.XMLSecurityManager;
 import java.util.HashMap;
+
 import javax.xml.XMLConstants;
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
@@ -35,8 +38,12 @@ public class XMLReaderManager {
     private HashMap m_inUse;
 
     private boolean m_useServicesMechanism = true;
+
+    private boolean _secureProcessing;
      
     private String _accessExternalDTD = XalanConstants.EXTERNAL_ACCESS_DEFAULT;
+
+    private XMLSecurityManager _xmlSecurityManager;
 
     
     private XMLReaderManager() {
@@ -79,7 +86,12 @@ public class XMLReaderManager {
                     
                     
                     reader = XMLReaderFactory.createXMLReader();
-
+                    try {
+                        reader.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, _secureProcessing);
+                    } catch (SAXNotRecognizedException e) {
+                        System.err.println("Warning:  " + reader.getClass().getName() + ": "
+                                + e.getMessage());
+                    }
                 } catch (Exception e) {
                    try {
                         
@@ -125,6 +137,21 @@ public class XMLReaderManager {
                         + se.getMessage());
         }
 
+        try {
+            if (_xmlSecurityManager != null) {
+                for (XMLSecurityManager.Limit limit : XMLSecurityManager.Limit.values()) {
+                    reader.setProperty(limit.apiProperty(),
+                            _xmlSecurityManager.getLimitValueAsString(limit));
+                }
+                if (_xmlSecurityManager.printEntityCountInfo()) {
+                    reader.setProperty(XalanConstants.JDK_ENTITY_COUNT_INFO, XalanConstants.JDK_YES);
+                }
+            }
+        } catch (SAXException se) {
+            System.err.println("Warning:  " + reader.getClass().getName() + ": "
+                        + se.getMessage());
+        }
+
         return reader;
     }
 
@@ -147,17 +174,28 @@ public class XMLReaderManager {
     }
 
     
-    public String getProperty(String name) {
+    public void setFeature(String name, boolean value) {
+        if (name.equals(XMLConstants.FEATURE_SECURE_PROCESSING)) {
+            _secureProcessing = value;
+        }
+    }
+
+    
+    public Object getProperty(String name) {
         if (name.equals(XMLConstants.ACCESS_EXTERNAL_DTD)) {
             return _accessExternalDTD;
+        } else if (name.equals(XalanConstants.SECURITY_MANAGER)) {
+            return _xmlSecurityManager;
         }
         return null;
     }
 
     
-    public void setProperty(String name, String value) {
+    public void setProperty(String name, Object value) {
         if (name.equals(XMLConstants.ACCESS_EXTERNAL_DTD)) {
             _accessExternalDTD = (String)value;
+        } else if (name.equals(XalanConstants.SECURITY_MANAGER)) {
+            _xmlSecurityManager = (XMLSecurityManager)value;
         }
     }
 }

@@ -122,6 +122,9 @@ public class DefaultPersistenceDelegate extends PersistenceDelegate {
     
     private void initBean(Class type, Object oldInstance, Object newInstance, Encoder out) {
         for (Field field : type.getFields()) {
+            if (!ReflectUtil.isPackageAccessible(field.getDeclaringClass())) {
+                continue;
+            }
             int mod = field.getModifiers();
             if (Modifier.isFinal(mod) || Modifier.isStatic(mod) || Modifier.isTransient(mod)) {
                 continue;

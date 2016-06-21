@@ -16,6 +16,8 @@ import com.sun.org.apache.xerces.internal.util.SymbolTable;
 import com.sun.org.apache.xerces.internal.util.XMLChar;
 import com.sun.org.apache.xerces.internal.util.XMLResourceIdentifierImpl;
 import com.sun.org.apache.xerces.internal.util.XMLStringBuffer;
+import com.sun.org.apache.xerces.internal.utils.XMLLimitAnalyzer;
+import com.sun.org.apache.xerces.internal.utils.XMLSecurityManager;
 import com.sun.org.apache.xerces.internal.xni.Augmentations;
 import com.sun.org.apache.xerces.internal.xni.XMLAttributes;
 import com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier;
@@ -68,6 +70,9 @@ public abstract class XMLScanner
             Constants.XERCES_PROPERTY_PREFIX + Constants.ENTITY_MANAGER_PROPERTY;
 
     
+    private static final String SECURITY_MANAGER = Constants.SECURITY_MANAGER;
+
+    
 
     
     protected static final boolean DEBUG_ATTR_NORMALIZATION = false;
@@ -116,6 +121,12 @@ public abstract class XMLScanner
 
     
     protected XMLEntityStorage fEntityStore = null ;
+
+    
+    protected XMLSecurityManager fSecurityManager = null;
+
+    
+    protected XMLLimitAnalyzer fLimitAnalyzer = null;
 
     
 
@@ -207,6 +218,7 @@ public abstract class XMLScanner
         fSymbolTable = (SymbolTable)componentManager.getProperty(SYMBOL_TABLE);
         fErrorReporter = (XMLErrorReporter)componentManager.getProperty(ERROR_REPORTER);
         fEntityManager = (XMLEntityManager)componentManager.getProperty(ENTITY_MANAGER);
+        fSecurityManager = (XMLSecurityManager)componentManager.getProperty(SECURITY_MANAGER);
 
         
         fEntityStore = fEntityManager.getEntityStore() ;
@@ -238,6 +250,10 @@ public abstract class XMLScanner
             } else if (property.equals(Constants.ENTITY_MANAGER_PROPERTY)) {
                 fEntityManager = (XMLEntityManager)value;
             }
+        }
+
+        if (propertyId.equals(SECURITY_MANAGER)) {
+            fSecurityManager = (XMLSecurityManager)value;
         }
                 
 
@@ -290,6 +306,8 @@ public abstract class XMLScanner
         fEntityManager = (XMLEntityManager)propertyManager.getProperty(ENTITY_MANAGER);
         fEntityStore = fEntityManager.getEntityStore() ;
         fEntityScanner = (XMLEntityScanner)fEntityManager.getEntityScanner() ;
+        fSecurityManager = (XMLSecurityManager)propertyManager.getProperty(SECURITY_MANAGER);
+
         
         
         fValidation = false;
@@ -414,7 +432,7 @@ public abstract class XMLScanner
                             reportFatalError("SDDeclInvalid",  new Object[] {standalone});
                         }
                     } else {
-                        reportFatalError("EncodingDeclRequired", null);
+                        reportFatalError("SDDeclNameInvalid", null);
                     }
                     break;
                 }
@@ -425,8 +443,9 @@ public abstract class XMLScanner
             sawSpace = fEntityScanner.skipSpaces();
         }
         
-        if(currLiteral)
+        if(currLiteral) {
             currEnt.literal = true;
+        }
         
         if (scanningTextDecl && state != STATE_DONE) {
             reportFatalError("MorePseudoAttributes", null);
@@ -465,7 +484,7 @@ public abstract class XMLScanner
             XMLString value)
             throws IOException, XNIException {
 
-        String name = fEntityScanner.scanName();
+        String name = scanPseudoAttributeName();
         
 
         if (name == null) {
@@ -515,6 +534,29 @@ public abstract class XMLScanner
         
         return name;
 
+    } 
+
+    
+    private String scanPseudoAttributeName() throws IOException, XNIException {
+        final int ch = fEntityScanner.peekChar();
+        switch (ch) {
+            case 'v':
+                if (fEntityScanner.skipString(fVersionSymbol)) {
+                    return fVersionSymbol;
+                }
+                break;
+            case 'e':
+                if (fEntityScanner.skipString(fEncodingSymbol)) {
+                    return fEncodingSymbol;
+                }
+                break;
+            case 's':
+                if (fEntityScanner.skipString(fStandaloneSymbol)) {
+                    return fStandaloneSymbol;
+                }
+                break;
+        }
+        return null;
     } 
 
     

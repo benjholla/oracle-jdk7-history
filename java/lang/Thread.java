@@ -141,6 +141,12 @@ class Thread implements Runnable {
     
     private void init(ThreadGroup g, Runnable target, String name,
                       long stackSize) {
+        init(g, target, name, stackSize, null);
+    }
+
+    
+    private void init(ThreadGroup g, Runnable target, String name,
+                      long stackSize, AccessControlContext acc) {
         if (name == null) {
             throw new NullPointerException("name cannot be null");
         }
@@ -181,7 +187,8 @@ class Thread implements Runnable {
             this.contextClassLoader = parent.getContextClassLoader();
         else
             this.contextClassLoader = parent.contextClassLoader;
-        this.inheritedAccessControlContext = AccessController.getContext();
+        this.inheritedAccessControlContext =
+                acc != null ? acc : AccessController.getContext();
         this.target = target;
         setPriority(priority);
         if (parent.inheritableThreadLocals != null)
@@ -208,6 +215,11 @@ class Thread implements Runnable {
     
     public Thread(Runnable target) {
         init(null, target, "Thread-" + nextThreadNum(), 0);
+    }
+
+    
+    Thread(Runnable target, AccessControlContext acc) {
+        init(null, target, "Thread-" + nextThreadNum(), 0, acc);
     }
 
     

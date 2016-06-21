@@ -53,7 +53,6 @@ import com.sun.org.apache.xerces.internal.util.DOMUtil;
 import com.sun.org.apache.xerces.internal.util.DefaultErrorHandler;
 import com.sun.org.apache.xerces.internal.util.ErrorHandlerWrapper;
 import com.sun.org.apache.xerces.internal.util.SAXInputSource;
-import com.sun.org.apache.xerces.internal.util.SecurityManager;
 import com.sun.org.apache.xerces.internal.util.StAXInputSource;
 import com.sun.org.apache.xerces.internal.util.StAXLocationWrapper;
 import com.sun.org.apache.xerces.internal.util.SymbolHash;
@@ -61,6 +60,7 @@ import com.sun.org.apache.xerces.internal.util.SymbolTable;
 import com.sun.org.apache.xerces.internal.util.XMLSymbols;
 import com.sun.org.apache.xerces.internal.util.URI.MalformedURIException;
 import com.sun.org.apache.xerces.internal.utils.SecuritySupport;
+import com.sun.org.apache.xerces.internal.utils.XMLSecurityManager;
 import com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager;
 import com.sun.org.apache.xerces.internal.xni.QName;
 import com.sun.org.apache.xerces.internal.xni.XNIException;
@@ -222,7 +222,7 @@ public class XSDHandler {
     protected XSDeclarationPool fDeclPool = null;
 
     
-    protected SecurityManager fSecureProcessing = null;
+    protected XMLSecurityManager fSecureProcessing = null;
 
     private String fAccessExternalSchema;
     private String fAccessExternalDTD;
@@ -2159,12 +2159,12 @@ public class XSDHandler {
                     }
                     catch (SAXException se) {}
 
-                    try {
-                        parser.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, fAccessExternalDTD);
-                    } catch (SAXNotRecognizedException exc) {
-                        System.err.println("Warning: " + parser.getClass().getName() + ": " +
-                                exc.getMessage());
-                    }
+                     try {
+                             parser.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, fAccessExternalDTD);
+                     } catch (SAXNotRecognizedException exc) {
+                         System.err.println("Warning: " + parser.getClass().getName() + ": " +
+                                 exc.getMessage());
+                     }
                 }
                 
                 
@@ -3382,7 +3382,7 @@ public class XSDHandler {
 
         fSecureProcessing = null;
         if( componentManager!=null ) {
-            fSecureProcessing = (SecurityManager) componentManager.getProperty(SECURE_PROCESSING, null);
+            fSecureProcessing = (XMLSecurityManager) componentManager.getProperty(SECURE_PROCESSING, null);
         }
 
         

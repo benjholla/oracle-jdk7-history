@@ -17,8 +17,8 @@ import com.sun.org.apache.xerces.internal.impl.validation.ValidationManager;
 import com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaValidator;
 import com.sun.org.apache.xerces.internal.jaxp.validation.XSGrammarPoolContainer;
 import com.sun.org.apache.xerces.internal.util.SAXMessageFormatter;
-import com.sun.org.apache.xerces.internal.util.SecurityManager;
 import com.sun.org.apache.xerces.internal.util.Status;
+import com.sun.org.apache.xerces.internal.utils.XMLSecurityManager;
 import com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager;
 import com.sun.org.apache.xerces.internal.xni.XMLDocumentHandler;
 import com.sun.org.apache.xerces.internal.xni.parser.XMLComponent;
@@ -87,6 +87,7 @@ public class SAXParserImpl extends javax.xml.parsers.SAXParser
     
     private final EntityResolver fInitEntityResolver;
 
+    private final XMLSecurityManager fSecurityManager;
     private final XMLSecurityPropertyManager fSecurityPropertyMgr;
 
     
@@ -99,10 +100,10 @@ public class SAXParserImpl extends javax.xml.parsers.SAXParser
     SAXParserImpl(SAXParserFactoryImpl spf, Hashtable features, boolean secureProcessing)
         throws SAXException
     {
+        fSecurityManager = new XMLSecurityManager(secureProcessing);
         fSecurityPropertyMgr = new XMLSecurityPropertyManager();
-
         
-        xmlReader = new JAXPSAXParser(this, fSecurityPropertyMgr);
+        xmlReader = new JAXPSAXParser(this, fSecurityPropertyMgr, fSecurityManager);
 
         
         
@@ -123,11 +124,12 @@ public class SAXParserImpl extends javax.xml.parsers.SAXParser
 
         xmlReader.setProperty0(XML_SECURITY_PROPERTY_MANAGER, fSecurityPropertyMgr);
 
-        
+        xmlReader.setProperty0(SECURITY_MANAGER, fSecurityManager);
+
         if (secureProcessing) {
-            xmlReader.setProperty0(SECURITY_MANAGER, new SecurityManager());
             
             if (features != null) {
+
                 Object temp = features.get(XMLConstants.FEATURE_SECURE_PROCESSING);
                 if (temp != null) {
                     boolean value = ((Boolean) temp).booleanValue();
@@ -136,7 +138,6 @@ public class SAXParserImpl extends javax.xml.parsers.SAXParser
                                 XMLSecurityPropertyManager.State.FSP, Constants.EXTERNAL_ACCESS_DEFAULT_FSP);
                         fSecurityPropertyMgr.setValue(XMLSecurityPropertyManager.Property.ACCESS_EXTERNAL_SCHEMA,
                                 XMLSecurityPropertyManager.State.FSP, Constants.EXTERNAL_ACCESS_DEFAULT_FSP);
-
                     }
                 }
             }
@@ -338,19 +339,31 @@ public class SAXParserImpl extends javax.xml.parsers.SAXParser
         private final HashMap fInitFeatures = new HashMap();
         private final HashMap fInitProperties = new HashMap();
         private final SAXParserImpl fSAXParser;
+        private XMLSecurityManager fSecurityManager;
         private XMLSecurityPropertyManager fSecurityPropertyMgr;
 
 
         public JAXPSAXParser() {
-            this(null, null);
+            this(null, null, null);
         }
 
-        JAXPSAXParser(SAXParserImpl saxParser, XMLSecurityPropertyManager spm) {
+        JAXPSAXParser(SAXParserImpl saxParser, XMLSecurityPropertyManager securityPropertyMgr,
+                XMLSecurityManager securityManager) {
             super();
             fSAXParser = saxParser;
-            fSecurityPropertyMgr = spm;
-
+            fSecurityManager = securityManager;
+            fSecurityPropertyMgr = securityPropertyMgr;
             
+            if (fSecurityManager == null) {
+                fSecurityManager = new XMLSecurityManager(true);
+                try {
+                    super.setProperty(SECURITY_MANAGER, fSecurityManager);
+                } catch (SAXException e) {
+                    throw new UnsupportedOperationException(
+                        SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
+                        "property-not-recognized", new Object [] {SECURITY_MANAGER}), e);
+                }
+            }
             if (fSecurityPropertyMgr == null) {
                 fSecurityPropertyMgr = new XMLSecurityPropertyManager();
                 try {
@@ -358,7 +371,7 @@ public class SAXParserImpl extends javax.xml.parsers.SAXParser
                 } catch (SAXException e) {
                     throw new UnsupportedOperationException(
                         SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
-                        "property-not-recognized", new Object [] {SECURITY_MANAGER}), e);
+                        "property-not-recognized", new Object [] {XML_SECURITY_PROPERTY_MANAGER}), e);
                 }
             }
         }
@@ -372,7 +385,8 @@ public class SAXParserImpl extends javax.xml.parsers.SAXParser
             }
             if (name.equals(XMLConstants.FEATURE_SECURE_PROCESSING)) {
                 try {
-                    setProperty(SECURITY_MANAGER, value ? new SecurityManager() : null);
+                    fSecurityManager.setSecureProcessing(value);
+                    setProperty(SECURITY_MANAGER, fSecurityManager);
                 }
                 catch (SAXNotRecognizedException exc) {
                     
@@ -408,13 +422,7 @@ public class SAXParserImpl extends javax.xml.parsers.SAXParser
                 throw new NullPointerException();
             }
             if (name.equals(XMLConstants.FEATURE_SECURE_PROCESSING)) {
-                try {
-                    return (super.getProperty(SECURITY_MANAGER) != null);
-                }
-                
-                catch (SAXException exc) {
-                    return false;
-                }
+                return fSecurityManager.isSecureProcessing();
             }
             return super.getFeature(name);
         }
@@ -489,17 +497,21 @@ public class SAXParserImpl extends javax.xml.parsers.SAXParser
             if (fSAXParser != null && fSAXParser.fSchemaValidator != null) {
                 setSchemaValidatorProperty(name, value);
             }
+
             
-            int index = (fSecurityPropertyMgr != null) ? fSecurityPropertyMgr.getIndex(name) : -1;
-            if (index > -1) {
-                fSecurityPropertyMgr.setValue(index,
-                        XMLSecurityPropertyManager.State.APIPROPERTY, (String)value);
-            } else {
-                if (!fInitProperties.containsKey(name)) {
-                    fInitProperties.put(name, super.getProperty(name));
+            if (fSecurityManager == null ||
+                    !fSecurityManager.setLimit(name, XMLSecurityManager.State.APIPROPERTY, value)) {
+                
+                if (fSecurityPropertyMgr == null ||
+                        !fSecurityPropertyMgr.setValue(name, XMLSecurityPropertyManager.State.APIPROPERTY, value)) {
+                    
+                    if (!fInitProperties.containsKey(name)) {
+                        fInitProperties.put(name, super.getProperty(name));
+                    }
+                    super.setProperty(name, value);
                 }
-                super.setProperty(name, value);
             }
+
         }
 
         public synchronized Object getProperty(String name)
@@ -512,9 +524,18 @@ public class SAXParserImpl extends javax.xml.parsers.SAXParser
                 
                 return fSAXParser.schemaLanguage;
             }
-            int index = (fSecurityPropertyMgr != null) ? fSecurityPropertyMgr.getIndex(name) : -1;
-            if (index > -1) {
-                return fSecurityPropertyMgr.getValueByIndex(index);
+
+            
+            String propertyValue = (fSecurityManager != null) ?
+                    fSecurityManager.getLimitAsString(name) : null;
+            if (propertyValue != null) {
+                return propertyValue;
+            } else {
+                propertyValue = (fSecurityPropertyMgr != null) ?
+                    fSecurityPropertyMgr.getValue(name) : null;
+                if (propertyValue != null) {
+                    return propertyValue;
+                }
             }
 
             return super.getProperty(name);

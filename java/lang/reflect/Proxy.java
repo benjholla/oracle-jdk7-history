@@ -354,6 +354,7 @@ public class Proxy implements java.io.Serializable {
     }
 
     
+    @CallerSensitive
     public static InvocationHandler getInvocationHandler(Object proxy)
         throws IllegalArgumentException
     {
@@ -362,8 +363,19 @@ public class Proxy implements java.io.Serializable {
             throw new IllegalArgumentException("not a proxy instance");
         }
 
-        Proxy p = (Proxy) proxy;
-        return p.h;
+        final Proxy p = (Proxy) proxy;
+        final InvocationHandler ih = p.h;
+        if (System.getSecurityManager() != null) {
+            Class<?> ihClass = ih.getClass();
+            Class<?> caller = Reflection.getCallerClass();
+            if (ReflectUtil.needsPackageAccessCheck(caller.getClassLoader(),
+                                                    ihClass.getClassLoader()))
+            {
+                ReflectUtil.checkPackageAccess(ihClass);
+            }
+        }
+
+        return ih;
     }
 
     private static native Class defineClass0(ClassLoader loader, String name,

@@ -28,6 +28,8 @@ import com.sun.org.apache.xerces.internal.xni.Augmentations;
 import com.sun.org.apache.xerces.internal.impl.XMLErrorReporter;
 import com.sun.org.apache.xerces.internal.impl.XMLEntityHandler;
 import com.sun.org.apache.xerces.internal.impl.Constants;
+import com.sun.org.apache.xerces.internal.utils.XMLSecurityManager;
+import com.sun.xml.internal.stream.Entity;
 
 
 public class XMLDTDScannerImpl
@@ -1271,7 +1273,7 @@ implements XMLDTDScanner, XMLComponent, XMLEntityHandler {
 
         
         if (systemId == null) {
-            scanEntityValue(fLiteral, fLiteral2);
+            scanEntityValue(name, isPEDecl, fLiteral, fLiteral2);
             
             
             fStringBuffer.clear();
@@ -1326,7 +1328,7 @@ implements XMLDTDScanner, XMLComponent, XMLEntityHandler {
     } 
 
     
-    protected final void scanEntityValue(XMLString value,
+    protected final void scanEntityValue(String entityName, boolean isPEDecl, XMLString value,
     XMLString nonNormalizedValue)
     throws IOException, XNIException {
         int quote = fEntityScanner.scanChar();
@@ -1338,10 +1340,20 @@ implements XMLDTDScanner, XMLComponent, XMLEntityHandler {
 
         XMLString literal = fString;
         XMLString literal2 = fString;
+        int countChar = 0;
+        if (fLimitAnalyzer == null && fSecurityManager != null) {
+            fLimitAnalyzer = fSecurityManager.getLimitAnalyzer();
+            fLimitAnalyzer.startEntity(entityName);
+        }
+
         if (fEntityScanner.scanLiteral(quote, fString) != quote) {
             fStringBuffer.clear();
             fStringBuffer2.clear();
             do {
+                if (isPEDecl && fLimitAnalyzer != null) {
+                    checkLimit("%" + entityName, fString.length + countChar);
+                }
+                countChar = 0;
                 fStringBuffer.append(fString);
                 fStringBuffer2.append(fString);
                 if (fEntityScanner.skipChar('&')) {
@@ -1401,6 +1413,7 @@ implements XMLDTDScanner, XMLComponent, XMLEntityHandler {
                     }
                 }
                 else {
+                    countChar++;
                     int c = fEntityScanner.peekChar();
                     if (XMLChar.isHighSurrogate(c)) {
                         scanSurrogates(fStringBuffer2);
@@ -1424,9 +1437,17 @@ implements XMLDTDScanner, XMLComponent, XMLEntityHandler {
             fStringBuffer2.append(fString);
             literal = fStringBuffer;
             literal2 = fStringBuffer2;
+        } else {
+            if (isPEDecl) {
+                checkLimit("%" + entityName, literal);
+        }
         }
         value.setValues(literal);
         nonNormalizedValue.setValues(literal2);
+        if (fLimitAnalyzer != null) {
+            fLimitAnalyzer.endEntity(XMLSecurityManager.Limit.PARAMETER_ENTITY_SIZE_LIMIT, entityName);
+        }
+
         if (!fEntityScanner.skipChar(quote)) {
             reportFatalError("CloseQuoteMissingInDecl", null);
         }
@@ -1784,6 +1805,34 @@ implements XMLDTDScanner, XMLComponent, XMLEntityHandler {
         
         setScannerState(SCANNER_STATE_TEXT_DECL);
         
+    }
+
+    
+    private void checkLimit(String entityName, XMLString buffer) {
+        checkLimit(entityName, buffer.length);
+    }
+
+    
+    private void checkLimit(String entityName, int len) {
+        if (fLimitAnalyzer == null) {
+            fLimitAnalyzer = fSecurityManager.getLimitAnalyzer();
+        }
+        fLimitAnalyzer.addValue(XMLSecurityManager.Limit.PARAMETER_ENTITY_SIZE_LIMIT, entityName, len);
+        if (fSecurityManager.isOverLimit(XMLSecurityManager.Limit.PARAMETER_ENTITY_SIZE_LIMIT)) {
+                    fSecurityManager.debugPrint();
+            reportFatalError("MaxEntitySizeLimit", new Object[]{entityName,
+                fLimitAnalyzer.getValue(XMLSecurityManager.Limit.PARAMETER_ENTITY_SIZE_LIMIT),
+                fSecurityManager.getLimit(XMLSecurityManager.Limit.PARAMETER_ENTITY_SIZE_LIMIT),
+                fSecurityManager.getStateLiteral(XMLSecurityManager.Limit.PARAMETER_ENTITY_SIZE_LIMIT)});
+        }
+        if (fSecurityManager.isOverLimit(XMLSecurityManager.Limit.TOTAL_ENTITY_SIZE_LIMIT)) {
+            fSecurityManager.debugPrint();
+            reportFatalError("TotalEntitySizeLimit",
+                new Object[]{fLimitAnalyzer.getTotalValue(XMLSecurityManager.Limit.TOTAL_ENTITY_SIZE_LIMIT),
+                fSecurityManager.getLimit(XMLSecurityManager.Limit.TOTAL_ENTITY_SIZE_LIMIT),
+                fSecurityManager.getStateLiteral(XMLSecurityManager.Limit.TOTAL_ENTITY_SIZE_LIMIT)});
+        }
+
     }
 
     public DTDGrammar getGrammar(){

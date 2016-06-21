@@ -34,12 +34,14 @@ import com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
 import com.sun.org.apache.xerces.internal.xni.Augmentations;
 import com.sun.org.apache.xerces.internal.impl.Constants;
 import com.sun.org.apache.xerces.internal.impl.XMLEntityHandler;
-import com.sun.org.apache.xerces.internal.util.SecurityManager;
 import com.sun.org.apache.xerces.internal.util.NamespaceSupport;
 import com.sun.org.apache.xerces.internal.utils.SecuritySupport;
+import com.sun.org.apache.xerces.internal.utils.XMLLimitAnalyzer;
+import com.sun.org.apache.xerces.internal.utils.XMLSecurityManager;
+import com.sun.org.apache.xerces.internal.utils.XMLSecurityManager.Limit;
+import com.sun.org.apache.xerces.internal.utils.XMLSecurityManager.State;
 import com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager;
 import com.sun.org.apache.xerces.internal.xni.NamespaceContext;
-import com.sun.xml.internal.stream.Entity;
 import javax.xml.XMLConstants;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.events.XMLEvent;
@@ -131,7 +133,7 @@ public class XMLDocumentFragmentScannerImpl
 
     
     protected static final String STANDARD_URI_CONFORMANT =
-            Constants.XERCES_FEATURE_PREFIX +Constants.STANDARD_URI_CONFORMANT_FEATURE;
+            Constants.XERCES_FEATURE_PREFIX + Constants.STANDARD_URI_CONFORMANT_FEATURE;
 
     
     private static final String XML_SECURITY_PROPERTY_MANAGER =
@@ -177,11 +179,8 @@ public class XMLDocumentFragmentScannerImpl
     };
 
     private static final char [] cdata = {'[','C','D','A','T','A','['};
-    private static final char [] endTag = {'<','/'};
-
-    
     static final char [] xmlDecl = {'<','?','x','m','l'};
-
+    private static final char [] endTag = {'<','/'};
     
 
     
@@ -277,6 +276,7 @@ public class XMLDocumentFragmentScannerImpl
     protected String fDeclaredEncoding =  null;
     
     protected boolean fDisallowDoctype = false;
+
     
     protected String fAccessExternalDTD = EXTERNAL_ACCESS_DEFAULT;
 
@@ -335,7 +335,6 @@ public class XMLDocumentFragmentScannerImpl
 
     protected boolean foundBuiltInRefs = false;
 
-    protected SecurityManager fSecurityManager = null;
 
     
     static final short MAX_DEPTH_LIMIT = 5 ;
@@ -489,8 +488,11 @@ public class XMLDocumentFragmentScannerImpl
         
         fReportCdataEvent = componentManager.getFeature(Constants.STAX_REPORT_CDATA_EVENT, true);
 
-        fSecurityManager = (SecurityManager)componentManager.getProperty(Constants.SECURITY_MANAGER, null);
-        fElementAttributeLimit = (fSecurityManager != null)?fSecurityManager.getElementAttrLimit():0;
+        fSecurityManager = (XMLSecurityManager)componentManager.getProperty(Constants.SECURITY_MANAGER, null);
+        fLimitAnalyzer = fSecurityManager.getLimitAnalyzer();
+
+        fElementAttributeLimit = (fSecurityManager != null)?
+                fSecurityManager.getLimit(XMLSecurityManager.Limit.ELEMENT_ATTRIBUTE_LIMIT):0;
 
         fNotifyBuiltInRefs = componentManager.getFeature(NOTIFY_BUILTIN_REFS, false);
 
@@ -515,9 +517,6 @@ public class XMLDocumentFragmentScannerImpl
         fReadingAttributes = false;
         
         
-        fSupportExternalEntities = true;
-        fSupportExternalEntities = true;
-        fSupportExternalEntities = true;
         fSupportExternalEntities = true;
         fReplaceEntityReferences = true;
         fIsCoalesce = false;
@@ -585,10 +584,13 @@ public class XMLDocumentFragmentScannerImpl
 
         dtdGrammarUtil = null;
 
-         
+        
         XMLSecurityPropertyManager spm = (XMLSecurityPropertyManager)
                 propertyManager.getProperty(XML_SECURITY_PROPERTY_MANAGER);
         fAccessExternalDTD = spm.getValue(XMLSecurityPropertyManager.Property.ACCESS_EXTERNAL_DTD);
+
+        fSecurityManager = (XMLSecurityManager)propertyManager.getProperty(Constants.SECURITY_MANAGER);
+        fLimitAnalyzer = fSecurityManager.getLimitAnalyzer();
     } 
 
     
@@ -651,10 +653,10 @@ public class XMLDocumentFragmentScannerImpl
 
         
         if (propertyId.equals(XML_SECURITY_PROPERTY_MANAGER))
-        {
+            {
             XMLSecurityPropertyManager spm = (XMLSecurityPropertyManager)value;
             fAccessExternalDTD = spm.getValue(XMLSecurityPropertyManager.Property.ACCESS_EXTERNAL_DTD);
-        }
+            }
 
     } 
 
@@ -1100,7 +1102,8 @@ public class XMLDocumentFragmentScannerImpl
             fAddDefaultAttr = true;
             do {
                 scanAttribute(fAttributes);
-                if (fSecurityManager != null && fAttributes.getLength() > fElementAttributeLimit){
+                if (fSecurityManager != null && !fSecurityManager.isNoLimit(fElementAttributeLimit) &&
+                        fAttributes.getLength() > fElementAttributeLimit){
                     fErrorReporter.reportError(XMLMessageFormatter.XML_DOMAIN,
                                                  "ElementAttributeLimit",
                                                  new Object[]{rawname, new Integer(fAttributes.getLength()) },
@@ -1642,6 +1645,7 @@ public class XMLDocumentFragmentScannerImpl
 
     } 
 
+    
     String checkAccess(String systemId, String allowedProtocols) throws IOException {
         String baseSystemId = fEntityScanner.getBaseSystemId();
         String expandedSystemId = fEntityManager.expandSystemId(systemId, baseSystemId,fStrictURI);
@@ -2291,6 +2295,8 @@ public class XMLDocumentFragmentScannerImpl
                             if(DEBUG){
                                 System.out.println("NOT USING THE BUFFER, STRING = " + fTempString.toString());
                             }
+                            
+                            checkLimit(fContentBuffer);
                             if(dtdGrammarUtil!= null && dtdGrammarUtil.isIgnorableWhiteSpace(fContentBuffer)){
                                 if(DEBUG)System.out.println("Return SPACE EVENT");
                                 return XMLEvent.SPACE;
@@ -2389,6 +2395,8 @@ public class XMLDocumentFragmentScannerImpl
                             fLastSectionWasCharacterData = true ;
                             continue;
                         }else{
+                            
+                            checkLimit(fContentBuffer);
                             if(dtdGrammarUtil!= null && dtdGrammarUtil.isIgnorableWhiteSpace(fContentBuffer)){
                                 if(DEBUG)System.out.println("Return SPACE EVENT");
                                 return XMLEvent.SPACE;
@@ -2599,6 +2607,26 @@ public class XMLDocumentFragmentScannerImpl
             } 
         }
 
+        
+        protected void checkLimit(XMLStringBuffer buffer) {
+            if (fLimitAnalyzer.isTracking(fCurrentEntityName)) {
+                fLimitAnalyzer.addValue(Limit.GENEAL_ENTITY_SIZE_LIMIT, fCurrentEntityName, buffer.length);
+                if (fSecurityManager.isOverLimit(Limit.GENEAL_ENTITY_SIZE_LIMIT)) {
+                    fSecurityManager.debugPrint();
+                    reportFatalError("MaxEntitySizeLimit", new Object[]{fCurrentEntityName,
+                        fLimitAnalyzer.getValue(Limit.GENEAL_ENTITY_SIZE_LIMIT),
+                        fSecurityManager.getLimit(Limit.GENEAL_ENTITY_SIZE_LIMIT),
+                        fSecurityManager.getStateLiteral(Limit.GENEAL_ENTITY_SIZE_LIMIT)});
+                }
+                if (fSecurityManager.isOverLimit(Limit.TOTAL_ENTITY_SIZE_LIMIT)) {
+                    fSecurityManager.debugPrint();
+                    reportFatalError("TotalEntitySizeLimit",
+                        new Object[]{fLimitAnalyzer.getTotalValue(Limit.TOTAL_ENTITY_SIZE_LIMIT),
+                        fSecurityManager.getLimit(Limit.TOTAL_ENTITY_SIZE_LIMIT),
+                        fSecurityManager.getStateLiteral(Limit.TOTAL_ENTITY_SIZE_LIMIT)});
+                }
+            }
+        }
 
         
         

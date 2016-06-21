@@ -6,6 +6,8 @@ package com.sun.org.apache.xerces.internal.parsers;
 import java.io.IOException;
 
 import com.sun.org.apache.xerces.internal.impl.Constants;
+import com.sun.org.apache.xerces.internal.utils.XMLSecurityManager;
+import com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager;
 import com.sun.org.apache.xerces.internal.xni.XNIException;
 import com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
 import com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration;
@@ -44,6 +46,13 @@ public abstract class XMLParser {
     protected XMLParserConfiguration fConfiguration;
 
     
+    XMLSecurityManager securityManager;
+
+    
+    XMLSecurityPropertyManager securityPropertyManager;
+
+
+    
     
     
 
@@ -72,6 +81,15 @@ public abstract class XMLParser {
     
     public void parse(XMLInputSource inputSource)
         throws XNIException, IOException {
+        
+        if (securityManager == null) {
+            securityManager = new XMLSecurityManager(true);
+            fConfiguration.setProperty(Constants.SECURITY_MANAGER, securityManager);
+        }
+        if (securityPropertyManager == null) {
+            securityPropertyManager = new XMLSecurityPropertyManager();
+            fConfiguration.setProperty(Constants.XML_SECURITY_PROPERTY_MANAGER, securityPropertyManager);
+        }
 
         reset();
         fConfiguration.parse(inputSource);

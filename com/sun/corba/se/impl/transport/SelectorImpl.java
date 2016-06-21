@@ -30,7 +30,7 @@ import com.sun.corba.se.impl.logging.ORBUtilSystemException;
 import com.sun.corba.se.impl.orbutil.ORBUtility;
 
 
-public class SelectorImpl
+class SelectorImpl
     extends
         Thread
     implements

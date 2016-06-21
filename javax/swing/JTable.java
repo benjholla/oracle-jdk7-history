@@ -29,6 +29,7 @@ import java.text.MessageFormat;
 
 import javax.print.attribute.*;
 import javax.print.PrintService;
+import sun.reflect.misc.ReflectUtil;
 
 import sun.swing.SwingUtilities2;
 import sun.swing.SwingUtilities2.Section;
@@ -3471,14 +3472,16 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
             
             
             
-            if ("".equals(s)) {
-                if (constructor.getDeclaringClass() == String.class) {
-                    value = s;
-                }
-                return super.stopCellEditing();
-            }
 
             try {
+                if ("".equals(s)) {
+                    if (constructor.getDeclaringClass() == String.class) {
+                        value = s;
+                    }
+                    return super.stopCellEditing();
+                }
+
+                SwingUtilities2.checkAccess(constructor.getModifiers());
                 value = constructor.newInstance(new Object[]{s});
             }
             catch (Exception e) {
@@ -3502,6 +3505,8 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
                 if (type == Object.class) {
                     type = String.class;
                 }
+                ReflectUtil.checkPackageAccess(type);
+                SwingUtilities2.checkAccess(type.getModifiers());
                 constructor = type.getConstructor(argTypes);
             }
             catch (Exception e) {

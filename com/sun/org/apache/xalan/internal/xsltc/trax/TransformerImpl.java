@@ -6,6 +6,7 @@ package com.sun.org.apache.xalan.internal.xsltc.trax;
 
 import com.sun.org.apache.xalan.internal.XalanConstants;
 import com.sun.org.apache.xalan.internal.utils.FactoryImpl;
+import com.sun.org.apache.xalan.internal.utils.XMLSecurityManager;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -148,6 +149,7 @@ public final class TransformerImpl extends Transformer
      
     private String _accessExternalDTD = XalanConstants.EXTERNAL_ACCESS_DEFAULT;
 
+    private XMLSecurityManager _securityManager;
     
     private Hashtable _parameters = null;
 
@@ -195,8 +197,11 @@ public final class TransformerImpl extends Transformer
         _useServicesMechanism = _tfactory.useServicesMechnism();
         _accessExternalStylesheet = (String)_tfactory.getAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET);
         _accessExternalDTD = (String)_tfactory.getAttribute(XMLConstants.ACCESS_EXTERNAL_DTD);
+        _securityManager = (XMLSecurityManager)_tfactory.getAttribute(XalanConstants.SECURITY_MANAGER);
         _readerManager = XMLReaderManager.getInstance(_useServicesMechanism);
         _readerManager.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, _accessExternalDTD);
+        _readerManager.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, _isSecureProcessing);
+        _readerManager.setProperty(XalanConstants.SECURITY_MANAGER, _securityManager);
         
     }
 
@@ -208,6 +213,7 @@ public final class TransformerImpl extends Transformer
     
     public void setSecureProcessing(boolean flag) {
         _isSecureProcessing = flag;
+        _readerManager.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, _isSecureProcessing);
     }
     
     public boolean useServicesMechnism() {

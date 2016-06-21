@@ -20,6 +20,8 @@ import com.sun.corba.se.spi.orbutil.proxy.InvocationHandlerFactory ;
 import com.sun.corba.se.spi.orbutil.proxy.DelegateInvocationHandlerImpl ;
 import com.sun.corba.se.spi.orbutil.proxy.CompositeInvocationHandler ;
 import com.sun.corba.se.spi.orbutil.proxy.CompositeInvocationHandlerImpl ;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 public class InvocationHandlerFactoryImpl implements InvocationHandlerFactory
 {
@@ -85,24 +87,32 @@ public class InvocationHandlerFactoryImpl implements InvocationHandlerFactory
         
         
         
-        InvocationHandler dynamicStubHandler =
+        final InvocationHandler dynamicStubHandler =
             DelegateInvocationHandlerImpl.create( stub ) ;
 
         
         
-        InvocationHandler stubMethodHandler = new StubInvocationHandlerImpl(
+        final InvocationHandler stubMethodHandler = new StubInvocationHandlerImpl(
             pm, classData, stub ) ;
 
         
         
         final CompositeInvocationHandler handler =
             new CustomCompositeInvocationHandlerImpl( stub ) ;
+
+        AccessController.doPrivileged(new PrivilegedAction<Void>() {
+            @Override
+            public Void run() {
         handler.addInvocationHandler( DynamicStub.class,
             dynamicStubHandler ) ;
         handler.addInvocationHandler( org.omg.CORBA.Object.class,
             dynamicStubHandler ) ;
         handler.addInvocationHandler( Object.class,
             dynamicStubHandler ) ;
+                return null;
+            }
+        });
+
 
         
         

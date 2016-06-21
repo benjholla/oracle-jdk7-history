@@ -145,11 +145,12 @@ public class ObjectOutputStream
 
     
     public void defaultWriteObject() throws IOException {
-        if ( curContext == null ) {
+        SerialCallbackContext ctx = curContext;
+        if (ctx == null) {
             throw new NotActiveException("not in call to writeObject");
         }
-        Object curObj = curContext.getObj();
-        ObjectStreamClass curDesc = curContext.getDesc();
+        Object curObj = ctx.getObj();
+        ObjectStreamClass curDesc = ctx.getDesc();
         bout.setBlockDataMode(false);
         defaultWriteFields(curObj, curDesc);
         bout.setBlockDataMode(true);
@@ -158,11 +159,12 @@ public class ObjectOutputStream
     
     public ObjectOutputStream.PutField putFields() throws IOException {
         if (curPut == null) {
-            if (curContext == null) {
+            SerialCallbackContext ctx = curContext;
+            if (ctx == null) {
                 throw new NotActiveException("not in call to writeObject");
             }
-            Object curObj = curContext.getObj();
-            ObjectStreamClass curDesc = curContext.getDesc();
+            Object curObj = ctx.getObj();
+            ObjectStreamClass curDesc = ctx.getDesc();
             curPut = new PutFieldImpl(curDesc);
         }
         return curPut;
@@ -820,7 +822,11 @@ public class ObjectOutputStream
     private void defaultWriteFields(Object obj, ObjectStreamClass desc)
         throws IOException
     {
-        
+        Class<?> cl = desc.forClass();
+        if (cl != null && obj != null && !cl.isInstance(obj)) {
+            throw new ClassCastException();
+        }
+
         desc.checkDefaultSerialize();
 
         int primDataSize = desc.getPrimDataSize();

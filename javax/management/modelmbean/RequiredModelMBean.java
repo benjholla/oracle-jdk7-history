@@ -174,11 +174,15 @@ public class RequiredModelMBean
                     RequiredModelMBean.class.getName(),
                 "setModelMBeanInfo(ModelMBeanInfo)",
                 "Setting ModelMBeanInfo to " + printModelMBeanInfo(mbi));
+            int noOfNotifications = 0;
+            if (mbi.getNotifications() != null) {
+                noOfNotifications = mbi.getNotifications().length;
+            }
             MODELMBEAN_LOGGER.logp(Level.FINER,
                     RequiredModelMBean.class.getName(),
                 "setModelMBeanInfo(ModelMBeanInfo)",
                 "ModelMBeanInfo notifications has " +
-                (mbi.getNotifications()).length + " elements");
+                noOfNotifications + " elements");
         }
 
         modelMBeanInfo = (ModelMBeanInfo)mbi.clone();

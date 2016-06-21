@@ -455,8 +455,8 @@ public class JPEGImageWriter extends ImageWriter {
             
             
             
-            if (bandSizes[i] > 8) {
-                throw new IIOException("Sample size must be <= 8");
+            if (bandSizes[i] <= 0 || bandSizes[i] > 8) {
+                throw new IIOException("Illegal band size: should be 0 < size <= 8");
             }
             
             

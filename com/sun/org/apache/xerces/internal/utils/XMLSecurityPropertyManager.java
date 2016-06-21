@@ -53,6 +53,17 @@ public final class XMLSecurityPropertyManager {
         readSystemProperties();
     }
 
+
+    
+    public boolean setValue(String propertyName, State state, Object value) {
+        int index = getIndex(propertyName);
+        if (index > -1) {
+            setValue(index, state, (String)value);
+            return true;
+        }
+        return false;
+    }
+
     
     public void setValue(Property property, State state, String value) {
         
@@ -70,6 +81,18 @@ public final class XMLSecurityPropertyManager {
             states[index] = state;
         }
     }
+
+
+    
+    public String getValue(String propertyName) {
+        int index = getIndex(propertyName);
+        if (index > -1) {
+            return getValueByIndex(index);
+        }
+
+        return null;
+    }
+
     
     public String getValue(Property property) {
         return values[property.ordinal()];

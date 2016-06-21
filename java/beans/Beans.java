@@ -19,6 +19,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
 import java.io.StreamCorruptedException;
 
+import java.lang.reflect.Modifier;
+
 import java.net.URL;
 
 import java.security.AccessController;
@@ -117,6 +119,10 @@ public class Beans {
                     throw serex;
                 }
                 throw ex;
+            }
+
+            if (!Modifier.isPublic(cl.getModifiers())) {
+                throw new ClassNotFoundException("" + cl + " : no public access");
             }
 
             

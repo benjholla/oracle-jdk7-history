@@ -3,6 +3,9 @@
 
 package javax.management.remote;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import javax.management.Notification;
 
@@ -32,12 +35,9 @@ public class TargetedNotification implements Serializable {
     
     public TargetedNotification(Notification notification,
                                 Integer listenerID) {
+        validate(notification, listenerID);
         
         
-        if (notification == null) throw new
-            IllegalArgumentException("Invalid notification: null");
-        if (listenerID == null) throw new
-            IllegalArgumentException("Invalid listener ID: null");
         this.notif = notification;
         this.id = listenerID;
     }
@@ -58,9 +58,9 @@ public class TargetedNotification implements Serializable {
     }
 
     
-    private final Notification notif;
+    private Notification notif;
     
-    private final Integer id;
+    private Integer id;
     
 
 
@@ -69,4 +69,22 @@ public class TargetedNotification implements Serializable {
 
 
 
+
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        ois.defaultReadObject();
+        try {
+            validate(this.notif, this.id);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidObjectException(e.getMessage());
+        }
+    }
+
+    private static void validate(Notification notif, Integer id) throws IllegalArgumentException {
+        if (notif == null) {
+            throw new IllegalArgumentException("Invalid notification: null");
+        }
+        if (id == null) {
+            throw new IllegalArgumentException("Invalid listener ID: null");
+        }
+    }
 }

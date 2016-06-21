@@ -2,6 +2,7 @@
 package java.lang;
 
 import java.io.*;
+import java.security.AccessControlContext;
 import java.util.Properties;
 import java.util.PropertyPermission;
 import java.util.StringTokenizer;
@@ -391,6 +392,9 @@ public final class System {
             }
             public int getStringHash32(String string) {
                 return string.hash32();
+            }
+            public Thread newThreadWithAcc(Runnable target, AccessControlContext acc) {
+                return new Thread(target, acc);
             }
         });
     }

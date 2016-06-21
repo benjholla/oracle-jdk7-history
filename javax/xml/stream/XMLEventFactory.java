@@ -19,18 +19,14 @@ public abstract class XMLEventFactory {
   public static XMLEventFactory newInstance()
     throws FactoryConfigurationError
   {
-    return (XMLEventFactory) FactoryFinder.find(
-      JAXPFACTORYID,
-      DEFAULIMPL);
+    return (XMLEventFactory) FactoryFinder.find(JAXPFACTORYID, DEFAULIMPL, true);
   }
 
   
   public static XMLEventFactory newFactory()
     throws FactoryConfigurationError
   {
-    return (XMLEventFactory) FactoryFinder.find(
-      JAXPFACTORYID,
-      DEFAULIMPL);
+    return (XMLEventFactory) FactoryFinder.find(JAXPFACTORYID, DEFAULIMPL, true);
   }
 
   
@@ -39,7 +35,8 @@ public abstract class XMLEventFactory {
           throws FactoryConfigurationError {
       try {
           
-          return (XMLEventFactory) FactoryFinder.find(factoryId, classLoader, null);
+            return (XMLEventFactory) FactoryFinder.find(factoryId, classLoader,
+                    null, factoryId.equals(JAXPFACTORYID) ? true : false);
       } catch (FactoryFinder.ConfigurationError e) {
           throw new FactoryConfigurationError(e.getException(),
                   e.getMessage());
@@ -52,7 +49,8 @@ public abstract class XMLEventFactory {
           throws FactoryConfigurationError {
       try {
           
-          return (XMLEventFactory) FactoryFinder.find(factoryId, classLoader, null);
+            return (XMLEventFactory) FactoryFinder.find(factoryId, classLoader,
+                    null, factoryId.equals(JAXPFACTORYID) ? true : false);
       } catch (FactoryFinder.ConfigurationError e) {
           throw new FactoryConfigurationError(e.getException(),
                   e.getMessage());

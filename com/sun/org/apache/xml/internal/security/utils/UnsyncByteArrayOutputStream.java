@@ -22,6 +22,9 @@ public class UnsyncByteArrayOutputStream extends OutputStream  {
     }
 
     public void write(byte[] arg0) {
+        if ((Integer.MAX_VALUE - pos) < arg0.length) {
+            throw new OutOfMemoryError();
+        }
         int newPos = pos + arg0.length;
         if (newPos > size) {
             expandSize(newPos);
@@ -31,6 +34,9 @@ public class UnsyncByteArrayOutputStream extends OutputStream  {
     }
 
     public void write(byte[] arg0, int arg1, int arg2) {
+        if ((Integer.MAX_VALUE - pos) < arg2) {
+            throw new OutOfMemoryError();
+        }
         int newPos = pos + arg2;
         if (newPos > size) {
             expandSize(newPos);
@@ -40,6 +46,9 @@ public class UnsyncByteArrayOutputStream extends OutputStream  {
     }
 
     public void write(int arg0) {
+        if ((Integer.MAX_VALUE - pos) == 0) {
+            throw new OutOfMemoryError();
+        }
         int newPos = pos + 1;
         if (newPos > size) {
             expandSize(newPos);
@@ -60,7 +69,11 @@ public class UnsyncByteArrayOutputStream extends OutputStream  {
     private void expandSize(int newPos) {
         int newSize = size;
         while (newPos > newSize) {
-            newSize = newSize<<2;
+            newSize = newSize << 1;
+            
+            if (newSize < 0) {
+                newSize = Integer.MAX_VALUE;
+            }
         }
         byte newBuf[] = new byte[newSize];
         System.arraycopy(buf, 0, newBuf, 0, pos);

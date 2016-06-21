@@ -2,12 +2,14 @@
 
 package java.awt.datatransfer;
 
-import java.awt.Toolkit;
 import java.io.*;
 import java.nio.*;
 import java.util.*;
 
 import sun.awt.datatransfer.DataTransferer;
+import sun.reflect.misc.ReflectUtil;
+
+import static sun.security.util.SecurityConstants.GET_CLASSLOADER_PERMISSION;
 
 
 public class DataFlavor implements Externalizable, Cloneable {
@@ -20,27 +22,33 @@ public class DataFlavor implements Externalizable, Cloneable {
                                                    ClassLoader fallback)
         throws ClassNotFoundException
     {
-        ClassLoader systemClassLoader = (ClassLoader)
-            java.security.AccessController.doPrivileged(
-                new java.security.PrivilegedAction() {
-                    public Object run() {
-                        ClassLoader cl = Thread.currentThread().
-                            getContextClassLoader();
-                        return (cl != null)
-                            ? cl
-                            : ClassLoader.getSystemClassLoader();
-                    }
-                    });
-
+        ReflectUtil.checkPackageAccess(className);
         try {
-            return Class.forName(className, true, systemClassLoader);
-        } catch (ClassNotFoundException e2) {
-            if (fallback != null) {
-                return Class.forName(className, true, fallback);
-            } else {
-                throw new ClassNotFoundException(className);
+            SecurityManager sm = System.getSecurityManager();
+            if (sm != null) {
+                sm.checkPermission(GET_CLASSLOADER_PERMISSION);
             }
+            ClassLoader loader = ClassLoader.getSystemClassLoader();
+            try {
+                
+                return Class.forName(className, true, loader);
+            }
+            catch (ClassNotFoundException exception) {
+                
+                loader = Thread.currentThread().getContextClassLoader();
+                if (loader != null) {
+                    try {
+                        return Class.forName(className, true, loader);
+                    }
+                    catch (ClassNotFoundException e) {
+                        
+                    }
+                }
+            }
+        } catch (SecurityException exception) {
+            
         }
+        return Class.forName(className, true, fallback);
     }
 
     

@@ -13,6 +13,7 @@ import java.lang.reflect.InvocationHandler ;
 
 import com.sun.corba.se.spi.logging.CORBALogDomains ;
 import com.sun.corba.se.impl.logging.ORBUtilSystemException ;
+import com.sun.corba.se.impl.presentation.rmi.DynamicAccessPermission;
 
 public class CompositeInvocationHandlerImpl implements
     CompositeInvocationHandler
@@ -23,11 +24,13 @@ public class CompositeInvocationHandlerImpl implements
     public void addInvocationHandler( Class interf,
         InvocationHandler handler )
     {
+        checkAccess();
         classToInvocationHandler.put( interf, handler ) ;
     }
 
     public void setDefaultHandler( InvocationHandler handler )
     {
+        checkAccess();
         defaultHandler = handler ;
     }
 
@@ -54,5 +57,13 @@ public class CompositeInvocationHandlerImpl implements
         
 
         return handler.invoke( proxy, method, args ) ;
+    }
+
+    private static final DynamicAccessPermission perm = new DynamicAccessPermission("access");
+    private void checkAccess() {
+        final SecurityManager sm = System.getSecurityManager();
+        if (sm != null) {
+            sm.checkPermission(perm);
+}
     }
 }

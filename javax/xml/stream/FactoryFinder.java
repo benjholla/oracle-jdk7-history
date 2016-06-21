@@ -119,28 +119,36 @@ class FactoryFinder {
     }
 
     
-    static Object find(String factoryId, String fallbackClassName)
+    static Object find(String factoryId, String fallbackClassName, boolean standardId)
         throws ConfigurationError
     {
-        return find(factoryId, null, fallbackClassName);
+        return find(factoryId, null, fallbackClassName, standardId);
     }
 
     
-    static Object find(String factoryId, ClassLoader cl, String fallbackClassName)
+    static Object find(String factoryId, ClassLoader cl, String fallbackClassName,
+            boolean standardId)
         throws ConfigurationError
     {
         dPrint("find factoryId =" + factoryId);
 
         
         try {
-            String systemProp = ss.getSystemProperty(factoryId);
+            String systemProp;
+            if (standardId) {
+                systemProp = ss.getSystemProperty(factoryId);
+            } else {
+                systemProp = System.getProperty(factoryId);
+            }
+
             if (systemProp != null) {
                 dPrint("found system property, value=" + systemProp);
                 return newInstance(systemProp, null, true);
             }
         }
         catch (SecurityException se) {
-            if (debug) se.printStackTrace();
+            throw new ConfigurationError(
+                "Failed to read factoryId '" + factoryId + "'", se);
         }
 
         

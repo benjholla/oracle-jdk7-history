@@ -37,6 +37,11 @@ abstract public class TimeZone implements Serializable, Cloneable {
     static final long serialVersionUID = 3581463369166924961L;
 
     
+    
+    private static final boolean allowSetDefault = AccessController.doPrivileged(
+        new sun.security.action.GetPropertyAction("jdk.util.TimeZone.allowSetDefault")) != null;
+
+    
     public abstract int getOffset(int era, int year, int month, int day,
                                   int dayOfWeek, int milliseconds);
 
@@ -297,6 +302,9 @@ abstract public class TimeZone implements Serializable, Cloneable {
                 sm.checkPermission(new PropertyPermission
                                    ("user.timezone", "write"));
             } catch (SecurityException e) {
+                if (!allowSetDefault) {
+                    throw e;
+                }
                 hasPermission = false;
             }
         }
@@ -318,18 +326,20 @@ abstract public class TimeZone implements Serializable, Cloneable {
 
     
     private static TimeZone getDefaultInAppContext() {
-        
-        JavaAWTAccess javaAWTAccess = SharedSecrets.getJavaAWTAccess();
-        if (javaAWTAccess == null) {
-            return mainAppContextDefault;
-        } else {
-            if (!javaAWTAccess.isDisposed()) {
-                TimeZone tz = (TimeZone)
-                    javaAWTAccess.get(TimeZone.class);
-                if (tz == null && javaAWTAccess.isMainAppContext()) {
-                    return mainAppContextDefault;
-                } else {
-                    return tz;
+        if (allowSetDefault) {
+            
+            JavaAWTAccess javaAWTAccess = SharedSecrets.getJavaAWTAccess();
+            if (javaAWTAccess == null) {
+                return mainAppContextDefault;
+            } else {
+                if (!javaAWTAccess.isDisposed()) {
+                    TimeZone tz = (TimeZone)
+                        javaAWTAccess.get(TimeZone.class);
+                    if (tz == null && javaAWTAccess.isMainAppContext()) {
+                        return mainAppContextDefault;
+                    } else {
+                        return tz;
+                    }
                 }
             }
         }
@@ -338,15 +348,17 @@ abstract public class TimeZone implements Serializable, Cloneable {
 
     
     private static void setDefaultInAppContext(TimeZone tz) {
-        
-        JavaAWTAccess javaAWTAccess = SharedSecrets.getJavaAWTAccess();
-        if (javaAWTAccess == null) {
-            mainAppContextDefault = tz;
-        } else {
-            if (!javaAWTAccess.isDisposed()) {
-                javaAWTAccess.put(TimeZone.class, tz);
-                if (javaAWTAccess.isMainAppContext()) {
-                    mainAppContextDefault = null;
+        if (allowSetDefault) {
+            
+            JavaAWTAccess javaAWTAccess = SharedSecrets.getJavaAWTAccess();
+            if (javaAWTAccess == null) {
+                mainAppContextDefault = tz;
+            } else {
+                if (!javaAWTAccess.isDisposed()) {
+                    javaAWTAccess.put(TimeZone.class, tz);
+                    if (javaAWTAccess.isMainAppContext()) {
+                        mainAppContextDefault = null;
+                    }
                 }
             }
         }

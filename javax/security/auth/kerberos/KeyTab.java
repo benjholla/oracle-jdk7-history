@@ -3,6 +3,7 @@
 package javax.security.auth.kerberos;
 
 import java.io.File;
+import java.security.AccessControlException;
 import java.util.Objects;
 import sun.misc.SharedSecrets;
 import sun.security.krb5.EncryptionKey;
@@ -43,7 +44,19 @@ public final class KeyTab {
 
     
     private sun.security.krb5.internal.ktab.KeyTab takeSnapshot() {
-        return sun.security.krb5.internal.ktab.KeyTab.getInstance(file);
+        try {
+            return sun.security.krb5.internal.ktab.KeyTab.getInstance(file);
+        } catch (AccessControlException ace) {
+            if (file != null) {
+                
+                throw ace;
+            } else {
+                AccessControlException ace2 = new AccessControlException(
+                        "Access to default keytab denied (modified exception)");
+                ace2.setStackTrace(ace.getStackTrace());
+                throw ace2;
+            }
+        }
     }
 
     

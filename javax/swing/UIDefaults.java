@@ -30,6 +30,7 @@ import java.security.PrivilegedAction;
 
 import sun.reflect.misc.MethodUtil;
 import sun.reflect.misc.ReflectUtil;
+import sun.swing.SwingUtilities2;
 import sun.util.CoreResourceBundleControl;
 
 
@@ -561,7 +562,7 @@ public class UIDefaults extends Hashtable<Object,Object>
                         }
                         ReflectUtil.checkPackageAccess(className);
                         c = Class.forName(className, true, (ClassLoader)cl);
-                        checkAccess(c.getModifiers());
+                        SwingUtilities2.checkAccess(c.getModifiers());
                         if (methodName != null) {
                             Class[] types = getClassArray(args);
                             Method m = c.getMethod(methodName, types);
@@ -569,7 +570,7 @@ public class UIDefaults extends Hashtable<Object,Object>
                         } else {
                             Class[] types = getClassArray(args);
                             Constructor constructor = c.getConstructor(types);
-                            checkAccess(constructor.getModifiers());
+                            SwingUtilities2.checkAccess(constructor.getModifiers());
                             return constructor.newInstance(args);
                         }
                     } catch(Exception e) {
@@ -582,13 +583,6 @@ public class UIDefaults extends Hashtable<Object,Object>
                     return null;
                 }
             }, acc);
-        }
-
-        private void checkAccess(int modifiers) {
-            if(System.getSecurityManager() != null &&
-                    !Modifier.isPublic(modifiers)) {
-                throw new SecurityException("Resource is not accessible");
-            }
         }
 
         

@@ -2,6 +2,9 @@
 
 package javax.management;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
 import java.util.Arrays;
 
 
@@ -16,7 +19,7 @@ public class MBeanNotificationInfo extends MBeanFeatureInfo implements Cloneable
         new MBeanNotificationInfo[0];
 
     
-    private final String[] types;
+    private String[] types;
 
     
     private final transient boolean arrayGettersSafe;
@@ -37,9 +40,8 @@ public class MBeanNotificationInfo extends MBeanFeatureInfo implements Cloneable
 
         
 
-        if (notifTypes == null)
-            notifTypes = NO_TYPES;
-        this.types = notifTypes;
+        this.types = (notifTypes != null && notifTypes.length > 0) ?
+                        notifTypes.clone() : NO_TYPES;
         this.arrayGettersSafe =
             MBeanInfo.arrayGettersSafe(this.getClass(),
                                        MBeanNotificationInfo.class);
@@ -100,5 +102,12 @@ public class MBeanNotificationInfo extends MBeanFeatureInfo implements Cloneable
         for (int i = 0; i < types.length; i++)
             hash ^= types[i].hashCode();
         return hash;
+    }
+
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        ObjectInputStream.GetField gf = ois.readFields();
+        String[] t = (String[])gf.get("types", null);
+
+        types = (t != null && t.length != 0) ? t.clone() : NO_TYPES;
     }
 }

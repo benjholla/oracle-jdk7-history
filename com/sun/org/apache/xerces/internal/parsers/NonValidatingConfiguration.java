@@ -19,7 +19,6 @@ import com.sun.org.apache.xerces.internal.util.FeatureState;
 import com.sun.org.apache.xerces.internal.util.PropertyState;
 import com.sun.org.apache.xerces.internal.util.Status;
 import com.sun.org.apache.xerces.internal.util.SymbolTable;
-import com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager;
 import com.sun.org.apache.xerces.internal.xni.XMLLocator;
 import com.sun.org.apache.xerces.internal.xni.XNIException;
 import com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarPool;
@@ -132,6 +131,9 @@ public class NonValidatingConfiguration
     
     protected static final String XML_SECURITY_PROPERTY_MANAGER =
             Constants.XML_SECURITY_PROPERTY_MANAGER;
+
+    
+    private static final String SECURITY_MANAGER = Constants.SECURITY_MANAGER;
 
     
 
@@ -256,6 +258,7 @@ public class NonValidatingConfiguration
             DATATYPE_VALIDATOR_FACTORY,
             VALIDATION_MANAGER,
             LOCALE,
+            SECURITY_MANAGER,
             XML_SECURITY_PROPERTY_MANAGER
         };
         addRecognizedProperties(recognizedProperties);
@@ -312,8 +315,6 @@ public class NonValidatingConfiguration
             
             
         }
-
-        setProperty(XML_SECURITY_PROPERTY_MANAGER, new XMLSecurityPropertyManager());
     } 
 
     
