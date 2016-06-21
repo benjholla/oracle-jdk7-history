@@ -55,6 +55,9 @@ import com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager;
 import com.sun.org.apache.xalan.internal.utils.ObjectFactory;
 import com.sun.org.apache.xalan.internal.utils.FactoryImpl;
 import com.sun.org.apache.xalan.internal.utils.SecuritySupport;
+import com.sun.org.apache.xalan.internal.utils.XMLSecurityPropertyManager;
+import com.sun.org.apache.xalan.internal.utils.XMLSecurityPropertyManager.Property;
+import com.sun.org.apache.xalan.internal.utils.XMLSecurityPropertyManager.State;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLFilter;
@@ -144,6 +147,14 @@ public class TransformerFactoryImpl
     private boolean _useServicesMechanism;
 
     
+    private String _accessExternalStylesheet = XalanConstants.EXTERNAL_ACCESS_DEFAULT;
+
+     
+    private String _accessExternalDTD = XalanConstants.EXTERNAL_ACCESS_DEFAULT;
+
+    private XMLSecurityPropertyManager _xmlSecurityPropertyMgr;
+
+    
     public TransformerFactoryImpl() {
         this(true);
     }
@@ -155,10 +166,17 @@ public class TransformerFactoryImpl
     private TransformerFactoryImpl(boolean useServicesMechanism) {
         this.m_DTMManagerClass = XSLTCDTMManager.getDTMManagerClass(useServicesMechanism);
         this._useServicesMechanism = useServicesMechanism;
+
         if (System.getSecurityManager() != null) {
             _isSecureMode = true;
             _isNotSecureProcessing = false;
         }
+
+        _xmlSecurityPropertyMgr = new XMLSecurityPropertyManager();
+        _accessExternalDTD = _xmlSecurityPropertyMgr.getValue(
+                Property.ACCESS_EXTERNAL_DTD);
+        _accessExternalStylesheet = _xmlSecurityPropertyMgr.getValue(
+                Property.ACCESS_EXTERNAL_STYLESHEET);
     }
 
     
@@ -197,6 +215,11 @@ public class TransformerFactoryImpl
               return Boolean.TRUE;
             else
               return Boolean.FALSE;
+        }
+
+        int index = _xmlSecurityPropertyMgr.getIndex(name);
+        if (index > -1) {
+            return _xmlSecurityPropertyMgr.getValueByIndex(index);
         }
 
         
@@ -292,6 +315,17 @@ public class TransformerFactoryImpl
             }
         }
 
+        int index = _xmlSecurityPropertyMgr.getIndex(name);
+        if (index > -1) {
+            _xmlSecurityPropertyMgr.setValue(index,
+                    State.APIPROPERTY, (String)value);
+            _accessExternalDTD = _xmlSecurityPropertyMgr.getValue(
+                    Property.ACCESS_EXTERNAL_DTD);
+            _accessExternalStylesheet = _xmlSecurityPropertyMgr.getValue(
+                    Property.ACCESS_EXTERNAL_STYLESHEET);
+            return;
+        }
+
         
         final ErrorMsg err
             = new ErrorMsg(ErrorMsg.JAXP_INVALID_ATTR_ERR, name);
@@ -314,7 +348,19 @@ public class TransformerFactoryImpl
                 throw new TransformerConfigurationException(err.toString());
             }
             _isNotSecureProcessing = !value;
+
             
+            if (value && XalanConstants.IS_JDK8_OR_ABOVE) {
+                _xmlSecurityPropertyMgr.setValue(Property.ACCESS_EXTERNAL_DTD,
+                        State.FSP, XalanConstants.EXTERNAL_ACCESS_DEFAULT_FSP);
+                _xmlSecurityPropertyMgr.setValue(Property.ACCESS_EXTERNAL_STYLESHEET,
+                        State.FSP, XalanConstants.EXTERNAL_ACCESS_DEFAULT_FSP);
+                _accessExternalDTD = _xmlSecurityPropertyMgr.getValue(
+                        Property.ACCESS_EXTERNAL_DTD);
+                _accessExternalStylesheet = _xmlSecurityPropertyMgr.getValue(
+                        Property.ACCESS_EXTERNAL_STYLESHEET);
+            }
+
             return;
         }
         else if (name.equals(XalanConstants.ORACLE_FEATURE_SERVICE_MECHANISM)) {
@@ -600,6 +646,8 @@ public class TransformerFactoryImpl
                 xsltc.setTemplateInlining(false);
 
         if (!_isNotSecureProcessing) xsltc.setSecureProcessing(true);
+        xsltc.setProperty(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, _accessExternalStylesheet);
+        xsltc.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, _accessExternalDTD);
         xsltc.init();
 
         
@@ -681,15 +729,20 @@ public class TransformerFactoryImpl
 
         
     if (bytecodes == null) {
-
         Vector errs = xsltc.getErrors();
         ErrorMsg err = null;
         if (errs != null) {
-            err = (ErrorMsg)errs.get(errs.size()-1);
+            err = (ErrorMsg)errs.elementAt(errs.size()-1);
         } else {
             err = new ErrorMsg(ErrorMsg.JAXP_COMPILE_ERR);
         }
-        TransformerConfigurationException exc =  new TransformerConfigurationException(err.toString(), err.getCause());
+        Throwable cause = err.getCause();
+        TransformerConfigurationException exc;
+        if (cause != null) {
+            exc =  new TransformerConfigurationException(cause.getMessage(), cause);
+        } else {
+            exc =  new TransformerConfigurationException(err.toString());
+        }
 
         
         if (_errorListener != null) {

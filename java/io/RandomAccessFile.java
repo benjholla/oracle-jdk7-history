@@ -4,6 +4,7 @@ package java.io;
 
 import java.nio.channels.FileChannel;
 import sun.nio.ch.FileChannelImpl;
+import sun.misc.IoTrace;
 
 
 
@@ -13,6 +14,9 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
     private FileDescriptor fd;
     private FileChannel channel = null;
     private boolean rw;
+
+    
+    private final String path;
 
     private Object closeLock = new Object();
     private volatile boolean closed = false;
@@ -64,8 +68,12 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
         if (name == null) {
             throw new NullPointerException();
         }
+        if (file.isInvalid()) {
+            throw new FileNotFoundException("Invalid file path");
+        }
         fd = new FileDescriptor();
         fd.incrementAndGetUseCount();
+        this.path = name;
         open(name, imode);
     }
 
@@ -79,7 +87,7 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
     public final FileChannel getChannel() {
         synchronized (this) {
             if (channel == null) {
-                channel = FileChannelImpl.open(fd, true, rw, this);
+                channel = FileChannelImpl.open(fd, path, true, rw, this);
 
                 
                 fd.incrementAndGetUseCount();
@@ -95,10 +103,32 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
     
 
     
-    public native int read() throws IOException;
+    public int read() throws IOException {
+        Object traceContext = IoTrace.fileReadBegin(path);
+        int b = 0;
+        try {
+            b = read0();
+        } finally {
+            IoTrace.fileReadEnd(traceContext, b == -1 ? 0 : 1);
+        }
+        return b;
+    }
+
+    private native int read0() throws IOException;
 
     
-    private native int readBytes(byte b[], int off, int len) throws IOException;
+    private int readBytes(byte b[], int off, int len) throws IOException {
+        Object traceContext = IoTrace.fileReadBegin(path);
+        int bytesRead = 0;
+        try {
+            bytesRead = readBytes0(b, off, len);
+        } finally {
+            IoTrace.fileReadEnd(traceContext, bytesRead == -1 ? 0 : bytesRead);
+        }
+        return bytesRead;
+    }
+
+    private native int readBytes0(byte b[], int off, int len) throws IOException;
 
     
     public int read(byte b[], int off, int len) throws IOException {
@@ -150,10 +180,32 @@ public class RandomAccessFile implements DataOutput, DataInput, Closeable {
     
 
     
-    public native void write(int b) throws IOException;
+    public void write(int b) throws IOException {
+        Object traceContext = IoTrace.fileWriteBegin(path);
+        int bytesWritten = 0;
+        try {
+            write0(b);
+            bytesWritten = 1;
+        } finally {
+            IoTrace.fileWriteEnd(traceContext, bytesWritten);
+        }
+    }
+
+    private native void write0(int b) throws IOException;
 
     
-    private native void writeBytes(byte b[], int off, int len) throws IOException;
+    private void writeBytes(byte b[], int off, int len) throws IOException {
+        Object traceContext = IoTrace.fileWriteBegin(path);
+        int bytesWritten = 0;
+        try {
+            writeBytes0(b, off, len);
+            bytesWritten = len;
+        } finally {
+            IoTrace.fileWriteEnd(traceContext, bytesWritten);
+        }
+    }
+
+    private native void writeBytes0(byte b[], int off, int len) throws IOException;
 
     
     public void write(byte b[]) throws IOException {

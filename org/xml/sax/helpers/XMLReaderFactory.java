@@ -26,6 +26,7 @@ final public class XMLReaderFactory
     private static final String property = "org.xml.sax.driver";
     private static SecuritySupport ss = new SecuritySupport();
 
+    private static String _clsFromJar = null;
     private static boolean _jarread = false;
     
     public static XMLReader createXMLReader ()
@@ -63,14 +64,14 @@ final public class XMLReaderFactory
                     }
 
                     if (in != null) {
-                        reader = new BufferedReader (
-                                new InputStreamReader (in, "UTF8"));
-                        className = reader.readLine ();
+                        reader = new BufferedReader (new InputStreamReader (in, "UTF8"));
+                        _clsFromJar = reader.readLine ();
                         in.close ();
                     }
                 } catch (Exception e) {
                 }
             }
+            className = _clsFromJar;
         }
 
         

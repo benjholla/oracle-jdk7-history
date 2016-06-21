@@ -257,6 +257,10 @@ public abstract class RMIServerImpl implements Closeable, RMIServer {
         String clientHost = "";
         try {
             clientHost = RemoteServer.getClientHost();
+            
+            if (clientHost.contains(":")) {
+                clientHost = "[" + clientHost + "]";
+            }
         } catch (ServerNotActiveException e) {
             logger.trace("makeConnectionId", "getClientHost", e);
         }

@@ -4,6 +4,7 @@
 
 package com.sun.org.apache.xalan.internal.xsltc.trax;
 
+import com.sun.org.apache.xalan.internal.XalanConstants;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -67,6 +68,9 @@ public final class TemplatesImpl implements Templates, Serializable {
 
     private boolean _useServicesMechanism;
 
+    
+    private String _accessExternalStylesheet = XalanConstants.EXTERNAL_ACCESS_DEFAULT;
+
     static final class TransletClassLoader extends ClassLoader {
         TransletClassLoader(ClassLoader parent) {
             super(parent);
@@ -106,6 +110,7 @@ public final class TemplatesImpl implements Templates, Serializable {
         _indentNumber = indentNumber;
         _tfactory = tfactory;
         _useServicesMechanism = tfactory.useServicesMechnism();
+        _accessExternalStylesheet = (String) tfactory.getAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET);
     }
     
     public TemplatesImpl() { }
@@ -263,6 +268,7 @@ public final class TemplatesImpl implements Templates, Serializable {
             translet.postInitialization();
             translet.setTemplates(this);
             translet.setServicesMechnism(_useServicesMechanism);
+            translet.setAllowedProtocols(_accessExternalStylesheet);
             if (_auxClasses != null) {
                 translet.setAuxiliaryClasses(_auxClasses);
             }

@@ -16,8 +16,12 @@ abstract class AbstractXMLSchema extends Schema implements
     
     private final HashMap fFeatures;
 
+    
+    private final HashMap fProperties;
+
     public AbstractXMLSchema() {
         fFeatures = new HashMap();
+        fProperties = new HashMap();
     }
 
     
@@ -40,9 +44,18 @@ abstract class AbstractXMLSchema extends Schema implements
     }
 
     
-
-    final void setFeature(String featureId, boolean state) {
+    public final void setFeature(String featureId, boolean state) {
         fFeatures.put(featureId, state ? Boolean.TRUE : Boolean.FALSE);
+    }
+
+    
+    public final Object getProperty(String propertyId) {
+        return fProperties.get(propertyId);
+    }
+
+    
+    public final void setProperty(String propertyId, Object state) {
+        fProperties.put(propertyId, state);
     }
 
 } 

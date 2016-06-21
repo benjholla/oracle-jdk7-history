@@ -25,6 +25,7 @@ import com.sun.org.apache.xerces.internal.util.PropertyState;
 import com.sun.org.apache.xerces.internal.util.SecurityManager;
 import com.sun.org.apache.xerces.internal.util.Status;
 import com.sun.org.apache.xerces.internal.util.SymbolTable;
+import com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager;
 import com.sun.org.apache.xerces.internal.xni.NamespaceContext;
 import com.sun.org.apache.xerces.internal.xni.XNIException;
 import com.sun.org.apache.xerces.internal.xni.parser.XMLComponent;
@@ -84,6 +85,10 @@ final class XMLSchemaValidatorComponentManager extends ParserConfigurationSettin
     
     private static final String SECURITY_MANAGER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.SECURITY_MANAGER_PROPERTY;
+
+    
+    private static final String XML_SECURITY_PROPERTY_MANAGER =
+            Constants.XML_SECURITY_PROPERTY_MANAGER;
 
     
     private static final String SYMBOL_TABLE =
@@ -147,6 +152,9 @@ final class XMLSchemaValidatorComponentManager extends ParserConfigurationSettin
 
     
     private final SecurityManager fInitSecurityManager;
+
+    
+    private final XMLSecurityPropertyManager fSecurityPropertyMgr;
 
     
     
@@ -213,6 +221,10 @@ final class XMLSchemaValidatorComponentManager extends ParserConfigurationSettin
         }
         fComponents.put(SECURITY_MANAGER, fInitSecurityManager);
 
+        
+        fSecurityPropertyMgr = (XMLSecurityPropertyManager)
+                grammarContainer.getProperty(Constants.XML_SECURITY_PROPERTY_MANAGER);
+        setProperty(XML_SECURITY_PROPERTY_MANAGER, fSecurityPropertyMgr);
     }
 
     
@@ -252,6 +264,15 @@ final class XMLSchemaValidatorComponentManager extends ParserConfigurationSettin
                 throw new XMLConfigurationException(Status.NOT_ALLOWED, XMLConstants.FEATURE_SECURE_PROCESSING);
             }
             setProperty(SECURITY_MANAGER, value ? new SecurityManager() : null);
+
+            if (value && Constants.IS_JDK8_OR_ABOVE) {
+                fSecurityPropertyMgr.setValue(XMLSecurityPropertyManager.Property.ACCESS_EXTERNAL_DTD,
+                        XMLSecurityPropertyManager.State.FSP, Constants.EXTERNAL_ACCESS_DEFAULT_FSP);
+                fSecurityPropertyMgr.setValue(XMLSecurityPropertyManager.Property.ACCESS_EXTERNAL_SCHEMA,
+                        XMLSecurityPropertyManager.State.FSP, Constants.EXTERNAL_ACCESS_DEFAULT_FSP);
+                setProperty(XML_SECURITY_PROPERTY_MANAGER, fSecurityPropertyMgr);
+            }
+
             return;
         }
         fConfigUpdated = true;

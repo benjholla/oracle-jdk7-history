@@ -4,6 +4,7 @@
 
 package com.sun.org.apache.xalan.internal.xsltc.compiler;
 
+import com.sun.org.apache.xalan.internal.utils.Objects;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.TypeCheckError;
 
@@ -54,20 +55,24 @@ class VariableRefBase extends Expression {
     }
 
     
+    @Override
     public boolean equals(Object obj) {
-        try {
-            return (_variable == ((VariableRefBase) obj)._variable);
-        }
-        catch (ClassCastException e) {
-            return false;
-        }
+        return obj == this || (obj instanceof VariableRefBase)
+            && (_variable == ((VariableRefBase) obj)._variable);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this._variable);
     }
 
     
+    @Override
     public String toString() {
         return "variable-ref("+_variable.getName()+'/'+_variable.getType()+')';
     }
 
+    @Override
     public Type typeCheck(SymbolTable stable)
         throws TypeCheckError
     {

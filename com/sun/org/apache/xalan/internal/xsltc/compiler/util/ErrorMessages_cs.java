@@ -194,6 +194,10 @@ public class ErrorMessages_cs extends ListResourceBundle {
         "Nelze naj\u00edt c\u00edlovou p\u0159edlohu se stylem ''{0}''."},
 
         
+        {ErrorMsg.ACCESSING_XSLT_TARGET_ERR,
+        "Could not read stylesheet target ''{0}'', because ''{1}'' access is not allowed."},
+
+        
         {ErrorMsg.NOT_IMPLEMENTED_ERR,
         "Neimplementov\u00e1no: ''{0}''."},
 

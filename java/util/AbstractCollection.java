@@ -60,13 +60,21 @@ public abstract class AbstractCollection<E> implements Collection<E> {
 
         for (int i = 0; i < r.length; i++) {
             if (! it.hasNext()) { 
-                if (a != r)
+                if (a == r) {
+                    r[i] = null; 
+                } else if (a.length < i) {
                     return Arrays.copyOf(r, i);
-                r[i] = null; 
-                return r;
+                } else {
+                    System.arraycopy(r, 0, a, 0, i);
+                    if (a.length > i) {
+                        a[i] = null;
+                    }
+                }
+                return a;
             }
             r[i] = (T)it.next();
         }
+        
         return it.hasNext() ? finishToArray(r, it) : r;
     }
 

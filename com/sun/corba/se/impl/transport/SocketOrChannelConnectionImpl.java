@@ -1444,7 +1444,7 @@ public class SocketOrChannelConnectionImpl
             
 
             responseWaitingRoom.signalExceptionToAllWaiters(systemException);
-
+        } finally {
             if (contactInfo != null) {
                 ((OutboundConnectionCache)getConnectionCache()).remove(contactInfo);
             } else if (acceptor != null) {
@@ -1465,7 +1465,6 @@ public class SocketOrChannelConnectionImpl
 
             writeUnlock();
 
-        } finally {
             if (orb.transportDebugFlag) {
                 dprint(".purgeCalls<-: "
                        + minor_code + "/" + die + "/" + lockHeld

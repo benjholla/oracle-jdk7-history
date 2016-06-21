@@ -2140,10 +2140,7 @@ public final class TypeCodeImpl extends TypeCode
 
                 if (labelIndex == _unionLabels.length) {
                     
-                    if (_defaultIndex == -1)
-                        
-                        throw wrapper.unexpectedUnionDefault() ;
-                    else
+                    if (_defaultIndex != -1)
                         
                         _memberTypes[_defaultIndex].copy(src, dst);
                 }

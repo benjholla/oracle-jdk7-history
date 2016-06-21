@@ -4,6 +4,7 @@ package java.io;
 
 import java.nio.channels.FileChannel;
 import sun.nio.ch.FileChannelImpl;
+import sun.misc.IoTrace;
 
 
 
@@ -12,6 +13,9 @@ class FileOutputStream extends OutputStream
 {
     
     private final FileDescriptor fd;
+
+    
+    private final String path;
 
     
     private final boolean append;
@@ -60,9 +64,12 @@ class FileOutputStream extends OutputStream
         if (name == null) {
             throw new NullPointerException();
         }
+        if (file.isInvalid()) {
+            throw new FileNotFoundException("Invalid file path");
+        }
         this.fd = new FileDescriptor();
         this.append = append;
-
+        this.path = name;
         fd.incrementAndGetUseCount();
         open(name, append);
     }
@@ -77,6 +84,7 @@ class FileOutputStream extends OutputStream
             security.checkWrite(fdObj);
         }
         this.fd = fdObj;
+        this.path = null;
         this.append = false;
 
         
@@ -92,7 +100,14 @@ class FileOutputStream extends OutputStream
 
     
     public void write(int b) throws IOException {
-        write(b, append);
+        Object traceContext = IoTrace.fileWriteBegin(path);
+        int bytesWritten = 0;
+        try {
+            write(b, append);
+            bytesWritten = 1;
+        } finally {
+            IoTrace.fileWriteEnd(traceContext, bytesWritten);
+        }
     }
 
     
@@ -101,12 +116,26 @@ class FileOutputStream extends OutputStream
 
     
     public void write(byte b[]) throws IOException {
-        writeBytes(b, 0, b.length, append);
+        Object traceContext = IoTrace.fileWriteBegin(path);
+        int bytesWritten = 0;
+        try {
+            writeBytes(b, 0, b.length, append);
+            bytesWritten = b.length;
+        } finally {
+            IoTrace.fileWriteEnd(traceContext, bytesWritten);
+        }
     }
 
     
     public void write(byte b[], int off, int len) throws IOException {
-        writeBytes(b, off, len, append);
+        Object traceContext = IoTrace.fileWriteBegin(path);
+        int bytesWritten = 0;
+        try {
+            writeBytes(b, off, len, append);
+            bytesWritten = len;
+        } finally {
+            IoTrace.fileWriteEnd(traceContext, bytesWritten);
+        }
     }
 
     
@@ -143,7 +172,7 @@ class FileOutputStream extends OutputStream
     public FileChannel getChannel() {
         synchronized (this) {
             if (channel == null) {
-                channel = FileChannelImpl.open(fd, false, true, append, this);
+                channel = FileChannelImpl.open(fd, path, false, true, append, this);
 
                 
                 fd.incrementAndGetUseCount();

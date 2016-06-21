@@ -1041,10 +1041,18 @@ public class JViewport extends JComponent implements Accessible
         int bdx = blitToX - blitFromX;
         int bdy = blitToY - blitFromY;
 
+        Composite oldComposite = null;
         
+        if (g instanceof Graphics2D) {
+            Graphics2D g2d = (Graphics2D) g;
+            oldComposite = g2d.getComposite();
+            g2d.setComposite(AlphaComposite.Src);
+        }
         rm.copyArea(this, g, blitFromX, blitFromY, blitW, blitH, bdx, bdy,
                     false);
-
+        if (oldComposite != null) {
+            ((Graphics2D) g).setComposite(oldComposite);
+        }
         
         int x = view.getX();
         int y = view.getY();

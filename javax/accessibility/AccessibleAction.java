@@ -7,7 +7,7 @@ public interface AccessibleAction {
 
     
     public static final String TOGGLE_EXPAND =
-        new String ("toggle expand");
+        new String ("toggleexpand");
 
     
     public static final String INCREMENT =

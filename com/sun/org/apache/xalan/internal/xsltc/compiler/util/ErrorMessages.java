@@ -196,6 +196,10 @@ public class ErrorMessages extends ListResourceBundle {
         "Could not find stylesheet target ''{0}''."},
 
         
+        {ErrorMsg.ACCESSING_XSLT_TARGET_ERR,
+        "Could not read stylesheet target ''{0}'', because ''{1}'' access is not allowed due to restriction set by the accessExternalStylesheet property."},
+
+        
         {ErrorMsg.NOT_IMPLEMENTED_ERR,
         "Not implemented: ''{0}''."},
 

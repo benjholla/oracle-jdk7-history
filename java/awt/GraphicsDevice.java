@@ -83,6 +83,12 @@ public abstract class GraphicsDevice {
                                     bgColor.getBlue(), 255);
                 w.setBackground(bgColor);
             }
+            
+            final GraphicsConfiguration gc = w.getGraphicsConfiguration();
+            if (gc != null && gc.getDevice() != this
+                    && gc.getDevice().getFullScreenWindow() == w) {
+                gc.getDevice().setFullScreenWindow(null);
+            }
         }
         if (fullScreenWindow != null && windowedModeBounds != null) {
             

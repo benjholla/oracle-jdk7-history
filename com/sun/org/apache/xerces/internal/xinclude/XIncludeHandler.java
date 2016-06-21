@@ -9,6 +9,7 @@ import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Stack;
 import java.util.StringTokenizer;
+import javax.xml.XMLConstants;
 
 import com.sun.org.apache.xerces.internal.impl.Constants;
 import com.sun.org.apache.xerces.internal.impl.XMLEntityManager;
@@ -50,6 +51,8 @@ import com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration;
 import com.sun.org.apache.xerces.internal.xpointer.XPointerHandler;
 import com.sun.org.apache.xerces.internal.xpointer.XPointerProcessor;
 import com.sun.org.apache.xerces.internal.utils.ObjectFactory;
+import com.sun.org.apache.xerces.internal.utils.Objects;
+import com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager;
 
 
 public class XIncludeHandler
@@ -166,6 +169,10 @@ public class XIncludeHandler
         Constants.XERCES_FEATURE_PREFIX + Constants.PARSER_SETTINGS;
 
     
+    protected static final String XML_SECURITY_PROPERTY_MANAGER =
+            Constants.XML_SECURITY_PROPERTY_MANAGER;
+
+    
     private static final String[] RECOGNIZED_FEATURES =
         { ALLOW_UE_AND_NOTATION_EVENTS, XINCLUDE_FIXUP_BASE_URIS, XINCLUDE_FIXUP_LANGUAGE };
 
@@ -219,6 +226,7 @@ public class XIncludeHandler
     protected XMLErrorReporter fErrorReporter;
     protected XMLEntityResolver fEntityResolver;
     protected SecurityManager fSecurityManager;
+    protected XMLSecurityPropertyManager fSecurityPropertyMgr;
 
     
     protected XIncludeTextReader fXInclude10TextReader;
@@ -311,6 +319,7 @@ public class XIncludeHandler
 
     
 
+    @Override
     public void reset(XMLComponentManager componentManager)
         throws XNIException {
         fNamespaceContext = null;
@@ -459,6 +468,9 @@ public class XIncludeHandler
             fSecurityManager = null;
         }
 
+        fSecurityPropertyMgr = (XMLSecurityPropertyManager)
+                componentManager.getProperty(Constants.XML_SECURITY_PROPERTY_MANAGER);
+
         
         try {
             Integer value =
@@ -512,11 +524,13 @@ public class XIncludeHandler
     } 
 
     
+    @Override
     public String[] getRecognizedFeatures() {
         return (String[])(RECOGNIZED_FEATURES.clone());
     } 
 
     
+    @Override
     public void setFeature(String featureId, boolean state)
         throws XMLConfigurationException {
         if (featureId.equals(ALLOW_UE_AND_NOTATION_EVENTS)) {
@@ -529,11 +543,13 @@ public class XIncludeHandler
     } 
 
     
+    @Override
     public String[] getRecognizedProperties() {
         return (String[])(RECOGNIZED_PROPERTIES.clone());
     } 
 
     
+    @Override
     public void setProperty(String propertyId, Object value)
         throws XMLConfigurationException {
         if (propertyId.equals(SYMBOL_TABLE)) {
@@ -564,6 +580,16 @@ public class XIncludeHandler
             }
             return;
         }
+        if (propertyId.equals(XML_SECURITY_PROPERTY_MANAGER)) {
+            fSecurityPropertyMgr = (XMLSecurityPropertyManager)value;
+
+            if (fChildConfig != null) {
+                fChildConfig.setProperty(XML_SECURITY_PROPERTY_MANAGER, value);
+            }
+
+            return;
+        }
+
         if (propertyId.equals(BUFFER_SIZE)) {
             Integer bufferSize = (Integer) value;
             if (fChildConfig != null) {
@@ -586,6 +612,7 @@ public class XIncludeHandler
     } 
 
     
+    @Override
     public Boolean getFeatureDefault(String featureId) {
         for (int i = 0; i < RECOGNIZED_FEATURES.length; i++) {
             if (RECOGNIZED_FEATURES[i].equals(featureId)) {
@@ -596,6 +623,7 @@ public class XIncludeHandler
     } 
 
     
+    @Override
     public Object getPropertyDefault(String propertyId) {
         for (int i = 0; i < RECOGNIZED_PROPERTIES.length; i++) {
             if (RECOGNIZED_PROPERTIES[i].equals(propertyId)) {
@@ -605,10 +633,12 @@ public class XIncludeHandler
         return null;
     } 
 
+    @Override
     public void setDocumentHandler(XMLDocumentHandler handler) {
         fDocumentHandler = handler;
     }
 
+    @Override
     public XMLDocumentHandler getDocumentHandler() {
         return fDocumentHandler;
     }
@@ -616,6 +646,7 @@ public class XIncludeHandler
     
 
     
+    @Override
     public void startDocument(
         XMLLocator locator,
         String encoding,
@@ -663,6 +694,7 @@ public class XIncludeHandler
         }
     }
 
+    @Override
     public void xmlDecl(
         String version,
         String encoding,
@@ -675,6 +707,7 @@ public class XIncludeHandler
         }
     }
 
+    @Override
     public void doctypeDecl(
         String rootElement,
         String publicId,
@@ -686,6 +719,7 @@ public class XIncludeHandler
         }
     }
 
+    @Override
     public void comment(XMLString text, Augmentations augs)
         throws XNIException {
         if (!fInDTD) {
@@ -702,6 +736,7 @@ public class XIncludeHandler
         }
     }
 
+    @Override
     public void processingInstruction(
         String target,
         XMLString data,
@@ -722,6 +757,7 @@ public class XIncludeHandler
         }
     }
 
+    @Override
     public void startElement(
         QName element,
         XMLAttributes attributes,
@@ -792,6 +828,7 @@ public class XIncludeHandler
         }
     }
 
+    @Override
     public void emptyElement(
         QName element,
         XMLAttributes attributes,
@@ -873,6 +910,7 @@ public class XIncludeHandler
         fDepth--;
     }
 
+    @Override
     public void endElement(QName element, Augmentations augs)
         throws XNIException {
 
@@ -918,6 +956,7 @@ public class XIncludeHandler
         fDepth--;
     }
 
+    @Override
     public void startGeneralEntity(
         String name,
         XMLResourceIdentifier resId,
@@ -936,6 +975,7 @@ public class XIncludeHandler
         }
     }
 
+    @Override
     public void textDecl(String version, String encoding, Augmentations augs)
         throws XNIException {
         if (fDocumentHandler != null
@@ -944,6 +984,7 @@ public class XIncludeHandler
         }
     }
 
+    @Override
     public void endGeneralEntity(String name, Augmentations augs)
         throws XNIException {
         if (fDocumentHandler != null
@@ -953,6 +994,7 @@ public class XIncludeHandler
         }
     }
 
+    @Override
     public void characters(XMLString text, Augmentations augs)
         throws XNIException {
         if (getState() == STATE_NORMAL_PROCESSING) {
@@ -969,6 +1011,7 @@ public class XIncludeHandler
         }
     }
 
+    @Override
     public void ignorableWhitespace(XMLString text, Augmentations augs)
         throws XNIException {
         if (fDocumentHandler != null
@@ -978,6 +1021,7 @@ public class XIncludeHandler
         }
     }
 
+    @Override
     public void startCDATA(Augmentations augs) throws XNIException {
         if (fDocumentHandler != null
             && getState() == STATE_NORMAL_PROCESSING
@@ -986,6 +1030,7 @@ public class XIncludeHandler
         }
     }
 
+    @Override
     public void endCDATA(Augmentations augs) throws XNIException {
         if (fDocumentHandler != null
             && getState() == STATE_NORMAL_PROCESSING
@@ -994,6 +1039,7 @@ public class XIncludeHandler
         }
     }
 
+    @Override
     public void endDocument(Augmentations augs) throws XNIException {
         if (isRootDocument()) {
             if (!fSeenRootElement) {
@@ -1005,10 +1051,12 @@ public class XIncludeHandler
         }
     }
 
+    @Override
     public void setDocumentSource(XMLDocumentSource source) {
         fDocumentSource = source;
     }
 
+    @Override
     public XMLDocumentSource getDocumentSource() {
         return fDocumentSource;
     }
@@ -1018,6 +1066,7 @@ public class XIncludeHandler
     
 
     
+    @Override
     public void attributeDecl(
         String elementName,
         String attributeName,
@@ -1042,6 +1091,7 @@ public class XIncludeHandler
     }
 
     
+    @Override
     public void elementDecl(
         String name,
         String contentModel,
@@ -1053,6 +1103,7 @@ public class XIncludeHandler
     }
 
     
+    @Override
     public void endAttlist(Augmentations augmentations) throws XNIException {
         if (fDTDHandler != null) {
             fDTDHandler.endAttlist(augmentations);
@@ -1060,6 +1111,7 @@ public class XIncludeHandler
     }
 
     
+    @Override
     public void endConditional(Augmentations augmentations)
         throws XNIException {
         if (fDTDHandler != null) {
@@ -1068,6 +1120,7 @@ public class XIncludeHandler
     }
 
     
+    @Override
     public void endDTD(Augmentations augmentations) throws XNIException {
         if (fDTDHandler != null) {
             fDTDHandler.endDTD(augmentations);
@@ -1076,6 +1129,7 @@ public class XIncludeHandler
     }
 
     
+    @Override
     public void endExternalSubset(Augmentations augmentations)
         throws XNIException {
         if (fDTDHandler != null) {
@@ -1084,6 +1138,7 @@ public class XIncludeHandler
     }
 
     
+    @Override
     public void endParameterEntity(String name, Augmentations augmentations)
         throws XNIException {
         if (fDTDHandler != null) {
@@ -1092,6 +1147,7 @@ public class XIncludeHandler
     }
 
     
+    @Override
     public void externalEntityDecl(
         String name,
         XMLResourceIdentifier identifier,
@@ -1103,11 +1159,13 @@ public class XIncludeHandler
     }
 
     
+    @Override
     public XMLDTDSource getDTDSource() {
         return fDTDSource;
     }
 
     
+    @Override
     public void ignoredCharacters(XMLString text, Augmentations augmentations)
         throws XNIException {
         if (fDTDHandler != null) {
@@ -1116,6 +1174,7 @@ public class XIncludeHandler
     }
 
     
+    @Override
     public void internalEntityDecl(
         String name,
         XMLString text,
@@ -1132,6 +1191,7 @@ public class XIncludeHandler
     }
 
     
+    @Override
     public void notationDecl(
         String name,
         XMLResourceIdentifier identifier,
@@ -1144,11 +1204,13 @@ public class XIncludeHandler
     }
 
     
+    @Override
     public void setDTDSource(XMLDTDSource source) {
         fDTDSource = source;
     }
 
     
+    @Override
     public void startAttlist(String elementName, Augmentations augmentations)
         throws XNIException {
         if (fDTDHandler != null) {
@@ -1157,6 +1219,7 @@ public class XIncludeHandler
     }
 
     
+    @Override
     public void startConditional(short type, Augmentations augmentations)
         throws XNIException {
         if (fDTDHandler != null) {
@@ -1165,6 +1228,7 @@ public class XIncludeHandler
     }
 
     
+    @Override
     public void startDTD(XMLLocator locator, Augmentations augmentations)
         throws XNIException {
         fInDTD = true;
@@ -1174,6 +1238,7 @@ public class XIncludeHandler
     }
 
     
+    @Override
     public void startExternalSubset(
         XMLResourceIdentifier identifier,
         Augmentations augmentations)
@@ -1184,6 +1249,7 @@ public class XIncludeHandler
     }
 
     
+    @Override
     public void startParameterEntity(
         String name,
         XMLResourceIdentifier identifier,
@@ -1200,6 +1266,7 @@ public class XIncludeHandler
     }
 
     
+    @Override
     public void unparsedEntityDecl(
         String name,
         XMLResourceIdentifier identifier,
@@ -1217,11 +1284,13 @@ public class XIncludeHandler
     }
 
     
+    @Override
     public XMLDTDHandler getDTDHandler() {
         return fDTDHandler;
     }
 
     
+    @Override
     public void setDTDHandler(XMLDTDHandler handler) {
         fDTDHandler = handler;
     }
@@ -1413,6 +1482,7 @@ public class XIncludeHandler
                 if (fErrorReporter != null) fChildConfig.setProperty(ERROR_REPORTER, fErrorReporter);
                 if (fEntityResolver != null) fChildConfig.setProperty(ENTITY_RESOLVER, fEntityResolver);
                 fChildConfig.setProperty(SECURITY_MANAGER, fSecurityManager);
+                fChildConfig.setProperty(XML_SECURITY_PROPERTY_MANAGER, fSecurityPropertyMgr);
                 fChildConfig.setProperty(BUFFER_SIZE, new Integer(fBufferSize));
 
                 
@@ -1450,11 +1520,10 @@ public class XIncludeHandler
                         fNamespaceContext);
 
                     ((XPointerHandler)fXPtrProcessor).setProperty(XINCLUDE_FIXUP_BASE_URIS,
-                            new Boolean(fFixupBaseURIs));
+                            fFixupBaseURIs);
 
                     ((XPointerHandler)fXPtrProcessor).setProperty(
-                            XINCLUDE_FIXUP_LANGUAGE,
-                            new Boolean (fFixupLanguage));
+                            XINCLUDE_FIXUP_LANGUAGE, fFixupLanguage);
 
                     if (fErrorReporter != null)
                         ((XPointerHandler)fXPtrProcessor).setProperty(ERROR_REPORTER, fErrorReporter);
@@ -1526,7 +1595,7 @@ public class XIncludeHandler
                 if (fErrorReporter != null) {
                     fErrorReporter.setDocumentLocator(fDocLocation);
                 }
-                reportFatalError("XMLParseError", new Object[] { href });
+                reportFatalError("XMLParseError", new Object[] { href, e.getMessage() });
             }
             catch (IOException e) {
                 
@@ -1858,14 +1927,14 @@ public class XIncludeHandler
                 
                 final String baseScheme = base.getScheme();
                 final String literalScheme = uri.getScheme();
-                if (!isEqual(baseScheme, literalScheme)) {
+                if (!Objects.equals(baseScheme, literalScheme)) {
                     return relativeURI;
                 }
 
                 
                 final String baseAuthority = base.getAuthority();
                 final String literalAuthority = uri.getAuthority();
-                if (!isEqual(baseAuthority, literalAuthority)) {
+                if (!Objects.equals(baseAuthority, literalAuthority)) {
                     return uri.getSchemeSpecificPart();
                 }
 
@@ -1874,7 +1943,7 @@ public class XIncludeHandler
                 final String literalQuery = uri.getQueryString();
                 final String literalFragment = uri.getFragment();
                 if (literalQuery != null || literalFragment != null) {
-                    StringBuffer buffer = new StringBuffer();
+                    final StringBuilder buffer = new StringBuilder();
                     if (literalPath != null) {
                         buffer.append(literalPath);
                     }
@@ -2285,15 +2354,15 @@ public class XIncludeHandler
 
         
         
+        @Override
         public boolean equals(Object obj) {
-            if (obj == null) {
-                return false;
-            }
-            if (obj instanceof Notation) {
-                Notation other = (Notation)obj;
-                return name.equals(other.name);
-            }
-            return false;
+            return obj == this || obj instanceof Notation
+                    && Objects.equals(name, ((Notation)obj).name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(name);
         }
 
         
@@ -2306,15 +2375,11 @@ public class XIncludeHandler
         public boolean isDuplicate(Object obj) {
             if (obj != null && obj instanceof Notation) {
                 Notation other = (Notation)obj;
-                return name.equals(other.name)
-                && isEqual(publicId, other.publicId)
-                && isEqual(expandedSystemId, other.expandedSystemId);
+                return Objects.equals(name, other.name)
+                && Objects.equals(publicId, other.publicId)
+                && Objects.equals(expandedSystemId, other.expandedSystemId);
             }
             return false;
-        }
-
-        private boolean isEqual(String one, String two) {
-            return (one == two || (one != null && one.equals(two)));
         }
     }
 
@@ -2331,15 +2396,15 @@ public class XIncludeHandler
 
         
         
+        @Override
         public boolean equals(Object obj) {
-            if (obj == null) {
-                return false;
-            }
-            if (obj instanceof UnparsedEntity) {
-                UnparsedEntity other = (UnparsedEntity)obj;
-                return name.equals(other.name);
-            }
-            return false;
+            return obj == this || obj instanceof UnparsedEntity
+                    && Objects.equals(name, ((UnparsedEntity)obj).name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(name);
         }
 
         
@@ -2352,16 +2417,12 @@ public class XIncludeHandler
         public boolean isDuplicate(Object obj) {
             if (obj != null && obj instanceof UnparsedEntity) {
                 UnparsedEntity other = (UnparsedEntity)obj;
-                return name.equals(other.name)
-                && isEqual(publicId, other.publicId)
-                && isEqual(expandedSystemId, other.expandedSystemId)
-                && isEqual(notation, other.notation);
+                return Objects.equals(name, other.name)
+                && Objects.equals(publicId, other.publicId)
+                && Objects.equals(expandedSystemId, other.expandedSystemId)
+                && Objects.equals(notation, other.notation);
             }
             return false;
-        }
-
-        private boolean isEqual(String one, String two) {
-            return (one == two || (one != null && one.equals(two)));
         }
     }
 
@@ -2512,17 +2573,13 @@ public class XIncludeHandler
         return httpSource;
     }
 
-    private boolean isEqual(String one, String two) {
-        return (one == two || (one != null && one.equals(two)));
-    }
-
     
-    private static boolean gNeedEscaping[] = new boolean[128];
+    private static final boolean gNeedEscaping[] = new boolean[128];
     
-    private static char gAfterEscaping1[] = new char[128];
+    private static final char gAfterEscaping1[] = new char[128];
     
-    private static char gAfterEscaping2[] = new char[128];
-    private static char[] gHexChs = {'0', '1', '2', '3', '4', '5', '6', '7',
+    private static final char gAfterEscaping2[] = new char[128];
+    private static final char[] gHexChs = {'0', '1', '2', '3', '4', '5', '6', '7',
                                      '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
     
     static {
@@ -2552,7 +2609,7 @@ public class XIncludeHandler
     private String escapeHref(String href) {
         int len = href.length();
         int ch;
-        StringBuffer buffer = new StringBuffer(len*3);
+        final StringBuilder buffer = new StringBuilder(len*3);
 
         
         int i = 0;

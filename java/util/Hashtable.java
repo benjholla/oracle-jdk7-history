@@ -63,44 +63,25 @@ public class Hashtable<K,V>
     }
 
     
-    transient boolean useAltHashing;
+    transient int hashSeed;
 
     
-    
-    private static final sun.misc.Unsafe UNSAFE;
-
-    
-    private static final long HASHSEED_OFFSET;
-
-     static {
-        try {
-            UNSAFE = sun.misc.Unsafe.getUnsafe();
-            HASHSEED_OFFSET = UNSAFE.objectFieldOffset(
-                Hashtable.class.getDeclaredField("hashSeed"));
-        } catch (NoSuchFieldException | SecurityException e) {
-            throw new Error("Failed to record hashSeed offset", e);
+    final boolean initHashSeedAsNeeded(int capacity) {
+        boolean currentAltHashing = hashSeed != 0;
+        boolean useAltHashing = sun.misc.VM.isBooted() &&
+                (capacity >= Holder.ALTERNATIVE_HASHING_THRESHOLD);
+        boolean switching = currentAltHashing ^ useAltHashing;
+        if (switching) {
+            hashSeed = useAltHashing
+                ? sun.misc.Hashing.randomHashSeed(this)
+                : 0;
         }
-     }
-
-    
-    transient final int hashSeed = sun.misc.Hashing.randomHashSeed(this);
+        return switching;
+    }
 
     private int hash(Object k) {
-        if (useAltHashing) {
-            if (k.getClass() == String.class) {
-                return sun.misc.Hashing.stringHash32((String) k);
-            } else {
-                int h = hashSeed ^ k.hashCode();
-
-                
-                
-                
-                h ^= (h >>> 20) ^ (h >>> 12);
-                return h ^ (h >>> 7) ^ (h >>> 4);
-             }
-        } else  {
-            return k.hashCode();
-        }
+        
+        return hashSeed ^ k.hashCode();
     }
 
     
@@ -116,8 +97,7 @@ public class Hashtable<K,V>
         this.loadFactor = loadFactor;
         table = new Entry[initialCapacity];
         threshold = (int)Math.min(initialCapacity * loadFactor, MAX_ARRAY_SIZE + 1);
-        useAltHashing = sun.misc.VM.isBooted() &&
-                (initialCapacity >= Holder.ALTERNATIVE_HASHING_THRESHOLD);
+        initHashSeedAsNeeded(initialCapacity);
     }
 
     
@@ -224,10 +204,7 @@ public class Hashtable<K,V>
 
         modCount++;
         threshold = (int)Math.min(newCapacity * loadFactor, MAX_ARRAY_SIZE + 1);
-        boolean currentAltHashing = useAltHashing;
-        useAltHashing = sun.misc.VM.isBooted() &&
-                (newCapacity >= Holder.ALTERNATIVE_HASHING_THRESHOLD);
-        boolean rehash = currentAltHashing ^ useAltHashing;
+        boolean rehash = initHashSeedAsNeeded(newCapacity);
 
         table = newMap;
 
@@ -597,10 +574,6 @@ public class Hashtable<K,V>
         s.defaultReadObject();
 
         
-        UNSAFE.putIntVolatile(this, HASHSEED_OFFSET,
-                sun.misc.Hashing.randomHashSeed(this));
-
-        
         int origlength = s.readInt();
         int elements = s.readInt();
 
@@ -614,20 +587,19 @@ public class Hashtable<K,V>
         if (origlength > 0 && length > origlength)
             length = origlength;
 
-        Entry<K,V>[] table = new Entry[length];
+        Entry<K,V>[] newTable = new Entry[length];
         threshold = (int) Math.min(length * loadFactor, MAX_ARRAY_SIZE + 1);
         count = 0;
-        useAltHashing = sun.misc.VM.isBooted() &&
-                (length >= Holder.ALTERNATIVE_HASHING_THRESHOLD);
+        initHashSeedAsNeeded(length);
 
         
         for (; elements > 0; elements--) {
             K key = (K)s.readObject();
             V value = (V)s.readObject();
             
-            reconstitutionPut(table, key, value);
+            reconstitutionPut(newTable, key, value);
         }
-        this.table = table;
+        this.table = newTable;
     }
 
     
@@ -699,7 +671,7 @@ public class Hashtable<K,V>
         }
 
         public int hashCode() {
-            return hash ^ value.hashCode();
+            return (Objects.hashCode(key) ^ Objects.hashCode(value));
         }
 
         public String toString() {

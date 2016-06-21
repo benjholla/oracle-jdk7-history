@@ -3,7 +3,7 @@ package com.sun.org.apache.bcel.internal.generic;
 
 
 import com.sun.org.apache.bcel.internal.Constants;
-import com.sun.org.apache.bcel.internal.generic.InstructionHandle;
+import com.sun.org.apache.bcel.internal.util.Objects;
 
 
 public class ReturnaddressType extends Type {
@@ -22,7 +22,13 @@ public class ReturnaddressType extends Type {
         this.returnTarget = returnTarget;
   }
 
+  @Override
+  public int hashCode() {
+      return Objects.hashCode(this.returnTarget);
+  }
+
   
+  @Override
   public boolean equals(Object rat){
     if(!(rat instanceof ReturnaddressType))
       return false;

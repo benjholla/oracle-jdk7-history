@@ -5,13 +5,14 @@ package com.sun.org.apache.bcel.internal.generic;
 
 import com.sun.org.apache.bcel.internal.Constants;
 import com.sun.org.apache.bcel.internal.classfile.*;
+import com.sun.org.apache.bcel.internal.util.Objects;
 
 
 public class LocalVariableGen
   implements InstructionTargeter, NamedAndTyped, Cloneable,
              java.io.Serializable
 {
-  private int         index;
+  private final int   index;
   private String      name;
   private Type        type;
   private InstructionHandle start, end;
@@ -44,27 +45,89 @@ public class LocalVariableGen
                              signature_index, index, cp.getConstantPool());
   }
 
-  public void        setIndex(int index)           { this.index = index; }
-  public int         getIndex()                   { return index; }
+  public int         getIndex()                  { return index; }
+  @Override
   public void        setName(String name)        { this.name = name; }
+  @Override
   public String      getName()                   { return name; }
+  @Override
   public void        setType(Type type)          { this.type = type; }
+  @Override
   public Type        getType()                   { return type; }
 
   public InstructionHandle getStart()                  { return start; }
   public InstructionHandle getEnd()                    { return end; }
 
-  public void setStart(InstructionHandle start) {
-    BranchInstruction.notifyTarget(this.start, start, this);
-    this.start = start;
-  }
+  
+  void notifyTargetChanging() {
+    
+    
+    
+    
+    
 
-  public void setEnd(InstructionHandle end) {
-    BranchInstruction.notifyTarget(this.end, end, this);
-    this.end = end;
+    
+    BranchInstruction.notifyTargetChanging(this.start, this);
+    if (this.end != this.start) {
+        
+        
+        
+        BranchInstruction.notifyTargetChanging(this.end, this);
+    }
   }
 
   
+  void notifyTargetChanged() {
+    
+    
+    
+    
+    
+
+    
+    BranchInstruction.notifyTargetChanged(this.start, this);
+    if (this.end != this.start) {
+        
+        
+        
+        BranchInstruction.notifyTargetChanged(this.end, this);
+    }
+  }
+
+  public final void setStart(InstructionHandle start) {
+
+    
+    
+    
+    notifyTargetChanging();
+
+    this.start = start;
+
+    
+    
+    
+    notifyTargetChanged();
+  }
+
+  public final void setEnd(InstructionHandle end) {
+    
+    
+    
+    
+    notifyTargetChanging();
+
+    this.end = end;
+
+    
+    
+    
+    
+    notifyTargetChanged();
+
+  }
+
+  
+  @Override
   public void updateTarget(InstructionHandle old_ih, InstructionHandle new_ih) {
     boolean targeted = false;
 
@@ -84,12 +147,17 @@ public class LocalVariableGen
   }
 
   
+  @Override
   public boolean containsTarget(InstructionHandle ih) {
     return (start == ih) || (end == ih);
   }
 
   
+  @Override
   public boolean equals(Object o) {
+    if (o==this)
+      return true;
+
     if(!(o instanceof LocalVariableGen))
       return false;
 
@@ -97,10 +165,21 @@ public class LocalVariableGen
     return (l.index == index) && (l.start == start) && (l.end == end);
   }
 
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 59 * hash + this.index;
+    hash = 59 * hash + Objects.hashCode(this.start);
+    hash = 59 * hash + Objects.hashCode(this.end);
+    return hash;
+  }
+
+  @Override
   public String toString() {
     return "LocalVariableGen(" + name +  ", " + type +  ", " + start + ", " + end + ")";
   }
 
+  @Override
   public Object clone() {
     try {
       return super.clone();

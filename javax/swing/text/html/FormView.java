@@ -38,6 +38,10 @@ public class FormView extends ComponentView implements ActionListener {
             attr.getAttribute(StyleConstants.NameAttribute);
         JComponent c = null;
         Object model = attr.getAttribute(StyleConstants.ModelAttribute);
+
+        
+        
+        removeStaleListenerForModel(model);
         if (t == HTML.Tag.INPUT) {
             c = createInputComponent(attr, model);
         } else if (t == HTML.Tag.SELECT) {
@@ -182,6 +186,63 @@ public class FormView extends ComponentView implements ActionListener {
         return c;
     }
 
+    private void removeStaleListenerForModel(Object model) {
+        if (model instanceof DefaultButtonModel) {
+            
+            
+            
+            DefaultButtonModel buttonModel = (DefaultButtonModel) model;
+            String listenerClass = "javax.swing.AbstractButton$Handler";
+            for (ActionListener listener : buttonModel.getActionListeners()) {
+                if (listenerClass.equals(listener.getClass().getName())) {
+                    buttonModel.removeActionListener(listener);
+                }
+            }
+            for (ChangeListener listener : buttonModel.getChangeListeners()) {
+                if (listenerClass.equals(listener.getClass().getName())) {
+                    buttonModel.removeChangeListener(listener);
+                }
+            }
+            for (ItemListener listener : buttonModel.getItemListeners()) {
+                if (listenerClass.equals(listener.getClass().getName())) {
+                    buttonModel.removeItemListener(listener);
+                }
+            }
+        } else if (model instanceof AbstractListModel) {
+            
+            
+            
+            
+            
+            AbstractListModel listModel = (AbstractListModel) model;
+            String listenerClass1 =
+                    "javax.swing.plaf.basic.BasicListUI$Handler";
+            String listenerClass2 =
+                    "javax.swing.plaf.basic.BasicComboBoxUI$Handler";
+            for (ListDataListener listener : listModel.getListDataListeners()) {
+                if (listenerClass1.equals(listener.getClass().getName())
+                        || listenerClass2.equals(listener.getClass().getName()))
+                {
+                    listModel.removeListDataListener(listener);
+                }
+            }
+        } else if (model instanceof AbstractDocument) {
+            
+            
+            String listenerClass1 =
+                    "javax.swing.plaf.basic.BasicTextUI$UpdateHandler";
+            String listenerClass2 =
+                    "javax.swing.text.DefaultCaret$Handler";
+            AbstractDocument docModel = (AbstractDocument) model;
+            for (DocumentListener listener : docModel.getDocumentListeners()) {
+                if (listenerClass1.equals(listener.getClass().getName())
+                        || listenerClass2.equals(listener.getClass().getName()))
+                {
+                    docModel.removeDocumentListener(listener);
+                }
+            }
+        }
+    }
 
     
     public float getMaximumSpan(int axis) {

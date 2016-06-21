@@ -319,7 +319,7 @@ public abstract class Signature extends SignatureSpi {
         throws SignatureException {
         if (state == VERIFY) {
             if ((signature == null) || (offset < 0) || (length < 0) ||
-                (offset + length > signature.length)) {
+                (length > signature.length - offset)) {
                 throw new IllegalArgumentException("Bad arguments");
             }
 

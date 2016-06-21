@@ -11,13 +11,17 @@ import java.util.Iterator;
 public abstract class XMLEventFactory {
   protected XMLEventFactory(){}
 
+    static final String JAXPFACTORYID = "javax.xml.stream.XMLEventFactory";
+    static final String DEFAULIMPL = "com.sun.xml.internal.stream.events.XMLEventFactoryImpl";
+
+
   
   public static XMLEventFactory newInstance()
     throws FactoryConfigurationError
   {
     return (XMLEventFactory) FactoryFinder.find(
-      "javax.xml.stream.XMLEventFactory",
-      "com.sun.xml.internal.stream.events.XMLEventFactoryImpl");
+      JAXPFACTORYID,
+      DEFAULIMPL);
   }
 
   
@@ -25,8 +29,8 @@ public abstract class XMLEventFactory {
     throws FactoryConfigurationError
   {
     return (XMLEventFactory) FactoryFinder.find(
-      "javax.xml.stream.XMLEventFactory",
-      "com.sun.xml.internal.stream.events.XMLEventFactoryImpl");
+      JAXPFACTORYID,
+      DEFAULIMPL);
   }
 
   
@@ -35,7 +39,7 @@ public abstract class XMLEventFactory {
           throws FactoryConfigurationError {
       try {
           
-          return (XMLEventFactory) FactoryFinder.newInstance(factoryId, classLoader, false);
+          return (XMLEventFactory) FactoryFinder.find(factoryId, classLoader, null);
       } catch (FactoryFinder.ConfigurationError e) {
           throw new FactoryConfigurationError(e.getException(),
                   e.getMessage());
@@ -48,7 +52,7 @@ public abstract class XMLEventFactory {
           throws FactoryConfigurationError {
       try {
           
-          return (XMLEventFactory) FactoryFinder.newInstance(factoryId, classLoader, false);
+          return (XMLEventFactory) FactoryFinder.find(factoryId, classLoader, null);
       } catch (FactoryFinder.ConfigurationError e) {
           throw new FactoryConfigurationError(e.getException(),
                   e.getMessage());

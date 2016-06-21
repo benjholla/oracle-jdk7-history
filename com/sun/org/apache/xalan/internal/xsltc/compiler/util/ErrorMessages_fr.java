@@ -194,6 +194,10 @@ public class ErrorMessages_fr extends ListResourceBundle {
         "Cible de feuille de style ''{0}'' introuvable."},
 
         
+        {ErrorMsg.ACCESSING_XSLT_TARGET_ERR,
+        "Could not read stylesheet target ''{0}'', because ''{1}'' access is not allowed."},
+
+        
         {ErrorMsg.NOT_IMPLEMENTED_ERR,
         "Non impl\u00E9ment\u00E9 : ''{0}''."},
 

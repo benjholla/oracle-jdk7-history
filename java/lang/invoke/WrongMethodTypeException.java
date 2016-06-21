@@ -15,4 +15,16 @@ public class WrongMethodTypeException extends RuntimeException {
     public WrongMethodTypeException(String s) {
         super(s);
     }
+
+    
+    
+     WrongMethodTypeException(String s, Throwable cause) {
+        super(s, cause);
+    }
+
+    
+    
+     WrongMethodTypeException(Throwable cause) {
+        super(cause);
+    }
 }

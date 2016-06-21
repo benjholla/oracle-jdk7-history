@@ -10,6 +10,7 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.validation.Schema;
+import javax.xml.XMLConstants;
 
 import com.sun.org.apache.xerces.internal.dom.DOMImplementationImpl;
 import com.sun.org.apache.xerces.internal.dom.DOMMessageFormatter;
@@ -19,12 +20,16 @@ import com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaValidator;
 import com.sun.org.apache.xerces.internal.jaxp.validation.XSGrammarPoolContainer;
 import com.sun.org.apache.xerces.internal.parsers.DOMParser;
 import com.sun.org.apache.xerces.internal.util.SecurityManager;
+import com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager;
+import com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager.Property;
+import com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager.State;
 import com.sun.org.apache.xerces.internal.xni.XMLDocumentHandler;
 import com.sun.org.apache.xerces.internal.xni.parser.XMLComponent;
 import com.sun.org.apache.xerces.internal.xni.parser.XMLComponentManager;
 import com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException;
 import com.sun.org.apache.xerces.internal.xni.parser.XMLDocumentSource;
 import com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration;
+import javax.xml.XMLConstants;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.xml.sax.EntityResolver;
@@ -74,6 +79,17 @@ public class DocumentBuilderImpl extends DocumentBuilder
     private static final String SECURITY_MANAGER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.SECURITY_MANAGER_PROPERTY;
 
+    
+    private static final String XML_SECURITY_PROPERTY_MANAGER =
+            Constants.XML_SECURITY_PROPERTY_MANAGER;
+
+    
+    public static final String ACCESS_EXTERNAL_DTD = XMLConstants.ACCESS_EXTERNAL_DTD;
+
+    
+    public static final String ACCESS_EXTERNAL_SCHEMA = XMLConstants.ACCESS_EXTERNAL_SCHEMA;
+
+
     private final DOMParser domParser;
     private final Schema grammar;
 
@@ -87,6 +103,8 @@ public class DocumentBuilderImpl extends DocumentBuilder
 
     
     private final EntityResolver fInitEntityResolver;
+
+    private XMLSecurityPropertyManager fSecurityPropertyMgr;
 
     DocumentBuilderImpl(DocumentBuilderFactoryImpl dbf, Hashtable dbfAttrs, Hashtable features)
         throws SAXNotRecognizedException, SAXNotSupportedException {
@@ -131,9 +149,26 @@ public class DocumentBuilderImpl extends DocumentBuilder
             domParser.setFeature(XINCLUDE_FEATURE, true);
         }
 
+        fSecurityPropertyMgr = new XMLSecurityPropertyManager();
+        domParser.setProperty(XML_SECURITY_PROPERTY_MANAGER, fSecurityPropertyMgr);
+
         
         if (secureProcessing) {
             domParser.setProperty(SECURITY_MANAGER, new SecurityManager());
+
+            
+            if (features != null) {
+                Object temp = features.get(XMLConstants.FEATURE_SECURE_PROCESSING);
+                if (temp != null) {
+                    boolean value = ((Boolean) temp).booleanValue();
+                    if (value && Constants.IS_JDK8_OR_ABOVE) {
+                        fSecurityPropertyMgr.setValue(Property.ACCESS_EXTERNAL_DTD,
+                                State.FSP, Constants.EXTERNAL_ACCESS_DEFAULT_FSP);
+                        fSecurityPropertyMgr.setValue(Property.ACCESS_EXTERNAL_SCHEMA,
+                                State.FSP, Constants.EXTERNAL_ACCESS_DEFAULT_FSP);
+                    }
+                }
+            }
         }
 
         this.grammar = dbf.getSchema();
@@ -223,26 +258,32 @@ public class DocumentBuilderImpl extends DocumentBuilder
                             
                             domParser.setProperty(JAXP_SCHEMA_LANGUAGE, W3C_XML_SCHEMA);
                         }
-                    }
-                        } else if(JAXP_SCHEMA_SOURCE.equals(name)){
-                        if( isValidating() ) {
-                                                String value=(String)dbfAttrs.get(JAXP_SCHEMA_LANGUAGE);
-                                                if(value !=null && W3C_XML_SCHEMA.equals(value)){
-                                        domParser.setProperty(name, val);
-                                                }else{
+                     }
+                 } else if(JAXP_SCHEMA_SOURCE.equals(name)){
+                    if( isValidating() ) {
+                        String value=(String)dbfAttrs.get(JAXP_SCHEMA_LANGUAGE);
+                        if(value !=null && W3C_XML_SCHEMA.equals(value)){
+                            domParser.setProperty(name, val);
+                        }else{
                             throw new IllegalArgumentException(
                                 DOMMessageFormatter.formatMessage(DOMMessageFormatter.DOM_DOMAIN,
                                 "jaxp-order-not-supported",
                                 new Object[] {JAXP_SCHEMA_LANGUAGE, JAXP_SCHEMA_SOURCE}));
-                                                }
-                                        }
-                } else {
-                    
-                    domParser.setProperty(name, val);
-                                }
                         }
-                }
+                     }
+                  } else {
+                    int index = fSecurityPropertyMgr.getIndex(name);
+                    if (index > -1) {
+                        fSecurityPropertyMgr.setValue(index,
+                                XMLSecurityPropertyManager.State.APIPROPERTY, (String)val);
+                    } else {
+                        
+                        domParser.setProperty(name, val);
+                    }
+                  }
+             }
         }
+    }
 
     
     public Document newDocument() {

@@ -301,6 +301,8 @@ public class DateFormatSymbols implements Serializable, Cloneable {
     private static final ConcurrentMap<Locale, SoftReference<DateFormatSymbols>> cachedInstances
         = new ConcurrentHashMap<Locale, SoftReference<DateFormatSymbols>>(3);
 
+    private transient int lastZoneIndex = 0;
+
     private void initializeData(Locale desiredLocale) {
         locale = desiredLocale;
 
@@ -337,12 +339,20 @@ public class DateFormatSymbols implements Serializable, Cloneable {
     }
 
     
-    final int getZoneIndex(String ID)
-    {
+    final int getZoneIndex(String ID) {
         String[][] zoneStrings = getZoneStringsWrapper();
-        for (int index=0; index<zoneStrings.length; index++)
-        {
-            if (ID.equals(zoneStrings[index][0])) return index;
+
+        
+        if (lastZoneIndex < zoneStrings.length && ID.equals(zoneStrings[lastZoneIndex][0])) {
+            return lastZoneIndex;
+        }
+
+        
+        for (int index = 0; index < zoneStrings.length; index++) {
+            if (ID.equals(zoneStrings[index][0])) {
+                lastZoneIndex = index;
+                return index;
+            }
         }
 
         return -1;

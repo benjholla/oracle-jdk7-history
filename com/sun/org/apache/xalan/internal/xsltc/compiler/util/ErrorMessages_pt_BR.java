@@ -194,6 +194,10 @@ public class ErrorMessages_pt_BR extends ListResourceBundle {
         "N\u00E3o foi poss\u00EDvel localizar o alvo da folha de estilos ''{0}''."},
 
         
+        {ErrorMsg.ACCESSING_XSLT_TARGET_ERR,
+        "Could not read stylesheet target ''{0}'', because ''{1}'' access is not allowed."},
+
+        
         {ErrorMsg.NOT_IMPLEMENTED_ERR,
         "N\u00E3o implementado: ''{0}''."},
 

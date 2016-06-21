@@ -3,6 +3,8 @@
 package java.lang.invoke;
 
 import sun.invoke.util.BytecodeDescriptor;
+import sun.invoke.util.VerifyAccess;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -15,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import static java.lang.invoke.MethodHandleNatives.Constants.*;
 import static java.lang.invoke.MethodHandleStatics.*;
+import java.util.Objects;
 
 
  final class MemberName implements Member, Cloneable {
@@ -22,17 +25,12 @@ import static java.lang.invoke.MethodHandleStatics.*;
     private String     name;        
     private Object     type;        
     private int        flags;       
-
-    private Object     vmtarget;    
-    private int        vmindex;     
-
-    { vmindex = VM_INDEX_UNINITIALIZED; }
+    
+    
+    private Object     resolution;  
 
     
     public Class<?> getDeclaringClass() {
-        if (clazz == null && isResolved()) {
-            expandFromVM();
-        }
         return clazz;
     }
 
@@ -48,6 +46,16 @@ import static java.lang.invoke.MethodHandleStatics.*;
             if (name == null)  return null;
         }
         return name;
+    }
+
+    public MethodType getMethodOrFieldType() {
+        if (isInvocable())
+            return getMethodType();
+        if (isGetter())
+            return MethodType.methodType(getFieldType());
+        if (isSetter())
+            return MethodType.methodType(void.class, getFieldType());
+        throw new InternalError("not a method or field: "+this);
     }
 
     
@@ -80,9 +88,11 @@ import static java.lang.invoke.MethodHandleStatics.*;
 
     
     public MethodType getInvocationType() {
-        MethodType itype = getMethodType();
+        MethodType itype = getMethodOrFieldType();
+        if (isConstructor() && getReferenceKind() == REF_newInvokeSpecial)
+            return itype.changeReturnType(clazz);
         if (!isStatic())
-            itype = itype.insertParameterTypes(0, clazz);
+            return itype.insertParameterTypes(0, clazz);
         return itype;
     }
 
@@ -141,9 +151,91 @@ import static java.lang.invoke.MethodHandleStatics.*;
         return (flags & RECOGNIZED_MODIFIERS);
     }
 
-    private void setFlags(int flags) {
-        this.flags = flags;
-        assert(testAnyFlags(ALL_KINDS));
+    
+    public byte getReferenceKind() {
+        return (byte) ((flags >>> MN_REFERENCE_KIND_SHIFT) & MN_REFERENCE_KIND_MASK);
+    }
+    private boolean referenceKindIsConsistent() {
+        byte refKind = getReferenceKind();
+        if (refKind == REF_NONE)  return isType();
+        if (isField()) {
+            assert(staticIsConsistent());
+            assert(MethodHandleNatives.refKindIsField(refKind));
+        } else if (isConstructor()) {
+            assert(refKind == REF_newInvokeSpecial || refKind == REF_invokeSpecial);
+        } else if (isMethod()) {
+            assert(staticIsConsistent());
+            assert(MethodHandleNatives.refKindIsMethod(refKind));
+            if (clazz.isInterface())
+                assert(refKind == REF_invokeInterface ||
+                       refKind == REF_invokeVirtual && isObjectPublicMethod());
+        } else {
+            assert(false);
+        }
+        return true;
+    }
+    private boolean isObjectPublicMethod() {
+        if (clazz == Object.class)  return true;
+        MethodType mtype = getMethodType();
+        if (name.equals("toString") && mtype.returnType() == String.class && mtype.parameterCount() == 0)
+            return true;
+        if (name.equals("hashCode") && mtype.returnType() == int.class && mtype.parameterCount() == 0)
+            return true;
+        if (name.equals("equals") && mtype.returnType() == boolean.class && mtype.parameterCount() == 1 && mtype.parameterType(0) == Object.class)
+            return true;
+        return false;
+    }
+     boolean referenceKindIsConsistentWith(int originalRefKind) {
+        int refKind = getReferenceKind();
+        if (refKind == originalRefKind)  return true;
+        switch (originalRefKind) {
+        case REF_invokeInterface:
+            
+            assert(refKind == REF_invokeVirtual ||
+                   refKind == REF_invokeSpecial) : this;
+            return true;
+        case REF_invokeVirtual:
+        case REF_newInvokeSpecial:
+            
+            assert(refKind == REF_invokeSpecial) : this;
+            return true;
+        }
+        assert(false) : this;
+        return true;
+    }
+    private boolean staticIsConsistent() {
+        byte refKind = getReferenceKind();
+        return MethodHandleNatives.refKindIsStatic(refKind) == isStatic() || getModifiers() == 0;
+    }
+    private boolean vminfoIsConsistent() {
+        byte refKind = getReferenceKind();
+        assert(isResolved());  
+        Object vminfo = MethodHandleNatives.getMemberVMInfo(this);
+        assert(vminfo instanceof Object[]);
+        long vmindex = (Long) ((Object[])vminfo)[0];
+        Object vmtarget = ((Object[])vminfo)[1];
+        if (MethodHandleNatives.refKindIsField(refKind)) {
+            assert(vmindex >= 0) : vmindex + ":" + this;
+            assert(vmtarget instanceof Class);
+        } else {
+            if (MethodHandleNatives.refKindDoesDispatch(refKind))
+                assert(vmindex >= 0) : vmindex + ":" + this;
+            else
+                assert(vmindex < 0) : vmindex;
+            assert(vmtarget instanceof MemberName) : vmtarget + " in " + this;
+        }
+        return true;
+    }
+
+    private MemberName changeReferenceKind(byte refKind, byte oldKind) {
+        assert(getReferenceKind() == oldKind);
+        assert(MethodHandleNatives.refKindIsValid(refKind));
+        flags += (((int)refKind - oldKind) << MN_REFERENCE_KIND_SHIFT);
+
+
+
+
+        return this;
     }
 
     private boolean testFlags(int mask, int value) {
@@ -154,6 +246,17 @@ import static java.lang.invoke.MethodHandleStatics.*;
     }
     private boolean testAnyFlags(int mask) {
         return !testFlags(mask, 0);
+    }
+
+    
+    public boolean isMethodHandleInvoke() {
+        final int bits = Modifier.NATIVE | Modifier.FINAL;
+        final int negs = Modifier.STATIC;
+        if (testFlags(bits | negs, bits) &&
+            clazz == MethodHandle.class) {
+            return name.equals("invoke") || name.equals("invokeExact");
+        }
+        return false;
     }
 
     
@@ -177,8 +280,20 @@ import static java.lang.invoke.MethodHandleStatics.*;
         return Modifier.isFinal(flags);
     }
     
+    public boolean canBeStaticallyBound() {
+        return Modifier.isFinal(flags | clazz.getModifiers());
+    }
+    
+    public boolean isVolatile() {
+        return Modifier.isVolatile(flags);
+    }
+    
     public boolean isAbstract() {
         return Modifier.isAbstract(flags);
+    }
+    
+    public boolean isNative() {
+        return Modifier.isNative(flags);
     }
     
 
@@ -213,15 +328,12 @@ import static java.lang.invoke.MethodHandleStatics.*;
             IS_FIELD            = MN_IS_FIELD,         
             IS_TYPE             = MN_IS_TYPE,          
             IS_CALLER_SENSITIVE = MN_CALLER_SENSITIVE; 
-    static final int  
-            SEARCH_SUPERCLASSES = MN_SEARCH_SUPERCLASSES,
-            SEARCH_INTERFACES   = MN_SEARCH_INTERFACES;
 
     static final int ALL_ACCESS = Modifier.PUBLIC | Modifier.PRIVATE | Modifier.PROTECTED;
     static final int ALL_KINDS = IS_METHOD | IS_CONSTRUCTOR | IS_FIELD | IS_TYPE;
     static final int IS_INVOCABLE = IS_METHOD | IS_CONSTRUCTOR;
     static final int IS_FIELD_OR_METHOD = IS_METHOD | IS_FIELD;
-    static final int SEARCH_ALL_SUPERS = SEARCH_SUPERCLASSES | SEARCH_INTERFACES;
+    static final int SEARCH_ALL_SUPERS = MN_SEARCH_SUPERCLASSES | MN_SEARCH_INTERFACES;
 
     
     public boolean isInvocable() {
@@ -257,6 +369,12 @@ import static java.lang.invoke.MethodHandleStatics.*;
     }
 
     
+    public boolean isAccessibleFrom(Class<?> lookupClass) {
+        return VerifyAccess.isMemberAccessible(this.getDeclaringClass(), this.getDeclaringClass(), flags,
+                                               lookupClass, ALL_ACCESS|MethodHandles.Lookup.PACKAGE);
+    }
+
+    
     private void init(Class<?> defClass, String name, Object type, int flags) {
         
         
@@ -265,8 +383,10 @@ import static java.lang.invoke.MethodHandleStatics.*;
         this.clazz = defClass;
         this.name = name;
         this.type = type;
-        setFlags(flags);
-        assert(!isResolved());
+        this.flags = flags;
+        assert(testAnyFlags(ALL_KINDS));
+        assert(this.resolution == null);  
+        
     }
 
     private void expandFromVM() {
@@ -277,39 +397,93 @@ import static java.lang.invoke.MethodHandleStatics.*;
     }
 
     
-    private static int flagsMods(int flags, int mods) {
+    private static int flagsMods(int flags, int mods, byte refKind) {
         assert((flags & RECOGNIZED_MODIFIERS) == 0);
         assert((mods & ~RECOGNIZED_MODIFIERS) == 0);
-        return flags | mods;
+        assert((refKind & ~MN_REFERENCE_KIND_MASK) == 0);
+        return flags | mods | (refKind << MN_REFERENCE_KIND_SHIFT);
     }
     
     public MemberName(Method m) {
-        Object[] typeInfo = { m.getReturnType(), m.getParameterTypes() };
-        init(m.getDeclaringClass(), m.getName(), typeInfo, flagsMods(IS_METHOD, m.getModifiers()));
+        this(m, false);
+    }
+    @SuppressWarnings("LeakingThisInConstructor")
+    public MemberName(Method m, boolean wantSpecial) {
+        m.getClass();  
         
         MethodHandleNatives.init(this, m);
-        assert(isResolved());
+        assert(isResolved() && this.clazz != null);
+        this.name = m.getName();
+        if (this.type == null)
+            this.type = new Object[] { m.getReturnType(), m.getParameterTypes() };
+        if (wantSpecial) {
+            if (getReferenceKind() == REF_invokeVirtual)
+                changeReferenceKind(REF_invokeSpecial, REF_invokeVirtual);
+        }
+    }
+    public MemberName asSpecial() {
+        switch (getReferenceKind()) {
+        case REF_invokeSpecial:     return this;
+        case REF_invokeVirtual:     return clone().changeReferenceKind(REF_invokeSpecial, REF_invokeVirtual);
+        case REF_newInvokeSpecial:  return clone().changeReferenceKind(REF_invokeSpecial, REF_newInvokeSpecial);
+        }
+        throw new IllegalArgumentException(this.toString());
+    }
+    public MemberName asConstructor() {
+        switch (getReferenceKind()) {
+        case REF_invokeSpecial:     return clone().changeReferenceKind(REF_newInvokeSpecial, REF_invokeSpecial);
+        case REF_newInvokeSpecial:  return this;
+        }
+        throw new IllegalArgumentException(this.toString());
     }
     
-    public MemberName(Constructor ctor) {
-        Object[] typeInfo = { void.class, ctor.getParameterTypes() };
-        init(ctor.getDeclaringClass(), CONSTRUCTOR_NAME, typeInfo, flagsMods(IS_CONSTRUCTOR, ctor.getModifiers()));
+    @SuppressWarnings("LeakingThisInConstructor")
+    public MemberName(Constructor<?> ctor) {
+        ctor.getClass();  
         
         MethodHandleNatives.init(this, ctor);
-        assert(isResolved());
+        assert(isResolved() && this.clazz != null);
+        this.name = CONSTRUCTOR_NAME;
+        if (this.type == null)
+            this.type = new Object[] { void.class, ctor.getParameterTypes() };
     }
     
     public MemberName(Field fld) {
-        init(fld.getDeclaringClass(), fld.getName(), fld.getType(), flagsMods(IS_FIELD, fld.getModifiers()));
+        this(fld, false);
+    }
+    @SuppressWarnings("LeakingThisInConstructor")
+    public MemberName(Field fld, boolean makeSetter) {
+        fld.getClass();  
         
         MethodHandleNatives.init(this, fld);
-        assert(isResolved());
+        assert(isResolved() && this.clazz != null);
+        this.name = fld.getName();
+        this.type = fld.getType();
+        assert((REF_putStatic - REF_getStatic) == (REF_putField - REF_getField));
+        byte refKind = this.getReferenceKind();
+        assert(refKind == (isStatic() ? REF_getStatic : REF_getField));
+        if (makeSetter) {
+            changeReferenceKind((byte)(refKind + (REF_putStatic - REF_getStatic)), refKind);
+        }
+    }
+    public boolean isGetter() {
+        return MethodHandleNatives.refKindIsGetter(getReferenceKind());
+    }
+    public boolean isSetter() {
+        return MethodHandleNatives.refKindIsSetter(getReferenceKind());
+    }
+    public MemberName asSetter() {
+        byte refKind = getReferenceKind();
+        assert(MethodHandleNatives.refKindIsGetter(refKind));
+        assert((REF_putStatic - REF_getStatic) == (REF_putField - REF_getField));
+        byte setterRefKind = (byte)(refKind + (REF_putField - REF_getField));
+        return clone().changeReferenceKind(setterRefKind, refKind);
     }
     
     public MemberName(Class<?> type) {
-        init(type.getDeclaringClass(), type.getSimpleName(), type, flagsMods(IS_TYPE, type.getModifiers()));
-        vmindex = 0;  
-        assert(isResolved());
+        init(type.getDeclaringClass(), type.getSimpleName(), type,
+                flagsMods(IS_TYPE, type.getModifiers(), REF_NONE));
+        initResolved(true);
     }
 
     
@@ -320,42 +494,112 @@ import static java.lang.invoke.MethodHandleStatics.*;
         try {
             return (MemberName) super.clone();
         } catch (CloneNotSupportedException ex) {
-            throw new InternalError();
+            throw newInternalError(ex);
         }
      }
 
     
+    public MemberName getDefinition() {
+        if (!isResolved())  throw new IllegalStateException("must be resolved: "+this);
+        if (isType())  return this;
+        MemberName res = this.clone();
+        res.clazz = null;
+        res.type = null;
+        res.name = null;
+        res.resolution = res;
+        res.expandFromVM();
+        assert(res.getName().equals(this.getName()));
+        return res;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(clazz, flags, name, getType());
+    }
+    @Override
+    public boolean equals(Object that) {
+        return (that instanceof MemberName && this.equals((MemberName)that));
+    }
+
+    
+    public boolean equals(MemberName that) {
+        if (this == that)  return true;
+        if (that == null)  return false;
+        return this.clazz == that.clazz
+                && this.flags == that.flags
+                && Objects.equals(this.name, that.name)
+                && Objects.equals(this.getType(), that.getType());
+    }
 
     
     
-    public MemberName(Class<?> defClass, String name, Class<?> type, int modifiers) {
-        init(defClass, name, type, IS_FIELD | (modifiers & RECOGNIZED_MODIFIERS));
+    public MemberName(Class<?> defClass, String name, Class<?> type, byte refKind) {
+        init(defClass, name, type, flagsMods(IS_FIELD, 0, refKind));
+        initResolved(false);
     }
     
-    public MemberName(Class<?> defClass, String name, Class<?> type) {
-        this(defClass, name, type, 0);
+    public MemberName(Class<?> defClass, String name, Class<?> type, Void unused) {
+        this(defClass, name, type, REF_NONE);
+        initResolved(false);
     }
     
-    public MemberName(Class<?> defClass, String name, MethodType type, int modifiers) {
-        int flagBit = (name.equals(CONSTRUCTOR_NAME) ? IS_CONSTRUCTOR : IS_METHOD);
-        init(defClass, name, type, flagBit | (modifiers & RECOGNIZED_MODIFIERS));
+    public MemberName(Class<?> defClass, String name, MethodType type, byte refKind) {
+        @SuppressWarnings("LocalVariableHidesMemberVariable")
+        int flags = (name != null && name.equals(CONSTRUCTOR_NAME) ? IS_CONSTRUCTOR : IS_METHOD);
+        init(defClass, name, type, flagsMods(flags, 0, refKind));
+        initResolved(false);
     }
+
+
+
+
+
+
+
+
+
+
     
-    public MemberName(Class<?> defClass, String name, MethodType type) {
-        this(defClass, name, type, 0);
+    public boolean hasReceiverTypeDispatch() {
+        return MethodHandleNatives.refKindDoesDispatch(getReferenceKind());
     }
 
     
     public boolean isResolved() {
-        return (vmindex != VM_INDEX_UNINITIALIZED);
+        return resolution == null;
     }
 
-    
-    public boolean hasReceiverTypeDispatch() {
-        return (isMethod() && getVMIndex() >= 0);
+    private void initResolved(boolean isResolved) {
+        assert(this.resolution == null);  
+        if (!isResolved)
+            this.resolution = this;
+        assert(isResolved() == isResolved);
     }
 
+    void checkForTypeAlias() {
+        if (isInvocable()) {
+            MethodType type;
+            if (this.type instanceof MethodType)
+                type = (MethodType) this.type;
+            else
+                this.type = type = getMethodType();
+            if (type.erase() == type)  return;
+            if (VerifyAccess.isTypeVisible(type, clazz))  return;
+            throw new LinkageError("bad method type alias: "+type+" not visible from "+clazz);
+        } else {
+            Class<?> type;
+            if (this.type instanceof Class<?>)
+                type = (Class<?>) this.type;
+            else
+                this.type = type = getFieldType();
+            if (VerifyAccess.isTypeVisible(type, clazz))  return;
+            throw new LinkageError("bad field type alias: "+type+" not visible from "+clazz);
+        }
+    }
+
+
     
+    @SuppressWarnings("LocalVariableHidesMemberVariable")
     @Override
     public String toString() {
         if (isType())
@@ -375,6 +619,11 @@ import static java.lang.invoke.MethodHandleStatics.*;
         } else {
             buf.append(type == null ? "(*)*" : getName(type));
         }
+        byte refKind = getReferenceKind();
+        if (refKind != REF_NONE) {
+            buf.append('/');
+            buf.append(MethodHandleNatives.refKindName(refKind));
+        }
         
         return buf.toString();
     }
@@ -383,19 +632,6 @@ import static java.lang.invoke.MethodHandleStatics.*;
             return ((Class<?>)obj).getName();
         return String.valueOf(obj);
     }
-
-    
-    
-     int getVMIndex() {
-        if (!isResolved())
-            throw newIllegalStateException("not resolved", this);
-        return vmindex;
-    }
-
-
-
-
-
 
     public IllegalAccessException makeAccessException(String message, Object from) {
         message = message + ": "+ toString();
@@ -414,14 +650,19 @@ import static java.lang.invoke.MethodHandleStatics.*;
     }
     public ReflectiveOperationException makeAccessException() {
         String message = message() + ": "+ toString();
-        if (isResolved())
-            return new IllegalAccessException(message);
+        ReflectiveOperationException ex;
+        if (isResolved() || !(resolution instanceof NoSuchMethodError ||
+                              resolution instanceof NoSuchFieldError))
+            ex = new IllegalAccessException(message);
         else if (isConstructor())
-            return new NoSuchMethodException(message);
+            ex = new NoSuchMethodException(message);
         else if (isMethod())
-            return new NoSuchMethodException(message);
+            ex = new NoSuchMethodException(message);
         else
-            return new NoSuchFieldException(message);
+            ex = new NoSuchFieldException(message);
+        if (resolution instanceof Throwable)
+            ex.initCause((Throwable) resolution);
+        return ex;
     }
 
     
@@ -433,7 +674,7 @@ import static java.lang.invoke.MethodHandleStatics.*;
         private Factory() { } 
         static Factory INSTANCE = new Factory();
 
-        private static int ALLOWED_FLAGS = SEARCH_ALL_SUPERS | ALL_KINDS;
+        private static int ALLOWED_FLAGS = ALL_KINDS;
 
         
         List<MemberName> getMembers(Class<?> defc,
@@ -467,14 +708,14 @@ import static java.lang.invoke.MethodHandleStatics.*;
                 
                 totalCount += buf.length;
                 int excess = bufCount - buf.length;
-                if (bufs == null)  bufs = new ArrayList<MemberName[]>(1);
+                if (bufs == null)  bufs = new ArrayList<>(1);
                 bufs.add(buf);
                 int len2 = buf.length;
                 len2 = Math.max(len2, excess);
                 len2 = Math.max(len2, totalCount / 4);
                 buf = newMemberBuffer(Math.min(BUF_MAX, len2));
             }
-            ArrayList<MemberName> result = new ArrayList<MemberName>(totalCount);
+            ArrayList<MemberName> result = new ArrayList<>(totalCount);
             if (bufs != null) {
                 for (MemberName[] buf0 : bufs) {
                     Collections.addAll(result, buf0);
@@ -493,51 +734,45 @@ import static java.lang.invoke.MethodHandleStatics.*;
             }
             return result;
         }
-        boolean resolveInPlace(MemberName m, boolean searchSupers, Class<?> lookupClass) {
-            if (m.name == null || m.type == null) {  
-                Class<?> defc = m.getDeclaringClass();
-                List<MemberName> choices = null;
-                if (m.isMethod())
-                    choices = getMethods(defc, searchSupers, m.name, (MethodType) m.type, lookupClass);
-                else if (m.isConstructor())
-                    choices = getConstructors(defc, lookupClass);
-                else if (m.isField())
-                    choices = getFields(defc, searchSupers, m.name, (Class<?>) m.type, lookupClass);
-                
-                if (choices == null || choices.size() != 1)
-                    return false;
-                if (m.name == null)  m.name = choices.get(0).name;
-                if (m.type == null)  m.type = choices.get(0).type;
-            }
-            MethodHandleNatives.resolve(m, lookupClass);
-            if (m.isResolved())  return true;
-            int matchFlags = m.flags | (searchSupers ? SEARCH_ALL_SUPERS : 0);
-            String matchSig = m.getSignature();
-            MemberName[] buf = { m };
-            int n = MethodHandleNatives.getMembers(m.getDeclaringClass(),
-                    m.getName(), matchSig, matchFlags, lookupClass, 0, buf);
-            if (n != 1)  return false;
-            return m.isResolved();
-        }
         
-        public MemberName resolveOrNull(MemberName m, boolean searchSupers, Class<?> lookupClass) {
-            MemberName result = m.clone();
-            if (resolveInPlace(result, searchSupers, lookupClass))
-                return result;
-            return null;
+        private MemberName resolve(byte refKind, MemberName ref, Class<?> lookupClass) {
+            MemberName m = ref.clone();  
+            assert(refKind == m.getReferenceKind());
+            try {
+                m = MethodHandleNatives.resolve(m, lookupClass);
+                m.checkForTypeAlias();
+                m.resolution = null;
+            } catch (LinkageError ex) {
+                
+                assert(!m.isResolved());
+                m.resolution = ex;
+                return m;
+            }
+            assert(m.referenceKindIsConsistent());
+            m.initResolved(true);
+            assert(m.vminfoIsConsistent());
+            return m;
         }
         
         public
         <NoSuchMemberException extends ReflectiveOperationException>
-        MemberName resolveOrFail(MemberName m, boolean searchSupers, Class<?> lookupClass,
+        MemberName resolveOrFail(byte refKind, MemberName m, Class<?> lookupClass,
                                  Class<NoSuchMemberException> nsmClass)
                 throws IllegalAccessException, NoSuchMemberException {
-            MemberName result = resolveOrNull(m, searchSupers, lookupClass);
-            if (result != null)
+            MemberName result = resolve(refKind, m, lookupClass);
+            if (result.isResolved())
                 return result;
-            ReflectiveOperationException ex = m.makeAccessException();
+            ReflectiveOperationException ex = result.makeAccessException();
             if (ex instanceof IllegalAccessException)  throw (IllegalAccessException) ex;
             throw nsmClass.cast(ex);
+        }
+        
+        public
+        MemberName resolveOrNull(byte refKind, MemberName m, Class<?> lookupClass) {
+            MemberName result = resolve(refKind, m, lookupClass);
+            if (result.isResolved())
+                return result;
+            return null;
         }
         
         public List<MemberName> getMethods(Class<?> defc, boolean searchSupers,

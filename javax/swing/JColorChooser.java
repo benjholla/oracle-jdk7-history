@@ -70,6 +70,7 @@ public class JColorChooser extends JComponent implements Accessible {
             dialog = new ColorChooserDialog((Dialog)window, title, modal, c, chooserPane,
                                             okListener, cancelListener);
         }
+        dialog.getAccessibleContext().setAccessibleDescription(title);
         return dialog;
     }
 
@@ -327,6 +328,7 @@ class ColorChooserDialog extends JDialog {
         buttonPane.setLayout(new FlowLayout(FlowLayout.CENTER));
         JButton okButton = new JButton(okString);
         getRootPane().setDefaultButton(okButton);
+        okButton.getAccessibleContext().setAccessibleDescription(okString);
         okButton.setActionCommand("OK");
         okButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -339,6 +341,7 @@ class ColorChooserDialog extends JDialog {
         buttonPane.add(okButton);
 
         cancelButton = new JButton(cancelString);
+        cancelButton.getAccessibleContext().setAccessibleDescription(cancelString);
 
         
         Action cancelKeyAction = new AbstractAction() {
@@ -368,6 +371,7 @@ class ColorChooserDialog extends JDialog {
         buttonPane.add(cancelButton);
 
         JButton resetButton = new JButton(resetString);
+        resetButton.getAccessibleContext().setAccessibleDescription(resetString);
         resetButton.addActionListener(new ActionListener() {
            public void actionPerformed(ActionEvent e) {
                reset();

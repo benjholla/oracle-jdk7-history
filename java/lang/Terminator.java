@@ -22,14 +22,20 @@ class Terminator {
             }
         };
         handler = sh;
+        
+        
+        
         try {
             Signal.handle(new Signal("HUP"), sh);
+        } catch (IllegalArgumentException e) {
+        }
+        try {
             Signal.handle(new Signal("INT"), sh);
+        } catch (IllegalArgumentException e) {
+        }
+        try {
             Signal.handle(new Signal("TERM"), sh);
         } catch (IllegalArgumentException e) {
-            
-            
-            
         }
     }
 

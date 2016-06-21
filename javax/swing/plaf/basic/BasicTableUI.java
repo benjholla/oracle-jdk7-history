@@ -375,7 +375,7 @@ public class BasicTableUI extends TableUI
                     }
                 }
                 else {
-                    if (!(table.getParent().getParent() instanceof
+                    if (!(SwingUtilities.getUnwrappedParent(table).getParent() instanceof
                             JScrollPane)) {
                         return;
                     }
@@ -1345,7 +1345,7 @@ public class BasicTableUI extends TableUI
         }
 
         
-        Container parent = table.getParent();  
+        Container parent = SwingUtilities.getUnwrappedParent(table);  
         if (parent != null) {
             parent = parent.getParent();  
             if (parent != null && parent instanceof JScrollPane) {

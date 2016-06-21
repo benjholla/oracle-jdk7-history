@@ -36,7 +36,11 @@ import com.sun.org.apache.xerces.internal.impl.Constants;
 import com.sun.org.apache.xerces.internal.impl.XMLEntityHandler;
 import com.sun.org.apache.xerces.internal.util.SecurityManager;
 import com.sun.org.apache.xerces.internal.util.NamespaceSupport;
+import com.sun.org.apache.xerces.internal.utils.SecuritySupport;
+import com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager;
 import com.sun.org.apache.xerces.internal.xni.NamespaceContext;
+import com.sun.xml.internal.stream.Entity;
+import javax.xml.XMLConstants;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.events.XMLEvent;
 
@@ -126,6 +130,17 @@ public class XMLDocumentFragmentScannerImpl
             Constants.XERCES_PROPERTY_PREFIX + Constants.ENTITY_RESOLVER_PROPERTY;
 
     
+    protected static final String STANDARD_URI_CONFORMANT =
+            Constants.XERCES_FEATURE_PREFIX +Constants.STANDARD_URI_CONFORMANT_FEATURE;
+
+    
+    private static final String XML_SECURITY_PROPERTY_MANAGER =
+            Constants.XML_SECURITY_PROPERTY_MANAGER;
+
+    
+    final static String EXTERNAL_ACCESS_DEFAULT = Constants.EXTERNAL_ACCESS_DEFAULT;
+
+    
 
     
     private static final String[] RECOGNIZED_FEATURES = {
@@ -150,6 +165,7 @@ public class XMLDocumentFragmentScannerImpl
         SYMBOL_TABLE,
                 ERROR_REPORTER,
                 ENTITY_MANAGER,
+                XML_SECURITY_PROPERTY_MANAGER
     };
 
     
@@ -157,11 +173,15 @@ public class XMLDocumentFragmentScannerImpl
                 null,
                 null,
                 null,
+                EXTERNAL_ACCESS_DEFAULT
     };
 
-    protected static final char [] cdata = {'[','C','D','A','T','A','['};
-    protected static final char [] xmlDecl = {'<','?','x','m','l'};
-    protected static final char [] endTag = {'<','/'};
+    private static final char [] cdata = {'[','C','D','A','T','A','['};
+    private static final char [] endTag = {'<','/'};
+
+    
+    static final char [] xmlDecl = {'<','?','x','m','l'};
+
     
 
     
@@ -257,6 +277,11 @@ public class XMLDocumentFragmentScannerImpl
     protected String fDeclaredEncoding =  null;
     
     protected boolean fDisallowDoctype = false;
+    
+    protected String fAccessExternalDTD = EXTERNAL_ACCESS_DEFAULT;
+
+    
+    protected boolean fStrictURI;
 
     
 
@@ -351,8 +376,6 @@ public class XMLDocumentFragmentScannerImpl
     } 
 
     
-   
-
     public boolean scanDocument(boolean complete)
     throws IOException, XNIException {
 
@@ -493,6 +516,9 @@ public class XMLDocumentFragmentScannerImpl
         
         
         fSupportExternalEntities = true;
+        fSupportExternalEntities = true;
+        fSupportExternalEntities = true;
+        fSupportExternalEntities = true;
         fReplaceEntityReferences = true;
         fIsCoalesce = false;
 
@@ -503,6 +529,12 @@ public class XMLDocumentFragmentScannerImpl
 
         dtdGrammarUtil = null;
 
+        
+        XMLSecurityPropertyManager spm = (XMLSecurityPropertyManager)
+                componentManager.getProperty(XML_SECURITY_PROPERTY_MANAGER, null);
+        fAccessExternalDTD = spm.getValue(XMLSecurityPropertyManager.Property.ACCESS_EXTERNAL_DTD);
+
+        fStrictURI = componentManager.getFeature(STANDARD_URI_CONFORMANT, false);
 
         
     } 
@@ -553,6 +585,10 @@ public class XMLDocumentFragmentScannerImpl
 
         dtdGrammarUtil = null;
 
+         
+        XMLSecurityPropertyManager spm = (XMLSecurityPropertyManager)
+                propertyManager.getProperty(XML_SECURITY_PROPERTY_MANAGER);
+        fAccessExternalDTD = spm.getValue(XMLSecurityPropertyManager.Property.ACCESS_EXTERNAL_DTD);
     } 
 
     
@@ -611,6 +647,13 @@ public class XMLDocumentFragmentScannerImpl
                 fEntityManager = (XMLEntityManager)value;
             }
             return;
+        }
+
+        
+        if (propertyId.equals(XML_SECURITY_PROPERTY_MANAGER))
+        {
+            XMLSecurityPropertyManager spm = (XMLSecurityPropertyManager)value;
+            fAccessExternalDTD = spm.getValue(XMLSecurityPropertyManager.Property.ACCESS_EXTERNAL_DTD);
         }
 
     } 
@@ -680,7 +723,7 @@ public class XMLDocumentFragmentScannerImpl
         
         if (fDocumentHandler != null && !fScanningAttribute) {
             if (!name.equals("[xml]")) {
-                fDocumentHandler.startGeneralEntity(name, identifier, encoding, null);
+                fDocumentHandler.startGeneralEntity(name, identifier, encoding, augs);
             }
         }
 
@@ -701,7 +744,7 @@ public class XMLDocumentFragmentScannerImpl
         
         if (fDocumentHandler != null && !fScanningAttribute) {
             if (!name.equals("[xml]")) {
-                fDocumentHandler.endGeneralEntity(name, null);
+                fDocumentHandler.endGeneralEntity(name, augs);
             }
         }
 
@@ -1468,7 +1511,8 @@ public class XMLDocumentFragmentScannerImpl
         
         
         
-        if((fEntityStore.isExternalEntity(name) && !fSupportExternalEntities) || (!fEntityStore.isExternalEntity(name) && !fReplaceEntityReferences) || foundBuiltInRefs){
+        boolean isEE = fEntityStore.isExternalEntity(name);
+        if((isEE && !fSupportExternalEntities) || (!isEE && !fReplaceEntityReferences) || foundBuiltInRefs){
             fScannerState = SCANNER_STATE_REFERENCE;
             return ;
         }
@@ -1597,6 +1641,12 @@ public class XMLDocumentFragmentScannerImpl
         return "null";
 
     } 
+
+    String checkAccess(String systemId, String allowedProtocols) throws IOException {
+        String baseSystemId = fEntityScanner.getBaseSystemId();
+        String expandedSystemId = fEntityManager.expandSystemId(systemId, baseSystemId,fStrictURI);
+        return SecuritySupport.checkAccess(expandedSystemId, allowedProtocols, Constants.ACCESS_EXTERNAL_ALL);
+    }
 
     
     

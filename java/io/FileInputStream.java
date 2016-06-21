@@ -4,6 +4,7 @@ package java.io;
 
 import java.nio.channels.FileChannel;
 import sun.nio.ch.FileChannelImpl;
+import sun.misc.IoTrace;
 
 
 
@@ -12,6 +13,9 @@ class FileInputStream extends InputStream
 {
     
     private final FileDescriptor fd;
+
+    
+    private final String path;
 
     private FileChannel channel = null;
 
@@ -43,8 +47,12 @@ class FileInputStream extends InputStream
         if (name == null) {
             throw new NullPointerException();
         }
+        if (file.isInvalid()) {
+            throw new FileNotFoundException("Invalid file path");
+        }
         fd = new FileDescriptor();
         fd.incrementAndGetUseCount();
+        this.path = name;
         open(name);
     }
 
@@ -58,6 +66,7 @@ class FileInputStream extends InputStream
             security.checkRead(fdObj);
         }
         fd = fdObj;
+        path = null;
 
         
         fd.incrementAndGetUseCount();
@@ -67,19 +76,44 @@ class FileInputStream extends InputStream
     private native void open(String name) throws FileNotFoundException;
 
     
-    public native int read() throws IOException;
+    public int read() throws IOException {
+        Object traceContext = IoTrace.fileReadBegin(path);
+        int b = 0;
+        try {
+            b = read0();
+        } finally {
+            IoTrace.fileReadEnd(traceContext, b == -1 ? 0 : 1);
+        }
+        return b;
+    }
+
+    private native int read0() throws IOException;
 
     
     private native int readBytes(byte b[], int off, int len) throws IOException;
 
     
     public int read(byte b[]) throws IOException {
-        return readBytes(b, 0, b.length);
+        Object traceContext = IoTrace.fileReadBegin(path);
+        int bytesRead = 0;
+        try {
+            bytesRead = readBytes(b, 0, b.length);
+        } finally {
+            IoTrace.fileReadEnd(traceContext, bytesRead == -1 ? 0 : bytesRead);
+        }
+        return bytesRead;
     }
 
     
     public int read(byte b[], int off, int len) throws IOException {
-        return readBytes(b, off, len);
+        Object traceContext = IoTrace.fileReadBegin(path);
+        int bytesRead = 0;
+        try {
+            bytesRead = readBytes(b, off, len);
+        } finally {
+            IoTrace.fileReadEnd(traceContext, bytesRead == -1 ? 0 : bytesRead);
+        }
+        return bytesRead;
     }
 
     
@@ -121,7 +155,7 @@ class FileInputStream extends InputStream
     public FileChannel getChannel() {
         synchronized (this) {
             if (channel == null) {
-                channel = FileChannelImpl.open(fd, true, false, this);
+                channel = FileChannelImpl.open(fd, path, true, false, this);
 
                 
                 fd.incrementAndGetUseCount();

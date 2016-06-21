@@ -110,9 +110,14 @@ public class TextComponent extends Component implements Accessible {
 
     
     public synchronized void setText(String t) {
+        boolean skipTextEvent = (text == null || text.isEmpty())
+                && (t == null || t.isEmpty());
         text = (t != null) ? t : "";
         TextComponentPeer peer = (TextComponentPeer)this.peer;
-        if (peer != null) {
+        
+        
+        
+        if (peer != null && !skipTextEvent) {
             peer.setText(text);
         }
     }

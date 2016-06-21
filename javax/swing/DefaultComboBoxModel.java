@@ -18,8 +18,7 @@ public class DefaultComboBoxModel<E> extends AbstractListModel<E> implements Mut
 
     
     public DefaultComboBoxModel(final E items[]) {
-        objects = new Vector<E>();
-        objects.ensureCapacity( items.length );
+        objects = new Vector<E>(items.length);
 
         int i,c;
         for ( i=0,c=items.length;i<c;i++ )

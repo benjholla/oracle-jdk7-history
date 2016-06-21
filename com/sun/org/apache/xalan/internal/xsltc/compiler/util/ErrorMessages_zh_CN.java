@@ -194,6 +194,10 @@ public class ErrorMessages_zh_CN extends ListResourceBundle {
         "\u627E\u4E0D\u5230\u6837\u5F0F\u8868\u76EE\u6807 ''{0}''\u3002"},
 
         
+        {ErrorMsg.ACCESSING_XSLT_TARGET_ERR,
+        "Could not read stylesheet target ''{0}'', because ''{1}'' access is not allowed."},
+
+        
         {ErrorMsg.NOT_IMPLEMENTED_ERR,
         "\u672A\u5B9E\u73B0: ''{0}''\u3002"},
 

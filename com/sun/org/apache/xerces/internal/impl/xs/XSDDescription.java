@@ -82,6 +82,15 @@ public class XSDDescription extends XMLResourceIdentifierImpl
     }
 
     
+    public boolean isExternal() {
+        return fContextType == CONTEXT_INCLUDE ||
+               fContextType == CONTEXT_REDEFINE ||
+               fContextType == CONTEXT_IMPORT ||
+               fContextType == CONTEXT_ELEMENT ||
+               fContextType == CONTEXT_ATTRIBUTE ||
+               fContextType == CONTEXT_XSITYPE;
+    }
+    
     public boolean equals(Object descObj) {
         if(!(descObj instanceof XMLSchemaDescription)) return false;
         XMLSchemaDescription desc = (XMLSchemaDescription)descObj;

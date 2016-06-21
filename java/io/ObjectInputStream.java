@@ -1154,8 +1154,9 @@ public class ObjectInputStream
                                               int ndoubles);
 
     
-    
-    private static native ClassLoader latestUserDefinedLoader();
+    private static ClassLoader latestUserDefinedLoader() {
+        return sun.misc.VM.latestUserDefinedLoader();
+    }
 
     
     private class GetFieldImpl extends GetField {

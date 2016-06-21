@@ -2,6 +2,7 @@
 
 package java.beans;
 
+import com.sun.beans.TypeResolver;
 import com.sun.beans.WeakCache;
 import com.sun.beans.finder.ClassFinder;
 
@@ -11,6 +12,7 @@ import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 
 import java.util.Map;
 import java.util.ArrayList;
@@ -380,7 +382,7 @@ public class Introspector {
                 if (readI != null) cls = cls && readI.getGenericReturnType() instanceof Class;
                 if (writeI != null) cls = cls && writeI.getGenericParameterTypes()[1] instanceof Class;
                 if (!cls) {
-                    pd = new IndexedPropertyDescriptor((IndexedPropertyDescriptor) pd);
+                    pd = new IndexedPropertyDescriptor(ipd);
                     pd.updateGenericsFor(this.beanClass);
                 }
             }
@@ -735,44 +737,61 @@ public class Introspector {
                     continue;
                 }
 
-                Class argTypes[] = FeatureDescriptor.getParameterTypes(beanClass, method);
-                Class resultType = FeatureDescriptor.getReturnType(beanClass, method);
-
-                if (name.startsWith(ADD_PREFIX) && argTypes.length == 1 &&
-                    resultType == Void.TYPE &&
-                    Introspector.isSubclass(argTypes[0], eventListenerType)) {
-                    String listenerName = name.substring(3);
-                    if (listenerName.length() > 0 &&
-                        argTypes[0].getName().endsWith(listenerName)) {
-                        if (adds == null) {
-                            adds = new HashMap();
+                if (name.startsWith(ADD_PREFIX)) {
+                    Class<?> returnType = method.getReturnType();
+                    if (returnType == void.class) {
+                        Type[] parameterTypes = method.getGenericParameterTypes();
+                        if (parameterTypes.length == 1) {
+                            Class<?> type = TypeResolver.erase(TypeResolver.resolveInClass(beanClass, parameterTypes[0]));
+                            if (Introspector.isSubclass(type, eventListenerType)) {
+                                String listenerName = name.substring(3);
+                                if (listenerName.length() > 0 &&
+                                    type.getName().endsWith(listenerName)) {
+                                    if (adds == null) {
+                                        adds = new HashMap();
+                                    }
+                                    adds.put(listenerName, method);
+                                }
+                            }
                         }
-                        adds.put(listenerName, method);
                     }
                 }
-                else if (name.startsWith(REMOVE_PREFIX) && argTypes.length == 1 &&
-                         resultType == Void.TYPE &&
-                         Introspector.isSubclass(argTypes[0], eventListenerType)) {
-                    String listenerName = name.substring(6);
-                    if (listenerName.length() > 0 &&
-                        argTypes[0].getName().endsWith(listenerName)) {
-                        if (removes == null) {
-                            removes = new HashMap();
+                else if (name.startsWith(REMOVE_PREFIX)) {
+                    Class<?> returnType = method.getReturnType();
+                    if (returnType == void.class) {
+                        Type[] parameterTypes = method.getGenericParameterTypes();
+                        if (parameterTypes.length == 1) {
+                            Class<?> type = TypeResolver.erase(TypeResolver.resolveInClass(beanClass, parameterTypes[0]));
+                            if (Introspector.isSubclass(type, eventListenerType)) {
+                                String listenerName = name.substring(6);
+                                if (listenerName.length() > 0 &&
+                                    type.getName().endsWith(listenerName)) {
+                                    if (removes == null) {
+                                        removes = new HashMap();
+                                    }
+                                    removes.put(listenerName, method);
+                                }
+                            }
                         }
-                        removes.put(listenerName, method);
                     }
                 }
-                else if (name.startsWith(GET_PREFIX) && argTypes.length == 0 &&
-                         resultType.isArray() &&
-                         Introspector.isSubclass(resultType.getComponentType(),
-                                                 eventListenerType)) {
-                    String listenerName  = name.substring(3, name.length() - 1);
-                    if (listenerName.length() > 0 &&
-                        resultType.getComponentType().getName().endsWith(listenerName)) {
-                        if (gets == null) {
-                            gets = new HashMap();
+                else if (name.startsWith(GET_PREFIX)) {
+                    Class<?>[] parameterTypes = method.getParameterTypes();
+                    if (parameterTypes.length == 0) {
+                        Class<?> returnType = FeatureDescriptor.getReturnType(beanClass, method);
+                        if (returnType.isArray()) {
+                            Class<?> type = returnType.getComponentType();
+                            if (Introspector.isSubclass(type, eventListenerType)) {
+                                String listenerName  = name.substring(3, name.length() - 1);
+                                if (listenerName.length() > 0 &&
+                                    type.getName().endsWith(listenerName)) {
+                                    if (gets == null) {
+                                        gets = new HashMap();
+                                    }
+                                    gets.put(listenerName, method);
+                                }
+                            }
                         }
-                        gets.put(listenerName, method);
                     }
                 }
             }
@@ -1019,11 +1038,11 @@ public class Introspector {
     private boolean isEventHandler(Method m) {
         
         
-        Class argTypes[] = FeatureDescriptor.getParameterTypes(beanClass, m);
+        Type argTypes[] = m.getGenericParameterTypes();
         if (argTypes.length != 1) {
             return false;
         }
-        return isSubclass(argTypes[0], EventObject.class);
+        return isSubclass(TypeResolver.erase(TypeResolver.resolveInClass(beanClass, argTypes[0])), EventObject.class);
     }
 
     
@@ -1070,24 +1089,25 @@ public class Introspector {
                 }
 
                 
-                Class params[] = FeatureDescriptor.getParameterTypes(start, method);
-                if (method.getName().equals(methodName) &&
-                    params.length == argCount) {
-                    if (args != null) {
-                        boolean different = false;
-                        if (argCount > 0) {
-                            for (int j = 0; j < argCount; j++) {
-                                if (params[j] != args[j]) {
-                                    different = true;
+                if (method.getName().equals(methodName)) {
+                    Type[] params = method.getGenericParameterTypes();
+                    if (params.length == argCount) {
+                        if (args != null) {
+                            boolean different = false;
+                            if (argCount > 0) {
+                                for (int j = 0; j < argCount; j++) {
+                                    if (TypeResolver.erase(TypeResolver.resolveInClass(start, params[j])) != args[j]) {
+                                        different = true;
+                                        continue;
+                                    }
+                                }
+                                if (different) {
                                     continue;
                                 }
                             }
-                            if (different) {
-                                continue;
-                            }
                         }
+                        return method;
                     }
-                    return method;
                 }
             }
         }

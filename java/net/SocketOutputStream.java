@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 
+import sun.misc.IoTrace;
+
 
 class SocketOutputStream extends FileOutputStream
 {
@@ -44,9 +46,12 @@ class SocketOutputStream extends FileOutputStream
             throw new ArrayIndexOutOfBoundsException();
         }
 
+        Object traceContext = IoTrace.socketWriteBegin();
+        int bytesWritten = 0;
         FileDescriptor fd = impl.acquireFD();
         try {
             socketWrite0(fd, b, off, len);
+            bytesWritten = len;
         } catch (SocketException se) {
             if (se instanceof sun.net.ConnectionResetException) {
                 impl.setConnectionResetPending();
@@ -59,6 +64,7 @@ class SocketOutputStream extends FileOutputStream
             }
         } finally {
             impl.releaseFD();
+            IoTrace.socketWriteEnd(traceContext, impl.address, impl.port, bytesWritten);
         }
     }
 

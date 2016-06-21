@@ -87,6 +87,7 @@ public class SAXParserFactoryImpl extends SAXParserFactory {
                         "jaxp-secureprocessing-feature", null));
             }
             fSecureProcess = value;
+            putInFeatures(name, value);
             return;
         }
 

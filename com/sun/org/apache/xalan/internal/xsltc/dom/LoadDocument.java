@@ -4,6 +4,7 @@
 
 package com.sun.org.apache.xalan.internal.xsltc.dom;
 
+import com.sun.org.apache.xalan.internal.XalanConstants;
 import java.io.FileNotFoundException;
 
 import javax.xml.transform.stream.StreamSource;
@@ -12,8 +13,10 @@ import com.sun.org.apache.xalan.internal.xsltc.DOM;
 import com.sun.org.apache.xalan.internal.xsltc.DOMCache;
 import com.sun.org.apache.xalan.internal.xsltc.DOMEnhancedForDTM;
 import com.sun.org.apache.xalan.internal.xsltc.TransletException;
+import com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMsg;
 import com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet;
 import com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl;
+import com.sun.org.apache.xalan.internal.utils.SecuritySupport;
 import com.sun.org.apache.xml.internal.dtm.DTM;
 import com.sun.org.apache.xml.internal.dtm.DTMAxisIterator;
 import com.sun.org.apache.xml.internal.dtm.DTMManager;
@@ -166,6 +169,13 @@ public final class LoadDocument {
                 throw new TransletException(e);
             }
         } else {
+            String accessError = SecuritySupport.checkAccess(uri, translet.getAllowedProtocols(), XalanConstants.ACCESS_EXTERNAL_ALL);
+            if (accessError != null) {
+                ErrorMsg msg = new ErrorMsg(ErrorMsg.ACCESSING_XSLT_TARGET_ERR,
+                        SecuritySupport.sanitizePath(uri), accessError);
+                throw new Exception(msg.toString());
+            }
+
             
             
             

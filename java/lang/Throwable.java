@@ -116,9 +116,10 @@ public class Throwable implements Serializable {
     
     public synchronized Throwable initCause(Throwable cause) {
         if (this.cause != this)
-            throw new IllegalStateException("Can't overwrite cause");
+            throw new IllegalStateException("Can't overwrite cause with " +
+                                            Objects.toString(cause, "a null"), this);
         if (cause == this)
-            throw new IllegalArgumentException("Self-causation not permitted");
+            throw new IllegalArgumentException("Self-causation not permitted", this);
         this.cause = cause;
         return this;
     }
@@ -374,7 +375,7 @@ public class Throwable implements Serializable {
     
     public final synchronized void addSuppressed(Throwable exception) {
         if (exception == this)
-            throw new IllegalArgumentException(SELF_SUPPRESSION_MESSAGE);
+            throw new IllegalArgumentException(SELF_SUPPRESSION_MESSAGE, exception);
 
         if (exception == null)
             throw new NullPointerException(NULL_CAUSE_MESSAGE);

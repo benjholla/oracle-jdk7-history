@@ -64,13 +64,22 @@ public class LogManager {
 
                     
                     manager.rootLogger = manager.new RootLogger();
+                    
+                    
+                    
+                    
                     manager.addLogger(manager.rootLogger);
-                    manager.systemContext.addLocalLogger(manager.rootLogger);
+                    manager.systemContext.addLocalLogger(manager.rootLogger, false);
+                    manager.userContext.addLocalLogger(manager.rootLogger, false);
 
                     
                     
                     Logger.global.setLogManager(manager);
+                    
+                    
                     manager.addLogger(Logger.global);
+                    manager.systemContext.addLocalLogger(Logger.global, false);
+                    manager.userContext.addLocalLogger(Logger.global, false);
 
                     
                     
@@ -198,7 +207,11 @@ public class LogManager {
                         if (javaAwtAccess.isMainAppContext()) {
                             context = userContext;
                         } else {
-                            context = new LoggerContext();
+                            
+                            
+                            
+                            
+                            context = new LoggerContext(true);
                         }
                         javaAwtAccess.put(ecx, LoggerContext.class, context);
                     }
@@ -305,9 +318,13 @@ public class LogManager {
         private final Hashtable<String,LoggerWeakRef> namedLoggers = new Hashtable<>();
         
         private final LogNode root;
-
+        private final boolean requiresDefaultLoggers;
         private LoggerContext() {
+            this(false);
+        }
+        private LoggerContext(boolean requiresDefaultLoggers) {
             this.root = new LogNode(null, this);
+            this.requiresDefaultLoggers = requiresDefaultLoggers;
         }
 
         Logger demandLogger(String name, String resourceBundleName) {
@@ -316,7 +333,27 @@ public class LogManager {
             return manager.demandLogger(name, resourceBundleName, null);
         }
 
+
+        
+        
+        
+        
+        
+        
+        
+        private void ensureInitialized() {
+            if (requiresDefaultLoggers) {
+                
+                ensureDefaultLogger(manager.rootLogger);
+                ensureDefaultLogger(Logger.global);
+            }
+        }
+
+
         synchronized Logger findLogger(String name) {
+            
+            
+            ensureInitialized();
             LoggerWeakRef ref = namedLoggers.get(name);
             if (ref == null) {
                 return null;
@@ -330,21 +367,76 @@ public class LogManager {
             return logger;
         }
 
-        synchronized void ensureRootLogger(Logger logger) {
-            if (logger.getName().isEmpty())
-                return;
+        
+        
+        
+        
+        
+        
+        private void ensureAllDefaultLoggers(Logger logger) {
+            if (requiresDefaultLoggers) {
+                final String name = logger.getName();
+                if (!name.isEmpty()) {
+                    ensureDefaultLogger(manager.rootLogger);
+                }
+                if (!Logger.GLOBAL_LOGGER_NAME.equals(name)) {
+                    ensureDefaultLogger(Logger.global);
+                }
+            }
+        }
+
+        private void ensureDefaultLogger(Logger logger) {
+            
+            
 
             
             
-            if (findLogger("") == null && manager.rootLogger != null) {
-                addLocalLogger(manager.rootLogger);
+            
+            if (!requiresDefaultLoggers || logger == null
+                    || logger != Logger.global && logger != manager.rootLogger) {
+
+                
+                
+                
+                
+                
+                assert logger == null;
+
+                return;
             }
+
+            
+            if (!namedLoggers.containsKey(logger.getName())) {
+                
+                
+                
+                
+                
+                
+                addLocalLogger(logger, false);
+            }
+        }
+
+        boolean addLocalLogger(Logger logger) {
+            
+            return addLocalLogger(logger, requiresDefaultLoggers);
         }
 
         
         
-        synchronized boolean addLocalLogger(Logger logger) {
-            ensureRootLogger(logger);
+        synchronized boolean addLocalLogger(Logger logger, boolean addDefaultLoggersIfNeeded) {
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            if (addDefaultLoggersIfNeeded) {
+                ensureAllDefaultLoggers(logger);
+            }
 
             final String name = logger.getName();
             if (name == null) {
@@ -410,6 +502,9 @@ public class LogManager {
         }
 
         synchronized Enumeration<String> getLoggerNames() {
+            
+            
+            ensureInitialized();
             return namedLoggers.keys();
         }
 

@@ -242,7 +242,7 @@ public class SwingUtilities implements SwingConstants
                                       sourceEvent.getYOnScreen(),
                                       sourceEvent.getClickCount(),
                                       sourceEvent.isPopupTrigger(),
-                                      MouseEvent.NOBUTTON );
+                                      sourceEvent.getButton());
         }
         return newEvent;
     }

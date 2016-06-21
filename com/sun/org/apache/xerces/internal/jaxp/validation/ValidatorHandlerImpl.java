@@ -36,6 +36,7 @@ import com.sun.org.apache.xerces.internal.util.SecurityManager;
 import com.sun.org.apache.xerces.internal.util.URI;
 import com.sun.org.apache.xerces.internal.util.XMLAttributesImpl;
 import com.sun.org.apache.xerces.internal.util.XMLSymbols;
+import com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager;
 import com.sun.org.apache.xerces.internal.xni.Augmentations;
 import com.sun.org.apache.xerces.internal.xni.NamespaceContext;
 import com.sun.org.apache.xerces.internal.xni.QName;
@@ -108,6 +109,10 @@ final class ValidatorHandlerImpl extends ValidatorHandler implements
     
     private static final String VALIDATION_MANAGER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.VALIDATION_MANAGER_PROPERTY;
+
+    
+    private static final String XML_SECURITY_PROPERTY_MANAGER =
+            Constants.XML_SECURITY_PROPERTY_MANAGER;
 
     
     
@@ -641,6 +646,15 @@ final class ValidatorHandlerImpl extends ValidatorHandler implements
                                }
                                
                                catch (SAXException exc) {}
+                           }
+                           try {
+                               XMLSecurityPropertyManager spm = (XMLSecurityPropertyManager)
+                                       fComponentManager.getProperty(XML_SECURITY_PROPERTY_MANAGER);
+                               reader.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD,
+                                       spm.getValue(XMLSecurityPropertyManager.Property.ACCESS_EXTERNAL_DTD));
+                           } catch (SAXException exc) {
+                               System.err.println("Warning: " + reader.getClass().getName() + ": " +
+                                      exc.getMessage());
                            }
                         }
                     } catch( Exception e ) {

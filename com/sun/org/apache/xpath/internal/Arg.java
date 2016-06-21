@@ -3,6 +3,7 @@
 
 package com.sun.org.apache.xpath.internal;
 
+import com.sun.org.apache.xalan.internal.utils.Objects;
 import com.sun.org.apache.xml.internal.utils.QName;
 import com.sun.org.apache.xpath.internal.objects.XObject;
 
@@ -95,7 +96,7 @@ public class Arg
   {
 
     m_qname = new QName("");
-    ;  
+       
     m_val = null;
     m_expression = null;
     m_isVisible = true;
@@ -124,7 +125,13 @@ public class Arg
     m_expression = null;
   }
 
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.m_qname);
+    }
+
   
+  @Override
   public boolean equals(Object obj)
   {
     if(obj instanceof QName)

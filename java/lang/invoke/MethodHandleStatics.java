@@ -4,22 +4,37 @@ package java.lang.invoke;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import sun.misc.Unsafe;
 
 
  class MethodHandleStatics {
 
     private MethodHandleStatics() { }  
 
+    static final Unsafe UNSAFE = Unsafe.getUnsafe();
+
     static final boolean DEBUG_METHOD_HANDLE_NAMES;
+    static final boolean DUMP_CLASS_FILES;
+    static final boolean TRACE_INTERPRETER;
+    static final boolean TRACE_METHOD_LINKAGE;
+    static final Integer COMPILE_THRESHOLD;
     static {
-        final Object[] values = { false };
+        final Object[] values = { false, false, false, false, null };
         AccessController.doPrivileged(new PrivilegedAction<Void>() {
                 public Void run() {
                     values[0] = Boolean.getBoolean("java.lang.invoke.MethodHandle.DEBUG_NAMES");
+                    values[1] = Boolean.getBoolean("java.lang.invoke.MethodHandle.DUMP_CLASS_FILES");
+                    values[2] = Boolean.getBoolean("java.lang.invoke.MethodHandle.TRACE_INTERPRETER");
+                    values[3] = Boolean.getBoolean("java.lang.invoke.MethodHandle.TRACE_METHOD_LINKAGE");
+                    values[4] = Integer.getInteger("java.lang.invoke.MethodHandle.COMPILE_THRESHOLD");
                     return null;
                 }
             });
         DEBUG_METHOD_HANDLE_NAMES = (Boolean) values[0];
+        DUMP_CLASS_FILES          = (Boolean) values[1];
+        TRACE_INTERPRETER         = (Boolean) values[2];
+        TRACE_METHOD_LINKAGE      = (Boolean) values[3];
+        COMPILE_THRESHOLD         = (Integer) values[4];
     }
 
      static String getNameString(MethodHandle target, MethodType type) {
@@ -27,7 +42,7 @@ import java.security.PrivilegedAction;
             type = target.type();
         MemberName name = null;
         if (target != null)
-            name = MethodHandleNatives.getMethodName(target);
+            name = target.internalMemberName();
         if (name == null)
             return "invoke" + type;
         return name.getName() + type;
@@ -49,21 +64,17 @@ import java.security.PrivilegedAction;
         return str + target.type();
     }
 
-    static void checkSpreadArgument(Object av, int n) {
-        if (av == null) {
-            if (n == 0)  return;
-        } else if (av instanceof Object[]) {
-            int len = ((Object[])av).length;
-            if (len == n)  return;
-        } else {
-            int len = java.lang.reflect.Array.getLength(av);
-            if (len == n)  return;
-        }
-        
-        throw newIllegalArgumentException("Array is not of length "+n);
-    }
-
     
+     static InternalError newInternalError(String message, Throwable cause) {
+        InternalError e = new InternalError(message);
+        e.initCause(cause);
+        return e;
+    }
+     static InternalError newInternalError(Throwable cause) {
+        InternalError e = new InternalError();
+        e.initCause(cause);
+        return e;
+    }
      static RuntimeException newIllegalStateException(String message) {
         return new IllegalStateException(message);
     }
@@ -80,9 +91,10 @@ import java.security.PrivilegedAction;
         return new IllegalArgumentException(message(message, obj, obj2));
     }
      static Error uncaughtException(Throwable ex) {
-        Error err = new InternalError("uncaught exception");
-        err.initCause(ex);
-        return err;
+        throw newInternalError("uncaught exception", ex);
+    }
+    static Error NYI() {
+        throw new AssertionError("NYI");
     }
     private static String message(String message, Object obj) {
         if (obj != null)  message = message + ": " + obj;

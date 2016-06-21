@@ -4,33 +4,69 @@ package java.lang.invoke;
 
 import sun.invoke.util.Wrapper;
 import static java.lang.invoke.MethodHandleStatics.*;
+import static java.lang.invoke.MethodHandleNatives.Constants.*;
 
 
-class MethodTypeForm {
+final class MethodTypeForm {
     final int[] argToSlotTable, slotToArgTable;
     final long argCounts;               
     final long primCounts;              
     final int vmslots;                  
-    private Object vmlayout;            
     final MethodType erasedType;        
-
-     MethodType primsAsBoxes;   
-     MethodType primArgsAsBoxes; 
-     MethodType primsAsInts;    
-     MethodType primsAsLongs;   
-     MethodType primsAtEnd;     
+    final MethodType basicType;         
 
     
-     ToGeneric   toGeneric;     
-     FromGeneric fromGeneric;   
-     SpreadGeneric[] spreadGeneric; 
-     FilterGeneric filterGeneric; 
      MethodHandle genericInvoker; 
+     MethodHandle basicInvoker;   
+     MethodHandle namedFunctionInvoker; 
+
+    
+    final LambdaForm[] lambdaForms;
+    
+    static final int
+            LF_INVVIRTUAL     =  0,  
+            LF_INVSTATIC      =  1,
+            LF_INVSPECIAL     =  2,
+            LF_NEWINVSPECIAL  =  3,
+            LF_INVINTERFACE   =  4,
+            LF_INVSTATIC_INIT =  5,  
+            LF_INTERPRET      =  6,  
+            LF_COUNTER        =  7,  
+            LF_REINVOKE       =  8,  
+            LF_EX_LINKER      =  9,  
+            LF_EX_INVOKER     = 10,  
+            LF_GEN_LINKER     = 11,
+            LF_GEN_INVOKER    = 12,
+            LF_CS_LINKER      = 13,  
+            LF_LIMIT          = 14;
 
     public MethodType erasedType() {
         return erasedType;
     }
 
+    public MethodType basicType() {
+        return basicType;
+    }
+
+    public LambdaForm cachedLambdaForm(int which) {
+        return lambdaForms[which];
+    }
+
+    public LambdaForm setCachedLambdaForm(int which, LambdaForm form) {
+        
+        return lambdaForms[which] = form;
+    }
+
+    public MethodHandle basicInvoker() {
+        assert(erasedType == basicType) : "erasedType: " + erasedType + " != basicType: " + basicType;  
+        MethodHandle invoker = basicInvoker;
+        if (invoker != null)  return invoker;
+        invoker = basicType.invokers().makeBasicInvoker();
+        basicInvoker = invoker;
+        return invoker;
+    }
+
+    
     protected MethodTypeForm(MethodType erasedType) {
         this.erasedType = erasedType;
 
@@ -44,25 +80,40 @@ class MethodTypeForm {
 
         
         int pac = 0, lac = 0, prc = 0, lrc = 0;
-        Class<?> epts[] = ptypes;
+        Class<?>[] epts = ptypes;
+        Class<?>[] bpts = epts;
         for (int i = 0; i < epts.length; i++) {
             Class<?> pt = epts[i];
             if (pt != Object.class) {
-                assert(pt.isPrimitive());
                 ++pac;
-                if (hasTwoArgSlots(pt))  ++lac;
+                Wrapper w = Wrapper.forPrimitiveType(pt);
+                if (w.isDoubleWord())  ++lac;
+                if (w.isSubwordOrInt() && pt != int.class) {
+                    if (bpts == epts)
+                        bpts = bpts.clone();
+                    bpts[i] = int.class;
+                }
             }
         }
         pslotCount += lac;                  
         Class<?> rt = erasedType.returnType();
+        Class<?> bt = rt;
         if (rt != Object.class) {
             ++prc;          
-            if (hasTwoArgSlots(rt))  ++lrc;
+            Wrapper w = Wrapper.forPrimitiveType(rt);
+            if (w.isDoubleWord())  ++lrc;
+            if (w.isSubwordOrInt() && rt != int.class)
+                bt = int.class;
             
             if (rt == void.class)
                 rtypeCount = rslotCount = 0;
             else
                 rslotCount += lrc;
+        }
+        if (epts == bpts && bt == rt) {
+            this.basicType = erasedType;
+        } else {
+            this.basicType = MethodType.makeImpl(bt, bpts, true);
         }
         if (lac != 0) {
             int slot = ptypeCount + lac;
@@ -71,7 +122,8 @@ class MethodTypeForm {
             argToSlotTab[0] = slot;  
             for (int i = 0; i < epts.length; i++) {
                 Class<?> pt = epts[i];
-                if (hasTwoArgSlots(pt))  --slot;
+                Wrapper w = Wrapper.forBasicType(pt);
+                if (w.isDoubleWord())  --slot;
                 --slot;
                 slotToArgTab[slot] = i+1; 
                 argToSlotTab[1+i]  = slot;
@@ -99,135 +151,11 @@ class MethodTypeForm {
         
         this.vmslots = parameterSlotCount();
 
-        
-        if (!hasPrimitives()) {
-            primsAsBoxes = erasedType;
-            primArgsAsBoxes = erasedType;
-            primsAsInts  = erasedType;
-            primsAsLongs = erasedType;
-            primsAtEnd   = erasedType;
+        if (basicType == erasedType) {
+            lambdaForms = new LambdaForm[LF_LIMIT];
+        } else {
+            lambdaForms = null;  
         }
-    }
-
-    
-    public MethodType primsAsBoxes() {
-        MethodType ct = primsAsBoxes;
-        if (ct != null)  return ct;
-        MethodType t = erasedType;
-        ct = canonicalize(erasedType, WRAP, WRAP);
-        if (ct == null)  ct = t;  
-        return primsAsBoxes = ct;
-    }
-
-    
-    public MethodType primArgsAsBoxes() {
-        MethodType ct = primArgsAsBoxes;
-        if (ct != null)  return ct;
-        MethodType t = erasedType;
-        ct = canonicalize(erasedType, RAW_RETURN, WRAP);
-        if (ct == null)  ct = t;  
-        return primArgsAsBoxes = ct;
-    }
-
-    
-    public MethodType primsAsInts() {
-        MethodType ct = primsAsInts;
-        if (ct != null)  return ct;
-        MethodType t = erasedType;
-        ct = canonicalize(t, RAW_RETURN, INTS);
-        if (ct == null)  ct = t;  
-        return primsAsInts = ct;
-    }
-
-    
-    public MethodType primsAsLongs() {
-        MethodType ct = primsAsLongs;
-        if (ct != null)  return ct;
-        MethodType t = erasedType;
-        ct = canonicalize(t, RAW_RETURN, LONGS);
-        if (ct == null)  ct = t;  
-        return primsAsLongs = ct;
-    }
-
-    
-    public MethodType primsAtEnd() {
-        MethodType ct = primsAtEnd;
-        if (ct != null)  return ct;
-        MethodType t = erasedType;
-
-        int pac = primitiveParameterCount();
-        if (pac == 0)
-            return primsAtEnd = t;
-
-        int argc = parameterCount();
-        int lac = longPrimitiveParameterCount();
-        if (pac == argc && (lac == 0 || lac == argc))
-            return primsAtEnd = t;
-
-        
-        int[] reorder = primsAtEndOrder(t);
-        ct = reorderParameters(t, reorder, null);
-        
-        return primsAtEnd = ct;
-    }
-
-    
-    public static int[] primsAtEndOrder(MethodType mt) {
-        MethodTypeForm form = mt.form();
-        if (form.primsAtEnd == form.erasedType)
-            
-            return null;
-
-        int argc = form.parameterCount();
-        int[] paramOrder = new int[argc];
-
-        
-        int pac = form.primitiveParameterCount();
-        int lac = form.longPrimitiveParameterCount();
-        int rfill = 0, ifill = argc - pac, lfill = argc - lac;
-
-        Class<?>[] ptypes = mt.ptypes();
-        boolean changed = false;
-        for (int i = 0; i < ptypes.length; i++) {
-            Class<?> pt = ptypes[i];
-            int ord;
-            if (!pt.isPrimitive())             ord = rfill++;
-            else if (!hasTwoArgSlots(pt))      ord = ifill++;
-            else                               ord = lfill++;
-            if (ord != i)  changed = true;
-            assert(paramOrder[ord] == 0);
-            paramOrder[ord] = i;
-        }
-        assert(rfill == argc - pac && ifill == argc - lac && lfill == argc);
-        if (!changed) {
-            form.primsAtEnd = form.erasedType;
-            return null;
-        }
-        return paramOrder;
-    }
-
-    
-    public static MethodType reorderParameters(MethodType mt, int[] newParamOrder, Class<?>[] moreParams) {
-        if (newParamOrder == null)  return mt;  
-        Class<?>[] ptypes = mt.ptypes();
-        Class<?>[] ntypes = new Class<?>[newParamOrder.length];
-        int maxParam = ptypes.length + (moreParams == null ? 0 : moreParams.length);
-        boolean changed = (ntypes.length != ptypes.length);
-        for (int i = 0; i < newParamOrder.length; i++) {
-            int param = newParamOrder[i];
-            if (param != i)  changed = true;
-            Class<?> nt;
-            if (param < ptypes.length)   nt = ptypes[param];
-            else if (param == maxParam)  nt = mt.returnType();
-            else                         nt = moreParams[param - ptypes.length];
-            ntypes[i] = nt;
-        }
-        if (!changed)  return mt;
-        return MethodType.makeImpl(mt.returnType(), ntypes, true);
-    }
-
-    private static boolean hasTwoArgSlots(Class<?> type) {
-        return type == long.class || type == double.class;
     }
 
     private static long pack(int a, int b, int c, int d) {
@@ -267,11 +195,11 @@ class MethodTypeForm {
     public boolean hasPrimitives() {
         return primCounts != 0;
     }
-
-
-
-
-
+    public boolean hasNonVoidPrimitives() {
+        if (primCounts == 0)  return false;
+        if (primitiveParameterCount() != 0)  return true;
+        return (primitiveReturnCount() != 0 && returnCount() != 0);
+    }
     public boolean hasLongPrimitives() {
         return (longPrimitiveParameterCount() | longPrimitiveReturnCount()) != 0;
     }
@@ -379,18 +307,6 @@ class MethodTypeForm {
             }
         }
         return cs;
-    }
-
-     void notifyGenericMethodType() {
-        if (genericInvoker != null)  return;
-        try {
-            
-            genericInvoker = InvokeGeneric.generalInvokerOf(erasedType);
-        } catch (Exception ex) {
-            Error err = new InternalError("Exception while resolving inexact invoke");
-            err.initCause(ex);
-            throw err;
-        }
     }
 
     @Override

@@ -17,4 +17,13 @@ public interface XSGrammarPoolContainer {
     
     public Boolean getFeature(String featureId);
 
+    
+    public void setFeature(String featureId, boolean state);
+
+    
+    public Object getProperty(String propertyId);
+
+    
+    public void setProperty(String propertyId, Object state);
+
 }

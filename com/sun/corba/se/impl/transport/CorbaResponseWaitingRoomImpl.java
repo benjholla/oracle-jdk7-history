@@ -2,7 +2,10 @@
 
 package com.sun.corba.se.impl.transport;
 
-import java.util.Hashtable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import org.omg.CORBA.CompletionStatus;
 import org.omg.CORBA.SystemException;
@@ -43,7 +46,7 @@ public class CorbaResponseWaitingRoomImpl
 
     private CorbaConnection connection;
     
-    private Hashtable out_calls = null; 
+    final private Map<Integer, OutCallDesc> out_calls;
 
     public CorbaResponseWaitingRoomImpl(ORB orb, CorbaConnection connection)
     {
@@ -51,7 +54,8 @@ public class CorbaResponseWaitingRoomImpl
         wrapper = ORBUtilSystemException.get( orb,
             CORBALogDomains.RPC_TRANSPORT ) ;
         this.connection = connection;
-        out_calls = new Hashtable();
+        out_calls =
+            Collections.synchronizedMap(new HashMap<Integer, OutCallDesc>());
     }
 
     
@@ -114,7 +118,7 @@ public class CorbaResponseWaitingRoomImpl
             return null;
         }
 
-        OutCallDesc call = (OutCallDesc)out_calls.get(requestId);
+        OutCallDesc call = out_calls.get(requestId);
         if (call == null) {
             throw wrapper.nullOutCall(CompletionStatus.COMPLETED_MAYBE);
         }
@@ -172,7 +176,7 @@ public class CorbaResponseWaitingRoomImpl
         LocateReplyOrReplyMessage header = (LocateReplyOrReplyMessage)
             inputObject.getMessageHeader();
         Integer requestId = new Integer(header.getRequestId());
-        OutCallDesc call = (OutCallDesc) out_calls.get(requestId);
+        OutCallDesc call = out_calls.get(requestId);
 
         if (orb.transportDebugFlag) {
             dprint(".responseReceived: id/"
@@ -223,7 +227,6 @@ public class CorbaResponseWaitingRoomImpl
 
     public int numberRegistered()
     {
-        
         return out_calls.size();
     }
 
@@ -239,29 +242,41 @@ public class CorbaResponseWaitingRoomImpl
             dprint(".signalExceptionToAllWaiters: " + systemException);
         }
 
-        OutCallDesc call;
-        java.util.Enumeration e = out_calls.elements();
-        while(e.hasMoreElements()) {
-            call = (OutCallDesc) e.nextElement();
+        synchronized (out_calls) {
+            if (orb.transportDebugFlag) {
+                dprint(".signalExceptionToAllWaiters: out_calls size :" +
+                       out_calls.size());
+            }
 
-            synchronized(call.done){
-                
-                
-                CorbaMessageMediator corbaMsgMediator =
-                             (CorbaMessageMediator)call.messageMediator;
-                CDRInputObject inputObject =
-                           (CDRInputObject)corbaMsgMediator.getInputObject();
-                
-                
-                if (inputObject != null) {
-                    BufferManagerReadStream bufferManager =
-                        (BufferManagerReadStream)inputObject.getBufferManager();
-                    int requestId = corbaMsgMediator.getRequestId();
-                    bufferManager.cancelProcessing(requestId);
+            for (OutCallDesc call : out_calls.values()) {
+                if (orb.transportDebugFlag) {
+                    dprint(".signalExceptionToAllWaiters: signaling " +
+                            call);
                 }
-                call.inputObject = null;
-                call.exception = systemException;
-                call.done.notify();
+                synchronized(call.done) {
+                    try {
+                        
+                        
+                        CorbaMessageMediator corbaMsgMediator =
+                                     (CorbaMessageMediator)call.messageMediator;
+                        CDRInputObject inputObject =
+                                   (CDRInputObject)corbaMsgMediator.getInputObject();
+                        
+                        
+                        if (inputObject != null) {
+                            BufferManagerReadStream bufferManager =
+                                (BufferManagerReadStream)inputObject.getBufferManager();
+                            int requestId = corbaMsgMediator.getRequestId();
+                            bufferManager.cancelProcessing(requestId);
+                        }
+                    } catch (Exception e) {
+                    } finally {
+                        
+                        call.inputObject = null;
+                        call.exception = systemException;
+                        call.done.notifyAll();
+                    }
+                }
             }
         }
     }
@@ -269,7 +284,7 @@ public class CorbaResponseWaitingRoomImpl
     public MessageMediator getMessageMediator(int requestId)
     {
         Integer id = new Integer(requestId);
-        OutCallDesc call = (OutCallDesc) out_calls.get(id);
+        OutCallDesc call = out_calls.get(id);
         if (call == null) {
             
             

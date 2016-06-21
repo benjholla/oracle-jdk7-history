@@ -217,10 +217,11 @@ class KeyboardManager {
                  while (iter.hasMoreElements()) {
                      JMenuBar mb = (JMenuBar)iter.nextElement();
                      if ( mb.isShowing() && mb.isEnabled() ) { 
-                         if( !(ks.equals(ksE)) ) {
+                         boolean extended = (ksE != null) && !ksE.equals(ks);
+                         if (extended) {
                              fireBinding(mb, ksE, e, pressed);
                          }
-                         if(ks.equals(ksE) || !e.isConsumed()) {
+                         if (!extended || !e.isConsumed()) {
                              fireBinding(mb, ks, e, pressed);
                          }
                          if (e.isConsumed()) {

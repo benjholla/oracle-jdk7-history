@@ -60,6 +60,8 @@ import com.sun.org.apache.xerces.internal.util.SymbolHash;
 import com.sun.org.apache.xerces.internal.util.SymbolTable;
 import com.sun.org.apache.xerces.internal.util.XMLSymbols;
 import com.sun.org.apache.xerces.internal.util.URI.MalformedURIException;
+import com.sun.org.apache.xerces.internal.utils.SecuritySupport;
+import com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager;
 import com.sun.org.apache.xerces.internal.xni.QName;
 import com.sun.org.apache.xerces.internal.xni.XNIException;
 import com.sun.org.apache.xerces.internal.xni.grammars.Grammar;
@@ -88,11 +90,13 @@ import com.sun.org.apache.xerces.internal.xs.XSSimpleTypeDefinition;
 import com.sun.org.apache.xerces.internal.xs.XSTerm;
 import com.sun.org.apache.xerces.internal.xs.XSTypeDefinition;
 import com.sun.org.apache.xerces.internal.xs.datatypes.ObjectList;
+import javax.xml.XMLConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
@@ -190,6 +194,10 @@ public class XSDHandler {
     protected static final String LOCALE =
         Constants.XERCES_PROPERTY_PREFIX + Constants.LOCALE_PROPERTY;
 
+        
+    private static final String XML_SECURITY_PROPERTY_MANAGER =
+            Constants.XML_SECURITY_PROPERTY_MANAGER;
+
     protected static final boolean DEBUG_NODE_POOL = false;
 
     
@@ -215,6 +223,9 @@ public class XSDHandler {
 
     
     protected SecurityManager fSecureProcessing = null;
+
+    private String fAccessExternalSchema;
+    private String fAccessExternalDTD;
 
     
     
@@ -2066,6 +2077,15 @@ public class XSDHandler {
                         fLastSchemaWasDuplicate = true;
                         return schemaElement;
                     }
+                    if (referType == XSDDescription.CONTEXT_IMPORT || referType == XSDDescription.CONTEXT_INCLUDE
+                            || referType == XSDDescription.CONTEXT_REDEFINE) {
+                        String accessError = SecuritySupport.checkAccess(schemaId, fAccessExternalSchema, Constants.ACCESS_EXTERNAL_ALL);
+                        if (accessError != null) {
+                            reportSchemaFatalError("schema_reference.access",
+                                    new Object[] { SecuritySupport.sanitizePath(schemaId), accessError },
+                                    referElement);
+                        }
+                    }
                 }
 
                 fSchemaParser.parse(schemaSource);
@@ -2138,6 +2158,13 @@ public class XSDHandler {
                         }
                     }
                     catch (SAXException se) {}
+
+                    try {
+                        parser.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, fAccessExternalDTD);
+                    } catch (SAXNotRecognizedException exc) {
+                        System.err.println("Warning: " + parser.getClass().getName() + ": " +
+                                exc.getMessage());
+                    }
                 }
                 
                 
@@ -3433,6 +3460,17 @@ public class XSDHandler {
             }
         } catch (XMLConfigurationException e) {
         }
+
+        XMLSecurityPropertyManager securityPropertyMgr = (XMLSecurityPropertyManager)
+                componentManager.getProperty(XML_SECURITY_PROPERTY_MANAGER);
+        
+        fSchemaParser.setProperty(XML_SECURITY_PROPERTY_MANAGER, securityPropertyMgr);
+
+        fAccessExternalDTD = securityPropertyMgr.getValue(
+                XMLSecurityPropertyManager.Property.ACCESS_EXTERNAL_DTD);
+
+        fAccessExternalSchema = securityPropertyMgr.getValue(
+                XMLSecurityPropertyManager.Property.ACCESS_EXTERNAL_SCHEMA);
 
     } 
 

@@ -790,7 +790,7 @@ class Parser implements DTDConstants {
                         ch = readCh();
                         break;
                 }
-                char data[] = {mapNumericReference((char) n)};
+                char data[] = mapNumericReference(n);
                 return data;
             }
             addString('#');
@@ -859,11 +859,19 @@ class Parser implements DTDConstants {
     }
 
     
-    private char mapNumericReference(char c) {
-        if (c < 130 || c > 159) {
-            return c;
+    private char[] mapNumericReference(int c) {
+        char[] data;
+        if (c >= 0xffff) { 
+            try {
+                data = Character.toChars(c);
+            } catch (IllegalArgumentException e) {
+                data = new char[0];
+            }
+        } else {
+            data = new char[1];
+            data[0] = (c < 130 || c > 159) ? (char) c : cp1252Map[c - 130];
         }
-        return cp1252Map[c - 130];
+        return data;
     }
 
     

@@ -3,12 +3,14 @@
 package java.lang.invoke;
 
 import sun.invoke.util.Wrapper;
+import java.lang.ref.WeakReference;
+import java.lang.ref.ReferenceQueue;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import sun.invoke.util.BytecodeDescriptor;
 import static java.lang.invoke.MethodHandleStatics.*;
+import sun.invoke.util.VerifyType;
 
 
 public final
@@ -36,6 +38,18 @@ class MethodType implements java.io.Serializable {
      Class<?> rtype() { return rtype; }
      Class<?>[] ptypes() { return ptypes; }
 
+    void setForm(MethodTypeForm f) { form = f; }
+
+    
+     static final int MAX_JVM_ARITY = 255;  
+
+    
+    
+     static final int MAX_MH_ARITY = MAX_JVM_ARITY-1;  
+
+    
+     static final int MAX_MH_INVOKER_ARITY = MAX_MH_ARITY-1;  
+
     private static void checkRtype(Class<?> rtype) {
         rtype.equals(rtype);  
     }
@@ -55,8 +69,10 @@ class MethodType implements java.io.Serializable {
         checkSlotCount(ptypes.length + slots);
         return slots;
     }
-    private static void checkSlotCount(int count) {
-        if ((count & 0xFF) != count)
+    static void checkSlotCount(int count) {
+        assert((MAX_JVM_ARITY & (MAX_JVM_ARITY+1)) == 0);
+        
+        if ((count & MAX_JVM_ARITY) != count)
             throw newIllegalArgumentException("bad parameter count "+count);
     }
     private static IndexOutOfBoundsException newIndexOutOfBoundsException(Object num) {
@@ -64,8 +80,7 @@ class MethodType implements java.io.Serializable {
         return new IndexOutOfBoundsException(num.toString());
     }
 
-    static final HashMap<MethodType,MethodType> internTable
-            = new HashMap<MethodType, MethodType>();
+    static final WeakInternSet internTable = new WeakInternSet();
 
     static final Class<?>[] NO_PTYPES = {};
 
@@ -122,31 +137,17 @@ class MethodType implements java.io.Serializable {
             ptypes = NO_PTYPES; trusted = true;
         }
         MethodType mt1 = new MethodType(rtype, ptypes);
-        MethodType mt0;
-        synchronized (internTable) {
-            mt0 = internTable.get(mt1);
-            if (mt0 != null)
-                return mt0;
-        }
+        MethodType mt0 = internTable.get(mt1);
+        if (mt0 != null)
+            return mt0;
         if (!trusted)
             
             mt1 = new MethodType(rtype, ptypes.clone());
         
         MethodTypeForm form = MethodTypeForm.findForm(mt1);
         mt1.form = form;
-        if (form.erasedType == mt1) {
-            
-            MethodHandleNatives.init(mt1);
-        }
-        synchronized (internTable) {
-            mt0 = internTable.get(mt1);
-            if (mt0 != null)
-                return mt0;
-            internTable.put(mt1, mt1);
-        }
-        return mt1;
+        return internTable.add(mt1);
     }
-
     private static final MethodType[] objectOnlyTypes = new MethodType[20];
 
     
@@ -215,6 +216,19 @@ class MethodType implements java.io.Serializable {
         return insertParameterTypes(parameterCount(), ptypesToInsert);
     }
 
+     
+     MethodType replaceParameterTypes(int start, int end, Class<?>... ptypesToInsert) {
+        if (start == end)
+            return insertParameterTypes(start, ptypesToInsert);
+        int len = ptypes.length;
+        if (!(0 <= start && start <= end && end <= len))
+            throw newIndexOutOfBoundsException("start="+start+" end="+end);
+        int ilen = ptypesToInsert.length;
+        if (ilen == 0)
+            return dropParameterTypes(start, end);
+        return dropParameterTypes(start, end).insertParameterTypes(start, ptypesToInsert);
+    }
+
     
     public MethodType dropParameterTypes(int start, int end) {
         int len = ptypes.length;
@@ -262,6 +276,16 @@ class MethodType implements java.io.Serializable {
     
     public MethodType erase() {
         return form.erasedType();
+    }
+
+    
+     MethodType basicType() {
+        return form.basicType();
+    }
+
+    
+     MethodType invokerType() {
+        return insertParameterTypes(0, MethodHandle.class);
     }
 
     
@@ -323,6 +347,11 @@ class MethodType implements java.io.Serializable {
         return Collections.unmodifiableList(Arrays.asList(ptypes));
     }
 
+     Class<?> lastParameterType() {
+        int len = ptypes.length;
+        return len == 0 ? void.class : ptypes[len-1];
+    }
+
     
     public Class<?>[] parameterArray() {
         return ptypes.clone();
@@ -363,6 +392,26 @@ class MethodType implements java.io.Serializable {
     }
 
 
+    
+    boolean isViewableAs(MethodType newType) {
+        if (!VerifyType.isNullConversion(returnType(), newType.returnType()))
+            return false;
+        int argc = parameterCount();
+        if (argc != newType.parameterCount())
+            return false;
+        for (int i = 0; i < argc; i++) {
+            if (!VerifyType.isNullConversion(newType.parameterType(i), parameterType(i)))
+                return false;
+        }
+        return true;
+    }
+    
+    boolean isCastableTo(MethodType newType) {
+        int argc = parameterCount();
+        if (argc != newType.parameterCount())
+            return false;
+        return true;
+    }
     
     boolean isConvertibleTo(MethodType newType) {
         if (!canConvert(returnType(), newType.returnType()))
@@ -475,6 +524,10 @@ class MethodType implements java.io.Serializable {
         return BytecodeDescriptor.unparse(this);
     }
 
+     static String toFieldDescriptorString(Class<?> cls) {
+        return BytecodeDescriptor.unparse(cls);
+    }
+
     
 
     
@@ -513,18 +566,17 @@ class MethodType implements java.io.Serializable {
         
         checkRtype(rtype);
         checkPtypes(ptypes);
-        unsafe.putObject(this, rtypeOffset, rtype);
-        unsafe.putObject(this, ptypesOffset, ptypes);
+        UNSAFE.putObject(this, rtypeOffset, rtype);
+        UNSAFE.putObject(this, ptypesOffset, ptypes);
     }
 
     
-    private static final sun.misc.Unsafe unsafe = sun.misc.Unsafe.getUnsafe();
     private static final long rtypeOffset, ptypesOffset;
     static {
         try {
-            rtypeOffset = unsafe.objectFieldOffset
+            rtypeOffset = UNSAFE.objectFieldOffset
                 (MethodType.class.getDeclaredField("rtype"));
-            ptypesOffset = unsafe.objectFieldOffset
+            ptypesOffset = UNSAFE.objectFieldOffset
                 (MethodType.class.getDeclaredField("ptypes"));
         } catch (Exception ex) {
             throw new Error(ex);
@@ -537,5 +589,188 @@ class MethodType implements java.io.Serializable {
         
         
         return methodType(rtype, ptypes);
+    }
+
+    
+    private static class WeakInternSet {
+        
+        private static final int DEFAULT_INITIAL_CAPACITY = 16;
+
+        
+        
+        
+        private static final int MAXIMUM_CAPACITY = 1 << 30;
+
+        
+        private static final float DEFAULT_LOAD_FACTOR = 0.75f;
+
+        
+        private Entry[] table;
+
+        
+        private int size;
+
+        
+        private int threshold;
+
+        
+        private final float loadFactor;
+
+        
+        private final ReferenceQueue<Object> queue = new ReferenceQueue<>();
+
+        private Entry[] newTable(int n) {
+            return new Entry[n];
+        }
+
+        
+        WeakInternSet() {
+            this.loadFactor = DEFAULT_LOAD_FACTOR;
+            threshold = DEFAULT_INITIAL_CAPACITY;
+            table = newTable(DEFAULT_INITIAL_CAPACITY);
+        }
+
+        
+        private static int hash(int h) {
+            
+            
+            
+            h ^= (h >>> 20) ^ (h >>> 12);
+            return h ^ (h >>> 7) ^ (h >>> 4);
+        }
+
+        
+        private static boolean eq(Object x, Object y) {
+            return x == y || x.equals(y);
+        }
+
+        
+        private static int indexFor(int h, int length) {
+            return h & (length-1);
+        }
+
+        
+        private void expungeStaleEntries() {
+            for (Object x; (x = queue.poll()) != null; ) {
+                synchronized (queue) {
+                    Entry entry = (Entry) x;
+                    int i = indexFor(entry.hash, table.length);
+                    Entry prev = table[i];
+                    Entry p = prev;
+                    while (p != null) {
+                        Entry next = p.next;
+                        if (p == entry) {
+                            if (prev == entry)
+                                table[i] = next;
+                            else
+                                prev.next = next;
+                            entry.next = null;
+                            size--;
+                            break;
+                        }
+                        prev = p;
+                        p = next;
+                    }
+                }
+            }
+        }
+
+        
+        private Entry[] getTable() {
+            expungeStaleEntries();
+            return table;
+        }
+
+        
+        synchronized MethodType get(MethodType value) {
+            int h = hash(value.hashCode());
+            Entry[] tab = getTable();
+            int index = indexFor(h, tab.length);
+            Entry e = tab[index];
+            MethodType g;
+            while (e != null) {
+                if (e.hash == h && eq(value, g = e.get()))
+                    return g;
+                e = e.next;
+            }
+            return null;
+        }
+
+        
+        synchronized MethodType add(MethodType value) {
+            int h = hash(value.hashCode());
+            Entry[] tab = getTable();
+            int i = indexFor(h, tab.length);
+            MethodType g;
+            for (Entry e = tab[i]; e != null; e = e.next) {
+                if (h == e.hash && eq(value, g = e.get())) {
+                    return g;
+                }
+            }
+            Entry e = tab[i];
+            tab[i] = new Entry(value, queue, h, e);
+            if (++size >= threshold)
+                resize(tab.length * 2);
+            return value;
+        }
+
+        
+        private void resize(int newCapacity) {
+            Entry[] oldTable = getTable();
+            int oldCapacity = oldTable.length;
+            if (oldCapacity == MAXIMUM_CAPACITY) {
+                threshold = Integer.MAX_VALUE;
+                return;
+            }
+
+            Entry[] newTable = newTable(newCapacity);
+            transfer(oldTable, newTable);
+            table = newTable;
+
+            
+            if (size >= threshold / 2) {
+                threshold = (int)(newCapacity * loadFactor);
+            } else {
+                expungeStaleEntries();
+                transfer(newTable, oldTable);
+                table = oldTable;
+            }
+        }
+
+        
+        private void transfer(Entry[] src, Entry[] dest) {
+            for (int j = 0; j < src.length; ++j) {
+                Entry e = src[j];
+                src[j] = null;
+                while (e != null) {
+                    Entry next = e.next;
+                    MethodType key = e.get();
+                    if (key == null) {
+                        e.next = null;  
+                        size--;
+                    } else {
+                        int i = indexFor(e.hash, dest.length);
+                        e.next = dest[i];
+                        dest[i] = e;
+                    }
+                    e = next;
+                }
+            }
+        }
+
+        
+        private static class Entry extends WeakReference<MethodType> {
+            final int hash;
+            Entry next;
+
+            
+            Entry(MethodType key,
+                  ReferenceQueue<Object> queue,
+                  int hash, Entry next) {
+                super(key, queue);
+                this.hash  = hash;
+                this.next  = next;
+            }
+        }
     }
 }

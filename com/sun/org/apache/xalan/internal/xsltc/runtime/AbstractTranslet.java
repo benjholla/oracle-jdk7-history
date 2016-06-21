@@ -4,6 +4,7 @@
 
 package com.sun.org.apache.xalan.internal.xsltc.runtime;
 
+import com.sun.org.apache.xalan.internal.XalanConstants;
 import com.sun.org.apache.xalan.internal.utils.FactoryImpl;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -84,6 +85,9 @@ public abstract class AbstractTranslet implements Translet {
     private final static String ID_INDEX_NAME = "##id";
 
     private boolean _useServicesMechanism;
+
+    
+    private String _accessExternalStylesheet = XalanConstants.EXTERNAL_ACCESS_DEFAULT;
 
     
     public void printInternalState() {
@@ -624,6 +628,16 @@ public abstract class AbstractTranslet implements Translet {
     
     public void setServicesMechnism(boolean flag) {
         _useServicesMechanism = flag;
+    }
+
+    
+    public String getAllowedProtocols() {
+        return _accessExternalStylesheet;
+    }
+
+    
+    public void setAllowedProtocols(String protocols) {
+        _accessExternalStylesheet = protocols;
     }
 
     

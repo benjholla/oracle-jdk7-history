@@ -3,7 +3,6 @@
 package java.lang.invoke;
 
 import sun.invoke.empty.Empty;
-import sun.misc.Unsafe;
 import static java.lang.invoke.MethodHandleStatics.*;
 import static java.lang.invoke.MethodHandles.Lookup.IMPL_LOOKUP;
 
@@ -13,12 +12,8 @@ public class CallSite {
     static { MethodHandleImpl.initStatics(); }
 
     
-    private MemberName vmmethod; 
-    private int        vmindex;  
-
     
-    
-    MethodHandle target;
+    MethodHandle target;    
 
     
     
@@ -50,22 +45,6 @@ public class CallSite {
     }
 
     
-    void initializeFromJVM(String name,
-                           MethodType type,
-                           MemberName callerMethod,
-                           int        callerBCI) {
-        if (this.vmmethod != null) {
-            
-            throw new BootstrapMethodError("call site has already been linked to an invokedynamic instruction");
-        }
-        if (!this.type().equals(type)) {
-            throw wrongTargetType(target, type);
-        }
-        this.vmindex  = callerBCI;
-        this.vmmethod = callerMethod;
-    }
-
-    
     public abstract MethodHandle getTarget();
 
     
@@ -86,7 +65,7 @@ public class CallSite {
     public abstract MethodHandle dynamicInvoker();
 
      MethodHandle makeDynamicInvoker() {
-        MethodHandle getTarget = MethodHandleImpl.bindReceiver(GET_TARGET, this);
+        MethodHandle getTarget = GET_TARGET.bindReceiver(this);
         MethodHandle invoker = MethodHandles.exactInvoker(this.type());
         return MethodHandles.foldArguments(invoker, getTarget);
     }
@@ -96,8 +75,8 @@ public class CallSite {
         try {
             GET_TARGET = IMPL_LOOKUP.
                 findVirtual(CallSite.class, "getTarget", MethodType.methodType(MethodHandle.class));
-        } catch (ReflectiveOperationException ignore) {
-            throw new InternalError();
+        } catch (ReflectiveOperationException e) {
+            throw newInternalError(e);
         }
     }
 
@@ -108,12 +87,10 @@ public class CallSite {
     }
 
     
-    private static final Unsafe unsafe = Unsafe.getUnsafe();
     private static final long TARGET_OFFSET;
-
     static {
         try {
-            TARGET_OFFSET = unsafe.objectFieldOffset(CallSite.class.getDeclaredField("target"));
+            TARGET_OFFSET = UNSAFE.objectFieldOffset(CallSite.class.getDeclaredField("target"));
         } catch (Exception ex) { throw new Error(ex); }
     }
 
@@ -123,7 +100,7 @@ public class CallSite {
     }
     
     MethodHandle getTargetVolatile() {
-        return (MethodHandle) unsafe.getObjectVolatile(this, TARGET_OFFSET);
+        return (MethodHandle) UNSAFE.getObjectVolatile(this, TARGET_OFFSET);
     }
     
     void setTargetVolatile(MethodHandle newTarget) {
@@ -137,8 +114,7 @@ public class CallSite {
                              
                              Object info,
                              
-                             MemberName callerMethod, int callerBCI) {
-        Class<?> callerClass = callerMethod.getDeclaringClass();
+                             Class<?> callerClass) {
         Object caller = IMPL_LOOKUP.in(callerClass);
         CallSite site;
         try {

@@ -680,6 +680,7 @@ public abstract class BasicLookAndFeel extends LookAndFeel implements Serializab
                          "END", "endPassThrough",
                        "ENTER", "enterPressed"
                  }),
+            "ComboBox.noActionOnKeyNavigation", Boolean.FALSE,
 
             
 
@@ -972,7 +973,9 @@ public abstract class BasicLookAndFeel extends LookAndFeel implements Serializab
             "Menu.menuPopupOffsetY", new Integer(0),
             "Menu.submenuPopupOffsetX", new Integer(0),
             "Menu.submenuPopupOffsetY", new Integer(0),
-            "Menu.shortcutKeys", new int[] {KeyEvent.ALT_MASK},
+            "Menu.shortcutKeys", new int[]{
+                SwingUtilities2.getSystemMnemonicKeyMask()
+            },
             "Menu.crossMenuMnemonic", Boolean.TRUE,
             
             

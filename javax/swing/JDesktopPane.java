@@ -253,6 +253,13 @@ public class JDesktopPane extends JLayeredPane implements Accessible
     }
 
     
+    @Override
+    public void remove(Component comp) {
+        super.remove(comp);
+        updateFramesCache();
+    }
+
+    
     public JInternalFrame selectFrame(boolean forward) {
         JInternalFrame selectedFrame = getSelectedFrame();
         JInternalFrame frameToSelect = getNextFrame(selectedFrame, forward);

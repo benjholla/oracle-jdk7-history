@@ -25,8 +25,9 @@ public abstract class Select extends BranchInstruction
     super(opcode, target);
 
     this.targets = targets;
-    for(int i=0; i < targets.length; i++)
-      notifyTarget(null, targets[i], this);
+    for(int i=0; i < targets.length; i++) {
+      BranchInstruction.notifyTargetChanged(targets[i], this);
+    }
 
     this.match = match;
 
@@ -37,6 +38,7 @@ public abstract class Select extends BranchInstruction
   }
 
   
+  @Override
   protected int updatePosition(int offset, int max_offset) {
     position += offset; 
 
@@ -50,6 +52,7 @@ public abstract class Select extends BranchInstruction
   }
 
   
+  @Override
   public void dump(DataOutputStream out) throws IOException {
     out.writeByte(opcode);
 
@@ -61,6 +64,7 @@ public abstract class Select extends BranchInstruction
   }
 
   
+  @Override
   protected void initFromFile(ByteSequence bytes, boolean wide) throws IOException
   {
     padding = (4 - (bytes.getIndex() % 4)) % 4; 
@@ -74,8 +78,9 @@ public abstract class Select extends BranchInstruction
   }
 
   
+  @Override
   public String toString(boolean verbose) {
-    StringBuffer buf = new StringBuffer(super.toString(verbose));
+    final StringBuilder buf = new StringBuilder(super.toString(verbose));
 
     if(verbose) {
       for(int i=0; i < match_length; i++) {
@@ -84,7 +89,8 @@ public abstract class Select extends BranchInstruction
         if(targets[i] != null)
           s = targets[i].getInstruction().toString();
 
-        buf.append("(" + match[i] + ", " + s + " = {" + indices[i] + "})");
+          buf.append("(").append(match[i]).append(", ")
+             .append(s).append(" = {").append(indices[i]).append("})");
       }
     }
     else
@@ -94,12 +100,14 @@ public abstract class Select extends BranchInstruction
   }
 
   
-  public void setTarget(int i, InstructionHandle target) {
-    notifyTarget(targets[i], target, this);
+  public final void setTarget(int i, InstructionHandle target) {
+    notifyTargetChanging(targets[i], this);
     targets[i] = target;
+    notifyTargetChanged(targets[i], this);
   }
 
   
+  @Override
   public void updateTarget(InstructionHandle old_ih, InstructionHandle new_ih) {
     boolean targeted = false;
 
@@ -120,6 +128,7 @@ public abstract class Select extends BranchInstruction
   }
 
   
+  @Override
   public boolean containsTarget(InstructionHandle ih) {
     if(target == ih)
       return true;
@@ -132,6 +141,7 @@ public abstract class Select extends BranchInstruction
   }
 
   
+  @Override
   void dispose() {
     super.dispose();
 

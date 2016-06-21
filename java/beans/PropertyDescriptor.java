@@ -119,12 +119,13 @@ public class PropertyDescriptor extends FeatureDescriptor {
                 
                 return null;
             }
+            String nextMethodName = Introspector.GET_PREFIX + getBaseName();
             if (readMethodName == null) {
                 Class type = getPropertyType0();
                 if (type == boolean.class || type == null) {
                     readMethodName = Introspector.IS_PREFIX + getBaseName();
                 } else {
-                    readMethodName = Introspector.GET_PREFIX + getBaseName();
+                    readMethodName = nextMethodName;
                 }
             }
 
@@ -134,8 +135,8 @@ public class PropertyDescriptor extends FeatureDescriptor {
             
             
             readMethod = Introspector.findMethod(cls, readMethodName, 0);
-            if (readMethod == null) {
-                readMethodName = Introspector.GET_PREFIX + getBaseName();
+            if ((readMethod == null) && !readMethodName.equals(nextMethodName)) {
+                readMethodName = nextMethodName;
                 readMethod = Introspector.findMethod(cls, readMethodName, 0);
             }
             try {
@@ -416,7 +417,7 @@ public class PropertyDescriptor extends FeatureDescriptor {
         Method yw = y.getWriteMethod();
 
         try {
-            if (yw != null && yw.getDeclaringClass() == getClass0()) {
+            if (yw != null) {
                 setWriteMethod(yw);
             } else {
                 setWriteMethod(xw);
@@ -485,7 +486,7 @@ public class PropertyDescriptor extends FeatureDescriptor {
                     throw new IntrospectionException("bad write method arg count: "
                                                      + writeMethod);
                 }
-                if (propertyType != null && propertyType != params[0]) {
+                if (propertyType != null && !params[0].isAssignableFrom(propertyType)) {
                     throw new IntrospectionException("type mismatch between read and write methods");
                 }
                 propertyType = params[0];

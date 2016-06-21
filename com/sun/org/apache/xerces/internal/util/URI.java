@@ -3,6 +3,7 @@
 
 package com.sun.org.apache.xerces.internal.util;
 
+import com.sun.org.apache.xerces.internal.utils.Objects;
 import java.io.IOException;
 import java.io.Serializable;
 
@@ -930,7 +931,7 @@ import java.io.Serializable;
 
  
   public String getSchemeSpecificPart() {
-    StringBuffer schemespec = new StringBuffer();
+    final StringBuilder schemespec = new StringBuilder();
 
     if (m_host != null || m_regAuthority != null) {
       schemespec.append("//");
@@ -995,7 +996,7 @@ import java.io.Serializable;
 
   
   public String getAuthority() {
-      StringBuffer authority = new StringBuffer();
+      final StringBuilder authority = new StringBuilder();
       if (m_host != null || m_regAuthority != null) {
           authority.append("//");
 
@@ -1025,7 +1026,7 @@ import java.io.Serializable;
  
   public String getPath(boolean p_includeQueryString,
                         boolean p_includeFragment) {
-    StringBuffer pathString = new StringBuffer(m_path);
+    final StringBuilder pathString = new StringBuilder(m_path);
 
     if (p_includeQueryString && m_queryString != null) {
       pathString.append('?');
@@ -1252,6 +1253,7 @@ import java.io.Serializable;
   }
 
  
+  @Override
   public boolean equals(Object p_test) {
     if (p_test instanceof URI) {
       URI testURI = (URI) p_test;
@@ -1280,9 +1282,23 @@ import java.io.Serializable;
     return false;
   }
 
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 47 * hash + Objects.hashCode(this.m_scheme);
+        hash = 47 * hash + Objects.hashCode(this.m_userinfo);
+        hash = 47 * hash + Objects.hashCode(this.m_host);
+        hash = 47 * hash + this.m_port;
+        hash = 47 * hash + Objects.hashCode(this.m_path);
+        hash = 47 * hash + Objects.hashCode(this.m_queryString);
+        hash = 47 * hash + Objects.hashCode(this.m_fragment);
+        return hash;
+    }
+
  
+  @Override
   public String toString() {
-    StringBuffer uriSpecString = new StringBuffer();
+    final StringBuilder uriSpecString = new StringBuilder();
 
     if (m_scheme != null) {
       uriSpecString.append(m_scheme);

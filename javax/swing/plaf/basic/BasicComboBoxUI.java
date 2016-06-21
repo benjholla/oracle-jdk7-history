@@ -463,9 +463,9 @@ public class BasicComboBoxUI extends ComboBoxUI {
     
     protected void installComponents() {
         arrowButton = createArrowButton();
-        comboBox.add( arrowButton );
 
         if (arrowButton != null)  {
+            comboBox.add(arrowButton);
             configureArrowButton();
         }
 
@@ -818,7 +818,9 @@ public class BasicComboBoxUI extends ComboBoxUI {
             listBox.setSelectedIndex( si + 1 );
             listBox.ensureIndexIsVisible( si + 1 );
             if ( !isTableCellEditor ) {
-                comboBox.setSelectedIndex(si+1);
+                if (!(UIManager.getBoolean("ComboBox.noActionOnKeyNavigation") && comboBox.isPopupVisible())) {
+                    comboBox.setSelectedIndex(si+1);
+                }
             }
             comboBox.repaint();
         }
@@ -839,7 +841,9 @@ public class BasicComboBoxUI extends ComboBoxUI {
             listBox.setSelectedIndex( si - 1 );
             listBox.ensureIndexIsVisible( si - 1 );
             if ( !isTableCellEditor ) {
-                comboBox.setSelectedIndex(si-1);
+                if (!(UIManager.getBoolean("ComboBox.noActionOnKeyNavigation") && comboBox.isPopupVisible())) {
+                    comboBox.setSelectedIndex(si-1);
+                }
             }
             comboBox.repaint();
         }
@@ -1145,7 +1149,13 @@ public class BasicComboBoxUI extends ComboBoxUI {
                      key == HOME || key == END) {
                 int index = getNextIndex(comboBox, key);
                 if (index >= 0 && index < comboBox.getItemCount()) {
-                    comboBox.setSelectedIndex(index);
+                    if (UIManager.getBoolean("ComboBox.noActionOnKeyNavigation") && comboBox.isPopupVisible()) {
+                        ui.listBox.setSelectedIndex(index);
+                        ui.listBox.ensureIndexIsVisible(index);
+                        comboBox.repaint();
+                    } else {
+                        comboBox.setSelectedIndex(index);
+                    }
                 }
             }
             else if (key == DOWN) {
@@ -1214,21 +1224,32 @@ public class BasicComboBoxUI extends ComboBoxUI {
             else if (key == ENTER) {
                 if (comboBox.isPopupVisible()) {
                     
-                    boolean isEnterSelectablePopup =
-                            UIManager.getBoolean("ComboBox.isEnterSelectablePopup");
-                    if (!comboBox.isEditable() || isEnterSelectablePopup
-                            || ui.isTableCellEditor) {
+                    
+                    if (UIManager.getBoolean("ComboBox.noActionOnKeyNavigation")) {
                         Object listItem = ui.popup.getList().getSelectedValue();
                         if (listItem != null) {
-                            
-                            
-                            
-                            
                             comboBox.getEditor().setItem(listItem);
                             comboBox.setSelectedItem(listItem);
                         }
+                        comboBox.setPopupVisible(false);
+                    } else {
+                        
+                        boolean isEnterSelectablePopup =
+                                UIManager.getBoolean("ComboBox.isEnterSelectablePopup");
+                        if (!comboBox.isEditable() || isEnterSelectablePopup
+                                || ui.isTableCellEditor) {
+                            Object listItem = ui.popup.getList().getSelectedValue();
+                            if (listItem != null) {
+                                
+                                
+                                
+                                
+                                comboBox.getEditor().setItem(listItem);
+                                comboBox.setSelectedItem(listItem);
+                            }
+                        }
+                        comboBox.setPopupVisible(false);
                     }
-                    comboBox.setPopupVisible(false);
                 }
                 else {
                     
@@ -1259,14 +1280,20 @@ public class BasicComboBoxUI extends ComboBoxUI {
         }
 
         private int getNextIndex(JComboBox comboBox, String key) {
+            int listHeight = comboBox.getMaximumRowCount();
+
+            int selectedIndex = comboBox.getSelectedIndex();
+            if (UIManager.getBoolean("ComboBox.noActionOnKeyNavigation")
+                    && (comboBox.getUI() instanceof BasicComboBoxUI)) {
+                selectedIndex = ((BasicComboBoxUI) comboBox.getUI()).listBox.getSelectedIndex();
+            }
+
             if (key == PAGE_UP) {
-                int listHeight = comboBox.getMaximumRowCount();
-                int index = comboBox.getSelectedIndex() - listHeight;
+                int index = selectedIndex - listHeight;
                 return (index < 0 ? 0: index);
             }
             else if (key == PAGE_DOWN) {
-                int listHeight = comboBox.getMaximumRowCount();
-                int index = comboBox.getSelectedIndex() + listHeight;
+                int index = selectedIndex + listHeight;
                 int max = comboBox.getItemCount();
                 return (index < max ? index: max-1);
             }

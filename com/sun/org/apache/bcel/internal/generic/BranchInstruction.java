@@ -22,6 +22,7 @@ public abstract class BranchInstruction extends Instruction implements Instructi
   }
 
   
+  @Override
   public void dump(DataOutputStream out) throws IOException {
     out.writeByte(opcode);
 
@@ -58,6 +59,7 @@ public abstract class BranchInstruction extends Instruction implements Instructi
   }
 
   
+  @Override
   public String toString(boolean verbose) {
     String s = super.toString(verbose);
     String t = "null";
@@ -82,6 +84,7 @@ public abstract class BranchInstruction extends Instruction implements Instructi
   }
 
   
+  @Override
   protected void initFromFile(ByteSequence bytes, boolean wide) throws IOException
   {
     length = 3;
@@ -95,21 +98,30 @@ public abstract class BranchInstruction extends Instruction implements Instructi
   public InstructionHandle getTarget() { return target; }
 
   
-  public void setTarget(InstructionHandle target) {
-    notifyTarget(this.target, target, this);
+  public final void setTarget(InstructionHandle target) {
+    notifyTargetChanging(this.target, this);
     this.target = target;
+    notifyTargetChanged(this.target, this);
   }
 
   
-  static final void notifyTarget(InstructionHandle old_ih, InstructionHandle new_ih,
+  static void notifyTargetChanging(InstructionHandle old_ih,
                                  InstructionTargeter t) {
-    if(old_ih != null)
+    if(old_ih != null) {
       old_ih.removeTargeter(t);
-    if(new_ih != null)
-      new_ih.addTargeter(t);
+    }
   }
 
   
+  static void notifyTargetChanged(InstructionHandle new_ih,
+                                 InstructionTargeter t) {
+    if(new_ih != null) {
+      new_ih.addTargeter(t);
+    }
+  }
+
+  
+  @Override
   public void updateTarget(InstructionHandle old_ih, InstructionHandle new_ih) {
     if(target == old_ih)
       setTarget(new_ih);
@@ -118,11 +130,13 @@ public abstract class BranchInstruction extends Instruction implements Instructi
   }
 
   
+  @Override
   public boolean containsTarget(InstructionHandle ih) {
     return (target == ih);
   }
 
   
+  @Override
   void dispose() {
     setTarget(null);
     index=-1;

@@ -5,6 +5,7 @@ package com.sun.org.apache.xml.internal.dtm.ref;
 
 import java.util.Vector;
 
+import com.sun.org.apache.xalan.internal.utils.Objects;
 import com.sun.org.apache.xml.internal.dtm.DTM;
 import com.sun.org.apache.xml.internal.dtm.DTMDOMException;
 import com.sun.org.apache.xpath.internal.NodeSet;
@@ -85,21 +86,21 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final boolean equals(Object node)
   {
+      
+      
+      
+      return node instanceof Node && equals((Node) node);
+  }
 
-    try
-    {
-
-      
-      
-      
-      return equals((Node) node);
-    }
-    catch (ClassCastException cce)
-    {
-      return false;
-    }
+  @Override
+  public int hashCode() {
+      int hash = 7;
+      hash = 29 * hash + Objects.hashCode(this.dtm);
+      hash = 29 * hash + this.node;
+      return hash;
   }
 
   
@@ -115,36 +116,42 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final String getNodeName()
   {
     return dtm.getNodeName(node);
   }
 
   
+  @Override
   public final String getTarget()
   {
     return dtm.getNodeName(node);
   }  
 
   
+  @Override
   public final String getLocalName()
   {
     return dtm.getLocalName(node);
   }
 
   
+  @Override
   public final String getPrefix()
   {
     return dtm.getPrefix(node);
   }
 
   
+  @Override
   public final void setPrefix(String prefix) throws DOMException
   {
     throw new DTMDOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR);
   }
 
   
+  @Override
   public final String getNamespaceURI()
   {
     return dtm.getNamespaceURI(node);
@@ -158,6 +165,7 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final boolean isSupported(String feature, String version)
   {
     return implementation.hasFeature(feature,version);
@@ -165,6 +173,7 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final String getNodeValue() throws DOMException
   {
     return dtm.getNodeValue(node);
@@ -177,18 +186,21 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final void setNodeValue(String nodeValue) throws DOMException
   {
     throw new DTMDOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR);
   }
 
   
+  @Override
   public final short getNodeType()
   {
     return (short) dtm.getNodeType(node);
   }
 
   
+  @Override
   public final Node getParentNode()
   {
 
@@ -210,6 +222,7 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final NodeList getChildNodes()
   {
 
@@ -222,6 +235,7 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final Node getFirstChild()
   {
 
@@ -231,6 +245,7 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final Node getLastChild()
   {
 
@@ -240,6 +255,7 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final Node getPreviousSibling()
   {
 
@@ -249,6 +265,7 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final Node getNextSibling()
   {
 
@@ -264,6 +281,7 @@ public class DTMNodeProxy
   
 
   
+  @Override
   public final NamedNodeMap getAttributes()
   {
 
@@ -271,18 +289,21 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public boolean hasAttribute(String name)
   {
     return DTM.NULL != dtm.getAttributeNode(node,null,name);
   }
 
   
+  @Override
   public boolean hasAttributeNS(String namespaceURI, String localName)
   {
     return DTM.NULL != dtm.getAttributeNode(node,namespaceURI,localName);
   }
 
   
+  @Override
   public final Document getOwnerDocument()
   {
         
@@ -290,6 +311,7 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final Node insertBefore(Node newChild, Node refChild)
     throws DOMException
   {
@@ -297,6 +319,7 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final Node replaceChild(Node newChild, Node oldChild)
     throws DOMException
   {
@@ -304,42 +327,49 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final Node removeChild(Node oldChild) throws DOMException
   {
     throw new DTMDOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR);
   }
 
   
+  @Override
   public final Node appendChild(Node newChild) throws DOMException
   {
     throw new DTMDOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR);
   }
 
   
+  @Override
   public final boolean hasChildNodes()
   {
     return (DTM.NULL != dtm.getFirstChild(node));
   }
 
   
+  @Override
   public final Node cloneNode(boolean deep)
   {
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
   
+  @Override
   public final DocumentType getDoctype()
   {
     return null;
   }
 
   
+  @Override
   public final DOMImplementation getImplementation()
   {
     return implementation;
   }
 
   
+  @Override
   public final Element getDocumentElement()
   {
                 int dochandle=dtm.getDocument();
@@ -379,30 +409,35 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final Element createElement(String tagName) throws DOMException
   {
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
   
+  @Override
   public final DocumentFragment createDocumentFragment()
   {
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
   
+  @Override
   public final Text createTextNode(String data)
   {
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
   
+  @Override
   public final Comment createComment(String data)
   {
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
   
+  @Override
   public final CDATASection createCDATASection(String data)
     throws DOMException
   {
@@ -410,25 +445,29 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final ProcessingInstruction createProcessingInstruction(
-                                                                 String target, String data) throws DOMException
+                                String target, String data) throws DOMException
   {
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
   
+  @Override
   public final Attr createAttribute(String name) throws DOMException
   {
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
   
+  @Override
   public final EntityReference createEntityReference(String name)
     throws DOMException
   {
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
  
+  @Override
   public final NodeList getElementsByTagName(String tagname)
   {
        Vector listVector = new Vector();
@@ -491,6 +530,7 @@ public class DTMNodeProxy
 
 
   
+  @Override
   public final Node importNode(Node importedNode, boolean deep)
     throws DOMException
   {
@@ -498,20 +538,23 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final Element createElementNS(
-                                       String namespaceURI, String qualifiedName) throws DOMException
+                 String namespaceURI, String qualifiedName) throws DOMException
   {
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
   
+  @Override
   public final Attr createAttributeNS(
-                                      String namespaceURI, String qualifiedName) throws DOMException
+                  String namespaceURI, String qualifiedName) throws DOMException
   {
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
    
+  @Override
   public final NodeList getElementsByTagNameNS(String namespaceURI,
                                                String localName)
   {
@@ -582,30 +625,35 @@ public class DTMNodeProxy
     }
   }
   
+  @Override
   public final Element getElementById(String elementId)
   {
        return (Element) dtm.getNode(dtm.getElementById(elementId));
   }
 
   
+  @Override
   public final Text splitText(int offset) throws DOMException
   {
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
   
+  @Override
   public final String getData() throws DOMException
   {
     return dtm.getNodeValue(node);
   }
 
   
+  @Override
   public final void setData(String data) throws DOMException
   {
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
   
+  @Override
   public final int getLength()
   {
     
@@ -613,30 +661,35 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final String substringData(int offset, int count) throws DOMException
   {
     return getData().substring(offset,offset+count);
   }
 
   
+  @Override
   public final void appendData(String arg) throws DOMException
   {
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
   
+  @Override
   public final void insertData(int offset, String arg) throws DOMException
   {
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
   
+  @Override
   public final void deleteData(int offset, int count) throws DOMException
   {
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
   
+  @Override
   public final void replaceData(int offset, int count, String arg)
     throws DOMException
   {
@@ -644,20 +697,23 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final String getTagName()
   {
     return dtm.getNodeName(node);
   }
 
   
+  @Override
   public final String getAttribute(String name)
   {
-
     DTMNamedNodeMap  map = new DTMNamedNodeMap(dtm, node);
-    Node node = map.getNamedItem(name);
-    return (null == node) ? EMPTYSTRING : node.getNodeValue();  }
+    Node n = map.getNamedItem(name);
+    return (null == n) ? EMPTYSTRING : n.getNodeValue();
+  }
 
   
+  @Override
   public final void setAttribute(String name, String value)
     throws DOMException
   {
@@ -665,44 +721,50 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final void removeAttribute(String name) throws DOMException
   {
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
   
+  @Override
   public final Attr getAttributeNode(String name)
   {
-
     DTMNamedNodeMap  map = new DTMNamedNodeMap(dtm, node);
     return (Attr)map.getNamedItem(name);
   }
 
   
+  @Override
   public final Attr setAttributeNode(Attr newAttr) throws DOMException
   {
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
   
+  @Override
   public final Attr removeAttributeNode(Attr oldAttr) throws DOMException
   {
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
   
+  @Override
   public boolean hasAttributes()
   {
     return DTM.NULL != dtm.getFirstAttribute(node);
   }
 
   
+  @Override
   public final void normalize()
   {
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
   
+  @Override
   public final String getAttributeNS(String namespaceURI, String localName)
   {
     Node retNode = null;
@@ -713,6 +775,7 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final void setAttributeNS(
                                    String namespaceURI, String qualifiedName, String value)
     throws DOMException
@@ -721,6 +784,7 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final void removeAttributeNS(String namespaceURI, String localName)
     throws DOMException
   {
@@ -728,6 +792,7 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final Attr getAttributeNodeNS(String namespaceURI, String localName)
   {
        Attr retAttr = null;
@@ -739,18 +804,21 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final Attr setAttributeNodeNS(Attr newAttr) throws DOMException
   {
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
   
+  @Override
   public final String getName()
   {
     return dtm.getNodeName(node);
   }
 
   
+  @Override
   public final boolean getSpecified()
   {
     
@@ -761,18 +829,21 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public final String getValue()
   {
     return dtm.getNodeValue(node);
   }
 
   
+  @Override
   public final void setValue(String value)
   {
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
   
+  @Override
   public final Element getOwnerElement()
   {
     if (getNodeType() != Node.ATTRIBUTE_NODE)
@@ -784,16 +855,16 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public Node adoptNode(Node source) throws DOMException
   {
-
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
   
+  @Override
   public String getInputEncoding()
   {
-
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
@@ -806,7 +877,6 @@ public class DTMNodeProxy
   
   public boolean getStandalone()
   {
-
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
@@ -817,13 +887,14 @@ public class DTMNodeProxy
   }
 
   
+  @Override
   public boolean getStrictErrorChecking()
   {
-
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
   
+  @Override
   public void setStrictErrorChecking(boolean strictErrorChecking)
   {
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
@@ -832,7 +903,6 @@ public class DTMNodeProxy
   
   public String getVersion()
   {
-
     throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
   }
 
@@ -846,16 +916,19 @@ public class DTMNodeProxy
   
   static class DTMNodeProxyImplementation implements DOMImplementation
   {
+    @Override
     public DocumentType createDocumentType(String qualifiedName,String publicId, String systemId)
     {
       throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
     }
+    @Override
     public Document createDocument(String namespaceURI,String qualfiedName,DocumentType doctype)
     {
       
       throw new DTMDOMException(DOMException.NOT_SUPPORTED_ERR);
     }
     
+    @Override
     public boolean hasFeature(String feature,String version)
     {
       if( ("CORE".equals(feature.toUpperCase()) || "XML".equals(feature.toUpperCase()))
@@ -866,6 +939,7 @@ public class DTMNodeProxy
     }
 
     
+    @Override
     public Object getFeature(String feature, String version) {
         
         
@@ -878,6 +952,7 @@ public class DTMNodeProxy
 
 
 
+    @Override
     public Object setUserData(String key,
                               Object data,
                               UserDataHandler handler) {
@@ -885,11 +960,13 @@ public class DTMNodeProxy
     }
 
     
+    @Override
     public Object getUserData(String key) {
         return getOwnerDocument().getUserData( key);
     }
 
       
+    @Override
     public Object getFeature(String feature, String version) {
         
         
@@ -897,6 +974,7 @@ public class DTMNodeProxy
     }
 
     
+    @Override
     public boolean isEqualNode(Node arg) {
         if (arg == this) {
             return true;
@@ -956,6 +1034,7 @@ public class DTMNodeProxy
     }
 
       
+    @Override
     public String lookupNamespaceURI(String specifiedPrefix) {
         short type = this.getNodeType();
         switch (type) {
@@ -1026,6 +1105,7 @@ public class DTMNodeProxy
 
 
     
+    @Override
     public boolean isDefaultNamespace(String namespaceURI){
        
         return false;
@@ -1034,6 +1114,7 @@ public class DTMNodeProxy
     }
 
       
+    @Override
     public String lookupPrefix(String namespaceURI){
 
         
@@ -1067,32 +1148,38 @@ public class DTMNodeProxy
     }
 
      
+    @Override
     public boolean isSameNode(Node other) {
         
         return this == other;
     }
 
       
+    @Override
     public void setTextContent(String textContent)
         throws DOMException {
         setNodeValue(textContent);
     }
     
+    @Override
     public String getTextContent() throws DOMException {
         return getNodeValue();  
     }
 
      
+    @Override
     public short compareDocumentPosition(Node other) throws DOMException {
         return 0;
     }
 
      
+    @Override
     public String getBaseURI() {
         return null;
     }
 
-        
+    
+    @Override
     public Node renameNode(Node n,
                            String namespaceURI,
                            String name)
@@ -1102,10 +1189,12 @@ public class DTMNodeProxy
 
 
     
+    @Override
     public void normalizeDocument(){
 
     }
     
+    @Override
     public DOMConfiguration getDomConfig(){
        return null;
     }
@@ -1115,12 +1204,13 @@ public class DTMNodeProxy
     protected String fDocumentURI;
 
     
+    @Override
     public void setDocumentURI(String documentURI){
-
         fDocumentURI= documentURI;
     }
 
         
+    @Override
     public String getDocumentURI(){
         return fDocumentURI;
     }
@@ -1138,7 +1228,8 @@ public class DTMNodeProxy
         actualEncoding = value;
     }
 
-     
+   
+    @Override
     public Text replaceWholeText(String content)
                                  throws DOMException{
 
@@ -1146,6 +1237,7 @@ public class DTMNodeProxy
     }
 
      
+    @Override
     public String getWholeText(){
 
 
@@ -1154,12 +1246,10 @@ public class DTMNodeProxy
     }
 
       
+    @Override
     public boolean isElementContentWhitespace(){
         return false;
     }
-
-
-
 
      
     public void setIdAttribute(boolean id){
@@ -1167,32 +1257,38 @@ public class DTMNodeProxy
     }
 
      
+    @Override
     public void setIdAttribute(String name, boolean makeId) {
         
     }
 
 
     
+    @Override
     public void setIdAttributeNode(Attr at, boolean makeId) {
         
     }
 
     
+    @Override
     public void setIdAttributeNS(String namespaceURI, String localName,
                                     boolean makeId) {
         
     }
          
+    @Override
     public TypeInfo getSchemaTypeInfo(){
       return null; 
     }
 
+    @Override
     public boolean isId() {
         return false; 
     }
 
 
     private String xmlEncoding;
+    @Override
     public String getXmlEncoding( ) {
         return xmlEncoding;
     }
@@ -1201,23 +1297,25 @@ public class DTMNodeProxy
     }
 
     private boolean xmlStandalone;
+    @Override
     public boolean getXmlStandalone() {
         return xmlStandalone;
     }
 
+    @Override
     public void setXmlStandalone(boolean xmlStandalone) throws DOMException {
         this.xmlStandalone = xmlStandalone;
     }
 
     private String xmlVersion;
+    @Override
     public String getXmlVersion() {
         return xmlVersion;
     }
 
+    @Override
     public void setXmlVersion(String xmlVersion) throws DOMException {
         this.xmlVersion = xmlVersion;
     }
-
-
 
 }

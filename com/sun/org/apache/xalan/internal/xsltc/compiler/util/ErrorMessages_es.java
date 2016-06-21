@@ -194,6 +194,10 @@ public class ErrorMessages_es extends ListResourceBundle {
         "No se ha encontrado el destino de hoja de estilo ''{0}''."},
 
         
+        {ErrorMsg.ACCESSING_XSLT_TARGET_ERR,
+        "Could not read stylesheet target ''{0}'', because ''{1}'' access is not allowed."},
+
+        
         {ErrorMsg.NOT_IMPLEMENTED_ERR,
         "No implantado: ''{0}''."},
 

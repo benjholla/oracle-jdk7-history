@@ -3,7 +3,6 @@ package com.sun.org.apache.bcel.internal.generic;
 
 
 
-import com.sun.org.apache.bcel.internal.Constants;
 import com.sun.org.apache.bcel.internal.classfile.*;
 
 
@@ -20,11 +19,13 @@ public class LineNumberGen
   }
 
   
+  @Override
   public boolean containsTarget(InstructionHandle ih) {
     return this.ih == ih;
   }
 
   
+  @Override
   public void updateTarget(InstructionHandle old_ih, InstructionHandle new_ih) {
     if(old_ih != ih)
       throw new ClassGenException("Not targeting " + old_ih + ", but " + ih + "}");
@@ -37,12 +38,13 @@ public class LineNumberGen
     return new LineNumber(ih.getPosition(), src_line);
   }
 
-  public void setInstruction(InstructionHandle ih) {
-    BranchInstruction.notifyTarget(this.ih, ih, this);
-
+  public final void setInstruction(InstructionHandle ih) {
+    BranchInstruction.notifyTargetChanging(this.ih, this);
     this.ih = ih;
+    BranchInstruction.notifyTargetChanged(this.ih, this);
   }
 
+  @Override
   public Object clone() {
     try {
       return super.clone();

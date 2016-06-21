@@ -11,7 +11,7 @@ public class Version {
     
 
     
-    public static String fVersion = "Xerces-J 2.7.1";
+    public static final String fVersion = getVersion();
 
     private static final String fImmutableVersion = "Xerces-J 2.7.1";
 

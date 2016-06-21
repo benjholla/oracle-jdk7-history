@@ -47,7 +47,7 @@ public class XMLEntityScanner implements XMLLocator  {
     
     private Vector listeners = new Vector();
 
-    public static final boolean [] VALID_NAMES = new boolean[127];
+    private static final boolean [] VALID_NAMES = new boolean[127];
 
     
     private static final boolean DEBUG_BUFFER = false;

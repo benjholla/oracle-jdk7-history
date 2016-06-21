@@ -34,9 +34,6 @@ abstract public class TimeZone implements Serializable, Cloneable {
     private static final int ONE_DAY    = 24*ONE_HOUR;
 
     
-    private static JavaAWTAccess javaAWTAccess;
-
-    
     static final long serialVersionUID = 3581463369166924961L;
 
     
@@ -320,8 +317,9 @@ abstract public class TimeZone implements Serializable, Cloneable {
     }
 
     
-    private synchronized static TimeZone getDefaultInAppContext() {
-        javaAWTAccess = SharedSecrets.getJavaAWTAccess();
+    private static TimeZone getDefaultInAppContext() {
+        
+        JavaAWTAccess javaAWTAccess = SharedSecrets.getJavaAWTAccess();
         if (javaAWTAccess == null) {
             return mainAppContextDefault;
         } else {
@@ -339,8 +337,9 @@ abstract public class TimeZone implements Serializable, Cloneable {
     }
 
     
-    private synchronized static void setDefaultInAppContext(TimeZone tz) {
-        javaAWTAccess = SharedSecrets.getJavaAWTAccess();
+    private static void setDefaultInAppContext(TimeZone tz) {
+        
+        JavaAWTAccess javaAWTAccess = SharedSecrets.getJavaAWTAccess();
         if (javaAWTAccess == null) {
             mainAppContextDefault = tz;
         } else {
@@ -384,7 +383,7 @@ abstract public class TimeZone implements Serializable, Cloneable {
     private static final int    GMT_ID_LENGTH = 3;
 
     
-    private static TimeZone mainAppContextDefault;
+    private static volatile TimeZone mainAppContextDefault;
 
     
     private static final TimeZone parseCustomTimeZone(String id) {

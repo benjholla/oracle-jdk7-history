@@ -157,6 +157,9 @@ public class DocumentBuilderFactoryImpl extends DocumentBuilderFactory {
 
     public void setFeature(String name, boolean value)
         throws ParserConfigurationException {
+        if (features == null) {
+            features = new Hashtable();
+        }
         
         if (name.equals(XMLConstants.FEATURE_SECURE_PROCESSING)) {
             if (System.getSecurityManager() != null && (!value)) {
@@ -165,11 +168,10 @@ public class DocumentBuilderFactoryImpl extends DocumentBuilderFactory {
                         "jaxp-secureprocessing-feature", null));
             }
             fSecureProcess = value;
+            features.put(name, value ? Boolean.TRUE : Boolean.FALSE);
             return;
         }
-        if (features == null) {
-            features = new Hashtable();
-        }
+
         features.put(name, value ? Boolean.TRUE : Boolean.FALSE);
         
         try {

@@ -3,7 +3,6 @@ package com.sun.org.apache.bcel.internal.generic;
 
 
 
-import com.sun.org.apache.bcel.internal.Constants;
 import com.sun.org.apache.bcel.internal.classfile.*;
 
 
@@ -32,24 +31,28 @@ public final class CodeExceptionGen
   }
 
   
-  public void setStartPC(InstructionHandle start_pc) {
-    BranchInstruction.notifyTarget(this.start_pc, start_pc, this);
+  public final void setStartPC(InstructionHandle start_pc) {
+    BranchInstruction.notifyTargetChanging(this.start_pc, this);
     this.start_pc = start_pc;
+    BranchInstruction.notifyTargetChanged(this.start_pc, this);
   }
 
   
-  public void setEndPC(InstructionHandle end_pc) {
-    BranchInstruction.notifyTarget(this.end_pc, end_pc, this);
+  public final void setEndPC(InstructionHandle end_pc) {
+    BranchInstruction.notifyTargetChanging(this.end_pc, this);
     this.end_pc = end_pc;
+    BranchInstruction.notifyTargetChanged(this.end_pc, this);
   }
 
   
-  public void setHandlerPC(InstructionHandle handler_pc) {
-    BranchInstruction.notifyTarget(this.handler_pc, handler_pc, this);
+  public final void setHandlerPC(InstructionHandle handler_pc) {
+    BranchInstruction.notifyTargetChanging(this.handler_pc, this);
     this.handler_pc = handler_pc;
+    BranchInstruction.notifyTargetChanged(this.handler_pc, this);
   }
 
   
+  @Override
   public void updateTarget(InstructionHandle old_ih, InstructionHandle new_ih) {
     boolean targeted = false;
 
@@ -74,6 +77,7 @@ public final class CodeExceptionGen
   }
 
   
+  @Override
   public boolean containsTarget(InstructionHandle ih) {
     return (start_pc == ih) || (end_pc == ih) || (handler_pc == ih);
   }
@@ -92,10 +96,12 @@ public final class CodeExceptionGen
   
   public InstructionHandle getHandlerPC()                             { return handler_pc; }
 
+  @Override
   public String toString() {
     return "CodeExceptionGen(" + start_pc + ", " + end_pc + ", " + handler_pc + ")";
   }
 
+  @Override
   public Object clone() {
     try {
       return super.clone();

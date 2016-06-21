@@ -10,6 +10,12 @@ public class ArrayList<E> extends AbstractList<E>
     private static final long serialVersionUID = 8683452581122892189L;
 
     
+    private static final int DEFAULT_CAPACITY = 10;
+
+    
+    private static final Object[] EMPTY_ELEMENTDATA = {};
+
+    
     private transient Object[] elementData;
 
     
@@ -26,7 +32,8 @@ public class ArrayList<E> extends AbstractList<E>
 
     
     public ArrayList() {
-        this(10);
+        super();
+        this.elementData = EMPTY_ELEMENTDATA;
     }
 
     
@@ -41,20 +48,36 @@ public class ArrayList<E> extends AbstractList<E>
     
     public void trimToSize() {
         modCount++;
-        int oldCapacity = elementData.length;
-        if (size < oldCapacity) {
+        if (size < elementData.length) {
             elementData = Arrays.copyOf(elementData, size);
         }
     }
 
     
     public void ensureCapacity(int minCapacity) {
-        if (minCapacity > 0)
-            ensureCapacityInternal(minCapacity);
+        int minExpand = (elementData != EMPTY_ELEMENTDATA)
+            
+            ? 0
+            
+            
+            : DEFAULT_CAPACITY;
+
+        if (minCapacity > minExpand) {
+            ensureExplicitCapacity(minCapacity);
+        }
     }
 
     private void ensureCapacityInternal(int minCapacity) {
+        if (elementData == EMPTY_ELEMENTDATA) {
+            minCapacity = Math.max(DEFAULT_CAPACITY, minCapacity);
+        }
+
+        ensureExplicitCapacity(minCapacity);
+    }
+
+    private void ensureExplicitCapacity(int minCapacity) {
         modCount++;
+
         
         if (minCapacity - elementData.length > 0)
             grow(minCapacity);
@@ -291,8 +314,10 @@ public class ArrayList<E> extends AbstractList<E>
 
         
         int newSize = size - (toIndex-fromIndex);
-        while (size != newSize)
-            elementData[--size] = null;
+        for (int i = newSize; i < size; i++) {
+            elementData[i] = null;
+        }
+        size = newSize;
     }
 
     
@@ -340,6 +365,7 @@ public class ArrayList<E> extends AbstractList<E>
                 w += size - r;
             }
             if (w != size) {
+                
                 for (int i = w; i < size; i++)
                     elementData[i] = null;
                 modCount += size - w;
@@ -358,31 +384,39 @@ public class ArrayList<E> extends AbstractList<E>
         s.defaultWriteObject();
 
         
-        s.writeInt(elementData.length);
+        s.writeInt(size);
 
         
-        for (int i=0; i<size; i++)
+        for (int i=0; i<size; i++) {
             s.writeObject(elementData[i]);
+        }
 
         if (modCount != expectedModCount) {
             throw new ConcurrentModificationException();
         }
-
     }
 
     
     private void readObject(java.io.ObjectInputStream s)
         throws java.io.IOException, ClassNotFoundException {
+        elementData = EMPTY_ELEMENTDATA;
+
         
         s.defaultReadObject();
 
         
-        int arrayLength = s.readInt();
-        Object[] a = elementData = new Object[arrayLength];
+        s.readInt(); 
 
-        
-        for (int i=0; i<size; i++)
-            a[i] = s.readObject();
+        if (size > 0) {
+            
+            ensureCapacityInternal(size);
+
+            Object[] a = elementData;
+            
+            for (int i=0; i<size; i++) {
+                a[i] = s.readObject();
+            }
+        }
     }
 
     

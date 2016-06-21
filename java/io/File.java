@@ -27,6 +27,21 @@ public class File
     private String path;
 
     
+    private static enum PathStatus { INVALID, CHECKED };
+
+    
+    private transient PathStatus status = null;
+
+    
+    final boolean isInvalid() {
+        if (status == null) {
+            status = (this.path.indexOf('\u0000') < 0) ? PathStatus.CHECKED
+                                                       : PathStatus.INVALID;
+        }
+        return status == PathStatus.INVALID;
+    }
+
+    
     private transient int prefixLength;
 
     
@@ -195,6 +210,9 @@ public class File
 
     
     public String getCanonicalPath() throws IOException {
+        if (isInvalid()) {
+            throw new IOException("Invalid file path");
+        }
         return fs.canonicalize(fs.resolve(this));
     }
 
@@ -218,6 +236,9 @@ public class File
     
     @Deprecated
     public URL toURL() throws MalformedURLException {
+        if (isInvalid()) {
+            throw new MalformedURLException("Invalid file path");
+        }
         return new URL("file", "", slashify(getAbsolutePath(), isDirectory()));
     }
 
@@ -243,6 +264,9 @@ public class File
         if (security != null) {
             security.checkRead(path);
         }
+        if (isInvalid()) {
+            return false;
+        }
         return fs.checkAccess(this, FileSystem.ACCESS_READ);
     }
 
@@ -251,6 +275,9 @@ public class File
         SecurityManager security = System.getSecurityManager();
         if (security != null) {
             security.checkWrite(path);
+        }
+        if (isInvalid()) {
+            return false;
         }
         return fs.checkAccess(this, FileSystem.ACCESS_WRITE);
     }
@@ -261,6 +288,9 @@ public class File
         if (security != null) {
             security.checkRead(path);
         }
+        if (isInvalid()) {
+            return false;
+        }
         return ((fs.getBooleanAttributes(this) & FileSystem.BA_EXISTS) != 0);
     }
 
@@ -269,6 +299,9 @@ public class File
         SecurityManager security = System.getSecurityManager();
         if (security != null) {
             security.checkRead(path);
+        }
+        if (isInvalid()) {
+            return false;
         }
         return ((fs.getBooleanAttributes(this) & FileSystem.BA_DIRECTORY)
                 != 0);
@@ -280,6 +313,9 @@ public class File
         if (security != null) {
             security.checkRead(path);
         }
+        if (isInvalid()) {
+            return false;
+        }
         return ((fs.getBooleanAttributes(this) & FileSystem.BA_REGULAR) != 0);
     }
 
@@ -288,6 +324,9 @@ public class File
         SecurityManager security = System.getSecurityManager();
         if (security != null) {
             security.checkRead(path);
+        }
+        if (isInvalid()) {
+            return false;
         }
         return ((fs.getBooleanAttributes(this) & FileSystem.BA_HIDDEN) != 0);
     }
@@ -298,6 +337,9 @@ public class File
         if (security != null) {
             security.checkRead(path);
         }
+        if (isInvalid()) {
+            return 0L;
+        }
         return fs.getLastModifiedTime(this);
     }
 
@@ -306,6 +348,9 @@ public class File
         SecurityManager security = System.getSecurityManager();
         if (security != null) {
             security.checkRead(path);
+        }
+        if (isInvalid()) {
+            return 0L;
         }
         return fs.getLength(this);
     }
@@ -317,6 +362,9 @@ public class File
     public boolean createNewFile() throws IOException {
         SecurityManager security = System.getSecurityManager();
         if (security != null) security.checkWrite(path);
+        if (isInvalid()) {
+            throw new IOException("Invalid file path");
+        }
         return fs.createFileExclusively(path);
     }
 
@@ -325,6 +373,9 @@ public class File
         SecurityManager security = System.getSecurityManager();
         if (security != null) {
             security.checkDelete(path);
+        }
+        if (isInvalid()) {
+            return false;
         }
         return fs.delete(this);
     }
@@ -335,6 +386,9 @@ public class File
         if (security != null) {
             security.checkDelete(path);
         }
+        if (isInvalid()) {
+            return;
+        }
         DeleteOnExitHook.add(path);
     }
 
@@ -343,6 +397,9 @@ public class File
         SecurityManager security = System.getSecurityManager();
         if (security != null) {
             security.checkRead(path);
+        }
+        if (isInvalid()) {
+            return null;
         }
         return fs.list(this);
     }
@@ -404,6 +461,9 @@ public class File
         if (security != null) {
             security.checkWrite(path);
         }
+        if (isInvalid()) {
+            return false;
+        }
         return fs.createDirectory(this);
     }
 
@@ -434,6 +494,12 @@ public class File
             security.checkWrite(path);
             security.checkWrite(dest.path);
         }
+        if (dest == null) {
+            throw new NullPointerException();
+        }
+        if (this.isInvalid() || dest.isInvalid()) {
+            return false;
+        }
         return fs.rename(this, dest);
     }
 
@@ -444,6 +510,9 @@ public class File
         if (security != null) {
             security.checkWrite(path);
         }
+        if (isInvalid()) {
+            return false;
+        }
         return fs.setLastModifiedTime(this, time);
     }
 
@@ -453,6 +522,9 @@ public class File
         if (security != null) {
             security.checkWrite(path);
         }
+        if (isInvalid()) {
+            return false;
+        }
         return fs.setReadOnly(this);
     }
 
@@ -461,6 +533,9 @@ public class File
         SecurityManager security = System.getSecurityManager();
         if (security != null) {
             security.checkWrite(path);
+        }
+        if (isInvalid()) {
+            return false;
         }
         return fs.setPermission(this, FileSystem.ACCESS_WRITE, writable, ownerOnly);
     }
@@ -476,6 +551,9 @@ public class File
         if (security != null) {
             security.checkWrite(path);
         }
+        if (isInvalid()) {
+            return false;
+        }
         return fs.setPermission(this, FileSystem.ACCESS_READ, readable, ownerOnly);
     }
 
@@ -490,6 +568,9 @@ public class File
         if (security != null) {
             security.checkWrite(path);
         }
+        if (isInvalid()) {
+            return false;
+        }
         return fs.setPermission(this, FileSystem.ACCESS_EXECUTE, executable, ownerOnly);
     }
 
@@ -503,6 +584,9 @@ public class File
         SecurityManager security = System.getSecurityManager();
         if (security != null) {
             security.checkExec(path);
+        }
+        if (isInvalid()) {
+            return false;
         }
         return fs.checkAccess(this, FileSystem.ACCESS_EXECUTE);
     }
@@ -525,6 +609,9 @@ public class File
             sm.checkPermission(new RuntimePermission("getFileSystemAttributes"));
             sm.checkRead(path);
         }
+        if (isInvalid()) {
+            return 0L;
+        }
         return fs.getSpace(this, FileSystem.SPACE_TOTAL);
     }
 
@@ -534,6 +621,9 @@ public class File
         if (sm != null) {
             sm.checkPermission(new RuntimePermission("getFileSystemAttributes"));
             sm.checkRead(path);
+        }
+        if (isInvalid()) {
+            return 0L;
         }
         return fs.getSpace(this, FileSystem.SPACE_FREE);
     }
@@ -545,6 +635,9 @@ public class File
             sm.checkPermission(new RuntimePermission("getFileSystemAttributes"));
             sm.checkRead(path);
         }
+        if (isInvalid()) {
+            return 0L;
+        }
         return fs.getSpace(this, FileSystem.SPACE_USABLE);
     }
 
@@ -554,22 +647,28 @@ public class File
         private TempDirectory() { }
 
         
-        private static final File tmpdir = new File(fs.normalize(AccessController
-            .doPrivileged(new GetPropertyAction("java.io.tmpdir"))));
+        private static final File tmpdir = new File(AccessController
+            .doPrivileged(new GetPropertyAction("java.io.tmpdir")));
         static File location() {
             return tmpdir;
         }
 
         
         private static final SecureRandom random = new SecureRandom();
-        static File generateFile(String prefix, String suffix, File dir) {
+        static File generateFile(String prefix, String suffix, File dir)
+            throws IOException
+        {
             long n = random.nextLong();
             if (n == Long.MIN_VALUE) {
                 n = 0;      
             } else {
                 n = Math.abs(n);
             }
-            return new File(dir, prefix + Long.toString(n) + suffix);
+            String name = prefix + Long.toString(n) + suffix;
+            File f = new File(dir, name);
+            if (!name.equals(f.getName()))
+                throw new IOException("Unable to create temporary file");
+            return f;
         }
     }
 
@@ -583,22 +682,21 @@ public class File
         if (suffix == null)
             suffix = ".tmp";
 
-        File tmpdir = (directory != null) ? directory : TempDirectory.location();
-        SecurityManager sm = System.getSecurityManager();
+        File tmpdir = (directory != null) ? directory
+                                          : TempDirectory.location();
         File f;
-        do {
-            f = TempDirectory.generateFile(prefix, suffix, tmpdir);
-            if (sm != null) {
-                try {
-                    sm.checkWrite(f.getPath());
-                } catch (SecurityException se) {
-                    
-                    if (directory == null)
-                        throw new SecurityException("Unable to create temporary file");
-                    throw se;
-                }
-            }
-        } while (!fs.createFileExclusively(f.getPath()));
+        try {
+            do {
+                f = TempDirectory.generateFile(prefix, suffix, tmpdir);
+            } while (f.exists());
+            if (!f.createNewFile())
+                throw new IOException("Unable to create temporary file");
+        } catch (SecurityException se) {
+            
+            if (directory == null)
+                throw new SecurityException("Unable to create temporary file");
+            throw se;
+        }
         return f;
     }
 

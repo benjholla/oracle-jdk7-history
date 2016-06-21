@@ -584,8 +584,10 @@ public class MotifLookAndFeel extends BasicLookAndFeel
             "Menu.menuPopupOffsetY", new Integer(0),
             "Menu.submenuPopupOffsetX", new Integer(-2),
             "Menu.submenuPopupOffsetY", new Integer(3),
-            "Menu.shortcutKeys", new int[] {KeyEvent.ALT_MASK,
-                                            KeyEvent.META_MASK},
+            "Menu.shortcutKeys", new int[]{
+                SwingUtilities2.getSystemMnemonicKeyMask(),
+                KeyEvent.META_MASK
+            },
             "Menu.cancelMode", "hideMenuTree",
 
             "MenuBar.border", menuBarBorder,
@@ -1169,11 +1171,6 @@ public class MotifLookAndFeel extends BasicLookAndFeel
             "EditorPane.focusInputMap", multilineInputMap,
 
 
-            "FileChooser.pathLabelMnemonic", new Integer(KeyEvent.VK_P), 
-            "FileChooser.filterLabelMnemonic", new Integer (KeyEvent.VK_R), 
-            "FileChooser.foldersLabelMnemonic", new Integer (KeyEvent.VK_L), 
-            "FileChooser.filesLabelMnemonic", new Integer (KeyEvent.VK_I), 
-            "FileChooser.enterFileNameLabelMnemonic", new Integer (KeyEvent.VK_N), 
             "FileChooser.ancestorInputMap",
                new UIDefaults.LazyInputMap(new Object[] {
                      "ESCAPE", "cancelSelection"

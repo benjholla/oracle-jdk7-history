@@ -3,8 +3,8 @@
 
 package com.sun.org.apache.xml.internal.serializer.utils;
 
+import com.sun.org.apache.xalan.internal.utils.Objects;
 import java.io.IOException;
-import java.io.Serializable;
 
 
 
@@ -643,7 +643,7 @@ final class URI
   public String getSchemeSpecificPart()
   {
 
-    StringBuffer schemespec = new StringBuffer();
+    final StringBuilder schemespec = new StringBuilder();
 
     if (m_userinfo != null || m_host != null || m_port != -1)
     {
@@ -710,7 +710,7 @@ final class URI
                         boolean p_includeFragment)
   {
 
-    StringBuffer pathString = new StringBuffer(m_path);
+    final StringBuilder pathString = new StringBuilder(m_path);
 
     if (p_includeQueryString && m_queryString != null)
     {
@@ -973,6 +973,7 @@ final class URI
   }
 
   
+  @Override
   public boolean equals(Object p_test)
   {
 
@@ -995,11 +996,25 @@ final class URI
     return false;
   }
 
+  @Override
+  public int hashCode() {
+    int hash = 5;
+    hash = 41 * hash + Objects.hashCode(this.m_scheme);
+    hash = 41 * hash + Objects.hashCode(this.m_userinfo);
+    hash = 41 * hash + Objects.hashCode(this.m_host);
+    hash = 41 * hash + this.m_port;
+    hash = 41 * hash + Objects.hashCode(this.m_path);
+    hash = 41 * hash + Objects.hashCode(this.m_queryString);
+    hash = 41 * hash + Objects.hashCode(this.m_fragment);
+    return hash;
+  }
+
   
+  @Override
   public String toString()
   {
 
-    StringBuffer uriSpecString = new StringBuffer();
+    final StringBuilder uriSpecString = new StringBuilder();
 
     if (m_scheme != null)
     {

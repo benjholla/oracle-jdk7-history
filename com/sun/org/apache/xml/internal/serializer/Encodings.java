@@ -14,6 +14,14 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.sun.org.apache.xalan.internal.utils.SecuritySupport;
 
@@ -37,36 +45,17 @@ public final class Encodings extends Object
         throws UnsupportedEncodingException
     {
 
-        for (int i = 0; i < _encodings.length; ++i)
-        {
-            if (_encodings[i].name.equalsIgnoreCase(encoding))
-            {
-                try
-                {
-                    return new BufferedWriter(new OutputStreamWriter(
-                        output,
-                        _encodings[i].javaName));
-                }
-                catch (java.lang.IllegalArgumentException iae) 
-                {
-                    
-                }
-                catch (UnsupportedEncodingException usee)
-                {
-
-                    
-                }
+        final EncodingInfo ei = _encodingInfos.findEncoding(toUpperCaseFast(encoding));
+        if (ei != null) {
+            try {
+                return new BufferedWriter(new OutputStreamWriter(
+                        output, ei.javaName));
+            } catch (UnsupportedEncodingException usee) {
+                
             }
         }
 
-        try
-        {
-            return new BufferedWriter(new OutputStreamWriter(output, encoding));
-        }
-        catch (java.lang.IllegalArgumentException iae) 
-        {
-            throw new UnsupportedEncodingException(encoding);
-        }
+        return new BufferedWriter(new OutputStreamWriter(output, encoding));
     }
 
 
@@ -84,12 +73,24 @@ public final class Encodings extends Object
         EncodingInfo ei;
 
         String normalizedEncoding = toUpperCaseFast(encoding);
-        ei = (EncodingInfo) _encodingTableKeyJava.get(normalizedEncoding);
-        if (ei == null)
-            ei = (EncodingInfo) _encodingTableKeyMime.get(normalizedEncoding);
+        ei = _encodingInfos.findEncoding(normalizedEncoding);
         if (ei == null) {
             
-            ei = new EncodingInfo(null,null);
+            try {
+                
+                
+                
+                
+                
+                
+                
+                final Charset c = Charset.forName(encoding);
+                final String name = c.name();
+                ei = new EncodingInfo(name, name);
+                _encodingInfos.putEncoding(normalizedEncoding, ei);
+            } catch (IllegalCharsetNameException | UnsupportedCharsetException x) {
+                ei = new EncodingInfo(null,null);
+            }
         }
 
         return ei;
@@ -176,8 +177,8 @@ public final class Encodings extends Object
     
     private static String convertJava2MimeEncoding(String encoding)
     {
-        EncodingInfo enc =
-            (EncodingInfo) _encodingTableKeyJava.get(encoding.toUpperCase());
+        final EncodingInfo enc =
+             _encodingInfos.getEncodingFromJavaKey(toUpperCaseFast(encoding));
         if (null != enc)
             return enc.name;
         return encoding;
@@ -186,32 +187,37 @@ public final class Encodings extends Object
     
     public static String convertMime2JavaEncoding(String encoding)
     {
-
-        for (int i = 0; i < _encodings.length; ++i)
-        {
-            if (_encodings[i].name.equalsIgnoreCase(encoding))
-            {
-                return _encodings[i].javaName;
-            }
-        }
-
-        return encoding;
+        final EncodingInfo info = _encodingInfos.findEncoding(toUpperCaseFast(encoding));
+        return info != null ? info.javaName : encoding;
     }
 
     
-    private static EncodingInfo[] loadEncodingInfo()
-    {
-        try
-        {
+    
+    
+    private final static class EncodingInfos {
+        
+        private final Map<String, EncodingInfo> _encodingTableKeyJava = new HashMap<>();
+        private final Map<String, EncodingInfo> _encodingTableKeyMime = new HashMap<>();
+        
+        
+        
+        
+        private final Map<String, EncodingInfo> _encodingDynamicTable =
+                Collections.synchronizedMap(new HashMap<String, EncodingInfo>());
+
+        private EncodingInfos() {
+            loadEncodingInfo();
+        }
+
+        
+        
+        private InputStream openEncodingsFileStream() throws MalformedURLException, IOException {
             String urlString = null;
             InputStream is = null;
 
-            try
-            {
+            try {
                 urlString = SecuritySupport.getSystemProperty(ENCODINGS_PROP, "");
-            }
-            catch (SecurityException e)
-            {
+            } catch (SecurityException e) {
             }
 
             if (urlString != null && urlString.length() > 0) {
@@ -222,84 +228,187 @@ public final class Encodings extends Object
             if (is == null) {
                 is = SecuritySupport.getResourceAsStream(ENCODINGS_FILE);
             }
+            return is;
+        }
 
+        
+        
+        
+        private Properties loadProperties() throws MalformedURLException, IOException {
             Properties props = new Properties();
-            if (is != null) {
-                props.load(is);
-                is.close();
-            } else {
-                
-                
-                
-                
-                
-                
-            }
-
-            int totalEntries = props.size();
-            int totalMimeNames = 0;
-            Enumeration keys = props.keys();
-            for (int i = 0; i < totalEntries; ++i)
-            {
-                String javaName = (String) keys.nextElement();
-                String val = props.getProperty(javaName);
-                totalMimeNames++;
-                int pos = val.indexOf(' ');
-                for (int j = 0; j < pos; ++j)
-                    if (val.charAt(j) == ',')
-                        totalMimeNames++;
-            }
-            EncodingInfo[] ret = new EncodingInfo[totalMimeNames];
-            int j = 0;
-            keys = props.keys();
-            for (int i = 0; i < totalEntries; ++i)
-            {
-                String javaName = (String) keys.nextElement();
-                String val = props.getProperty(javaName);
-                int pos = val.indexOf(' ');
-                String mimeName;
-                
-                if (pos < 0)
-                {
+            final InputStream is = openEncodingsFileStream();
+            try {
+                if (is != null) {
+                    props.load(is);
+                } else {
                     
                     
                     
-                    mimeName = val;
+                    
+                    
                     
                 }
-                else
-                {
-                    
-                    
-                    StringTokenizer st =
-                        new StringTokenizer(val.substring(0, pos), ",");
-                    for (boolean first = true;
-                        st.hasMoreTokens();
-                        first = false)
-                    {
-                        mimeName = st.nextToken();
-                        ret[j] =
-                            new EncodingInfo(mimeName, javaName);
-                        _encodingTableKeyMime.put(
-                            mimeName.toUpperCase(),
-                            ret[j]);
-                        if (first)
-                            _encodingTableKeyJava.put(
-                                javaName.toUpperCase(),
-                                ret[j]);
-                        j++;
+            } finally {
+                if (is != null) {
+                    is.close();
+                }
+            }
+            return props;
+        }
+
+        
+        
+        
+        private String[] parseMimeTypes(String val) {
+            int pos = val.indexOf(' ');
+            
+            if (pos < 0) {
+                
+                
+                
+                return new String[] { val };
+                
+            }
+            
+            
+            StringTokenizer st =
+                    new StringTokenizer(val.substring(0, pos), ",");
+            String[] values = new String[st.countTokens()];
+            for (int i=0; st.hasMoreTokens(); i++) {
+                values[i] = st.nextToken();
+            }
+            return values;
+        }
+
+        
+        
+        
+        
+        
+        
+        
+        private String findCharsetNameFor(String name) {
+            try {
+                return Charset.forName(name).name();
+            } catch (Exception x) {
+                return null;
+            }
+        }
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        private String findCharsetNameFor(String javaName, String[] mimes) {
+            String cs = findCharsetNameFor(javaName);
+            if (cs != null) return javaName;
+            for (String m : mimes) {
+                cs = findCharsetNameFor(m);
+                if (cs != null) break;
+            }
+            return cs;
+        }
+
+        
+        private void loadEncodingInfo() {
+            try {
+                
+                final Properties props = loadProperties();
+
+                
+                Enumeration keys = props.keys();
+                Map<String, EncodingInfo> canonicals = new HashMap<>();
+                while (keys.hasMoreElements()) {
+                    final String javaName = (String) keys.nextElement();
+                    final String[] mimes = parseMimeTypes(props.getProperty(javaName));
+
+                    final String charsetName = findCharsetNameFor(javaName, mimes);
+                    if (charsetName != null) {
+                        final String kj = toUpperCaseFast(javaName);
+                        final String kc = toUpperCaseFast(charsetName);
+                        for (int i = 0; i < mimes.length; ++i) {
+                            final String mimeName = mimes[i];
+                            final String km = toUpperCaseFast(mimeName);
+                            EncodingInfo info = new EncodingInfo(mimeName, charsetName);
+                            _encodingTableKeyMime.put(km, info);
+                            if (!canonicals.containsKey(kc)) {
+                                
+                                
+                                
+                                
+                                canonicals.put(kc, info);
+                                _encodingTableKeyJava.put(kc, info);
+                            }
+                            _encodingTableKeyJava.put(kj, info);
+                        }
+                    } else {
+                        
+                        
                     }
                 }
+
+                
+                
+                
+                
+                
+                for (Entry<String, EncodingInfo> e : _encodingTableKeyJava.entrySet()) {
+                    e.setValue(canonicals.get(toUpperCaseFast(e.getValue().javaName)));
+                }
+
+            } catch (java.net.MalformedURLException mue) {
+                throw new com.sun.org.apache.xml.internal.serializer.utils.WrappedRuntimeException(mue);
+            } catch (java.io.IOException ioe) {
+                throw new com.sun.org.apache.xml.internal.serializer.utils.WrappedRuntimeException(ioe);
             }
-            return ret;
         }
-        catch (java.net.MalformedURLException mue)
-        {
-            throw new com.sun.org.apache.xml.internal.serializer.utils.WrappedRuntimeException(mue);
+
+        EncodingInfo findEncoding(String normalizedEncoding) {
+            EncodingInfo info = _encodingTableKeyJava.get(normalizedEncoding);
+            if (info == null) {
+                info = _encodingTableKeyMime.get(normalizedEncoding);
+            }
+            if (info == null) {
+                info = _encodingDynamicTable.get(normalizedEncoding);
+            }
+            return info;
         }
-        catch (java.io.IOException ioe)
-        {
-            throw new com.sun.org.apache.xml.internal.serializer.utils.WrappedRuntimeException(ioe);
+
+        EncodingInfo getEncodingFromMimeKey(String normalizedMimeName) {
+            return _encodingTableKeyMime.get(normalizedMimeName);
+        }
+
+        EncodingInfo getEncodingFromJavaKey(String normalizedJavaName) {
+            return _encodingTableKeyJava.get(normalizedJavaName);
+        }
+
+        void putEncoding(String key, EncodingInfo info) {
+            _encodingDynamicTable.put(key, info);
         }
     }
 
@@ -325,7 +434,6 @@ public final class Encodings extends Object
         return codePoint;
     }
 
-    private static final HashMap _encodingTableKeyJava = new HashMap();
-    private static final HashMap _encodingTableKeyMime = new HashMap();
-    private static final EncodingInfo[] _encodings = loadEncodingInfo();
+    private final static EncodingInfos _encodingInfos = new EncodingInfos();
+
 }

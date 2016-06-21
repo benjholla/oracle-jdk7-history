@@ -1004,7 +1004,7 @@ public class SimpleDateFormat extends DateFormat {
             
             int dstAmount = (nameIndex >= 3) ? tz.getDSTSavings() : 0;
             if (!(useSameName || (nameIndex >= 3 && dstAmount == 0))) {
-                calb.set(Calendar.DST_OFFSET, dstAmount);
+                calb.clear(Calendar.ZONE_OFFSET).set(Calendar.DST_OFFSET, dstAmount);
             }
             return (start + zoneNames[nameIndex].length());
         }

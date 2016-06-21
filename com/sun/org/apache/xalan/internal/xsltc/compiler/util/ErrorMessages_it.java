@@ -194,6 +194,10 @@ public class ErrorMessages_it extends ListResourceBundle {
         "Impossibile trovare la destinazione ''{0}'' del foglio di stile."},
 
         
+        {ErrorMsg.ACCESSING_XSLT_TARGET_ERR,
+        "Could not read stylesheet target ''{0}'', because ''{1}'' access is not allowed."},
+
+        
         {ErrorMsg.NOT_IMPLEMENTED_ERR,
         "Non implementato: ''{0}''."},
 

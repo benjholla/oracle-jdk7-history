@@ -3,17 +3,17 @@
 
 package com.sun.org.apache.xml.internal.utils;
 
-import com.sun.org.apache.xalan.internal.utils.SecuritySupport;
+import com.sun.org.apache.xalan.internal.XalanConstants;
 import com.sun.org.apache.xalan.internal.utils.FactoryImpl;
+import com.sun.org.apache.xalan.internal.utils.SecuritySupport;
 import java.util.HashMap;
-
+import javax.xml.XMLConstants;
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
-
+import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
-import org.xml.sax.SAXException;
 
 
 public class XMLReaderManager {
@@ -35,6 +35,9 @@ public class XMLReaderManager {
     private HashMap m_inUse;
 
     private boolean m_useServicesMechanism = true;
+     
+    private String _accessExternalDTD = XalanConstants.EXTERNAL_ACCESS_DEFAULT;
+
     
     private XMLReaderManager() {
     }
@@ -114,6 +117,14 @@ public class XMLReaderManager {
             }
         }
 
+        try {
+            
+            reader.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, _accessExternalDTD);
+        } catch (SAXException se) {
+            System.err.println("Warning:  " + reader.getClass().getName() + ": "
+                        + se.getMessage());
+        }
+
         return reader;
     }
 
@@ -135,4 +146,18 @@ public class XMLReaderManager {
         m_useServicesMechanism = flag;
     }
 
+    
+    public String getProperty(String name) {
+        if (name.equals(XMLConstants.ACCESS_EXTERNAL_DTD)) {
+            return _accessExternalDTD;
+        }
+        return null;
+    }
+
+    
+    public void setProperty(String name, String value) {
+        if (name.equals(XMLConstants.ACCESS_EXTERNAL_DTD)) {
+            _accessExternalDTD = (String)value;
+        }
+    }
 }

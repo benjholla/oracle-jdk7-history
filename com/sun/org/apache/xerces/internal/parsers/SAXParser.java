@@ -5,8 +5,11 @@ package com.sun.org.apache.xerces.internal.parsers;
 
 import com.sun.org.apache.xerces.internal.impl.Constants;
 import com.sun.org.apache.xerces.internal.util.SymbolTable;
+import com.sun.org.apache.xerces.internal.utils.XMLSecurityPropertyManager;
 import com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarPool;
 import com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
 
 
 public class SAXParser
@@ -47,6 +50,7 @@ public class SAXParser
         XMLGRAMMAR_POOL,
     };
 
+    XMLSecurityPropertyManager securityPropertyManager;
     
     
     
@@ -85,4 +89,20 @@ public class SAXParser
 
     } 
 
+    
+    public void setProperty(String name, Object value)
+        throws SAXNotRecognizedException, SAXNotSupportedException {
+        if (securityPropertyManager == null) {
+            securityPropertyManager = new XMLSecurityPropertyManager();
+        }
+        int index = securityPropertyManager.getIndex(name);
+
+        if (index > -1) {
+            
+            securityPropertyManager.setValue(index, XMLSecurityPropertyManager.State.APIPROPERTY, (String)value);
+            super.setProperty(Constants.XML_SECURITY_PROPERTY_MANAGER, securityPropertyManager);
+        } else {
+            super.setProperty(name, value);
+        }
+    }
 } 

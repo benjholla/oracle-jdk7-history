@@ -3,51 +3,26 @@
 package java.lang.invoke;
 
 
-import java.util.ArrayList;
-import sun.invoke.util.ValueConversions;
+import java.util.*;
+import sun.invoke.util.*;
+import sun.misc.Unsafe;
+
 import static java.lang.invoke.MethodHandleStatics.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public abstract class MethodHandle {
-    
-
-    private byte       vmentry;    
-    
-     Object vmtarget;   
-
-    
-    
-    
-
-    
-    
-    
-    static final int  INT_FIELD = 0;
-    static final long LONG_FIELD = 0;
-
-    
-    
-    
-    
-
-    
-    
-    
-    
-
-    
-
     static { MethodHandleImpl.initStatics(); }
-
-    
-    
 
     
     @java.lang.annotation.Target({java.lang.annotation.ElementType.METHOD})
     @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
     @interface PolymorphicSignature { }
 
-    private MethodType type;
+    private final MethodType type;
+     final LambdaForm form;
+    
 
     
     public MethodType type() {
@@ -56,9 +31,13 @@ public abstract class MethodHandle {
 
     
     
-     MethodHandle(MethodType type) {
+     MethodHandle(MethodType type, LambdaForm form) {
         type.getClass();  
+        form.getClass();  
         this.type = type;
+        this.form = form;
+
+        form.prepare();  
     }
 
     
@@ -68,8 +47,23 @@ public abstract class MethodHandle {
     public final native @PolymorphicSignature Object invoke(Object... args) throws Throwable;
 
     
+     final native @PolymorphicSignature Object invokeBasic(Object... args) throws Throwable;
+
+     static native @PolymorphicSignature Object linkToVirtual(Object... args) throws Throwable;
+
+    
+     static native @PolymorphicSignature Object linkToStatic(Object... args) throws Throwable;
+
+    
+     static native @PolymorphicSignature Object linkToSpecial(Object... args) throws Throwable;
+
+    
+     static native @PolymorphicSignature Object linkToInterface(Object... args) throws Throwable;
+
+    
     public Object invokeWithArguments(Object... arguments) throws Throwable {
         int argc = arguments == null ? 0 : arguments.length;
+        @SuppressWarnings("LocalVariableHidesMemberVariable")
         MethodType type = type();
         if (type.parameterCount() != argc || isVarargsCollector()) {
             
@@ -89,13 +83,14 @@ public abstract class MethodHandle {
         if (!type.isConvertibleTo(newType)) {
             throw new WrongMethodTypeException("cannot convert "+this+" to "+newType);
         }
-        return MethodHandleImpl.convertArguments(this, newType, 1);
+        return convertArguments(newType);
     }
 
     
     public MethodHandle asSpreader(Class<?> arrayType, int arrayLength) {
         asSpreaderChecks(arrayType, arrayLength);
-        return MethodHandleImpl.spreadArguments(this, arrayType, arrayLength);
+        int spreadArgPos = type.parameterCount() - arrayLength;
+        return MethodHandleImpl.makeSpreadArguments(this, arrayType, spreadArgPos, arrayLength);
     }
 
     private void asSpreaderChecks(Class<?> arrayType, int arrayLength) {
@@ -113,7 +108,7 @@ public abstract class MethodHandle {
                 }
             }
             if (sawProblem) {
-                ArrayList<Class<?>> ptypes = new ArrayList<Class<?>>(type().parameterList());
+                ArrayList<Class<?>> ptypes = new ArrayList<>(type().parameterList());
                 for (int i = nargs - arrayLength; i < nargs; i++) {
                     ptypes.set(i, arrayElement);
                 }
@@ -140,8 +135,12 @@ public abstract class MethodHandle {
     
     public MethodHandle asCollector(Class<?> arrayType, int arrayLength) {
         asCollectorChecks(arrayType, arrayLength);
+        int collectArgPos = type().parameterCount()-1;
+        MethodHandle target = this;
+        if (arrayType != type().parameterType(collectArgPos))
+            target = convertArguments(type().changeParameterType(collectArgPos, arrayType));
         MethodHandle collector = ValueConversions.varargsArray(arrayType, arrayLength);
-        return MethodHandleImpl.collectArguments(this, type.parameterCount()-1, collector);
+        return MethodHandles.collectArguments(target, collectArgPos, collector);
     }
 
     
@@ -162,7 +161,7 @@ public abstract class MethodHandle {
         boolean lastMatch = asCollectorChecks(arrayType, 0);
         if (isVarargsCollector() && lastMatch)
             return this;
-        return AdapterMethodHandle.makeVarargsCollector(this, arrayType);
+        return MethodHandleImpl.makeVarargsCollector(this, arrayType);
     }
 
     
@@ -179,25 +178,188 @@ public abstract class MethodHandle {
     
     public MethodHandle bindTo(Object x) {
         Class<?> ptype;
-        if (type().parameterCount() == 0 ||
-            (ptype = type().parameterType(0)).isPrimitive())
+        @SuppressWarnings("LocalVariableHidesMemberVariable")
+        MethodType type = type();
+        if (type.parameterCount() == 0 ||
+            (ptype = type.parameterType(0)).isPrimitive())
             throw newIllegalArgumentException("no leading reference parameter", x);
-        x = MethodHandles.checkValue(ptype, x);
-        
-        MethodHandle bmh = MethodHandleImpl.bindReceiver(this, x);
-        if (bmh != null)  return bmh;
-        return MethodHandleImpl.bindArgument(this, 0, x);
+        x = ptype.cast(x);  
+        return bindReceiver(x);
     }
 
     
     @Override
     public String toString() {
         if (DEBUG_METHOD_HANDLE_NAMES)  return debugString();
+        return standardString();
+    }
+    String standardString() {
         return "MethodHandle"+type;
+    }
+    String debugString() {
+        return standardString()+"/LF="+internalForm()+internalProperties();
     }
 
     
-    String debugString() {
-        return getNameString(this);
+    
+    
+
+    
+
+    
+    MethodHandle setVarargs(MemberName member) throws IllegalAccessException {
+        if (!member.isVarargs())  return this;
+        int argc = type().parameterCount();
+        if (argc != 0) {
+            Class<?> arrayType = type().parameterType(argc-1);
+            if (arrayType.isArray()) {
+                return MethodHandleImpl.makeVarargsCollector(this, arrayType);
+            }
+        }
+        throw member.makeAccessException("cannot make variable arity", null);
+    }
+    
+    MethodHandle viewAsType(MethodType newType) {
+        
+        if (!type.isViewableAs(newType))
+            throw new InternalError();
+        return MethodHandleImpl.makePairwiseConvert(this, newType, 0);
+    }
+
+    
+
+    
+    LambdaForm internalForm() {
+        return form;
+    }
+
+    
+    MemberName internalMemberName() {
+        return null;  
+    }
+
+    
+    Object internalValues() {
+        return null;
+    }
+
+    
+    Object internalProperties() {
+        
+        return "";
+    }
+
+    
+    
+    
+
+     MethodHandle convertArguments(MethodType newType) {
+        
+        return MethodHandleImpl.makePairwiseConvert(this, newType, 1);
+    }
+
+    
+    MethodHandle bindArgument(int pos, char basicType, Object value) {
+        
+        return rebind().bindArgument(pos, basicType, value);
+    }
+
+    
+    MethodHandle bindReceiver(Object receiver) {
+        
+        return bindArgument(0, 'L', receiver);
+    }
+
+    
+    MethodHandle bindImmediate(int pos, char basicType, Object value) {
+        
+        
+        
+
+        
+        
+        assert pos == 0 && basicType == 'L' && value instanceof Unsafe;
+        MethodType type2 = type.dropParameterTypes(pos, pos + 1); 
+        LambdaForm form2 = form.bindImmediate(pos + 1, basicType, value); 
+        return copyWith(type2, form2);
+    }
+
+    
+    MethodHandle copyWith(MethodType mt, LambdaForm lf) {
+        throw new InternalError("copyWith: " + this.getClass());
+    }
+
+    
+    MethodHandle dropArguments(MethodType srcType, int pos, int drops) {
+        
+        return rebind().dropArguments(srcType, pos, drops);
+    }
+
+    
+    MethodHandle permuteArguments(MethodType newType, int[] reorder) {
+        
+        return rebind().permuteArguments(newType, reorder);
+    }
+
+    
+    MethodHandle rebind() {
+        
+        MethodType type2 = type();
+        LambdaForm form2 = reinvokerForm(type2.basicType());
+        
+        return BoundMethodHandle.bindSingle(type2, form2, this);
+    }
+
+    
+    MethodHandle reinvokerTarget() {
+        throw new InternalError("not a reinvoker MH: "+this.getClass().getName()+": "+this);
+    }
+
+    
+    static LambdaForm reinvokerForm(MethodType mtype) {
+        mtype = mtype.basicType();
+        LambdaForm reinvoker = mtype.form().cachedLambdaForm(MethodTypeForm.LF_REINVOKE);
+        if (reinvoker != null)  return reinvoker;
+        MethodHandle MH_invokeBasic = MethodHandles.basicInvoker(mtype);
+        final int THIS_BMH    = 0;
+        final int ARG_BASE    = 1;
+        final int ARG_LIMIT   = ARG_BASE + mtype.parameterCount();
+        int nameCursor = ARG_LIMIT;
+        final int NEXT_MH     = nameCursor++;
+        final int REINVOKE    = nameCursor++;
+        LambdaForm.Name[] names = LambdaForm.arguments(nameCursor - ARG_LIMIT, mtype.invokerType());
+        names[NEXT_MH] = new LambdaForm.Name(NF_reinvokerTarget, names[THIS_BMH]);
+        Object[] targetArgs = Arrays.copyOfRange(names, THIS_BMH, ARG_LIMIT, Object[].class);
+        targetArgs[0] = names[NEXT_MH];  
+        names[REINVOKE] = new LambdaForm.Name(MH_invokeBasic, targetArgs);
+        return mtype.form().setCachedLambdaForm(MethodTypeForm.LF_REINVOKE, new LambdaForm("BMH.reinvoke", ARG_LIMIT, names));
+    }
+
+    private static final LambdaForm.NamedFunction NF_reinvokerTarget;
+    static {
+        try {
+            NF_reinvokerTarget = new LambdaForm.NamedFunction(MethodHandle.class
+                .getDeclaredMethod("reinvokerTarget"));
+        } catch (ReflectiveOperationException ex) {
+            throw newInternalError(ex);
+        }
+    }
+
+    
+    
+    void updateForm(LambdaForm newForm) {
+        if (form == newForm)  return;
+        
+        UNSAFE.putObject(this, FORM_OFFSET, newForm);
+        this.form.prepare();  
+    }
+
+    private static final long FORM_OFFSET;
+    static {
+        try {
+            FORM_OFFSET = UNSAFE.objectFieldOffset(MethodHandle.class.getDeclaredField("form"));
+        } catch (ReflectiveOperationException ex) {
+            throw newInternalError(ex);
+        }
     }
 }

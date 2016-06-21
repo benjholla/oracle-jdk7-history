@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.Vector;
 import java.util.ArrayList;
-
+import javax.xml.XMLConstants;
 import com.sun.org.apache.xerces.internal.impl.Constants;
 import com.sun.org.apache.xerces.internal.impl.RevalidationHandler;
 import com.sun.org.apache.xerces.internal.impl.XMLEntityManager;
@@ -193,6 +193,10 @@ public class XMLSchemaValidator
     protected static final String SCHEMA_DV_FACTORY =
         Constants.XERCES_PROPERTY_PREFIX + Constants.SCHEMA_DV_FACTORY_PROPERTY;
 
+    
+    private static final String XML_SECURITY_PROPERTY_MANAGER =
+            Constants.XML_SECURITY_PROPERTY_MANAGER;
+
     protected static final String USE_SERVICE_MECHANISM = Constants.ORACLE_FEATURE_SERVICE_MECHANISM;
 
     
@@ -251,11 +255,12 @@ public class XMLSchemaValidator
             JAXP_SCHEMA_SOURCE,
             JAXP_SCHEMA_LANGUAGE,
             SCHEMA_DV_FACTORY,
+            XML_SECURITY_PROPERTY_MANAGER
             };
 
     
     private static final Object[] PROPERTY_DEFAULTS =
-        { null, null, null, null, null, null, null, null, null, null, null};
+        { null, null, null, null, null, null, null, null, null, null, null, null, null};
 
     
     

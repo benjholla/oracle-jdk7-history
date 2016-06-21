@@ -1388,17 +1388,16 @@ public abstract class JComponent extends Container implements Serializable,
 
     
     public void setVisible(boolean aFlag) {
-        if(aFlag != isVisible()) {
+        if (aFlag != isVisible()) {
             super.setVisible(aFlag);
-            Container parent = getParent();
-            if(parent != null) {
-                Rectangle r = getBounds();
-                parent.repaint(r.x,r.y,r.width,r.height);
+            if (aFlag) {
+                Container parent = getParent();
+                if (parent != null) {
+                    Rectangle r = getBounds();
+                    parent.repaint(r.x, r.y, r.width, r.height);
+                }
+                revalidate();
             }
-            
-            
-            
-            revalidate();
         }
     }
 
@@ -2025,7 +2024,6 @@ public abstract class JComponent extends Container implements Serializable,
             super();
         }
 
-        protected ContainerListener accessibleContainerHandler = null;
         protected FocusListener accessibleFocusHandler = null;
 
         
@@ -3207,6 +3205,22 @@ public abstract class JComponent extends Container implements Serializable,
         ",maximumSize=" + maximumSizeString +
         ",minimumSize=" + minimumSizeString +
         ",preferredSize=" + preferredSizeString;
+    }
+
+    
+    @Override
+    @Deprecated
+    public void hide() {
+        boolean showing = isShowing();
+        super.hide();
+        if (showing) {
+            Container parent = getParent();
+            if (parent != null) {
+                Rectangle r = getBounds();
+                parent.repaint(r.x, r.y, r.width, r.height);
+            }
+            revalidate();
+        }
     }
 
 }

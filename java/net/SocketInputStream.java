@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 
+import sun.misc.IoTrace;
 import sun.net.ConnectionResetException;
 
 
@@ -50,7 +51,7 @@ class SocketInputStream extends FileInputStream
     }
 
     int read(byte b[], int off, int length, int timeout) throws IOException {
-        int n;
+        int n = 0;
 
         
         if (eof) {
@@ -72,6 +73,7 @@ class SocketInputStream extends FileInputStream
 
         boolean gotReset = false;
 
+        Object traceContext = IoTrace.socketReadBegin();
         
         FileDescriptor fd = impl.acquireFD();
         try {
@@ -83,10 +85,13 @@ class SocketInputStream extends FileInputStream
             gotReset = true;
         } finally {
             impl.releaseFD();
+            IoTrace.socketReadEnd(traceContext, impl.address, impl.port,
+                                  timeout, n > 0 ? n : 0);
         }
 
         
         if (gotReset) {
+            traceContext = IoTrace.socketReadBegin();
             impl.setConnectionResetPending();
             impl.acquireFD();
             try {
@@ -97,6 +102,8 @@ class SocketInputStream extends FileInputStream
             } catch (ConnectionResetException rstExc) {
             } finally {
                 impl.releaseFD();
+                IoTrace.socketReadEnd(traceContext, impl.address, impl.port,
+                                      timeout, n > 0 ? n : 0);
             }
         }
 

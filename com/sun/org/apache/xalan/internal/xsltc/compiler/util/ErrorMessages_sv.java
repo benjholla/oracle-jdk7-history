@@ -194,6 +194,10 @@ public class ErrorMessages_sv extends ListResourceBundle {
         "Hittade inte formatmallen ''{0}''."},
 
         
+        {ErrorMsg.ACCESSING_XSLT_TARGET_ERR,
+        "Could not read stylesheet target ''{0}'', because ''{1}'' access is not allowed."},
+
+        
         {ErrorMsg.NOT_IMPLEMENTED_ERR,
         "Inte implementerad: ''{0}''."},
 

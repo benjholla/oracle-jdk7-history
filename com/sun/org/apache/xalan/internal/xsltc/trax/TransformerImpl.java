@@ -4,6 +4,7 @@
 
 package com.sun.org.apache.xalan.internal.xsltc.trax;
 
+import com.sun.org.apache.xalan.internal.XalanConstants;
 import com.sun.org.apache.xalan.internal.utils.FactoryImpl;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -42,6 +43,7 @@ import javax.xml.transform.stax.StAXResult;
 import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+import javax.xml.XMLConstants;
 
 import com.sun.org.apache.xml.internal.utils.SystemIDResolver;
 
@@ -141,6 +143,10 @@ public final class TransformerImpl extends Transformer
 
     
     private boolean _useServicesMechanism;
+    
+    private String _accessExternalStylesheet = XalanConstants.EXTERNAL_ACCESS_DEFAULT;
+     
+    private String _accessExternalDTD = XalanConstants.EXTERNAL_ACCESS_DEFAULT;
 
     
     private Hashtable _parameters = null;
@@ -187,7 +193,10 @@ public final class TransformerImpl extends Transformer
         _indentNumber = indentNumber;
         _tfactory = tfactory;
         _useServicesMechanism = _tfactory.useServicesMechnism();
+        _accessExternalStylesheet = (String)_tfactory.getAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET);
+        _accessExternalDTD = (String)_tfactory.getAttribute(XMLConstants.ACCESS_EXTERNAL_DTD);
         _readerManager = XMLReaderManager.getInstance(_useServicesMechanism);
+        _readerManager.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, _accessExternalDTD);
         
     }
 

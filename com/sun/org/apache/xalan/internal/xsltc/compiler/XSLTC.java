@@ -20,8 +20,10 @@ import java.util.Vector;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
+import javax.xml.XMLConstants;
 
 import com.sun.org.apache.bcel.internal.classfile.JavaClass;
+import com.sun.org.apache.xalan.internal.XalanConstants;
 import com.sun.org.apache.xalan.internal.utils.SecuritySupport;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMsg;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.Util;
@@ -104,6 +106,12 @@ public final class XSLTC {
     private boolean _useServicesMechanism = true;
 
     
+    private String _accessExternalStylesheet = XalanConstants.EXTERNAL_ACCESS_DEFAULT;
+     
+    private String _accessExternalDTD = XalanConstants.EXTERNAL_ACCESS_DEFAULT;
+
+
+    
     public XSLTC(boolean useServicesMechanism) {
         _parser = new Parser(this, useServicesMechanism);
     }
@@ -125,6 +133,27 @@ public final class XSLTC {
     
     public void setServicesMechnism(boolean flag) {
         _useServicesMechanism = flag;
+    }
+
+    
+    public String getProperty(String name) {
+        if (name.equals(XMLConstants.ACCESS_EXTERNAL_STYLESHEET)) {
+            return _accessExternalStylesheet;
+        }
+        else if (name.equals(XMLConstants.ACCESS_EXTERNAL_DTD)) {
+            return _accessExternalDTD;
+        }
+        return null;
+    }
+
+    
+    public void setProperty(String name, String value) {
+        if (name.equals(XMLConstants.ACCESS_EXTERNAL_STYLESHEET)) {
+            _accessExternalStylesheet = (String)value;
+        }
+        else if (name.equals(XMLConstants.ACCESS_EXTERNAL_DTD)) {
+            _accessExternalDTD = (String)value;
+        }
     }
 
     

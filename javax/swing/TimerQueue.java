@@ -149,6 +149,9 @@ class TimerQueue implements Runnable
                                 addTimer(delayedTimer);
                             }
                         }
+
+                        
+                        timer.getLock().newCondition().awaitNanos(1);
                     } catch (SecurityException ignore) {
                     } finally {
                         timer.getLock().unlock();

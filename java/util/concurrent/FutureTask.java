@@ -3,46 +3,99 @@
 
 
 package java.util.concurrent;
-import java.util.concurrent.locks.*;
+import java.util.concurrent.locks.LockSupport;
 
 
 public class FutureTask<V> implements RunnableFuture<V> {
     
-    private final Sync sync;
+
+    
+    private volatile int state;
+    private static final int NEW          = 0;
+    private static final int COMPLETING   = 1;
+    private static final int NORMAL       = 2;
+    private static final int EXCEPTIONAL  = 3;
+    private static final int CANCELLED    = 4;
+    private static final int INTERRUPTING = 5;
+    private static final int INTERRUPTED  = 6;
+
+    
+    private Callable<V> callable;
+    
+    private Object outcome; 
+    
+    private volatile Thread runner;
+    
+    private volatile WaitNode waiters;
+
+    
+    @SuppressWarnings("unchecked")
+    private V report(int s) throws ExecutionException {
+        Object x = outcome;
+        if (s == NORMAL)
+            return (V)x;
+        if (s >= CANCELLED)
+            throw new CancellationException();
+        throw new ExecutionException((Throwable)x);
+    }
 
     
     public FutureTask(Callable<V> callable) {
         if (callable == null)
             throw new NullPointerException();
-        sync = new Sync(callable);
+        this.callable = callable;
+        this.state = NEW;       
     }
 
     
     public FutureTask(Runnable runnable, V result) {
-        sync = new Sync(Executors.callable(runnable, result));
+        this.callable = Executors.callable(runnable, result);
+        this.state = NEW;       
     }
 
     public boolean isCancelled() {
-        return sync.innerIsCancelled();
+        return state >= CANCELLED;
     }
 
     public boolean isDone() {
-        return sync.innerIsDone();
+        return state != NEW;
     }
 
     public boolean cancel(boolean mayInterruptIfRunning) {
-        return sync.innerCancel(mayInterruptIfRunning);
+        if (state != NEW)
+            return false;
+        if (mayInterruptIfRunning) {
+            if (!UNSAFE.compareAndSwapInt(this, stateOffset, NEW, INTERRUPTING))
+                return false;
+            Thread t = runner;
+            if (t != null)
+                t.interrupt();
+            UNSAFE.putOrderedInt(this, stateOffset, INTERRUPTED); 
+        }
+        else if (!UNSAFE.compareAndSwapInt(this, stateOffset, NEW, CANCELLED))
+            return false;
+        finishCompletion();
+        return true;
     }
 
     
     public V get() throws InterruptedException, ExecutionException {
-        return sync.innerGet();
+        int s = state;
+        if (s <= COMPLETING)
+            s = awaitDone(false, 0L);
+        return report(s);
     }
 
     
     public V get(long timeout, TimeUnit unit)
         throws InterruptedException, ExecutionException, TimeoutException {
-        return sync.innerGet(unit.toNanos(timeout));
+        if (unit == null)
+            throw new NullPointerException();
+        int s = state;
+        if (s <= COMPLETING &&
+            (s = awaitDone(true, unit.toNanos(timeout))) <= COMPLETING)
+            throw new TimeoutException();
+        return report(s);
     }
 
     
@@ -50,190 +103,218 @@ public class FutureTask<V> implements RunnableFuture<V> {
 
     
     protected void set(V v) {
-        sync.innerSet(v);
+        if (UNSAFE.compareAndSwapInt(this, stateOffset, NEW, COMPLETING)) {
+            outcome = v;
+            UNSAFE.putOrderedInt(this, stateOffset, NORMAL); 
+            finishCompletion();
+        }
     }
 
     
     protected void setException(Throwable t) {
-        sync.innerSetException(t);
+        if (UNSAFE.compareAndSwapInt(this, stateOffset, NEW, COMPLETING)) {
+            outcome = t;
+            UNSAFE.putOrderedInt(this, stateOffset, EXCEPTIONAL); 
+            finishCompletion();
+        }
     }
 
-    
-    
-    
-    
-    
-    
     public void run() {
-        sync.innerRun();
+        if (state != NEW ||
+            !UNSAFE.compareAndSwapObject(this, runnerOffset,
+                                         null, Thread.currentThread()))
+            return;
+        try {
+            Callable<V> c = callable;
+            if (c != null && state == NEW) {
+                V result;
+                boolean ran;
+                try {
+                    result = c.call();
+                    ran = true;
+                } catch (Throwable ex) {
+                    result = null;
+                    ran = false;
+                    setException(ex);
+                }
+                if (ran)
+                    set(result);
+            }
+        } finally {
+            
+            
+            runner = null;
+            
+            
+            int s = state;
+            if (s >= INTERRUPTING)
+                handlePossibleCancellationInterrupt(s);
+        }
     }
 
     
     protected boolean runAndReset() {
-        return sync.innerRunAndReset();
+        if (state != NEW ||
+            !UNSAFE.compareAndSwapObject(this, runnerOffset,
+                                         null, Thread.currentThread()))
+            return false;
+        boolean ran = false;
+        int s = state;
+        try {
+            Callable<V> c = callable;
+            if (c != null && s == NEW) {
+                try {
+                    c.call(); 
+                    ran = true;
+                } catch (Throwable ex) {
+                    setException(ex);
+                }
+            }
+        } finally {
+            
+            
+            runner = null;
+            
+            
+            s = state;
+            if (s >= INTERRUPTING)
+                handlePossibleCancellationInterrupt(s);
+        }
+        return ran && s == NEW;
     }
 
     
-    private final class Sync extends AbstractQueuedSynchronizer {
-        private static final long serialVersionUID = -7828117401763700385L;
+    private void handlePossibleCancellationInterrupt(int s) {
+        
+        
+        if (s == INTERRUPTING)
+            while (state == INTERRUPTING)
+                Thread.yield(); 
 
         
-        private static final int READY     = 0;
-        
-        private static final int RUNNING   = 1;
-        
-        private static final int RAN       = 2;
-        
-        private static final int CANCELLED = 4;
 
         
-        private final Callable<V> callable;
         
-        private V result;
         
-        private Throwable exception;
-
         
-        private volatile Thread runner;
-
-        Sync(Callable<V> callable) {
-            this.callable = callable;
-        }
-
-        private boolean ranOrCancelled(int state) {
-            return (state & (RAN | CANCELLED)) != 0;
-        }
-
         
-        protected int tryAcquireShared(int ignore) {
-            return innerIsDone() ? 1 : -1;
-        }
-
         
-        protected boolean tryReleaseShared(int ignore) {
-            runner = null;
-            return true;
-        }
+        
+    }
 
-        boolean innerIsCancelled() {
-            return getState() == CANCELLED;
-        }
+    
+    static final class WaitNode {
+        volatile Thread thread;
+        volatile WaitNode next;
+        WaitNode() { thread = Thread.currentThread(); }
+    }
 
-        boolean innerIsDone() {
-            return ranOrCancelled(getState()) && runner == null;
-        }
-
-        V innerGet() throws InterruptedException, ExecutionException {
-            acquireSharedInterruptibly(0);
-            if (getState() == CANCELLED)
-                throw new CancellationException();
-            if (exception != null)
-                throw new ExecutionException(exception);
-            return result;
-        }
-
-        V innerGet(long nanosTimeout) throws InterruptedException, ExecutionException, TimeoutException {
-            if (!tryAcquireSharedNanos(0, nanosTimeout))
-                throw new TimeoutException();
-            if (getState() == CANCELLED)
-                throw new CancellationException();
-            if (exception != null)
-                throw new ExecutionException(exception);
-            return result;
-        }
-
-        void innerSet(V v) {
-            for (;;) {
-                int s = getState();
-                if (s == RAN)
-                    return;
-                if (s == CANCELLED) {
-                    
-                    
-                    
-                    releaseShared(0);
-                    return;
+    
+    private void finishCompletion() {
+        
+        for (WaitNode q; (q = waiters) != null;) {
+            if (UNSAFE.compareAndSwapObject(this, waitersOffset, q, null)) {
+                for (;;) {
+                    Thread t = q.thread;
+                    if (t != null) {
+                        q.thread = null;
+                        LockSupport.unpark(t);
+                    }
+                    WaitNode next = q.next;
+                    if (next == null)
+                        break;
+                    q.next = null; 
+                    q = next;
                 }
-                if (compareAndSetState(s, RAN)) {
-                    result = v;
-                    releaseShared(0);
-                    done();
-                    return;
-                }
+                break;
             }
         }
 
-        void innerSetException(Throwable t) {
-            for (;;) {
-                int s = getState();
-                if (s == RAN)
-                    return;
-                if (s == CANCELLED) {
-                    
-                    
-                    
-                    releaseShared(0);
-                    return;
+        done();
+
+        callable = null;        
+    }
+
+    
+    private int awaitDone(boolean timed, long nanos)
+        throws InterruptedException {
+        final long deadline = timed ? System.nanoTime() + nanos : 0L;
+        WaitNode q = null;
+        boolean queued = false;
+        for (;;) {
+            if (Thread.interrupted()) {
+                removeWaiter(q);
+                throw new InterruptedException();
+            }
+
+            int s = state;
+            if (s > COMPLETING) {
+                if (q != null)
+                    q.thread = null;
+                return s;
+            }
+            else if (s == COMPLETING) 
+                Thread.yield();
+            else if (q == null)
+                q = new WaitNode();
+            else if (!queued)
+                queued = UNSAFE.compareAndSwapObject(this, waitersOffset,
+                                                     q.next = waiters, q);
+            else if (timed) {
+                nanos = deadline - System.nanoTime();
+                if (nanos <= 0L) {
+                    removeWaiter(q);
+                    return state;
                 }
-                if (compareAndSetState(s, RAN)) {
-                    exception = t;
-                    releaseShared(0);
-                    done();
-                    return;
+                LockSupport.parkNanos(this, nanos);
+            }
+            else
+                LockSupport.park(this);
+        }
+    }
+
+    
+    private void removeWaiter(WaitNode node) {
+        if (node != null) {
+            node.thread = null;
+            retry:
+            for (;;) {          
+                for (WaitNode pred = null, q = waiters, s; q != null; q = s) {
+                    s = q.next;
+                    if (q.thread != null)
+                        pred = q;
+                    else if (pred != null) {
+                        pred.next = s;
+                        if (pred.thread == null) 
+                            continue retry;
+                    }
+                    else if (!UNSAFE.compareAndSwapObject(this, waitersOffset,
+                                                          q, s))
+                        continue retry;
                 }
-            }
-        }
-
-        boolean innerCancel(boolean mayInterruptIfRunning) {
-            for (;;) {
-                int s = getState();
-                if (ranOrCancelled(s))
-                    return false;
-                if (compareAndSetState(s, CANCELLED))
-                    break;
-            }
-            if (mayInterruptIfRunning) {
-                Thread r = runner;
-                if (r != null)
-                    r.interrupt();
-            }
-            releaseShared(0);
-            done();
-            return true;
-        }
-
-        void innerRun() {
-            if (!compareAndSetState(READY, RUNNING))
-                return;
-
-            runner = Thread.currentThread();
-            if (getState() == RUNNING) { 
-                V result;
-                try {
-                    result = callable.call();
-                } catch (Throwable ex) {
-                    setException(ex);
-                    return;
-                }
-                set(result);
-            } else {
-                releaseShared(0); 
-            }
-        }
-
-        boolean innerRunAndReset() {
-            if (!compareAndSetState(READY, RUNNING))
-                return false;
-            try {
-                runner = Thread.currentThread();
-                if (getState() == RUNNING)
-                    callable.call(); 
-                runner = null;
-                return compareAndSetState(RUNNING, READY);
-            } catch (Throwable ex) {
-                setException(ex);
-                return false;
+                break;
             }
         }
     }
+
+    
+    private static final sun.misc.Unsafe UNSAFE;
+    private static final long stateOffset;
+    private static final long runnerOffset;
+    private static final long waitersOffset;
+    static {
+        try {
+            UNSAFE = sun.misc.Unsafe.getUnsafe();
+            Class<?> k = FutureTask.class;
+            stateOffset = UNSAFE.objectFieldOffset
+                (k.getDeclaredField("state"));
+            runnerOffset = UNSAFE.objectFieldOffset
+                (k.getDeclaredField("runner"));
+            waitersOffset = UNSAFE.objectFieldOffset
+                (k.getDeclaredField("waiters"));
+        } catch (Exception e) {
+            throw new Error(e);
+        }
+    }
+
 }

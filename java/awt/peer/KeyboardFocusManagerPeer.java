@@ -9,6 +9,9 @@ import java.awt.Window;
 public interface KeyboardFocusManagerPeer {
 
     
+    void setCurrentFocusedWindow(Window win);
+
+    
     Window getCurrentFocusedWindow();
 
     
