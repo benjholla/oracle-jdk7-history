@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011-2013, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
 /*
@@ -1422,7 +1422,7 @@ public class XPath {
                             }
                             ch = data.charAt(currentOffset);
                         } while (ch == ' ' || ch == 0x0A || ch == 0x09 || ch == 0x0D);
-                        if (currentOffset == endOffset || ch == '|') {
+                        if (currentOffset == endOffset || ch == '|' || ch == '/') {
                             addToken(tokens, XPath.Tokens.EXPRTOKEN_PERIOD);
                             starIsMultiplyOperator = true;
                             break;

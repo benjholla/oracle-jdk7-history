@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011-2013, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
 /*
@@ -79,7 +79,13 @@ public class ErrorMessages_cs extends ListResourceBundle {
  */
 
     // These message should be read from a locale-specific resource bundle
-    private static final Object[][] _contents =  new Object[][] {
+    /** Get the lookup table for error messages.
+     *
+     * @return The message lookup table.
+     */
+    public Object[][] getContents()
+    {
+        return new Object[][] {
 
         /*
          * Note to translators:  the substitution text in the following message
@@ -223,13 +229,6 @@ public class ErrorMessages_cs extends ListResourceBundle {
         "Nelze p\u0159elo\u017eit odkazy URI ''{0}''."}
     };
 
-    /** Get the lookup table for error messages.
-     *
-     * @return The message lookup table.
-     */
-    public Object[][] getContents()
-    {
-      return _contents;
     }
 
 }

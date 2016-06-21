@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011-2013, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
 /*
@@ -105,15 +105,15 @@ public class DTMAxisIterNodeList extends DTMNodeListBase {
      */
     public Node item(int index) {
         if (m_iter != null) {
-            int node;
+            int node = 0;
             int count = m_cachedNodes.size();
 
             if (count > index) {
                 node = m_cachedNodes.elementAt(index);
                 return m_dtm.getNode(node);
             } else if (m_last == -1) {
-                while (((node = m_iter.next()) != DTMAxisIterator.END)
-                           && count <= index) {
+                while (count <= index
+                        && ((node = m_iter.next()) != DTMAxisIterator.END)) {
                     m_cachedNodes.addElement(node);
                     count++;
                 }

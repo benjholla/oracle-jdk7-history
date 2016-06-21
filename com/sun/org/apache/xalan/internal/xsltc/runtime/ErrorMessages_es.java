@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011-2013, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
 /*
@@ -81,7 +81,13 @@ public class ErrorMessages_es extends ListResourceBundle {
  */
 
     // These message should be read from a locale-specific resource bundle
-    private static final Object[][] _contents =  new Object[][] {
+    /** Get the lookup table for error messages.
+     *
+     * @return The message lookup table.
+     */
+    public Object[][] getContents()
+    {
+        return new Object[][] {
 
         /*
          * Note to translators:  the substitution text in the following message
@@ -276,13 +282,6 @@ public class ErrorMessages_es extends ListResourceBundle {
         {BasisLibrary.UNALLOWED_EXTENSION_ELEMENT_ERR,
         "El uso del elemento de extensi\u00F3n ''{0}'' no est\u00E1 permitido cuando la funci\u00F3n de procesamiento seguro se ha definido en true."},
     };
-    /** Get the lookup table for error messages.
-     *
-     * @return The message lookup table.
-     */
-    public Object[][] getContents()
-    {
-        return _contents;
     }
 
 }
