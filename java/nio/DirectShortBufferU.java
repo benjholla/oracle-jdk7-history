@@ -37,10 +37,11 @@ class DirectShortBufferU
 
     
     
-    protected Object viewedBuffer = null;
+    
+    private final Object att;
 
-    public Object viewedBuffer() {
-        return viewedBuffer;
+    public Object attachment() {
+        return att;
     }
 
 
@@ -148,6 +149,19 @@ class DirectShortBufferU
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     
     DirectShortBufferU(DirectBuffer db,         
@@ -157,10 +171,10 @@ class DirectShortBufferU
 
         super(mark, pos, lim, cap);
         address = db.address() + off;
-        viewedBuffer = db;
 
 
 
+        att = db;
 
 
 

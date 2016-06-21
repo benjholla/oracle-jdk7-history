@@ -41,7 +41,7 @@ abstract class AbstractPlainSocketImpl extends SocketImpl
     private final Object resetLock = new Object();
 
    
-    private boolean stream;
+    protected boolean stream;
 
     
     static {
@@ -51,10 +51,11 @@ abstract class AbstractPlainSocketImpl extends SocketImpl
 
     
     protected synchronized void create(boolean stream) throws IOException {
-        fd = new FileDescriptor();
         this.stream = stream;
         if (!stream) {
             ResourceManager.beforeUdpCreate();
+            
+            fd = new FileDescriptor();
             try {
                 socketCreate(false);
             } catch (IOException ioe) {
@@ -63,6 +64,7 @@ abstract class AbstractPlainSocketImpl extends SocketImpl
                 throw ioe;
             }
         } else {
+            fd = new FileDescriptor();
             socketCreate(true);
         }
         if (socket != null)

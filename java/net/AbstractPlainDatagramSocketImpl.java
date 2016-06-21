@@ -31,8 +31,8 @@ abstract class AbstractPlainDatagramSocketImpl extends DatagramSocketImpl
 
     
     protected synchronized void create() throws SocketException {
-        fd = new FileDescriptor();
         ResourceManager.beforeUdpCreate();
+        fd = new FileDescriptor();
         try {
             datagramSocketCreate();
         } catch (SocketException ioe) {

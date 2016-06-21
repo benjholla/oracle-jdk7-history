@@ -227,6 +227,7 @@ class LocaleISOData {
         + "BM" + "BMU"  
         + "BN" + "BRN"  
         + "BO" + "BOL"  
+        + "BQ" + "BES"  
         + "BR" + "BRA"  
         + "BS" + "BHS"  
         + "BT" + "BTN"  
@@ -250,6 +251,7 @@ class LocaleISOData {
 
         + "CU" + "CUB"  
         + "CV" + "CPV"  
+        + "CW" + "CUW"  
         + "CX" + "CXR"  
         + "CY" + "CYP"  
         + "CZ" + "CZE"  
@@ -406,6 +408,7 @@ class LocaleISOData {
         + "SR" + "SUR"  
         + "ST" + "STP"  
         + "SV" + "SLV"  
+        + "SX" + "SXM"  
         + "SY" + "SYR"  
         + "SZ" + "SWZ"  
         + "TC" + "TCA"  

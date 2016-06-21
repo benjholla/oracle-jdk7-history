@@ -181,6 +181,13 @@ public abstract class Buffer {
         return mark;
     }
 
+    final void truncate() {                             
+        mark = -1;
+        position = 0;
+        limit = 0;
+        capacity = 0;
+    }
+
     final void discardMark() {                          
         mark = -1;
     }

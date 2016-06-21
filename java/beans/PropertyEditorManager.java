@@ -2,14 +2,9 @@
 
 package java.beans;
 
-import com.sun.beans.finder.PropertyEditorFinder;
-import sun.awt.AppContext;
-
 
 
 public class PropertyEditorManager {
-
-    private static final Object FINDER_KEY = new Object();
 
     
     public static void registerEditor(Class<?> targetType, Class<?> editorClass) {
@@ -17,17 +12,17 @@ public class PropertyEditorManager {
         if (sm != null) {
             sm.checkPropertiesAccess();
         }
-        getFinder().register(targetType, editorClass);
+        ThreadGroupContext.getContext().getPropertyEditorFinder().register(targetType, editorClass);
     }
 
     
     public static PropertyEditor findEditor(Class<?> targetType) {
-        return getFinder().find(targetType);
+        return ThreadGroupContext.getContext().getPropertyEditorFinder().find(targetType);
     }
 
     
     public static String[] getEditorSearchPath() {
-        return getFinder().getPackages();
+        return ThreadGroupContext.getContext().getPropertyEditorFinder().getPackages();
     }
 
     
@@ -36,17 +31,6 @@ public class PropertyEditorManager {
         if (sm != null) {
             sm.checkPropertiesAccess();
         }
-        getFinder().setPackages(path);
-    }
-
-    private static PropertyEditorFinder getFinder() {
-        AppContext context = AppContext.getAppContext();
-        Object object = context.get(FINDER_KEY);
-        if (object instanceof PropertyEditorFinder) {
-            return (PropertyEditorFinder) object;
-        }
-        PropertyEditorFinder finder = new PropertyEditorFinder();
-        context.put(FINDER_KEY, finder);
-        return finder;
+        ThreadGroupContext.getContext().getPropertyEditorFinder().setPackages(path);
     }
 }

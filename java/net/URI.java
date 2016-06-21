@@ -456,6 +456,8 @@ public final class URI
                     i++;
                     continue;
                 }
+                if (d != '%')
+                    return false;
                 i++;
                 if (toLower(s.charAt(i)) != toLower(t.charAt(i)))
                     return false;

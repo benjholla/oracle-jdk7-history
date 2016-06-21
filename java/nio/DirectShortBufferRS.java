@@ -148,6 +148,20 @@ class DirectShortBufferRS
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     
     DirectShortBufferRS(DirectBuffer db,         

@@ -148,6 +148,20 @@ class DirectDoubleBufferRU
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     
     DirectDoubleBufferRU(DirectBuffer db,         

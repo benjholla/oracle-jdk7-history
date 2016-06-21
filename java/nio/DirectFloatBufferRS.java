@@ -148,6 +148,20 @@ class DirectFloatBufferRS
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     
     DirectFloatBufferRS(DirectBuffer db,         

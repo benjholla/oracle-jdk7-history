@@ -37,10 +37,11 @@ class DirectLongBufferS
 
     
     
-    protected Object viewedBuffer = null;
+    
+    private final Object att;
 
-    public Object viewedBuffer() {
-        return viewedBuffer;
+    public Object attachment() {
+        return att;
     }
 
 
@@ -148,6 +149,19 @@ class DirectLongBufferS
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     
     DirectLongBufferS(DirectBuffer db,         
@@ -157,10 +171,10 @@ class DirectLongBufferS
 
         super(mark, pos, lim, cap);
         address = db.address() + off;
-        viewedBuffer = db;
 
 
 
+        att = db;
 
 
 

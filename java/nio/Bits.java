@@ -674,6 +674,14 @@ class Bits {
                         }
                     };
                 }
+                @Override
+                public ByteBuffer newDirectByteBuffer(long addr, int cap, Object ob) {
+                    return new DirectByteBuffer(addr, cap, ob);
+                }
+                @Override
+                public void truncate(Buffer buf) {
+                    buf.truncate();
+                }
         });
     }
 

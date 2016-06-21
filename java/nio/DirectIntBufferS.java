@@ -37,10 +37,11 @@ class DirectIntBufferS
 
     
     
-    protected Object viewedBuffer = null;
+    
+    private final Object att;
 
-    public Object viewedBuffer() {
-        return viewedBuffer;
+    public Object attachment() {
+        return att;
     }
 
 
@@ -148,6 +149,19 @@ class DirectIntBufferS
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     
     DirectIntBufferS(DirectBuffer db,         
@@ -157,10 +171,10 @@ class DirectIntBufferS
 
         super(mark, pos, lim, cap);
         address = db.address() + off;
-        viewedBuffer = db;
 
 
 
+        att = db;
 
 
 

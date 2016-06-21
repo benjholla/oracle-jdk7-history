@@ -37,10 +37,11 @@ class DirectByteBuffer
 
     
     
-    protected Object viewedBuffer = null;
+    
+    private final Object att;
 
-    public Object viewedBuffer() {
-        return viewedBuffer;
+    public Object attachment() {
+        return att;
     }
 
 
@@ -113,6 +114,7 @@ class DirectByteBuffer
             address = base;
         }
         cleaner = Cleaner.create(this, new Deallocator(base, size, cap));
+        att = null;
 
 
 
@@ -122,10 +124,22 @@ class DirectByteBuffer
 
     
     
+    
+    DirectByteBuffer(long addr, int cap, Object ob) {
+        super(-1, 0, cap, cap);
+        address = addr;
+        cleaner = null;
+        att = ob;
+    }
+
+
+    
+    
     private DirectByteBuffer(long addr, int cap) {
         super(-1, 0, cap, cap);
         address = addr;
         cleaner = null;
+        att = null;
     }
 
 
@@ -139,8 +153,8 @@ class DirectByteBuffer
 
         super(-1, 0, cap, cap, fd);
         address = addr;
-        viewedBuffer = null;
         cleaner = Cleaner.create(this, unmapper);
+        att = null;
 
 
 
@@ -157,10 +171,10 @@ class DirectByteBuffer
 
         super(mark, pos, lim, cap);
         address = db.address() + off;
-        viewedBuffer = db;
 
         cleaner = null;
 
+        att = db;
 
 
 

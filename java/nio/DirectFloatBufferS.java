@@ -37,10 +37,11 @@ class DirectFloatBufferS
 
     
     
-    protected Object viewedBuffer = null;
+    
+    private final Object att;
 
-    public Object viewedBuffer() {
-        return viewedBuffer;
+    public Object attachment() {
+        return att;
     }
 
 
@@ -148,6 +149,19 @@ class DirectFloatBufferS
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     
     DirectFloatBufferS(DirectBuffer db,         
@@ -157,10 +171,10 @@ class DirectFloatBufferS
 
         super(mark, pos, lim, cap);
         address = db.address() + off;
-        viewedBuffer = db;
 
 
 
+        att = db;
 
 
 

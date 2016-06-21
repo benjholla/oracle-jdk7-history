@@ -43,15 +43,17 @@ public final class UID implements Serializable {
                 boolean done = false;
                 while (!done) {
                     long now = System.currentTimeMillis();
-                    if (now <= lastTime) {
+                    if (now == lastTime) {
                         
                         try {
-                            Thread.currentThread().sleep(1);
+                            Thread.sleep(1);
                         } catch (InterruptedException e) {
                             interrupted = true;
                         }
                     } else {
-                        lastTime = now;
+                        
+                        
+                        lastTime = (now < lastTime) ? lastTime+1 : now;
                         lastCount = Short.MIN_VALUE;
                         done = true;
                     }

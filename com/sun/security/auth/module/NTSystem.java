@@ -6,6 +6,7 @@ package com.sun.security.auth.module;
 public class NTSystem {
 
     private native void getCurrent(boolean debug);
+    private native long getImpersonationToken0();
 
     private String userName;
     private String domain;
@@ -57,9 +58,13 @@ public class NTSystem {
     }
 
     
-    public long getImpersonationToken() {
+    public synchronized long getImpersonationToken() {
+        if (impersonationToken == 0) {
+            impersonationToken = getImpersonationToken0();
+        }
         return impersonationToken;
     }
+
 
     private void loadNative() {
         System.loadLibrary("jaas_nt");
