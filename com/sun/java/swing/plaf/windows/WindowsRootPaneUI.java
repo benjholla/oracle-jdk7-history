@@ -7,6 +7,8 @@ import java.awt.Container;
 import java.awt.Event;
 import java.awt.KeyEventPostProcessor;
 import java.awt.Window;
+import java.awt.Toolkit;
+import sun.awt.SunToolkit;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -96,7 +98,19 @@ public class WindowsRootPaneUI extends BasicRootPaneUI {
                 }
                 JMenu menu = mbar != null ? mbar.getMenu(0) : null;
 
-                if (menu != null) {
+                
+                
+                
+                
+                
+                
+                boolean skip = false;
+                Toolkit tk = Toolkit.getDefaultToolkit();
+                if (tk instanceof SunToolkit) {
+                    skip = ev.getWhen() <= ((SunToolkit)tk).getWindowDeactivationTime(winAncestor);
+                }
+
+                if (menu != null && !skip) {
                     MenuElement[] path = new MenuElement[2];
                     path[0] = mbar;
                     path[1] = menu;

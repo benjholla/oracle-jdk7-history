@@ -452,6 +452,16 @@ public class PropertyDescriptor extends FeatureDescriptor {
         constrained = old.constrained;
     }
 
+    void updateGenericsFor(Class<?> type) {
+        setClass0(type);
+        try {
+            setPropertyType(findPropertyType(getReadMethod0(), getWriteMethod0()));
+        }
+        catch (IntrospectionException exception) {
+            setPropertyType(null);
+        }
+    }
+
     
     private Class findPropertyType(Method readMethod, Method writeMethod)
         throws IntrospectionException {

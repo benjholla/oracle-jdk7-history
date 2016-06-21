@@ -353,6 +353,16 @@ public class IndexedPropertyDescriptor extends PropertyDescriptor {
         indexedReadMethodName = old.indexedReadMethodName;
     }
 
+    void updateGenericsFor(Class<?> type) {
+        super.updateGenericsFor(type);
+        try {
+            setIndexedPropertyType(findIndexedPropertyType(getIndexedReadMethod0(), getIndexedWriteMethod0()));
+        }
+        catch (IntrospectionException exception) {
+            setIndexedPropertyType(null);
+        }
+    }
+
     
     public int hashCode() {
         int result = super.hashCode();

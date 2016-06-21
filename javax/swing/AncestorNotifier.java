@@ -19,7 +19,7 @@ import java.io.Serializable;
 
 class AncestorNotifier implements ComponentListener, PropertyChangeListener, Serializable
 {
-    Component firstInvisibleAncestor;
+    transient Component firstInvisibleAncestor;
     EventListenerList listenerList = new EventListenerList();
     JComponent root;
 

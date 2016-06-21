@@ -26,8 +26,7 @@ class EventDispatchThread extends Thread {
     private static final PlatformLogger eventLog = PlatformLogger.getLogger("java.awt.event.EventDispatchThread");
 
     private EventQueue theQueue;
-    private boolean doDispatch = true;
-    private volatile boolean shutdown = false;
+    private volatile boolean doDispatch = true;
 
     private static final int ANY_EVENT = -1;
 
@@ -43,11 +42,6 @@ class EventDispatchThread extends Thread {
         doDispatch = false;
     }
 
-    public void interrupt() {
-        shutdown = true;
-        super.interrupt();
-    }
-
     public void run() {
         while (true) {
             try {
@@ -57,7 +51,12 @@ class EventDispatchThread extends Thread {
                     }
                 });
             } finally {
-                if(getEventQueue().detachDispatchThread(this, shutdown)) {
+                
+                
+                
+                if (getEventQueue().detachDispatchThread(this,
+                            !doDispatch || isInterrupted()))
+                {
                     break;
                 }
             }
@@ -115,8 +114,7 @@ class EventDispatchThread extends Thread {
     void pumpEventsForFilter(int id, Conditional cond, EventFilter filter) {
         addEventFilter(filter);
         doDispatch = true;
-        shutdown |= isInterrupted();
-        while (doDispatch && !shutdown && cond.evaluate()) {
+        while (doDispatch && !isInterrupted() && cond.evaluate()) {
             pumpOneEventForFilters(id);
         }
         removeEventFilter(filter);
@@ -204,12 +202,12 @@ class EventDispatchThread extends Thread {
             }
         }
         catch (ThreadDeath death) {
-            shutdown = true;
+            doDispatch = false;
             throw death;
         }
         catch (InterruptedException interruptedException) {
-            shutdown = true; 
-                             
+            doDispatch = false; 
+                                
         }
         catch (Throwable e) {
             processException(e);

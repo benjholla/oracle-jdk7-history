@@ -3,6 +3,7 @@
 package java.awt;
 
 import java.util.LinkedList;
+import sun.awt.AWTAccessor;
 import sun.awt.AppContext;
 import sun.awt.SunToolkit;
 
@@ -18,6 +19,17 @@ class SequencedEvent extends AWTEvent implements ActiveEvent {
     private final AWTEvent nested;
     private AppContext appContext;
     private boolean disposed;
+
+    static {
+        AWTAccessor.setSequencedEventAccessor(new AWTAccessor.SequencedEventAccessor() {
+            public AWTEvent getNested(AWTEvent sequencedEvent) {
+                return ((SequencedEvent)sequencedEvent).nested;
+            }
+            public boolean isSequencedEvent(AWTEvent event) {
+                return event instanceof SequencedEvent;
+            }
+        });
+    }
 
     
     public SequencedEvent(AWTEvent nested) {
