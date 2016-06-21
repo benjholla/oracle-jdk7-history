@@ -598,7 +598,9 @@ class InetAddress implements java.io.Serializable {
                         ifname = host.substring (pos+1);
                     }
                 }
-                addr = IPAddressUtil.textToNumericFormatV6(host);
+                if ((addr = IPAddressUtil.textToNumericFormatV6(host)) == null && host.contains(":")) {
+                    throw new UnknownHostException(host + ": invalid IPv6 address");
+                }
             } else if (ipv6Expected) {
                 
                 throw new UnknownHostException("["+host+"]");
@@ -616,10 +618,10 @@ class InetAddress implements java.io.Serializable {
                 }
                 return ret;
             }
-            } else if (ipv6Expected) {
-                
-                throw new UnknownHostException("["+host+"]");
-            }
+        } else if (ipv6Expected) {
+            
+            throw new UnknownHostException("["+host+"]");
+        }
         return getAllByName0(host, reqAddr, true);
     }
 

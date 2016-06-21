@@ -416,8 +416,9 @@ public class XMLEntityScanner implements XMLLocator  {
             fCurrentEntity.lineNumber++;
             fCurrentEntity.columnNumber = 1;
             if (fCurrentEntity.position == fCurrentEntity.count) {
+                invokeListeners(1);
                 fCurrentEntity.ch[0] = (char)c;
-                load(1, false, true);
+                load(1, false, false);
             }
             if (c == '\r' && isExternal) {
                 if (fCurrentEntity.ch[fCurrentEntity.position++] != '\n') {
@@ -519,9 +520,10 @@ public class XMLEntityScanner implements XMLLocator  {
         int offset = fCurrentEntity.position;
         if (XMLChar.isNameStart(fCurrentEntity.ch[offset])) {
             if (++fCurrentEntity.position == fCurrentEntity.count) {
+                invokeListeners(1);
                 fCurrentEntity.ch[0] = fCurrentEntity.ch[offset];
                 offset = 0;
-                if (load(1, false, true)) {
+                if (load(1, false, false)) {
                     fCurrentEntity.columnNumber++;
                     String symbol = fSymbolTable.addSymbol(fCurrentEntity.ch, 0, 1);
 
@@ -604,10 +606,11 @@ public class XMLEntityScanner implements XMLLocator  {
 
         if (XMLChar.isNameStart(fCurrentEntity.ch[offset])) {
             if (++fCurrentEntity.position == fCurrentEntity.count) {
+                invokeListeners(1);
                 fCurrentEntity.ch[0] = fCurrentEntity.ch[offset];
                 offset = 0;
 
-                if (load(1, false, true)) {
+                if (load(1, false, false)) {
                     fCurrentEntity.columnNumber++;
                     
                     
@@ -713,8 +716,9 @@ public class XMLEntityScanner implements XMLLocator  {
         if (fCurrentEntity.position == fCurrentEntity.count) {
             load(0, true, true);
         } else if (fCurrentEntity.position == fCurrentEntity.count - 1) {
+            invokeListeners(0);
             fCurrentEntity.ch[0] = fCurrentEntity.ch[fCurrentEntity.count - 1];
-            load(1, false, true);
+            load(1, false, false);
             fCurrentEntity.position = 0;
         }
 
@@ -834,8 +838,9 @@ public class XMLEntityScanner implements XMLLocator  {
         if (fCurrentEntity.position == fCurrentEntity.count) {
             load(0, true, true);
         } else if (fCurrentEntity.position == fCurrentEntity.count - 1) {
+            invokeListeners(0);
             fCurrentEntity.ch[0] = fCurrentEntity.ch[fCurrentEntity.count - 1];
-            load(1, false, true);
+            load(1, false, false);
             fCurrentEntity.position = 0;
         }
 
@@ -1159,8 +1164,9 @@ public class XMLEntityScanner implements XMLLocator  {
         } else if (c == '\n' && cc == '\r' && isExternal) {
             
             if (fCurrentEntity.position == fCurrentEntity.count) {
+                invokeListeners(1);
                 fCurrentEntity.ch[0] = (char)cc;
-                load(1, false, true);
+                load(1, false, false);
             }
             fCurrentEntity.position++;
             if (fCurrentEntity.ch[fCurrentEntity.position] == '\n') {
@@ -1222,8 +1228,9 @@ public class XMLEntityScanner implements XMLLocator  {
                     fCurrentEntity.lineNumber++;
                     fCurrentEntity.columnNumber = 1;
                     if (fCurrentEntity.position == fCurrentEntity.count - 1) {
+                        invokeListeners(0);
                         fCurrentEntity.ch[0] = (char)c;
-                        entityChanged = load(1, true, true);
+                        entityChanged = load(1, true, false);
                         if (!entityChanged){
                             
                             

@@ -406,6 +406,7 @@ class LocaleISOData {
         + "SN" + "SEN"  
         + "SO" + "SOM"  
         + "SR" + "SUR"  
+        + "SS" + "SSD"  
         + "ST" + "STP"  
         + "SV" + "SLV"  
         + "SX" + "SXM"  

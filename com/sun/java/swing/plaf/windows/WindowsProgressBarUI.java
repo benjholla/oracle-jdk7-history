@@ -267,8 +267,9 @@ public class WindowsProgressBarUI extends BasicProgressBarUI
     private Rectangle getFullChunkBounds(Rectangle box) {
         boolean vertical = (progressBar.getOrientation() == JProgressBar.VERTICAL);
         XPStyle xp = XPStyle.getXP();
-        int gap = xp.getInt(progressBar, Part.PP_PROGRESS, null,
-                            Prop.PROGRESSSPACESIZE, 0);
+        int gap = (xp != null) ? xp.getInt(progressBar, Part.PP_PROGRESS,
+                                           null, Prop.PROGRESSSPACESIZE, 0)
+                               : 0;
 
         if (!vertical) {
             int chunksize = box.width+gap;
@@ -283,6 +284,9 @@ public class WindowsProgressBarUI extends BasicProgressBarUI
                                           boolean vertical,
                                           int bgwidth, int bgheight) {
         XPStyle xp = XPStyle.getXP();
+        if (xp == null) {
+            return;
+        }
 
         
         Graphics2D gfx = (Graphics2D)g.create();
@@ -341,6 +345,9 @@ public class WindowsProgressBarUI extends BasicProgressBarUI
     private void paintXPBackground(Graphics g, boolean vertical,
                                    int barRectWidth, int barRectHeight) {
         XPStyle xp = XPStyle.getXP();
+        if (xp == null) {
+            return;
+        }
         Part part = vertical ? Part.PP_BARVERT : Part.PP_BAR;
         Skin skin = xp.getSkin(progressBar, part);
 

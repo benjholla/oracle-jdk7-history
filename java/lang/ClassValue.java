@@ -304,9 +304,18 @@ public abstract class ClassValue<T> {
         
         synchronized
         void removeEntry(ClassValue<?> classValue) {
-            
-            if (remove(classValue.identity) != null) {
+            Entry<?> e = remove(classValue.identity);
+            if (e == null) {
+                
+            } else if (e.isPromise()) {
+                
+                
+                
+                put(classValue.identity, e);
+            } else {
+                
                 classValue.bumpVersion();
+                
                 removeStaleEntries(classValue);
             }
         }

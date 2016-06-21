@@ -7,7 +7,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectOutput;
-import java.util.Hashtable;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.omg.CORBA.INTERNAL;
 
@@ -18,7 +19,7 @@ public abstract class OutputStreamHook extends ObjectOutputStream
     
     private class HookPutFields extends ObjectOutputStream.PutField
     {
-        private Hashtable fields = new Hashtable();
+        private Map<String,Object> fields = new HashMap<>();
 
         
         public void put(String name, boolean value){
@@ -88,7 +89,6 @@ public abstract class OutputStreamHook extends ObjectOutputStream
     public OutputStreamHook()
         throws java.io.IOException {
         super();
-
     }
 
     public void defaultWriteObject() throws IOException {

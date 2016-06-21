@@ -83,6 +83,9 @@ public class WindowsGraphicsUtils {
     static void paintXPText(AbstractButton b, Part part, State state,
             Graphics g, int x, int y, String text, int mnemIndex) {
         XPStyle xp = XPStyle.getXP();
+        if (xp == null) {
+            return;
+        }
         Color textColor = b.getForeground();
 
         if (textColor instanceof UIResource) {

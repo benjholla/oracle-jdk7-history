@@ -937,7 +937,9 @@ public final class String
             } else {
                 srcCount = 1;
             }
-            if (localeDependent || srcChar == '\u03A3') { 
+            if (localeDependent ||
+                srcChar == '\u03A3' || 
+                srcChar == '\u0130') { 
                 lowerChar = ConditionalSpecialCasing.toLowerCaseEx(this, i, locale);
             } else {
                 lowerChar = Character.toLowerCase(srcChar);

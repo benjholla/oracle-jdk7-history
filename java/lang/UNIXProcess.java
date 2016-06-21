@@ -252,41 +252,33 @@ final class UNIXProcess extends Process {
         ProcessPipeInputStream(int fd) {
             super(new FileInputStream(newFileDescriptor(fd)));
         }
-
-        private InputStream drainInputStream(InputStream in)
+        private static byte[] drainInputStream(InputStream in)
                 throws IOException {
             int n = 0;
             int j;
             byte[] a = null;
-            synchronized (closeLock) {
-                if (buf == null) 
-                    return null; 
-                j = in.available();
-            }
-            while (j > 0) {
+            while ((j = in.available()) > 0) {
                 a = (a == null) ? new byte[j] : Arrays.copyOf(a, n + j);
-                synchronized (closeLock) {
-                    if (buf == null) 
-                        return null; 
-                    n += in.read(a, n, j);
-                    j = in.available();
-                }
+                n += in.read(a, n, j);
             }
-            return (a == null) ?
-                    ProcessBuilder.NullInputStream.INSTANCE :
-                    new ByteArrayInputStream(n == a.length ? a : Arrays.copyOf(a, n));
+            return (a == null || n == a.length) ? a : Arrays.copyOf(a, n);
         }
 
         
         synchronized void processExited() {
-            try {
-                InputStream in = this.in;
-                if (in != null) {
-                    InputStream stragglers = drainInputStream(in);
-                    in.close();
-                    this.in = stragglers;
-                }
-            } catch (IOException ignored) { }
+            synchronized (closeLock) {
+                try {
+                    InputStream in = this.in;
+                    
+                    if (in != null) {
+                        byte[] stragglers = drainInputStream(in);
+                        in.close();
+                        this.in = (stragglers == null) ?
+                            ProcessBuilder.NullInputStream.INSTANCE :
+                            new ByteArrayInputStream(stragglers);
+                    }
+                } catch (IOException ignored) {}
+            }
         }
 
         @Override

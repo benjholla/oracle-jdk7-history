@@ -62,14 +62,15 @@ public class WindowsInternalFrameTitlePane extends BasicInternalFrameTitlePane {
             }
         } else {
             buttonWidth += 2;
-            selectedTitleGradientColor =
-                    UIManager.getColor("InternalFrame.activeTitleGradient");
-            notSelectedTitleGradientColor =
-                    UIManager.getColor("InternalFrame.inactiveTitleGradient");
             Color activeBorderColor =
                     UIManager.getColor("InternalFrame.activeBorderColor");
             setBorder(BorderFactory.createLineBorder(activeBorderColor, 1));
         }
+        
+        selectedTitleGradientColor =
+                UIManager.getColor("InternalFrame.activeTitleGradient");
+        notSelectedTitleGradientColor =
+                UIManager.getColor("InternalFrame.inactiveTitleGradient");
     }
 
     protected void uninstallListeners() {

@@ -187,7 +187,6 @@ public class MouseEvent extends InputEvent {
 
             if (getModifiersEx() != 0) { 
                 if (id == MouseEvent.MOUSE_RELEASED || id == MouseEvent.MOUSE_CLICKED){
-                    System.out.println("MEvent. CASE!");
                     shouldExcludeButtonFromExtModifiers = true;
                 }
             }

@@ -441,7 +441,7 @@ public class JPopupMenu extends JComponent implements Accessible,MenuElement {
 
             if (pref == null || pref.width != getWidth() ||
                                 pref.height != getHeight()) {
-                popup = getPopup();
+                showPopup();
             } else {
                 validate();
             }
@@ -484,7 +484,7 @@ public class JPopupMenu extends JComponent implements Accessible,MenuElement {
 
         if(b) {
             firePopupMenuWillBecomeVisible();
-            popup = getPopup();
+            showPopup();
             firePropertyChange("visible", Boolean.FALSE, Boolean.TRUE);
 
 
@@ -502,7 +502,7 @@ public class JPopupMenu extends JComponent implements Accessible,MenuElement {
     }
 
     
-    private Popup getPopup() {
+    private void showPopup() {
         Popup oldPopup = popup;
 
         if (oldPopup != null) {
@@ -526,8 +526,8 @@ public class JPopupMenu extends JComponent implements Accessible,MenuElement {
                                           desiredLocationY);
 
         popupFactory.setPopupType(PopupFactory.LIGHT_WEIGHT_POPUP);
+        popup = newPopup;
         newPopup.show();
-        return newPopup;
     }
 
     
@@ -543,7 +543,7 @@ public class JPopupMenu extends JComponent implements Accessible,MenuElement {
         desiredLocationX = x;
         desiredLocationY = y;
         if(popup != null && (x != oldX || y != oldY)) {
-            popup = getPopup();
+            showPopup();
         }
     }
 
@@ -647,7 +647,7 @@ public class JPopupMenu extends JComponent implements Accessible,MenuElement {
             Dimension newSize = getPreferredSize();
 
             if (!oldSize.equals(newSize)) {
-                popup = getPopup();
+                showPopup();
             }
         }
     }

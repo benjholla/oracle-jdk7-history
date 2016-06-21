@@ -36,18 +36,26 @@ public class ByteArrayOutputStream extends OutputStream {
     }
 
     
+    private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+
+    
     private void grow(int minCapacity) {
         
         int oldCapacity = buf.length;
         int newCapacity = oldCapacity << 1;
         if (newCapacity - minCapacity < 0)
             newCapacity = minCapacity;
-        if (newCapacity < 0) {
-            if (minCapacity < 0) 
-                throw new OutOfMemoryError();
-            newCapacity = Integer.MAX_VALUE;
-        }
+        if (newCapacity - MAX_ARRAY_SIZE > 0)
+            newCapacity = hugeCapacity(minCapacity);
         buf = Arrays.copyOf(buf, newCapacity);
+    }
+
+    private static int hugeCapacity(int minCapacity) {
+        if (minCapacity < 0) 
+            throw new OutOfMemoryError();
+        return (minCapacity > MAX_ARRAY_SIZE) ?
+            Integer.MAX_VALUE :
+            MAX_ARRAY_SIZE;
     }
 
     

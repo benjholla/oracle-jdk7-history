@@ -7,6 +7,11 @@ import java.awt.Window;
 import java.util.*;
 import java.awt.FocusTraversalPolicy;
 import sun.util.logging.PlatformLogger;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import sun.security.action.GetPropertyAction;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 
 public class SortingFocusTraversalPolicy
@@ -28,6 +33,30 @@ public class SortingFocusTraversalPolicy
 
     final private int FORWARD_TRAVERSAL = 0;
     final private int BACKWARD_TRAVERSAL = 1;
+
+    
+    private static final boolean legacySortingFTPEnabled;
+    private static final Method legacyMergeSortMethod;
+
+    static {
+        legacySortingFTPEnabled = "true".equals(AccessController.doPrivileged(
+            new GetPropertyAction("swing.legacySortingFTPEnabled", "true")));
+        legacyMergeSortMethod = legacySortingFTPEnabled ?
+            AccessController.doPrivileged(new PrivilegedAction<Method>() {
+                public Method run() {
+                    try {
+                        Class c = Class.forName("java.util.Arrays");
+                        Method m = c.getDeclaredMethod("legacyMergeSort", new Class[]{Object[].class, Comparator.class});
+                        m.setAccessible(true);
+                        return m;
+                    } catch (ClassNotFoundException | NoSuchMethodException e) {
+                        
+                        return null;
+                    }
+                }
+            }) :
+            null;
+    }
 
     
     protected SortingFocusTraversalPolicy() {
@@ -66,8 +95,30 @@ public class SortingFocusTraversalPolicy
     private void enumerateAndSortCycle(Container focusCycleRoot, List<Component> cycle) {
         if (focusCycleRoot.isShowing()) {
             enumerateCycle(focusCycleRoot, cycle);
-            Collections.sort(cycle, comparator);
+            if (!legacySortingFTPEnabled ||
+                !legacySort(cycle, comparator))
+            {
+                Collections.sort(cycle, comparator);
+            }
         }
+    }
+
+    private boolean legacySort(List<Component> l, Comparator<? super Component> c) {
+        if (legacyMergeSortMethod == null)
+            return false;
+
+        Object[] a = l.toArray();
+        try {
+            legacyMergeSortMethod.invoke(null, a, c);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            return false;
+        }
+        ListIterator<Component> i = l.listIterator();
+        for (Object e : a) {
+            i.next();
+            i.set((Component)e);
+        }
+        return true;
     }
 
     private void enumerateCycle(Container container, List<Component> cycle) {

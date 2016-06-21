@@ -228,6 +228,13 @@ public class SocketOrChannelAcceptorImpl
             
             
             
+
+            
+            
+            
+            
+            
+            getConnectionCache().stampTime(connection);
             getConnectionCache().put(this, connection);
 
             if (connection.shouldRegisterServerReadEvent()) {

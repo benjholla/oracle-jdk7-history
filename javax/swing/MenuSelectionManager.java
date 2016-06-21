@@ -7,6 +7,7 @@ import java.awt.event.*;
 import javax.swing.event.*;
 
 import sun.awt.AppContext;
+import sun.swing.SwingUtilities2;
 
 
 public class MenuSelectionManager {
@@ -29,6 +30,12 @@ public class MenuSelectionManager {
             if (msm == null) {
                 msm = new MenuSelectionManager();
                 context.put(MENU_SELECTION_MANAGER_KEY, msm);
+
+                
+                Object o = context.get(SwingUtilities2.MENU_SELECTION_MANAGER_LISTENER_KEY);
+                if (o != null && o instanceof ChangeListener) {
+                    msm.addChangeListener((ChangeListener) o);
+                }
             }
 
             return msm;

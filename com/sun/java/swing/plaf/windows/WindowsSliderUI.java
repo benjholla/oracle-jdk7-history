@@ -179,7 +179,6 @@ public class WindowsSliderUI extends BasicSliderUI
     }
 
     private Part getXPThumbPart() {
-        XPStyle xp = XPStyle.getXP();
         Part part;
         boolean vertical = (slider.getOrientation() == JSlider.VERTICAL);
         boolean leftToRight = slider.getComponentOrientation().isLeftToRight();

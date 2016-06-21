@@ -87,11 +87,14 @@ class AnimationController implements ActionListener, PropertyChangeListener {
                     
                     duration = 1000;
                 } else {
-                     duration = XPStyle.getXP().getThemeTransitionDuration(
-                           c, part,
-                           normalizeState(oldState),
-                           normalizeState(newState),
-                           Prop.TRANSITIONDURATIONS);
+                    XPStyle xp = XPStyle.getXP();
+                    duration = (xp != null)
+                               ? xp.getThemeTransitionDuration(
+                                       c, part,
+                                       normalizeState(oldState),
+                                       normalizeState(newState),
+                                       Prop.TRANSITIONDURATIONS)
+                               : 1000;
                 }
                 controller.startAnimation(c, part, oldState, newState, duration);
             }

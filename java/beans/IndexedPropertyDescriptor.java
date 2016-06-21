@@ -10,8 +10,8 @@ import java.lang.reflect.Method;
 public class IndexedPropertyDescriptor extends PropertyDescriptor {
 
     private Reference<Class> indexedPropertyTypeRef;
-    private Reference<Method> indexedReadMethodRef;
-    private Reference<Method> indexedWriteMethodRef;
+    private final MethodRef indexedReadMethodRef = new MethodRef();
+    private final MethodRef indexedWriteMethodRef = new MethodRef();
 
     private String indexedReadMethodName;
     private String indexedWriteMethodName;
@@ -72,11 +72,11 @@ public class IndexedPropertyDescriptor extends PropertyDescriptor {
 
     
     public synchronized Method getIndexedReadMethod() {
-        Method indexedReadMethod = getIndexedReadMethod0();
+        Method indexedReadMethod = this.indexedReadMethodRef.get();
         if (indexedReadMethod == null) {
             Class cls = getClass0();
             if (cls == null ||
-                (indexedReadMethodName == null && indexedReadMethodRef == null)) {
+                (indexedReadMethodName == null && !this.indexedReadMethodRef.isSet())) {
                 
                 return null;
             }
@@ -108,31 +108,30 @@ public class IndexedPropertyDescriptor extends PropertyDescriptor {
 
         
         setIndexedPropertyType(findIndexedPropertyType(readMethod,
-                                                       getIndexedWriteMethod0()));
+                                                       this.indexedWriteMethodRef.get()));
         setIndexedReadMethod0(readMethod);
     }
 
     private void setIndexedReadMethod0(Method readMethod) {
+        this.indexedReadMethodRef.set(readMethod);
         if (readMethod == null) {
             indexedReadMethodName = null;
-            indexedReadMethodRef = null;
             return;
         }
         setClass0(readMethod.getDeclaringClass());
 
         indexedReadMethodName = readMethod.getName();
-        this.indexedReadMethodRef = getSoftReference(readMethod);
         setTransient(readMethod.getAnnotation(Transient.class));
     }
 
 
     
     public synchronized Method getIndexedWriteMethod() {
-        Method indexedWriteMethod = getIndexedWriteMethod0();
+        Method indexedWriteMethod = this.indexedWriteMethodRef.get();
         if (indexedWriteMethod == null) {
             Class cls = getClass0();
             if (cls == null ||
-                (indexedWriteMethodName == null && indexedWriteMethodRef == null)) {
+                (indexedWriteMethodName == null && !this.indexedWriteMethodRef.isSet())) {
                 
                 return null;
             }
@@ -182,15 +181,14 @@ public class IndexedPropertyDescriptor extends PropertyDescriptor {
     }
 
     private void setIndexedWriteMethod0(Method writeMethod) {
+        this.indexedWriteMethodRef.set(writeMethod);
         if (writeMethod == null) {
             indexedWriteMethodName = null;
-            indexedWriteMethodRef = null;
             return;
         }
         setClass0(writeMethod.getDeclaringClass());
 
         indexedWriteMethodName = writeMethod.getName();
-        this.indexedWriteMethodRef = getSoftReference(writeMethod);
         setTransient(writeMethod.getAnnotation(Transient.class));
     }
 
@@ -218,18 +216,6 @@ public class IndexedPropertyDescriptor extends PropertyDescriptor {
     private Class getIndexedPropertyType0() {
         return (this.indexedPropertyTypeRef != null)
                 ? this.indexedPropertyTypeRef.get()
-                : null;
-    }
-
-    private Method getIndexedReadMethod0() {
-        return (this.indexedReadMethodRef != null)
-                ? this.indexedReadMethodRef.get()
-                : null;
-    }
-
-    private Method getIndexedWriteMethod0() {
-        return (this.indexedWriteMethodRef != null)
-                ? this.indexedWriteMethodRef.get()
                 : null;
     }
 
@@ -347,8 +333,8 @@ public class IndexedPropertyDescriptor extends PropertyDescriptor {
     
     IndexedPropertyDescriptor(IndexedPropertyDescriptor old) {
         super(old);
-        indexedReadMethodRef = old.indexedReadMethodRef;
-        indexedWriteMethodRef = old.indexedWriteMethodRef;
+        this.indexedReadMethodRef.set(old.indexedReadMethodRef.get());
+        this.indexedWriteMethodRef.set(old.indexedWriteMethodRef.get());
         indexedPropertyTypeRef = old.indexedPropertyTypeRef;
         indexedWriteMethodName = old.indexedWriteMethodName;
         indexedReadMethodName = old.indexedReadMethodName;
@@ -357,7 +343,7 @@ public class IndexedPropertyDescriptor extends PropertyDescriptor {
     void updateGenericsFor(Class<?> type) {
         super.updateGenericsFor(type);
         try {
-            setIndexedPropertyType(findIndexedPropertyType(getIndexedReadMethod0(), getIndexedWriteMethod0()));
+            setIndexedPropertyType(findIndexedPropertyType(this.indexedReadMethodRef.get(), this.indexedWriteMethodRef.get()));
         }
         catch (IntrospectionException exception) {
             setIndexedPropertyType(null);
@@ -381,7 +367,7 @@ public class IndexedPropertyDescriptor extends PropertyDescriptor {
     void appendTo(StringBuilder sb) {
         super.appendTo(sb);
         appendTo(sb, "indexedPropertyType", this.indexedPropertyTypeRef);
-        appendTo(sb, "indexedReadMethod", this.indexedReadMethodRef);
-        appendTo(sb, "indexedWriteMethod", this.indexedWriteMethodRef);
+        appendTo(sb, "indexedReadMethod", this.indexedReadMethodRef.get());
+        appendTo(sb, "indexedWriteMethod", this.indexedWriteMethodRef.get());
     }
 }
