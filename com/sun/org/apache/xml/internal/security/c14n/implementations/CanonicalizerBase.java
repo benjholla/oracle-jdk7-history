@@ -16,7 +16,6 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import com.sun.org.apache.xml.internal.security.c14n.CanonicalizationException;
@@ -30,6 +29,7 @@ import com.sun.org.apache.xml.internal.security.utils.XMLUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Comment;
 import org.w3c.dom.Element;
+import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.ProcessingInstruction;
@@ -38,6 +38,9 @@ import org.xml.sax.SAXException;
 
 
 public abstract class CanonicalizerBase extends CanonicalizerSpi {
+   
+   
+   
    
    
    private static final byte[] _END_PI = {'?','>'};
@@ -52,32 +55,24 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
    private static final byte[] _LT_ = {'&','l','t',';'};
    private static final byte[] _END_TAG = {'<','/'};
    private static final byte[] _AMP_ = {'&','a','m','p',';'};
+   private static final byte[] _EQUALS_STR = {'=','\"'};
+
    final static AttrCompare COMPARE=new AttrCompare();
    final static String XML="xml";
    final static String XMLNS="xmlns";
-   final static byte[] equalsStr= {'=','\"'};
    static final int NODE_BEFORE_DOCUMENT_ELEMENT = -1;
    static final int NODE_NOT_BEFORE_OR_AFTER_DOCUMENT_ELEMENT = 0;
    static final int NODE_AFTER_DOCUMENT_ELEMENT = 1;
-   
-   protected static final Attr nullNode;
-   static {
-    try {
-        nullNode=DocumentBuilderFactory.newInstance().
-            newDocumentBuilder().newDocument().createAttributeNS(Constants.NamespaceSpecNS,XMLNS);
-        nullNode.setValue("");
-    } catch (Exception e) {
-        throw new RuntimeException("Unable to create nullNode"+e);
-    }
-   }
-
    List nodeFilter;
-
    boolean _includeComments;
    Set _xpathNodeSet = null;
+
    
    Node _excludeNode =null;
    OutputStream _writer = new UnsyncByteArrayOutputStream();
+
+   
+   private Attr nullNode;
 
    
    public CanonicalizerBase(boolean includeComments) {
@@ -245,7 +240,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
                         writer.write('>');
                         sibling= currentNode.getFirstChild();
                         if (sibling==null) {
-                                writer.write(_END_TAG);
+                                writer.write(_END_TAG.clone());
                                 UtfHelpper.writeStringToUtf8(name,writer);
                                 writer.write('>');
                                 
@@ -259,7 +254,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
                         break;
                 }
                 while (sibling==null  && parentNode!=null) {
-                        writer.write(_END_TAG);
+                        writer.write(_END_TAG.clone());
                         UtfHelpper.writeByte(((Element)parentNode).getTagName(),writer,cache);
                         writer.write('>');
                         
@@ -407,7 +402,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
 
                         if (sibling==null) {
                                 if (currentNodeIsVisible) {
-                                        writer.write(_END_TAG);
+                                        writer.write(_END_TAG.clone());
                                         UtfHelpper.writeByte(name,writer,cache);
                                         writer.write('>');
                                         
@@ -425,7 +420,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
                 }
                 while (sibling==null  && parentNode!=null) {
                         if (isVisible(parentNode)) {
-                                writer.write(_END_TAG);
+                                writer.write(_END_TAG.clone());
                                 UtfHelpper.writeByte(((Element)parentNode).getTagName(),writer,cache);
                                 writer.write('>');
                                 
@@ -533,7 +528,8 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
         Attr nsprefix;
         if (((nsprefix=ns.getMappingWithoutRendered("xmlns"))!=null)
                 && "".equals(nsprefix.getValue())) {
-             ns.addMappingAndRender("xmlns","",nullNode);
+             ns.addMappingAndRender("xmlns", "",
+                        getNullNode(nsprefix.getOwnerDocument()));
         }
         }
    
@@ -551,7 +547,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
                                 final Map cache) throws IOException {
               writer.write(' ');
               UtfHelpper.writeByte(name,writer,cache);
-              writer.write(equalsStr);
+              writer.write(_EQUALS_STR.clone());
               byte  []toWrite;
               final int length = value.length();
               int i=0;
@@ -561,27 +557,27 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
                  switch (c) {
 
                  case '&' :
-                        toWrite=_AMP_;
+                        toWrite=_AMP_.clone();
                     break;
 
                  case '<' :
-                        toWrite=_LT_;
+                        toWrite=_LT_.clone();
                     break;
 
                  case '"' :
-                        toWrite=_QUOT_;
+                        toWrite=_QUOT_.clone();
                     break;
 
                  case 0x09 :    
-                        toWrite=__X9_;
+                        toWrite=__X9_.clone();
                     break;
 
                  case 0x0A :    
-                        toWrite=__XA_;
+                        toWrite=__XA_.clone();
                     break;
 
                  case 0x0D :    
-                        toWrite=__XD_;
+                        toWrite=__XD_.clone();
                     break;
 
                  default :
@@ -604,7 +600,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
               if (position == NODE_AFTER_DOCUMENT_ELEMENT) {
                 writer.write('\n');
               }
-              writer.write(_BEGIN_PI);
+              writer.write(_BEGIN_PI.clone());
 
               final String target = currentPI.getTarget();
               int length = target.length();
@@ -612,7 +608,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
               for (int i = 0; i < length; i++) {
                  char c=target.charAt(i);
                  if (c==0x0D) {
-                    writer.write(__XD_);
+                    writer.write(__XD_.clone());
                  } else {
                          if (c < 0x80)  {
                                 writer.write(c);
@@ -632,14 +628,14 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
                  for (int i = 0; i < length; i++) {
                         char c=data.charAt(i);
                     if (c==0x0D) {
-                       writer.write(__XD_);
+                       writer.write(__XD_.clone());
                     } else {
                         UtfHelpper.writeCharToUtf8(c,writer);
                     }
                  }
               }
 
-              writer.write(_END_PI);
+              writer.write(_END_PI.clone());
               if (position == NODE_BEFORE_DOCUMENT_ELEMENT) {
                 writer.write('\n');
              }
@@ -650,7 +646,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
                   if (position == NODE_AFTER_DOCUMENT_ELEMENT) {
                         writer.write('\n');
                   }
-              writer.write(_BEGIN_COMM);
+              writer.write(_BEGIN_COMM.clone());
 
               final String data = currentComment.getData();
               final int length = data.length();
@@ -658,7 +654,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
               for (int i = 0; i < length; i++) {
                  char c=data.charAt(i);
                  if (c==0x0D) {
-                    writer.write(__XD_);
+                    writer.write(__XD_.clone());
                  } else {
                          if (c < 0x80)  {
                                 writer.write(c);
@@ -668,7 +664,7 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
                  }
               }
 
-              writer.write(_END_COMM);
+              writer.write(_END_COMM.clone());
               if (position == NODE_BEFORE_DOCUMENT_ELEMENT) {
                         writer.write('\n');
                  }
@@ -684,19 +680,19 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
                  switch (c) {
 
                  case '&' :
-                        toWrite=_AMP_;
+                        toWrite=_AMP_.clone();
                     break;
 
                  case '<' :
-                        toWrite=_LT_;
+                        toWrite=_LT_.clone();
                     break;
 
                  case '>' :
-                        toWrite=_GT_;
+                        toWrite=_GT_.clone();
                     break;
 
                  case 0xD :
-                        toWrite=__XD_;
+                        toWrite=__XD_.clone();
                     break;
 
                  default :
@@ -710,5 +706,19 @@ public abstract class CanonicalizerBase extends CanonicalizerSpi {
                  writer.write(toWrite);
               }
            }
+
+    
+    protected Attr getNullNode(Document ownerDocument) {
+        if (nullNode == null) {
+            try {
+                nullNode = ownerDocument.createAttributeNS(
+                                    Constants.NamespaceSpecNS, XMLNS);
+                nullNode.setValue("");
+            } catch (Exception e) {
+                throw new RuntimeException("Unable to create nullNode: " + e);
+            }
+        }
+        return nullNode;
+    }
 
 }

@@ -38,6 +38,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
+import sun.corba.EncapsInputStreamFactory;
+
 public final class TypeCodeOutputStream extends EncapsOutputStream
 {
     private OutputStream enclosure = null;
@@ -54,9 +56,9 @@ public final class TypeCodeOutputStream extends EncapsOutputStream
 
     public org.omg.CORBA.portable.InputStream create_input_stream()
     {
-        
-        TypeCodeInputStream tcis
-            = new TypeCodeInputStream((ORB)orb(), getByteBuffer(), getIndex(), isLittleEndian(), getGIOPVersion());
+        TypeCodeInputStream tcis = EncapsInputStreamFactory
+                .newTypeCodeInputStream((ORB) orb(), getByteBuffer(),
+                        getIndex(), isLittleEndian(), getGIOPVersion());
         
             
             

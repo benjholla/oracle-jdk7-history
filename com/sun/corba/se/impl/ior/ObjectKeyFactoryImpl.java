@@ -26,6 +26,8 @@ import com.sun.corba.se.impl.ior.ObjectKeyImpl ;
 import com.sun.corba.se.impl.logging.IORSystemException ;
 
 import com.sun.corba.se.impl.encoding.EncapsInputStream ;
+import sun.corba.EncapsInputStreamFactory;
+
 
 
 interface Handler {
@@ -181,7 +183,7 @@ public class ObjectKeyFactoryImpl implements ObjectKeyFactory
     public ObjectKey create( byte[] key )
     {
         OctetSeqHolder osh = new OctetSeqHolder() ;
-        EncapsInputStream is = new EncapsInputStream( orb, key, key.length ) ;
+        EncapsInputStream is = EncapsInputStreamFactory.newEncapsInputStream( orb, key, key.length );
 
         ObjectKeyTemplate oktemp = create( is, fullKey, osh ) ;
         if (oktemp == null)

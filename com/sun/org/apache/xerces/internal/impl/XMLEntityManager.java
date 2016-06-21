@@ -1061,8 +1061,8 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver {
         if(fLimitAnalyzer != null) {
            fLimitAnalyzer.addValue(entityExpansionIndex, name, 1);
         }
-        if( fSecurityManager != null && fSecurityManager.isOverLimit(entityExpansionIndex)){
-            fSecurityManager.debugPrint();
+        if( fSecurityManager != null && fSecurityManager.isOverLimit(entityExpansionIndex, fLimitAnalyzer)){
+            fSecurityManager.debugPrint(fLimitAnalyzer);
             fErrorReporter.reportError(XMLMessageFormatter.XML_DOMAIN,"EntityExpansionLimitExceeded",
                     new Object[]{fSecurityManager.getLimitValueByIndex(entityExpansionIndex)},
                                              XMLErrorReporter.SEVERITY_FATAL_ERROR );
@@ -1116,7 +1116,7 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver {
                 if (fLimitAnalyzer != null) {
                     fLimitAnalyzer.endEntity(XMLSecurityManager.Limit.GENEAL_ENTITY_SIZE_LIMIT, fCurrentEntity.name);
                     if (fCurrentEntity.name.equals("[xml]")) {
-                        fSecurityManager.debugPrint();
+                        fSecurityManager.debugPrint(fLimitAnalyzer);
                     }
                 }
                 fCurrentEntity.close();
@@ -1185,7 +1185,6 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver {
         fAccessExternalDTD = spm.getValue(XMLSecurityPropertyManager.Property.ACCESS_EXTERNAL_DTD);
 
         fSecurityManager = (XMLSecurityManager)propertyManager.getProperty(SECURITY_MANAGER);
-        fLimitAnalyzer = fSecurityManager.getLimitAnalyzer();
 
         
         
@@ -1234,7 +1233,6 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver {
         fStaxEntityResolver = (StaxEntityResolverWrapper)componentManager.getProperty(STAX_ENTITY_RESOLVER, null);
         fValidationManager = (ValidationManager)componentManager.getProperty(VALIDATION_MANAGER, null);
         fSecurityManager = (XMLSecurityManager)componentManager.getProperty(SECURITY_MANAGER, null);
-        fLimitAnalyzer = fSecurityManager.getLimitAnalyzer();
         entityExpansionIndex = fSecurityManager.getIndex(Constants.JDK_ENTITY_EXPANSION_LIMIT);
 
         
@@ -1360,7 +1358,6 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver {
             if (suffixLength == Constants.SECURITY_MANAGER_PROPERTY.length() &&
                 propertyId.endsWith(Constants.SECURITY_MANAGER_PROPERTY)) {
                 fSecurityManager = (XMLSecurityManager)value;
-                fLimitAnalyzer = fSecurityManager.getLimitAnalyzer();
             }
         }
 
@@ -1371,6 +1368,11 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver {
             fAccessExternalDTD = spm.getValue(XMLSecurityPropertyManager.Property.ACCESS_EXTERNAL_DTD);
             }
         }
+
+    public void setLimitAnalyzer(XMLLimitAnalyzer fLimitAnalyzer) {
+        this.fLimitAnalyzer = fLimitAnalyzer;
+    }
+
     
     public String[] getRecognizedProperties() {
         return (String[])(RECOGNIZED_PROPERTIES.clone());

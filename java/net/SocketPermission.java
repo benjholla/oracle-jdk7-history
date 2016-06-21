@@ -11,6 +11,9 @@ import java.util.StringTokenizer;
 import java.net.InetAddress;
 import java.security.Permission;
 import java.security.PermissionCollection;
+import java.security.PrivilegedAction;
+import java.security.AccessController;
+import java.security.Security;
 import java.io.Serializable;
 import java.io.ObjectStreamField;
 import java.io.ObjectOutputStream;
@@ -18,6 +21,7 @@ import java.io.ObjectInputStream;
 import java.io.IOException;
 import sun.net.util.IPAddressUtil;
 import sun.net.RegisteredDomain;
+import sun.net.PortConfig;
 import sun.security.util.SecurityConstants;
 import sun.security.util.Debug;
 
@@ -51,6 +55,7 @@ implements java.io.Serializable
     private static final int PORT_MIN = 0;
     private static final int PORT_MAX = 65535;
     private static final int PRIV_PORT_MAX = 1023;
+    private static final int DEF_EPH_LOW = 49152;
 
     
     private transient int mask;
@@ -96,6 +101,14 @@ implements java.io.Serializable
 
     private static Debug debug = null;
     private static boolean debugInit = false;
+
+    
+    private static final int ephemeralLow = initEphemeralPorts(
+        "low", DEF_EPH_LOW
+    );
+    private static final int ephemeralHigh = initEphemeralPorts(
+        "high", PORT_MAX
+    );
 
     static {
         Boolean tmp = java.security.AccessController.doPrivileged(
@@ -195,6 +208,11 @@ implements java.io.Serializable
 
             return new int[] {l, h};
         }
+    }
+
+    
+    private boolean includesEphemerals() {
+        return portrange[0] == 0;
     }
 
     
@@ -619,10 +637,21 @@ implements java.io.Serializable
         int i,j;
 
         if ((that.mask & RESOLVE) != that.mask) {
+
             
             if ((that.portrange[0] < this.portrange[0]) ||
                     (that.portrange[1] > this.portrange[1])) {
+
+                
+                if (this.includesEphemerals() || that.includesEphemerals()) {
+                    if (!inRange(this.portrange[0], this.portrange[1],
+                                     that.portrange[0], that.portrange[1]))
+                    {
+                                return false;
+                    }
+                } else {
                     return false;
+                }
             }
         }
 
@@ -878,6 +907,71 @@ implements java.io.Serializable
         init(getName(),getMask(actions));
     }
 
+    
+    private static int initEphemeralPorts(
+        final String suffix, final int defval
+    )
+    {
+        return AccessController.doPrivileged(
+            new PrivilegedAction<Integer>(){
+                public Integer run() {
+                    int val = Integer.getInteger(
+                            "jdk.net.ephemeralPortRange."+suffix, -1
+                    );
+                    if (val != -1) {
+                        return val;
+                    } else {
+                        return suffix.equals("low") ?
+                            PortConfig.getLower() : PortConfig.getUpper();
+                    }
+                }
+            }
+        );
+    }
+
+    
+    private static boolean inRange(
+        int policyLow, int policyHigh, int targetLow, int targetHigh
+    )
+    {
+        if (targetLow == 0) {
+            
+            if (!inRange(policyLow, policyHigh, ephemeralLow, ephemeralHigh)) {
+                return false;
+            }
+            if (targetHigh == 0) {
+                
+                return true;
+            }
+            
+            targetLow = 1;
+        }
+
+        if (policyLow == 0 && policyHigh == 0) {
+            
+            return targetLow >= ephemeralLow && targetHigh <= ephemeralHigh;
+        }
+
+        if (policyLow != 0) {
+            
+            return targetLow >= policyLow && targetHigh <= policyHigh;
+        }
+
+        
+
+        
+
+        if (policyHigh >= ephemeralLow - 1) {
+            return targetHigh <= ephemeralHigh;
+        }
+
+        
+
+        
+
+        return  (targetLow <= policyHigh && targetHigh <= policyHigh) ||
+                (targetLow >= ephemeralLow && targetHigh <= ephemeralHigh);
+    }
     
 }
 

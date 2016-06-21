@@ -12,7 +12,6 @@ import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 
@@ -22,30 +21,30 @@ import javax.naming.*;
 
 final class VersionHelper12 extends VersionHelper {
 
-    private boolean getSystemPropsFailed = false;
-
-    VersionHelper12() {} 
+    
+    VersionHelper12() {
+    }
 
     public Class loadClass(String className) throws ClassNotFoundException {
-        ClassLoader cl = getContextClassLoader();
-        return Class.forName(className, true, cl);
+        return loadClass(className, getContextClassLoader());
     }
 
     
     Class loadClass(String className, ClassLoader cl)
         throws ClassNotFoundException {
-        return Class.forName(className, true, cl);
+        Class<?> cls = Class.forName(className, true, cl);
+        return cls;
     }
 
     
     public Class loadClass(String className, String codebase)
         throws ClassNotFoundException, MalformedURLException {
-        ClassLoader cl;
 
         ClassLoader parent = getContextClassLoader();
-        cl = URLClassLoader.newInstance(getUrlArray(codebase), parent);
+        ClassLoader cl =
+                 URLClassLoader.newInstance(getUrlArray(codebase), parent);
 
-        return Class.forName(className, true, cl);
+        return loadClass(className, cl);
     }
 
     String getJndiProperty(final int i) {
@@ -63,16 +62,12 @@ final class VersionHelper12 extends VersionHelper {
     }
 
     String[] getJndiProperties() {
-        if (getSystemPropsFailed) {
-            return null;        
-        }
         Properties sysProps = (Properties) AccessController.doPrivileged(
             new PrivilegedAction() {
                 public Object run() {
                     try {
                         return System.getProperties();
                     } catch (SecurityException e) {
-                        getSystemPropsFailed = true;
                         return null;
                     }
                 }
@@ -138,16 +133,23 @@ final class VersionHelper12 extends VersionHelper {
         return new InputStreamEnumeration(urls);
     }
 
+    
     ClassLoader getContextClassLoader() {
         return (ClassLoader) AccessController.doPrivileged(
             new PrivilegedAction() {
                 public Object run() {
-                    return Thread.currentThread().getContextClassLoader();
+                    ClassLoader loader =
+                            Thread.currentThread().getContextClassLoader();
+                    if (loader == null) {
+                        
+                        loader = ClassLoader.getSystemClassLoader();
+                    }
+
+                    return loader;
                 }
             }
         );
     }
-
 
     
     class InputStreamEnumeration implements NamingEnumeration {

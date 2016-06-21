@@ -13,11 +13,10 @@ import com.sun.corba.se.impl.encoding.OSFCodeSetRegistry;
 import com.sun.corba.se.impl.protocol.giopmsgheaders.Message;
 
 import com.sun.corba.se.spi.orb.ORB;
-
 import com.sun.corba.se.spi.logging.CORBALogDomains;
-
 import com.sun.corba.se.impl.logging.ORBUtilSystemException;
 
+import sun.corba.EncapsInputStreamFactory;
 
 public class EncapsInputStream extends CDRInputStream
 {
@@ -108,7 +107,7 @@ public class EncapsInputStream extends CDRInputStream
     }
 
     public CDRInputStream dup() {
-        return new EncapsInputStream(this);
+        return EncapsInputStreamFactory.newEncapsInputStream(this);
     }
 
     protected CodeSetConversion.BTCConverter createCharBTCConverter() {

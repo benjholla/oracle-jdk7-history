@@ -30,6 +30,7 @@ import org.xml.sax.SAXNotSupportedException;
 
 public class Extensions
 {
+    static final String JDK_DEFAULT_DOM = "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl";
   
   private Extensions(){}  
 
@@ -64,23 +65,14 @@ public class Extensions
 
       
       
-      try
-      {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        Document myDoc = db.newDocument();
+      Document myDoc = getDocument();
 
-        Text textNode = myDoc.createTextNode(textNodeValue);
-        DocumentFragment docFrag = myDoc.createDocumentFragment();
+      Text textNode = myDoc.createTextNode(textNodeValue);
+      DocumentFragment docFrag = myDoc.createDocumentFragment();
 
-        docFrag.appendChild(textNode);
+      docFrag.appendChild(textNode);
 
-        return new NodeSet(docFrag);
-      }
-      catch(ParserConfigurationException pce)
-      {
-        throw new com.sun.org.apache.xml.internal.utils.WrappedRuntimeException(pce);
-      }
+      return new NodeSet(docFrag);
     }
   }
 
@@ -134,8 +126,7 @@ public class Extensions
   public static NodeList tokenize(String toTokenize, String delims)
   {
 
-    Document doc = DocumentHolder.m_doc;
-
+    Document doc = getDocument();
 
     StringTokenizer lTokenizer = new StringTokenizer(toTokenize, delims);
     NodeSet resultSet = new NodeSet();
@@ -161,17 +152,7 @@ public class Extensions
   public static Node checkEnvironment(ExpressionContext myContext)
   {
 
-    Document factoryDocument;
-    try
-    {
-      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-      DocumentBuilder db = dbf.newDocumentBuilder();
-      factoryDocument = db.newDocument();
-    }
-    catch(ParserConfigurationException pce)
-    {
-      throw new com.sun.org.apache.xml.internal.utils.WrappedRuntimeException(pce);
-    }
+    Document factoryDocument = getDocument();
 
     Node resultNode = null;
     try
@@ -237,22 +218,19 @@ public class Extensions
   }
 
     
-    private static class DocumentHolder
-    {
-        
-        private static final Document m_doc;
-        static
+   private static Document getDocument()
+   {
+        try
         {
-            try
-            {
-                m_doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+            if (System.getSecurityManager() == null) {
+                return DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+            } else {
+                return DocumentBuilderFactory.newInstance(JDK_DEFAULT_DOM, null).newDocumentBuilder().newDocument();
             }
-
-            catch(ParserConfigurationException pce)
-            {
-                  throw new com.sun.org.apache.xml.internal.utils.WrappedRuntimeException(pce);
-            }
-
+        }
+        catch(ParserConfigurationException pce)
+        {
+            throw new com.sun.org.apache.xml.internal.utils.WrappedRuntimeException(pce);
         }
     }
 }

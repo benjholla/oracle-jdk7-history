@@ -120,6 +120,11 @@ public class LogManager {
 
     
     protected LogManager() {
+        this(checkSubclassPermissions());
+    }
+
+    private LogManager(Void checked) {
+
         
         try {
             Runtime.getRuntime().addShutdownHook(new Cleaner());
@@ -127,6 +132,19 @@ public class LogManager {
             
             
         }
+    }
+
+    private static Void checkSubclassPermissions() {
+        final SecurityManager sm = System.getSecurityManager();
+        if (sm != null) {
+            
+            
+            
+            
+            sm.checkPermission(new RuntimePermission("shutdownHooks"));
+            sm.checkPermission(new RuntimePermission("setContextClassLoader"));
+        }
+        return null;
     }
 
     

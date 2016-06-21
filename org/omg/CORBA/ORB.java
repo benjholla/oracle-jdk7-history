@@ -30,15 +30,6 @@ abstract public class ORB {
     
     
     
-    private static final String defaultORB = "com.sun.corba.se.impl.orb.ORBImpl";
-    private static final String defaultORBSingleton = "com.sun.corba.se.impl.orb.ORBSingleton";
-
-    
-    
-    
-    
-    
-    
     
     
     static private ORB singleton;
@@ -121,10 +112,12 @@ abstract public class ORB {
             String className = getSystemProperty(ORBSingletonClassKey);
             if (className == null)
                 className = getPropertyFromFile(ORBSingletonClassKey);
-            if (className == null)
-                className = defaultORBSingleton;
-
-            singleton = create_impl(className);
+            if ((className == null) ||
+                    (className.equals("com.sun.corba.se.impl.orb.ORBSingleton"))) {
+                singleton = new com.sun.corba.se.impl.orb.ORBSingleton();
+            } else {
+                singleton = create_impl(className);
+            }
         }
         return singleton;
     }
@@ -165,10 +158,13 @@ abstract public class ORB {
             className = getSystemProperty(ORBClassKey);
         if (className == null)
             className = getPropertyFromFile(ORBClassKey);
-        if (className == null)
-            className = defaultORB;
+        if ((className == null) ||
+                    (className.equals("com.sun.corba.se.impl.orb.ORBImpl"))) {
+            orb = new com.sun.corba.se.impl.orb.ORBImpl();
+        } else {
+            orb = create_impl(className);
+        }
 
-        orb = create_impl(className);
         orb.set_parameters(args, props);
         return orb;
     }
@@ -186,10 +182,13 @@ abstract public class ORB {
             className = getSystemProperty(ORBClassKey);
         if (className == null)
             className = getPropertyFromFile(ORBClassKey);
-        if (className == null)
-            className = defaultORB;
+        if ((className == null) ||
+                    (className.equals("com.sun.corba.se.impl.orb.ORBImpl"))) {
+            orb = new com.sun.corba.se.impl.orb.ORBImpl();
+        } else {
+            orb = create_impl(className);
+        }
 
-        orb = create_impl(className);
         orb.set_parameters(app, props);
         return orb;
     }

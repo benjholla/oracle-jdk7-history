@@ -24,17 +24,14 @@ import com.sun.corba.se.impl.orbutil.GetPropertyAction;
 
 public class PortableRemoteObject {
 
-    private static javax.rmi.CORBA.PortableRemoteObjectDelegate proDelegate = null;
+    private static final javax.rmi.CORBA.PortableRemoteObjectDelegate proDelegate;
 
     private static final String PortableRemoteObjectClassKey =
             "javax.rmi.CORBA.PortableRemoteObjectClass";
 
-    private static final String defaultPortableRemoteObjectImplName =
-            "com.sun.corba.se.impl.javax.rmi.PortableRemoteObject";
-
     static {
         proDelegate = (javax.rmi.CORBA.PortableRemoteObjectDelegate)
-            createDelegateIfSpecified(PortableRemoteObjectClassKey);
+            createDelegate(PortableRemoteObjectClassKey);
     }
 
     
@@ -100,7 +97,7 @@ public class PortableRemoteObject {
     
     
     
-    private static Object createDelegateIfSpecified(String classKey) {
+    private static Object createDelegate(String classKey) {
         String className = (String)
             AccessController.doPrivileged(new GetPropertyAction(classKey));
         if (className == null) {
@@ -110,7 +107,7 @@ public class PortableRemoteObject {
             }
         }
         if (className == null) {
-                className = defaultPortableRemoteObjectImplName;
+            return new com.sun.corba.se.impl.javax.rmi.PortableRemoteObject();
         }
 
         try {

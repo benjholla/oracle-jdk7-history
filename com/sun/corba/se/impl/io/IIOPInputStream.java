@@ -295,7 +295,7 @@ public class IIOPInputStream
     }
 
     
-    public final Object readObjectDelegate() throws IOException
+    public final synchronized Object readObjectDelegate() throws IOException
     {
         try {
 
@@ -314,7 +314,7 @@ public class IIOPInputStream
             }
     }
 
-    final Object simpleReadObject(Class clz,
+    final synchronized Object simpleReadObject(Class clz,
                                   String repositoryID,
                                   com.sun.org.omg.SendingContext.CodeBase sender,
                                   int offset)
@@ -382,7 +382,7 @@ public class IIOPInputStream
         return obj;
     }
 
-    public final void simpleSkipObject(String repositoryID,
+    public final synchronized  void simpleSkipObject(String repositoryID,
                                        com.sun.org.omg.SendingContext.CodeBase sender)
                                        
     {
@@ -449,7 +449,7 @@ public class IIOPInputStream
     }
 
     
-    public final void defaultReadObjectDelegate()
+    final synchronized void defaultReadObjectDelegate()
     
     {
         try {
@@ -859,7 +859,7 @@ public class IIOPInputStream
         }
     }
 
-    private Object inputObject(Class clz,
+    private synchronized Object inputObject(Class clz,
                                String repositoryID,
                                com.sun.org.omg.SendingContext.CodeBase sender,
                                int offset)
@@ -1117,7 +1117,7 @@ public class IIOPInputStream
     }
 
     
-    private Object inputObjectUsingFVD(Class clz,
+    private synchronized Object inputObjectUsingFVD(Class clz,
                                        String repositoryID,
                                        com.sun.org.omg.SendingContext.CodeBase sender,
                                        int offset)

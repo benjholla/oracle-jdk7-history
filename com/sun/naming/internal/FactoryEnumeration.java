@@ -32,7 +32,8 @@ public final class FactoryEnumeration {
 
             try {
                 if (answer == null) {   
-                    answer = Class.forName(className, true, loader);
+                    Class<?> cls = Class.forName(className, true, loader);
+                    answer = cls;
                 }
                 
                 answer = ((Class) answer).newInstance();

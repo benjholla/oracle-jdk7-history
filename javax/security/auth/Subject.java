@@ -448,6 +448,10 @@ public final class Subject implements java.io.Serializable {
         s.defaultReadObject();
 
         
+        principals = Collections.synchronizedSet(new SecureSet<Principal>
+                                (this, PRINCIPAL_SET, principals));
+
+        
         
         this.pubCredentials = Collections.synchronizedSet
                         (new SecureSet<Object>(this, PUB_CREDENTIAL_SET));

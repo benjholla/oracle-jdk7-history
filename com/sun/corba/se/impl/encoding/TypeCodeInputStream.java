@@ -41,6 +41,8 @@ import com.sun.corba.se.impl.encoding.CDRInputStream;
 import com.sun.corba.se.impl.encoding.CDROutputStream;
 import com.sun.corba.se.impl.encoding.MarshalInputStream;
 
+import sun.corba.EncapsInputStreamFactory;
+
 public class TypeCodeInputStream extends EncapsInputStream implements TypeCodeReader
 {
     private Map typeMap = null;
@@ -134,11 +136,13 @@ public class TypeCodeInputStream extends EncapsInputStream implements TypeCodeRe
 
         
         if (is instanceof CDRInputStream) {
-            encap = new TypeCodeInputStream((ORB)_orb, encapBuffer, encapBuffer.length,
-                                            ((CDRInputStream)is).isLittleEndian(),
-                                            ((CDRInputStream)is).getGIOPVersion());
+            encap = EncapsInputStreamFactory.newTypeCodeInputStream((ORB) _orb,
+                    encapBuffer, encapBuffer.length,
+                    ((CDRInputStream) is).isLittleEndian(),
+                    ((CDRInputStream) is).getGIOPVersion());
         } else {
-            encap = new TypeCodeInputStream((ORB)_orb, encapBuffer, encapBuffer.length);
+            encap = EncapsInputStreamFactory.newTypeCodeInputStream((ORB) _orb,
+                    encapBuffer, encapBuffer.length);
         }
         encap.setEnclosingInputStream(is);
         encap.makeEncapsulation();

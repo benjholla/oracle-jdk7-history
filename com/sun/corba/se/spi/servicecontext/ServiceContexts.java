@@ -35,6 +35,9 @@ import com.sun.corba.se.impl.orbutil.ORBUtility ;
 import com.sun.corba.se.impl.util.Utility ;
 import com.sun.corba.se.impl.logging.ORBUtilSystemException ;
 
+import sun.corba.EncapsInputStreamFactory;
+
+
 public class ServiceContexts {
     private static boolean isDebugging( OutputStream os )
     {
@@ -161,11 +164,11 @@ public class ServiceContexts {
             
             
             EncapsInputStream eis
-                = new EncapsInputStream(orb,
-                                        data,
-                                        data.length,
-                                        giopVersion,
-                                        codeBase);
+                = EncapsInputStreamFactory.newEncapsInputStream(orb,
+                                    data,
+                                    data.length,
+                                    giopVersion,
+                                    codeBase);
             eis.consumeEndian();
 
             

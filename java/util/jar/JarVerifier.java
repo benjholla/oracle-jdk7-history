@@ -127,7 +127,9 @@ class JarVerifier {
             name = name.substring(1);
 
         
-        if (sigFileSigners.get(name) != null) {
+        
+        if (sigFileSigners.get(name) != null ||
+                verifiedSigners.get(name) != null) {
             mev.setEntry(name, je);
             return;
         }

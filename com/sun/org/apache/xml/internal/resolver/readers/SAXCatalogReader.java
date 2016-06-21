@@ -5,19 +5,21 @@
 
 package com.sun.org.apache.xml.internal.resolver.readers;
 
-import java.util.Hashtable;
-import java.io.IOException;
+import com.sun.org.apache.xml.internal.resolver.Catalog;
+import com.sun.org.apache.xml.internal.resolver.CatalogException;
+import com.sun.org.apache.xml.internal.resolver.CatalogManager;
+import com.sun.org.apache.xml.internal.resolver.helpers.Debug;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.MalformedURLException;
 import java.net.UnknownHostException;
-
+import java.util.Hashtable;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParserFactory;
 import javax.xml.parsers.SAXParser;
-
+import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.AttributeList;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -27,12 +29,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.Locator;
 import org.xml.sax.Parser;
 import org.xml.sax.SAXException;
-
-import com.sun.org.apache.xml.internal.resolver.Catalog;
-import com.sun.org.apache.xml.internal.resolver.CatalogManager;
-import com.sun.org.apache.xml.internal.resolver.CatalogException;
-import com.sun.org.apache.xml.internal.resolver.readers.CatalogReader;
-import com.sun.org.apache.xml.internal.resolver.helpers.Debug;
+import sun.reflect.misc.ReflectUtil;
 
 
 public class SAXCatalogReader implements CatalogReader, ContentHandler, DocumentHandler {
@@ -163,7 +160,7 @@ public class SAXCatalogReader implements CatalogReader, ContentHandler, Document
         }
         parser.parse(new InputSource(is), spHandler);
       } else {
-        Parser parser = (Parser) Class.forName(parserClass).newInstance();
+        Parser parser = (Parser) ReflectUtil.forName(parserClass).newInstance();
         parser.setDocumentHandler(this);
         if (bResolver != null) {
           parser.setEntityResolver(bResolver);
@@ -264,7 +261,7 @@ public class SAXCatalogReader implements CatalogReader, ContentHandler, Document
 
       try {
         saxParser = (SAXCatalogParser)
-          Class.forName(saxParserClass).newInstance();
+          ReflectUtil.forName(saxParserClass).newInstance();
 
         saxParser.setCatalog(catalog);
         saxParser.startDocument();
@@ -320,7 +317,7 @@ public class SAXCatalogReader implements CatalogReader, ContentHandler, Document
 
       try {
         saxParser = (SAXCatalogParser)
-          Class.forName(saxParserClass).newInstance();
+          ReflectUtil.forName(saxParserClass).newInstance();
 
         saxParser.setCatalog(catalog);
         saxParser.startDocument();

@@ -85,11 +85,11 @@ public class SnmpMibOid extends SnmpMibNode implements Serializable {
 
         if (depth > length) {
             
-            throw noSuchObjectException;
+            throw new SnmpStatusException(SnmpStatusException.noSuchObject);
 
         } else if (depth == length) {
             
-            throw noSuchInstanceException;
+            throw new SnmpStatusException(SnmpStatusException.noSuchInstance);
 
         } else {
             
@@ -134,7 +134,7 @@ public class SnmpMibOid extends SnmpMibNode implements Serializable {
             
             
             
-            throw noSuchObjectException;
+            throw new SnmpStatusException(SnmpStatusException.noSuchObject);
 
         final Object data = handlers.getUserData();
         final int pduVersion = handlers.getRequestPduVersion();
@@ -159,7 +159,7 @@ public class SnmpMibOid extends SnmpMibNode implements Serializable {
                 
                 if (child == null) {
                     
-                    throw noSuchObjectException;
+                    throw new SnmpStatusException(SnmpStatusException.noSuchObject);
                     
                     
                     
@@ -358,10 +358,10 @@ public class SnmpMibOid extends SnmpMibNode implements Serializable {
         
         final int pos= getInsertAt(id);
         if (pos >= nbChildren)
-            throw noSuchObjectException;
+            throw new SnmpStatusException(SnmpStatusException.noSuchObject);
 
         if (varList[pos] != (int) id)
-            throw noSuchObjectException;
+            throw new SnmpStatusException(SnmpStatusException.noSuchObject);
 
         
         
@@ -369,10 +369,10 @@ public class SnmpMibOid extends SnmpMibNode implements Serializable {
         try {
             child = children.elementAtNonSync(pos);
         } catch(ArrayIndexOutOfBoundsException e) {
-            throw noSuchObjectException;
+            throw new SnmpStatusException(SnmpStatusException.noSuchObject);
         }
         if (child == null)
-            throw noSuchInstanceException;
+            throw new SnmpStatusException(SnmpStatusException.noSuchInstance);
         return child;
     }
 

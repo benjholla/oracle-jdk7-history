@@ -1075,7 +1075,4 @@ class SnmpRequestHandler extends ClientHandler implements SnmpDefinitions {
 
     static final private String InterruptSysCallMsg =
         "Interrupted system call";
-
-    static final private SnmpStatusException noSuchNameException =
-        new SnmpStatusException(SnmpDefinitions.snmpRspNoSuchName) ;
 }

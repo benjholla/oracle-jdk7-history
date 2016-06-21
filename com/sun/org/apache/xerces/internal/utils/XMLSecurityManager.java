@@ -106,7 +106,6 @@ public final class XMLSecurityManager {
     private boolean[] isSet;
 
 
-    private XMLLimitAnalyzer limitAnalyzer;
     
     private int indexEntityCountInfo = 10000;
     private String printEntityCountInfo = "";
@@ -118,7 +117,6 @@ public final class XMLSecurityManager {
 
     
     public XMLSecurityManager(boolean secureProcessing) {
-        limitAnalyzer = new XMLLimitAnalyzer(this);
         values = new int[Limit.values().length];
         states = new State[Limit.values().length];
         isSet = new boolean[Limit.values().length];
@@ -174,13 +172,15 @@ public final class XMLSecurityManager {
         if (index == indexEntityCountInfo) {
             printEntityCountInfo = (String)value;
         } else {
-            int temp = 0;
-            try {
+            int temp;
+            if (Integer.class.isAssignableFrom(value.getClass())) {
+                temp = ((Integer)value).intValue();
+            } else {
                 temp = Integer.parseInt((String) value);
                 if (temp < 0) {
                     temp = 0;
                 }
-            } catch (NumberFormatException e) {}
+            }
             setLimit(index, state, temp);
         }
     }
@@ -258,12 +258,14 @@ public final class XMLSecurityManager {
         return limit==NO_LIMIT;
     }
     
-    public boolean isOverLimit(Limit limit, String entityName, int size) {
-        return isOverLimit(limit.ordinal(), entityName, size);
+    public boolean isOverLimit(Limit limit, String entityName, int size,
+            XMLLimitAnalyzer limitAnalyzer) {
+        return isOverLimit(limit.ordinal(), entityName, size, limitAnalyzer);
     }
 
     
-    public boolean isOverLimit(int index, String entityName, int size) {
+    public boolean isOverLimit(int index, String entityName, int size,
+            XMLLimitAnalyzer limitAnalyzer) {
         if (values[index] == NO_LIMIT) {
             return false;
         }
@@ -275,11 +277,11 @@ public final class XMLSecurityManager {
     }
 
     
-    public boolean isOverLimit(Limit limit) {
-        return isOverLimit(limit.ordinal());
+    public boolean isOverLimit(Limit limit, XMLLimitAnalyzer limitAnalyzer) {
+        return isOverLimit(limit.ordinal(), limitAnalyzer);
     }
 
-    public boolean isOverLimit(int index) {
+    public boolean isOverLimit(int index, XMLLimitAnalyzer limitAnalyzer) {
         if (values[index] == NO_LIMIT) {
             return false;
         }
@@ -293,21 +295,12 @@ public final class XMLSecurityManager {
         }
     }
 
-    public void debugPrint() {
+    public void debugPrint(XMLLimitAnalyzer limitAnalyzer) {
         if (printEntityCountInfo.equals(Constants.JDK_YES)) {
-            limitAnalyzer.debugPrint();
+            limitAnalyzer.debugPrint(this);
         }
     }
 
-    
-    public XMLLimitAnalyzer getLimitAnalyzer() {
-        return limitAnalyzer;
-    }
-
-    
-    public void setLimitAnalyzer(XMLLimitAnalyzer analyzer) {
-        limitAnalyzer = analyzer;
-    }
 
     
     public boolean isSet(int index) {

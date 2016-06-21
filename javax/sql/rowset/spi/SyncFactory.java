@@ -12,6 +12,8 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 import javax.naming.*;
 
@@ -104,7 +106,16 @@ public class SyncFactory {
                 
 
                 
-                String strRowsetProperties = System.getProperty("rowset.properties");
+                String strRowsetProperties;
+                try {
+                    strRowsetProperties = AccessController.doPrivileged(new PrivilegedAction<String>() {
+                        public String run() {
+                            return System.getProperty("rowset.properties");
+                        }
+                    });
+                } catch (Exception ex) {
+                    strRowsetProperties = null;
+                }
                 if (strRowsetProperties != null) {
                     
                     
@@ -144,7 +155,16 @@ public class SyncFactory {
 
             
             properties.clear();
-            String providerImpls = System.getProperty(ROWSET_SYNC_PROVIDER);
+            String providerImpls;
+            try {
+                providerImpls = AccessController.doPrivileged(new PrivilegedAction<String>() {
+                    public String run() {
+                        return System.getProperty(ROWSET_SYNC_PROVIDER);
+                    }
+                });
+            } catch (Exception ex) {
+                providerImpls = null;
+            }
 
             if (providerImpls != null) {
                 int i = 0;

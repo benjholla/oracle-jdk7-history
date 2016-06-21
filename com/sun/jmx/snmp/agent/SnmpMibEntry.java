@@ -4,17 +4,9 @@ package com.sun.jmx.snmp.agent;
 
 
 
+import com.sun.jmx.snmp.SnmpDefinitions;
 import java.io.Serializable;
-import java.util.Hashtable;
-import java.util.Enumeration;
-
-
-
-import com.sun.jmx.snmp.SnmpValue;
-import com.sun.jmx.snmp.SnmpVarBind;
 import com.sun.jmx.snmp.SnmpStatusException;
-import com.sun.jmx.snmp.agent.SnmpMibOid;
-import com.sun.jmx.snmp.agent.SnmpMibNode;
 
 
 
@@ -39,7 +31,7 @@ public abstract class SnmpMibEntry extends SnmpMibNode
     
     public void validateVarId(long arc, Object userData)
         throws SnmpStatusException {
-        if (isVariable(arc) == false) throw noSuchNameException;
+        if (isVariable(arc) == false) throw new SnmpStatusException(SnmpDefinitions.snmpRspNoSuchName);
     }
 
     

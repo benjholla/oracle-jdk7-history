@@ -87,6 +87,7 @@ import com.sun.corba.se.impl.util.JDKBridge;
 
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentHashMap;
+import sun.corba.EncapsInputStreamFactory;
 
 
 public class CorbaClientRequestDispatcherImpl
@@ -815,8 +816,8 @@ public class CorbaClientRequestDispatcherImpl
         }
         byte[] data = ((UnknownServiceContext)sc).getData();
         EncapsInputStream in =
-            new EncapsInputStream((ORB)messageMediator.getBroker(),
-                                  data, data.length);
+                EncapsInputStreamFactory.newEncapsInputStream((ORB)messageMediator.getBroker(),
+                                      data, data.length);
         in.consumeEndian();
 
         String msg =

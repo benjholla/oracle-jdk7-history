@@ -219,7 +219,7 @@ public abstract class Canonicalizer20010315Excl extends CanonicalizerBase {
            if ((xmlns!=null) &&  (!isVisible(xmlns))) {
               
               
-              ns.addMapping(XMLNS,"",nullNode);
+              ns.addMapping(XMLNS, "", getNullNode(xmlns.getOwnerDocument()));
             }
 
                         if (E.getNamespaceURI() != null) {

@@ -22,8 +22,8 @@ public final class motif_ko extends ListResourceBundle {
             { "FileChooser.saveButton.textAndMnemonic", "\uC800\uC7A5" },
             { "FileChooser.saveButtonToolTip.textAndMnemonic", "\uC120\uD0DD\uB41C \uD30C\uC77C\uC744 \uC800\uC7A5\uD569\uB2C8\uB2E4." },
             { "FileChooser.saveDialogTitle.textAndMnemonic", "\uC800\uC7A5" },
-            { "FileChooser.updateButton.textAndMnemonic", "\uAC31\uC2E0" },
-            { "FileChooser.updateButtonToolTip.textAndMnemonic", "\uB514\uB809\uD1A0\uB9AC \uBAA9\uB85D\uC744 \uAC31\uC2E0\uD569\uB2C8\uB2E4." },
+            { "FileChooser.updateButton.textAndMnemonic", "\uC5C5\uB370\uC774\uD2B8" },
+            { "FileChooser.updateButtonToolTip.textAndMnemonic", "\uB514\uB809\uD1A0\uB9AC \uBAA9\uB85D\uC744 \uC5C5\uB370\uC774\uD2B8\uD569\uB2C8\uB2E4." },
         };
     }
 }

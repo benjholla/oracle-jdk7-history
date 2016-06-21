@@ -299,7 +299,8 @@ public abstract class Canonicalizer11 extends CanonicalizerBase {
             } else if (!isVisible(xmlns)) {
                 
                 
-                n = ns.addMappingAndRender(XMLNS, "", nullNode);
+                n = ns.addMappingAndRender(XMLNS, "",
+                        getNullNode(xmlns.getOwnerDocument()));
             }
             
             if (n != null) {

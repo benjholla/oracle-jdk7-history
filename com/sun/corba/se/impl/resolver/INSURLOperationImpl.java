@@ -13,6 +13,8 @@ import java.util.Collections ;
 import org.omg.CosNaming.NamingContextExt ;
 import org.omg.CosNaming.NamingContextExtHelper ;
 
+import sun.corba.EncapsInputStreamFactory;
+
 import com.sun.corba.se.spi.ior.IOR;
 import com.sun.corba.se.spi.ior.IORTemplate;
 import com.sun.corba.se.spi.ior.ObjectKey;
@@ -80,8 +82,8 @@ public class INSURLOperationImpl implements Operation
              buf[j] = (byte)((ORBUtility.hexOf(str.charAt(i)) << UN_SHIFT) & 0xF0);
              buf[j] |= (byte)(ORBUtility.hexOf(str.charAt(i+1)) & 0x0F);
         }
-        EncapsInputStream s = new EncapsInputStream(orb, buf, buf.length,
-            orb.getORBData().getGIOPVersion());
+        EncapsInputStream s = EncapsInputStreamFactory.newEncapsInputStream(orb, buf, buf.length,
+                orb.getORBData().getGIOPVersion());
         s.consumeEndian();
         return s.read_Object() ;
     }

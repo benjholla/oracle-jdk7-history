@@ -8,7 +8,8 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.rmi.RemoteException;
 import java.nio.ByteBuffer;
-
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import javax.rmi.CORBA.Util;
 import javax.rmi.CORBA.Tie;
 
@@ -83,6 +84,7 @@ import com.sun.corba.se.impl.protocol.giopmsgheaders.KeyAddr;
 import com.sun.corba.se.impl.protocol.giopmsgheaders.ProfileAddr;
 import com.sun.corba.se.impl.protocol.giopmsgheaders.ReferenceAddr;
 import com.sun.corba.se.impl.transport.CorbaContactInfoListIteratorImpl;
+import com.sun.corba.se.impl.protocol.giopmsgheaders.Message;
 import com.sun.corba.se.impl.util.JDKBridge;
 
 
@@ -124,10 +126,17 @@ public class SharedCDRClientRequestDispatcherImpl
 
         ByteBufferWithInfo bbwi = cdrOutputObject.getByteBufferWithInfo();
         cdrOutputObject.getMessageHeader().setSize(bbwi.byteBuffer, bbwi.getSize());
-
-        CDRInputObject cdrInputObject =
-            new CDRInputObject(orb, null, bbwi.byteBuffer,
-                               cdrOutputObject.getMessageHeader());
+        final ORB inOrb = orb;
+        final ByteBuffer inBuffer = bbwi.byteBuffer;
+        final Message inMsg = cdrOutputObject.getMessageHeader();
+        CDRInputObject cdrInputObject = AccessController
+                .doPrivileged(new PrivilegedAction<CDRInputObject>() {
+                    @Override
+                    public CDRInputObject run() {
+                        return new CDRInputObject(inOrb, null, inBuffer,
+                                inMsg);
+                    }
+                });
         messageMediator.setInputObject(cdrInputObject);
         cdrInputObject.setMessageMediator(messageMediator);
 
@@ -160,9 +169,17 @@ public class SharedCDRClientRequestDispatcherImpl
         cdrOutputObject = (CDROutputObject) messageMediator.getOutputObject();
         bbwi = cdrOutputObject.getByteBufferWithInfo();
         cdrOutputObject.getMessageHeader().setSize(bbwi.byteBuffer, bbwi.getSize());
-        cdrInputObject =
-            new CDRInputObject(orb, null, bbwi.byteBuffer,
-                               cdrOutputObject.getMessageHeader());
+        final ORB inOrb2 = orb;
+        final ByteBuffer inBuffer2 = bbwi.byteBuffer;
+        final Message inMsg2 = cdrOutputObject.getMessageHeader();
+        cdrInputObject = AccessController
+                .doPrivileged(new PrivilegedAction<CDRInputObject>() {
+                    @Override
+                    public CDRInputObject run() {
+                        return new CDRInputObject(inOrb2, null, inBuffer2,
+                                inMsg2);
+                    }
+                });
         messageMediator.setInputObject(cdrInputObject);
         cdrInputObject.setMessageMediator(messageMediator);
 

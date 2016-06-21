@@ -28,6 +28,7 @@ import com.sun.org.apache.xerces.internal.xni.Augmentations;
 import com.sun.org.apache.xerces.internal.impl.XMLErrorReporter;
 import com.sun.org.apache.xerces.internal.impl.XMLEntityHandler;
 import com.sun.org.apache.xerces.internal.impl.Constants;
+import com.sun.org.apache.xerces.internal.utils.XMLLimitAnalyzer;
 import com.sun.org.apache.xerces.internal.utils.XMLSecurityManager;
 import com.sun.xml.internal.stream.Entity;
 
@@ -214,6 +215,11 @@ implements XMLDTDScanner, XMLComponent, XMLEntityHandler {
         fEntityManager.setEntityHandler(this);
         fEntityManager.startDTDEntity(inputSource);
     } 
+
+
+    public void setLimitAnalyzer(XMLLimitAnalyzer limitAnalyzer) {
+        fLimitAnalyzer = limitAnalyzer;
+    }
 
     
     public boolean scanDTDExternalSubset(boolean complete)
@@ -1341,10 +1347,10 @@ implements XMLDTDScanner, XMLComponent, XMLEntityHandler {
         XMLString literal = fString;
         XMLString literal2 = fString;
         int countChar = 0;
-        if (fLimitAnalyzer == null && fSecurityManager != null) {
-            fLimitAnalyzer = fSecurityManager.getLimitAnalyzer();
+        if (fLimitAnalyzer == null ) {
+            fLimitAnalyzer = new XMLLimitAnalyzer();
+         }
             fLimitAnalyzer.startEntity(entityName);
-        }
 
         if (fEntityScanner.scanLiteral(quote, fString) != quote) {
             fStringBuffer.clear();
@@ -1805,6 +1811,8 @@ implements XMLDTDScanner, XMLComponent, XMLEntityHandler {
         
         setScannerState(SCANNER_STATE_TEXT_DECL);
         
+
+        fLimitAnalyzer = new XMLLimitAnalyzer();
     }
 
     
@@ -1815,18 +1823,18 @@ implements XMLDTDScanner, XMLComponent, XMLEntityHandler {
     
     private void checkLimit(String entityName, int len) {
         if (fLimitAnalyzer == null) {
-            fLimitAnalyzer = fSecurityManager.getLimitAnalyzer();
+            fLimitAnalyzer = new XMLLimitAnalyzer();
         }
         fLimitAnalyzer.addValue(XMLSecurityManager.Limit.PARAMETER_ENTITY_SIZE_LIMIT, entityName, len);
-        if (fSecurityManager.isOverLimit(XMLSecurityManager.Limit.PARAMETER_ENTITY_SIZE_LIMIT)) {
-                    fSecurityManager.debugPrint();
+        if (fSecurityManager.isOverLimit(XMLSecurityManager.Limit.PARAMETER_ENTITY_SIZE_LIMIT, fLimitAnalyzer)) {
+                    fSecurityManager.debugPrint(fLimitAnalyzer);
             reportFatalError("MaxEntitySizeLimit", new Object[]{entityName,
                 fLimitAnalyzer.getValue(XMLSecurityManager.Limit.PARAMETER_ENTITY_SIZE_LIMIT),
                 fSecurityManager.getLimit(XMLSecurityManager.Limit.PARAMETER_ENTITY_SIZE_LIMIT),
                 fSecurityManager.getStateLiteral(XMLSecurityManager.Limit.PARAMETER_ENTITY_SIZE_LIMIT)});
         }
-        if (fSecurityManager.isOverLimit(XMLSecurityManager.Limit.TOTAL_ENTITY_SIZE_LIMIT)) {
-            fSecurityManager.debugPrint();
+        if (fSecurityManager.isOverLimit(XMLSecurityManager.Limit.TOTAL_ENTITY_SIZE_LIMIT, fLimitAnalyzer)) {
+            fSecurityManager.debugPrint(fLimitAnalyzer);
             reportFatalError("TotalEntitySizeLimit",
                 new Object[]{fLimitAnalyzer.getTotalValue(XMLSecurityManager.Limit.TOTAL_ENTITY_SIZE_LIMIT),
                 fSecurityManager.getLimit(XMLSecurityManager.Limit.TOTAL_ENTITY_SIZE_LIMIT),

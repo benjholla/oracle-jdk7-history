@@ -20,6 +20,8 @@ import org.w3c.dom.Text;
 
 public class ExsltStrings extends ExsltBase
 {
+   static final String JDK_DEFAULT_DOM = "com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl";
+
   
   public static String align(String targetStr, String paddingStr, String type)
   {
@@ -120,7 +122,7 @@ public class ExsltStrings extends ExsltBase
         token = str.substring(fromIndex);
       }
 
-      Document doc = DocumentHolder.m_doc;
+      Document doc = getDocument();
       synchronized (doc)
       {
         Element element = doc.createElement("token");
@@ -150,7 +152,7 @@ public class ExsltStrings extends ExsltBase
     {
       StringTokenizer lTokenizer = new StringTokenizer(toTokenize, delims);
 
-      Document doc = DocumentHolder.m_doc;
+      Document doc = getDocument();
       synchronized (doc)
       {
         while (lTokenizer.hasMoreTokens())
@@ -166,7 +168,7 @@ public class ExsltStrings extends ExsltBase
     else
     {
 
-      Document doc = DocumentHolder.m_doc;
+      Document doc = getDocument();
       synchronized (doc)
       {
         for (int i = 0; i < toTokenize.length(); i++)
@@ -186,23 +188,21 @@ public class ExsltStrings extends ExsltBase
   {
     return tokenize(toTokenize, " \t\n\r");
   }
+
     
-    private static class DocumentHolder
-    {
-        
-        private static final Document m_doc;
-        static {
-            try
-            {
-                m_doc =DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+   private static Document getDocument()
+   {
+        try
+        {
+            if (System.getSecurityManager() == null) {
+                return DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+            } else {
+                return DocumentBuilderFactory.newInstance(JDK_DEFAULT_DOM, null).newDocumentBuilder().newDocument();
             }
-
-            catch(ParserConfigurationException pce)
-            {
-                  throw new com.sun.org.apache.xml.internal.utils.WrappedRuntimeException(pce);
-            }
-
+        }
+        catch(ParserConfigurationException pce)
+        {
+            throw new com.sun.org.apache.xml.internal.utils.WrappedRuntimeException(pce);
         }
     }
-
 }

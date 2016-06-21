@@ -4,6 +4,7 @@ package javax.swing.event;
 import java.io.*;
 import java.util.*;
 import java.lang.reflect.Array;
+import sun.reflect.misc.ReflectUtil;
 
 
 public class EventListenerList implements Serializable {
@@ -144,7 +145,9 @@ public class EventListenerList implements Serializable {
         while (null != (listenerTypeOrNull = s.readObject())) {
             ClassLoader cl = Thread.currentThread().getContextClassLoader();
             EventListener l = (EventListener)s.readObject();
-            add((Class<EventListener>)Class.forName((String)listenerTypeOrNull, true, cl), l);
+            String name = (String) listenerTypeOrNull;
+            ReflectUtil.checkPackageAccess(name);
+            add((Class<EventListener>)Class.forName(name, true, cl), l);
         }
     }
 

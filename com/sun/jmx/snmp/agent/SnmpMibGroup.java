@@ -49,7 +49,7 @@ public abstract class SnmpMibGroup extends SnmpMibOid
     public void validateVarId(long arc, Object userData)
         throws SnmpStatusException {
         if (isVariable(arc) == false)
-            throw noSuchObjectException;
+            throw new SnmpStatusException(SnmpStatusException.noSuchObject);
     }
 
 
@@ -190,16 +190,16 @@ public abstract class SnmpMibGroup extends SnmpMibOid
 
             
             if (depth+2 > length)
-                throw noSuchInstanceException;
+                throw new SnmpStatusException(SnmpStatusException.noSuchInstance);
 
             
             
             if (depth+2 < length)
-                throw noSuchInstanceException;
+                throw new SnmpStatusException(SnmpStatusException.noSuchInstance);
 
             
             if (oid[depth+1] != 0L)
-                throw noSuchInstanceException;
+                throw new SnmpStatusException(SnmpStatusException.noSuchInstance);
 
             
             handlers.add(this,depth,varbind);
@@ -222,7 +222,7 @@ public abstract class SnmpMibGroup extends SnmpMibOid
             
             
             
-            throw noSuchObjectException;
+            throw new SnmpStatusException(SnmpStatusException.noSuchObject);
 
         final Object data = handlers.getUserData();
         final int pduVersion = handlers.getRequestPduVersion();
@@ -258,7 +258,7 @@ public abstract class SnmpMibGroup extends SnmpMibOid
                                                         depth+1,handlers,
                                                         checker);
                 }catch(SnmpStatusException ex) {
-                    throw noSuchObjectException;
+                    throw new SnmpStatusException(SnmpStatusException.noSuchObject);
                 } finally {
                     checker.remove(depth);
                 }
@@ -283,7 +283,7 @@ public abstract class SnmpMibGroup extends SnmpMibOid
                     try {
                         checker.checkCurrentOid();
                     } catch(SnmpStatusException e) {
-                        throw noSuchObjectException;
+                        throw new SnmpStatusException(SnmpStatusException.noSuchObject);
                     } finally {
                         checker.remove(depth,2);
                     }
@@ -328,7 +328,7 @@ public abstract class SnmpMibGroup extends SnmpMibOid
             
             
             
-            throw noSuchObjectException;
+            throw new SnmpStatusException(SnmpStatusException.noSuchObject);
 
         } catch (SnmpStatusException e) {
             
