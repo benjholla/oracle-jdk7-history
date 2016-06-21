@@ -108,7 +108,7 @@ import com.sun.xml.internal.ws.org.objectweb.asm.Type;
     }
 
     
-    protected abstract SpeciesData speciesData();
+     abstract SpeciesData speciesData();
 
     @Override
     final Object internalProperties() {
@@ -124,7 +124,7 @@ import com.sun.xml.internal.ws.org.objectweb.asm.Type;
         return Arrays.asList(boundValues);
     }
 
-    public final Object arg(int i) {
+     final Object arg(int i) {
         try {
             switch (speciesData().fieldType(i)) {
             case 'L': return argL(i);
@@ -138,22 +138,22 @@ import com.sun.xml.internal.ws.org.objectweb.asm.Type;
         }
         throw new InternalError("unexpected type: " + speciesData().types+"."+i);
     }
-    public final Object argL(int i) throws Throwable { return          speciesData().getters[i].invokeBasic(this); }
-    public final int    argI(int i) throws Throwable { return (int)    speciesData().getters[i].invokeBasic(this); }
-    public final float  argF(int i) throws Throwable { return (float)  speciesData().getters[i].invokeBasic(this); }
-    public final double argD(int i) throws Throwable { return (double) speciesData().getters[i].invokeBasic(this); }
-    public final long   argJ(int i) throws Throwable { return (long)   speciesData().getters[i].invokeBasic(this); }
+     final Object argL(int i) throws Throwable { return          speciesData().getters[i].invokeBasic(this); }
+     final int    argI(int i) throws Throwable { return (int)    speciesData().getters[i].invokeBasic(this); }
+     final float  argF(int i) throws Throwable { return (float)  speciesData().getters[i].invokeBasic(this); }
+     final double argD(int i) throws Throwable { return (double) speciesData().getters[i].invokeBasic(this); }
+     final long   argJ(int i) throws Throwable { return (long)   speciesData().getters[i].invokeBasic(this); }
 
     
     
     
 
-    public abstract BoundMethodHandle clone(MethodType mt, LambdaForm lf) throws Throwable;
-    public abstract BoundMethodHandle cloneExtendL(MethodType mt, LambdaForm lf, Object narg) throws Throwable;
-    public abstract BoundMethodHandle cloneExtendI(MethodType mt, LambdaForm lf, int    narg) throws Throwable;
-    public abstract BoundMethodHandle cloneExtendJ(MethodType mt, LambdaForm lf, long   narg) throws Throwable;
-    public abstract BoundMethodHandle cloneExtendF(MethodType mt, LambdaForm lf, float  narg) throws Throwable;
-    public abstract BoundMethodHandle cloneExtendD(MethodType mt, LambdaForm lf, double narg) throws Throwable;
+     abstract BoundMethodHandle clone(MethodType mt, LambdaForm lf) throws Throwable;
+     abstract BoundMethodHandle cloneExtendL(MethodType mt, LambdaForm lf, Object narg) throws Throwable;
+     abstract BoundMethodHandle cloneExtendI(MethodType mt, LambdaForm lf, int    narg) throws Throwable;
+     abstract BoundMethodHandle cloneExtendJ(MethodType mt, LambdaForm lf, long   narg) throws Throwable;
+     abstract BoundMethodHandle cloneExtendF(MethodType mt, LambdaForm lf, float  narg) throws Throwable;
+     abstract BoundMethodHandle cloneExtendD(MethodType mt, LambdaForm lf, double narg) throws Throwable;
 
     
     @Override MethodHandle reinvokerTarget() {
@@ -171,39 +171,39 @@ import com.sun.xml.internal.ws.org.objectweb.asm.Type;
     private  
     static final class Species_L extends BoundMethodHandle {
         final Object argL0;
-        public Species_L(MethodType mt, LambdaForm lf, Object argL0) {
+         Species_L(MethodType mt, LambdaForm lf, Object argL0) {
             super(mt, lf);
             this.argL0 = argL0;
         }
         
         @Override MethodHandle reinvokerTarget() { return (MethodHandle) argL0; }
         @Override
-        public SpeciesData speciesData() {
+         SpeciesData speciesData() {
             return SPECIES_DATA;
         }
-        public static final SpeciesData SPECIES_DATA = SpeciesData.getForClass("L", Species_L.class);
+         static final SpeciesData SPECIES_DATA = SpeciesData.getForClass("L", Species_L.class);
         @Override
-        public final BoundMethodHandle clone(MethodType mt, LambdaForm lf) throws Throwable {
+         final BoundMethodHandle clone(MethodType mt, LambdaForm lf) throws Throwable {
             return new Species_L(mt, lf, argL0);
         }
         @Override
-        public final BoundMethodHandle cloneExtendL(MethodType mt, LambdaForm lf, Object narg) throws Throwable {
+         final BoundMethodHandle cloneExtendL(MethodType mt, LambdaForm lf, Object narg) throws Throwable {
             return (BoundMethodHandle) SPECIES_DATA.extendWithIndex(INDEX_L).constructor[0].invokeBasic(mt, lf, argL0, narg);
         }
         @Override
-        public final BoundMethodHandle cloneExtendI(MethodType mt, LambdaForm lf, int narg) throws Throwable {
+         final BoundMethodHandle cloneExtendI(MethodType mt, LambdaForm lf, int narg) throws Throwable {
             return (BoundMethodHandle) SPECIES_DATA.extendWithIndex(INDEX_I).constructor[0].invokeBasic(mt, lf, argL0, narg);
         }
         @Override
-        public final BoundMethodHandle cloneExtendJ(MethodType mt, LambdaForm lf, long narg) throws Throwable {
+         final BoundMethodHandle cloneExtendJ(MethodType mt, LambdaForm lf, long narg) throws Throwable {
             return (BoundMethodHandle) SPECIES_DATA.extendWithIndex(INDEX_J).constructor[0].invokeBasic(mt, lf, argL0, narg);
         }
         @Override
-        public final BoundMethodHandle cloneExtendF(MethodType mt, LambdaForm lf, float narg) throws Throwable {
+         final BoundMethodHandle cloneExtendF(MethodType mt, LambdaForm lf, float narg) throws Throwable {
             return (BoundMethodHandle) SPECIES_DATA.extendWithIndex(INDEX_F).constructor[0].invokeBasic(mt, lf, argL0, narg);
         }
         @Override
-        public final BoundMethodHandle cloneExtendD(MethodType mt, LambdaForm lf, double narg) throws Throwable {
+         final BoundMethodHandle cloneExtendD(MethodType mt, LambdaForm lf, double narg) throws Throwable {
             return (BoundMethodHandle) SPECIES_DATA.extendWithIndex(INDEX_D).constructor[0].invokeBasic(mt, lf, argL0, narg);
         }
     }
@@ -224,10 +224,10 @@ import com.sun.xml.internal.ws.org.objectweb.asm.Type;
         final MethodHandle[]                     getters;
         final SpeciesData[]                      extensions;
 
-        public int fieldCount() {
+         int fieldCount() {
             return types.length();
         }
-        public char fieldType(int i) {
+         char fieldType(int i) {
             return types.charAt(i);
         }
 
@@ -395,11 +395,12 @@ import com.sun.xml.internal.ws.org.objectweb.asm.Type;
 
             final String className  = SPECIES_PREFIX_PATH + types;
             final String sourceFile = SPECIES_PREFIX_NAME + types;
-            cw.visit(V1_6, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, className, null, BMH, null);
+            final int NOT_ACC_PUBLIC = 0;  
+            cw.visit(V1_6, NOT_ACC_PUBLIC + ACC_FINAL + ACC_SUPER, className, null, BMH, null);
             cw.visitSource(sourceFile, null);
 
             
-            cw.visitField(ACC_PUBLIC + ACC_STATIC, "SPECIES_DATA", SPECIES_DATA_SIG, null, null).visitEnd();
+            cw.visitField(NOT_ACC_PUBLIC + ACC_STATIC, "SPECIES_DATA", SPECIES_DATA_SIG, null, null).visitEnd();
 
             
             for (int i = 0; i < types.length(); ++i) {
@@ -412,7 +413,7 @@ import com.sun.xml.internal.ws.org.objectweb.asm.Type;
             MethodVisitor mv;
 
             
-            mv = cw.visitMethod(ACC_PUBLIC, "<init>", makeSignature(types, true), null, null);
+            mv = cw.visitMethod(NOT_ACC_PUBLIC, "<init>", makeSignature(types, true), null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
             mv.visitVarInsn(ALOAD, 1);
@@ -436,7 +437,7 @@ import com.sun.xml.internal.ws.org.objectweb.asm.Type;
             mv.visitEnd();
 
             
-            mv = cw.visitMethod(ACC_PUBLIC + ACC_FINAL, "reinvokerTarget", "()" + MH_SIG, null, null);
+            mv = cw.visitMethod(NOT_ACC_PUBLIC + ACC_FINAL, "reinvokerTarget", "()" + MH_SIG, null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
             mv.visitFieldInsn(GETFIELD, className, "argL0", JLO_SIG);
@@ -446,7 +447,7 @@ import com.sun.xml.internal.ws.org.objectweb.asm.Type;
             mv.visitEnd();
 
             
-            mv = cw.visitMethod(ACC_PUBLIC + ACC_FINAL, "speciesData", MYSPECIES_DATA_SIG, null, null);
+            mv = cw.visitMethod(NOT_ACC_PUBLIC + ACC_FINAL, "speciesData", MYSPECIES_DATA_SIG, null, null);
             mv.visitCode();
             mv.visitFieldInsn(GETSTATIC, className, "SPECIES_DATA", SPECIES_DATA_SIG);
             mv.visitInsn(ARETURN);
@@ -454,7 +455,7 @@ import com.sun.xml.internal.ws.org.objectweb.asm.Type;
             mv.visitEnd();
 
             
-            mv = cw.visitMethod(ACC_PUBLIC + ACC_FINAL, "clone", makeSignature("", false), null, E_THROWABLE);
+            mv = cw.visitMethod(NOT_ACC_PUBLIC + ACC_FINAL, "clone", makeSignature("", false), null, E_THROWABLE);
             mv.visitCode();
             
             
@@ -477,7 +478,7 @@ import com.sun.xml.internal.ws.org.objectweb.asm.Type;
             
             for (Class<?> c : TYPES) {
                 char t = Wrapper.basicTypeChar(c);
-                mv = cw.visitMethod(ACC_PUBLIC + ACC_FINAL, "cloneExtend" + t, makeSignature(String.valueOf(t), false), null, E_THROWABLE);
+                mv = cw.visitMethod(NOT_ACC_PUBLIC + ACC_FINAL, "cloneExtend" + t, makeSignature(String.valueOf(t), false), null, E_THROWABLE);
                 mv.visitCode();
                 
                 
@@ -504,7 +505,7 @@ import com.sun.xml.internal.ws.org.objectweb.asm.Type;
             }
 
             
-            mv = cw.visitMethod(ACC_PUBLIC | ACC_STATIC, "<clinit>", VOID_SIG, null, null);
+            mv = cw.visitMethod(NOT_ACC_PUBLIC | ACC_STATIC, "<clinit>", VOID_SIG, null, null);
             mv.visitCode();
             mv.visitLdcInsn(types);
             mv.visitLdcInsn(Type.getObjectType(className));

@@ -147,6 +147,12 @@ public abstract class ORB extends com.sun.corba.se.org.omg.CORBA.ORB
     
     private Map wrapperMap ;
 
+    static class Holder {
+        static final PresentationManager defaultPresentationManager =
+            setupPresentationManager();
+    }
+    private static final Object pmLock = new Object();
+
     private static Map staticWrapperMap = new ConcurrentHashMap();
 
     protected MonitoringManager monitoringManager;
@@ -209,13 +215,24 @@ public abstract class ORB extends com.sun.corba.se.org.omg.CORBA.ORB
     
     public static PresentationManager getPresentationManager()
     {
-        AppContext ac = AppContext.getAppContext();
-        PresentationManager pm = (PresentationManager) ac.get(PresentationManager.class);
-        if (pm == null) {
-            pm = setupPresentationManager();
-            ac.put(PresentationManager.class, pm);
+        SecurityManager sm = System.getSecurityManager();
+        if (sm != null && AppContext.getAppContexts().size() > 0) {
+            AppContext ac = AppContext.getAppContext();
+            if (ac != null) {
+                synchronized (pmLock) {
+                    PresentationManager pm =
+                        (PresentationManager) ac.get(PresentationManager.class);
+                    if (pm == null) {
+                        pm = setupPresentationManager();
+                        ac.put(PresentationManager.class, pm);
+                    }
+                    return pm;
+                }
+            }
         }
-        return pm;
+
+        
+        return Holder.defaultPresentationManager;
     }
 
     

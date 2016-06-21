@@ -442,14 +442,30 @@ public final class Subject implements java.io.Serializable {
     }
 
     
+    @SuppressWarnings("unchecked")
     private void readObject(java.io.ObjectInputStream s)
                 throws java.io.IOException, ClassNotFoundException {
 
-        s.defaultReadObject();
+        ObjectInputStream.GetField gf = s.readFields();
+
+        readOnly = gf.get("readOnly", false);
+
+        Set<Principal> inputPrincs = (Set<Principal>)gf.get("principals", null);
 
         
-        principals = Collections.synchronizedSet(new SecureSet<Principal>
-                                (this, PRINCIPAL_SET, principals));
+        if (inputPrincs == null) {
+            throw new NullPointerException
+                (ResourcesMgr.getString("invalid.null.input.s."));
+        }
+        try {
+            principals = Collections.synchronizedSet(new SecureSet<Principal>
+                                (this, PRINCIPAL_SET, inputPrincs));
+        } catch (NullPointerException npe) {
+            
+            
+            principals = Collections.synchronizedSet
+                        (new SecureSet<Principal>(this, PRINCIPAL_SET));
+        }
 
         
         

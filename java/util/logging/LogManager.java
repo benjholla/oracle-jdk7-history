@@ -202,6 +202,9 @@ public class LogManager {
     }
 
     
+    private static WeakHashMap<Object, LoggerContext> contextsMap = null;
+
+    
     
     private LoggerContext getUserContext() {
         LoggerContext context = null;
@@ -209,33 +212,28 @@ public class LogManager {
         SecurityManager sm = System.getSecurityManager();
         JavaAWTAccess javaAwtAccess = SharedSecrets.getJavaAWTAccess();
         if (sm != null && javaAwtAccess != null) {
+            
             synchronized (javaAwtAccess) {
                 
                 
-                
-                
-                Object ecx = javaAwtAccess.getExecutionContext();
-                if (ecx == null) {
-                    
-                    ecx = javaAwtAccess.getContext();
-                }
+                final Object ecx = javaAwtAccess.getAppletContext();
                 if (ecx != null) {
-                    context = (LoggerContext)javaAwtAccess.get(ecx, LoggerContext.class);
+                    if (contextsMap == null) {
+                        contextsMap = new WeakHashMap<>();
+                    }
+                    context = contextsMap.get(ecx);
                     if (context == null) {
-                        if (javaAwtAccess.isMainAppContext()) {
-                            context = userContext;
-                        } else {
-                            
-                            
-                            
-                            
-                            context = new LoggerContext(true);
-                        }
-                        javaAwtAccess.put(ecx, LoggerContext.class, context);
+                        
+                        
+                        
+                        
+                        context = new LoggerContext(true);
+                        contextsMap.put(ecx, context);
                     }
                 }
             }
         }
+        
         return context != null ? context : userContext;
     }
 
@@ -262,7 +260,7 @@ public class LogManager {
         Logger result = getLogger(name);
         if (result == null) {
             
-            Logger newLogger = new Logger(name, resourceBundleName, caller);
+            Logger newLogger = new Logger(name, resourceBundleName, caller, false);
             do {
                 if (addLogger(newLogger)) {
                     
@@ -309,12 +307,12 @@ public class LogManager {
         } while (logger == null);
 
         
-        if (logger != sysLogger && sysLogger.getHandlers().length == 0) {
+        if (logger != sysLogger && sysLogger.accessCheckedHandlers().length == 0) {
             
             final Logger l = logger;
             AccessController.doPrivileged(new PrivilegedAction<Void>() {
                 public Void run() {
-                    for (Handler hdl : l.getHandlers()) {
+                    for (Handler hdl : l.accessCheckedHandlers()) {
                         sysLogger.addHandler(hdl);
                     }
                     return null;
@@ -598,7 +596,7 @@ public class LogManager {
             Logger result = findLogger(name);
             if (result == null) {
                 
-                Logger newLogger = new Logger(name, resourceBundleName);
+                Logger newLogger = new Logger(name, resourceBundleName, null, true);
                 do {
                     if (addLocalLogger(newLogger)) {
                         
@@ -1169,31 +1167,35 @@ public class LogManager {
     
     
     
-    private class RootLogger extends Logger {
+    private final class RootLogger extends Logger {
         private RootLogger() {
-            super("", null);
+            super("", null, null, true);
             setLevel(defaultLevel);
         }
 
+        @Override
         public void log(LogRecord record) {
             
             initializeGlobalHandlers();
             super.log(record);
         }
 
+        @Override
         public void addHandler(Handler h) {
             initializeGlobalHandlers();
             super.addHandler(h);
         }
 
+        @Override
         public void removeHandler(Handler h) {
             initializeGlobalHandlers();
             super.removeHandler(h);
         }
 
-        public Handler[] getHandlers() {
+        @Override
+        Handler[] accessCheckedHandlers() {
             initializeGlobalHandlers();
-            return super.getHandlers();
+            return super.accessCheckedHandlers();
         }
     }
 

@@ -63,4 +63,6 @@ class Messages
 
     static final String ILLEGAL_CAST = 
         "JAXBContext.IllegalCast";
+
+    static final String FAILED_TO_INITIALE_DATATYPE_FACTORY = "FAILED_TO_INITIALE_DATATYPE_FACTORY";
 }

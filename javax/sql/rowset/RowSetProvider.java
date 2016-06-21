@@ -7,6 +7,7 @@ import java.security.PrivilegedAction;
 import java.sql.SQLException;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
+import sun.reflect.misc.ReflectUtil;
 
 
 public class RowSetProvider {
@@ -40,15 +41,11 @@ public class RowSetProvider {
             factoryClassName = getSystemProperty(ROWSET_FACTORY_NAME);
             if (factoryClassName != null) {
                 trace("Found system property, value=" + factoryClassName);
-                factory = (RowSetFactory) getFactoryClass(factoryClassName, null, true).newInstance();
+                factory = (RowSetFactory) ReflectUtil.newInstance(getFactoryClass(factoryClassName, null, true));
             }
-        } catch (ClassNotFoundException e) {
-            throw new SQLException(
-                    "RowSetFactory: " + factoryClassName + " not found", e);
-        } catch (Exception e) {
-            throw new SQLException(
-                    "RowSetFactory: " + factoryClassName + " could not be instantiated: " + e,
-                    e);
+        }  catch (Exception e) {
+            throw new SQLException( "RowSetFactory: " + factoryClassName +
+                    " could not be instantiated: ", e);
         }
 
         
@@ -68,6 +65,16 @@ public class RowSetProvider {
             throws SQLException {
 
         trace("***In newInstance()");
+
+        if(factoryClassName == null) {
+            throw new SQLException("Error: factoryClassName cannot be null");
+        }
+        try {
+            ReflectUtil.checkPackageAccess(factoryClassName);
+        } catch (java.security.AccessControlException e) {
+            throw new SQLException("Access Exception",e);
+        }
+
         try {
             Class providerClass = getFactoryClass(factoryClassName, cl, false);
             RowSetFactory instance = (RowSetFactory) providerClass.newInstance();
@@ -159,6 +166,7 @@ public class RowSetProvider {
             });
         } catch (SecurityException se) {
             if (debug) {
+                trace("error getting " + propName + ":  "+ se);
                 se.printStackTrace();
             }
         }

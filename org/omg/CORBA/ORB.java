@@ -13,6 +13,8 @@ import java.io.FileInputStream;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
+import sun.reflect.misc.ReflectUtil;
+
 
 abstract public class ORB {
 
@@ -116,20 +118,38 @@ abstract public class ORB {
                     (className.equals("com.sun.corba.se.impl.orb.ORBSingleton"))) {
                 singleton = new com.sun.corba.se.impl.orb.ORBSingleton();
             } else {
-                singleton = create_impl(className);
+                singleton = create_impl_with_systemclassloader(className);
             }
         }
         return singleton;
     }
 
-    private static ORB create_impl(String className) {
+   private static ORB create_impl_with_systemclassloader(String className) {
 
+        try {
+            ReflectUtil.checkPackageAccess(className);
+            ClassLoader cl = ClassLoader.getSystemClassLoader();
+            Class<org.omg.CORBA.ORB> orbBaseClass = org.omg.CORBA.ORB.class;
+            Class<?> singletonOrbClass = Class.forName(className, true, cl).asSubclass(orbBaseClass);
+            return (ORB)singletonOrbClass.newInstance();
+        } catch (Throwable ex) {
+            SystemException systemException = new INITIALIZE(
+                "can't instantiate default ORB implementation " + className);
+            systemException.initCause(ex);
+            throw systemException;
+        }
+    }
+
+    private static ORB create_impl(String className) {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         if (cl == null)
             cl = ClassLoader.getSystemClassLoader();
 
         try {
-            return (ORB) Class.forName(className, true, cl).newInstance();
+            ReflectUtil.checkPackageAccess(className);
+            Class<org.omg.CORBA.ORB> orbBaseClass = org.omg.CORBA.ORB.class;
+            Class<?> orbClass = Class.forName(className, true, cl).asSubclass(orbBaseClass);
+            return (ORB)orbClass.newInstance();
         } catch (Throwable ex) {
             SystemException systemException = new INITIALIZE(
                "can't instantiate default ORB implementation " + className);
@@ -164,7 +184,6 @@ abstract public class ORB {
         } else {
             orb = create_impl(className);
         }
-
         orb.set_parameters(args, props);
         return orb;
     }
@@ -188,7 +207,6 @@ abstract public class ORB {
         } else {
             orb = create_impl(className);
         }
-
         orb.set_parameters(app, props);
         return orb;
     }
@@ -253,7 +271,7 @@ abstract public class ORB {
         try {
             
             String opDefClassName = "org.omg.CORBA.OperationDef";
-            Class opDefClass = null;
+            Class<?> opDefClass = null;
 
             ClassLoader cl = Thread.currentThread().getContextClassLoader();
             if ( cl == null )
@@ -263,7 +281,7 @@ abstract public class ORB {
 
             
             
-            Class[] argc = { opDefClass };
+            Class<?>[] argc = { opDefClass };
             java.lang.reflect.Method meth =
                 this.getClass().getMethod("create_operation_list", argc);
 

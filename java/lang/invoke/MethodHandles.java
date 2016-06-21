@@ -674,6 +674,7 @@ public class MethodHandles {
     
     public static
     MethodHandle permuteArguments(MethodHandle target, MethodType newType, int... reorder) {
+        reorder = reorder.clone();
         checkReorder(reorder, newType, target.type());
         return target.permuteArguments(newType, reorder);
     }
@@ -778,6 +779,7 @@ public class MethodHandles {
             throw newIllegalArgumentException("no argument type to remove");
         ArrayList<Class<?>> ptypes = new ArrayList<>(oldType.parameterList());
         ptypes.addAll(pos, valueTypes);
+        if (ptypes.size() != inargs)  throw newIllegalArgumentException("valueTypes");
         MethodType newType = MethodType.methodType(oldType.returnType(), ptypes);
         return target.dropArguments(newType, pos, dropped);
     }

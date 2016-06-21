@@ -30,7 +30,7 @@ import java.util.Map;
 @XmlType(name="EndpointReferenceType",namespace=W3CEndpointReference.NS)
 public final class W3CEndpointReference extends EndpointReference {
 
-    private final static JAXBContext w3cjc = getW3CJaxbContext();
+    private final JAXBContext w3cjc = getW3CJaxbContext();
 
     protected W3CEndpointReference() {
     }

@@ -151,6 +151,8 @@ class Thread implements Runnable {
             throw new NullPointerException("name cannot be null");
         }
 
+        this.name = name.toCharArray();
+
         Thread parent = currentThread();
         SecurityManager security = System.getSecurityManager();
         if (g == null) {
@@ -182,7 +184,6 @@ class Thread implements Runnable {
         this.group = g;
         this.daemon = parent.isDaemon();
         this.priority = parent.getPriority();
-        this.name = name.toCharArray();
         if (security == null || isCCLOverridden(parent.getClass()))
             this.contextClassLoader = parent.getContextClassLoader();
         else

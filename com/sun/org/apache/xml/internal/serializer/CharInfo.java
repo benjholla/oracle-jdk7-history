@@ -3,6 +3,11 @@
 
 package com.sun.org.apache.xml.internal.serializer;
 
+import com.sun.org.apache.xalan.internal.utils.SecuritySupport;
+import com.sun.org.apache.xml.internal.serializer.utils.MsgKey;
+import com.sun.org.apache.xml.internal.serializer.utils.SystemIDResolver;
+import com.sun.org.apache.xml.internal.serializer.utils.Utils;
+import com.sun.org.apache.xml.internal.serializer.utils.WrappedRuntimeException;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -10,18 +15,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-
 import javax.xml.transform.TransformerException;
-
-import com.sun.org.apache.xml.internal.serializer.utils.MsgKey;
-import com.sun.org.apache.xml.internal.serializer.utils.SystemIDResolver;
-import com.sun.org.apache.xml.internal.serializer.utils.Utils;
-import com.sun.org.apache.xml.internal.serializer.utils.WrappedRuntimeException;
-import com.sun.org.apache.xalan.internal.utils.ObjectFactory;
 
 
 final class CharInfo
@@ -94,13 +91,19 @@ final class CharInfo
         
         
 
-        if (internal) {
-            try {
+        try {
+            if (internal) {
                 
                 
                 entities = PropertyResourceBundle.getBundle(entitiesResource);
-            } catch (Exception e) {}
-        }
+            } else {
+                ClassLoader cl = SecuritySupport.getContextClassLoader();
+                if (cl != null) {
+                    entities = PropertyResourceBundle.getBundle(entitiesResource,
+                            Locale.getDefault(), cl);
+                }
+            }
+        } catch (Exception e) {}
 
         if (entities != null) {
             Enumeration keys = entities.getKeys();
@@ -116,6 +119,7 @@ final class CharInfo
             set(S_CARRIAGERETURN);
         } else {
             InputStream is = null;
+            String err = null;
 
             
             
@@ -123,18 +127,22 @@ final class CharInfo
                 if (internal) {
                     is = CharInfo.class.getResourceAsStream(entitiesResource);
                 } else {
-                    ClassLoader cl = ObjectFactory.findClassLoader();
-                    if (cl == null) {
-                        is = ClassLoader.getSystemResourceAsStream(entitiesResource);
-                    } else {
-                        is = cl.getResourceAsStream(entitiesResource);
+                    ClassLoader cl = SecuritySupport.getContextClassLoader();
+                    if (cl != null) {
+                        try {
+                            is = cl.getResourceAsStream(entitiesResource);
+                        } catch (Exception e) {
+                            err = e.getMessage();
+                        }
                     }
 
                     if (is == null) {
                         try {
                             URL url = new URL(entitiesResource);
                             is = url.openStream();
-                        } catch (Exception e) {}
+                        } catch (Exception e) {
+                            err = e.getMessage();
+                        }
                     }
                 }
 
@@ -142,7 +150,7 @@ final class CharInfo
                     throw new RuntimeException(
                         Utils.messages.createMessage(
                             MsgKey.ER_RESOURCE_COULD_NOT_FIND,
-                            new Object[] {entitiesResource, entitiesResource}));
+                            new Object[] {entitiesResource, err}));
                 }
 
                 
@@ -308,45 +316,24 @@ final class CharInfo
     }
 
 
-
-
-
-
-
-
-
-
-    private static CharInfo getCharInfoBasedOnPrivilege(
-        final String entitiesFileName, final String method,
-        final boolean internal){
-            return (CharInfo) AccessController.doPrivileged(
-                new PrivilegedAction() {
-                        public Object run() {
-                            return new CharInfo(entitiesFileName,
-                              method, internal);}
-            });
-    }
-
     
-    static CharInfo getCharInfo(String entitiesFileName, String method)
+    static CharInfo getCharInfoInternal(String entitiesFileName, String method)
     {
         CharInfo charInfo = (CharInfo) m_getCharInfoCache.get(entitiesFileName);
         if (charInfo != null) {
             return charInfo;
         }
 
-        
-        try {
-            charInfo = getCharInfoBasedOnPrivilege(entitiesFileName,
-                                        method, true);
-            m_getCharInfoCache.put(entitiesFileName, charInfo);
-            return charInfo;
-        } catch (Exception e) {}
+        charInfo = new CharInfo(entitiesFileName, method, true);
+        m_getCharInfoCache.put(entitiesFileName, charInfo);
+        return charInfo;
+    }
 
-        
+    
+    static CharInfo getCharInfo(String entitiesFileName, String method)
+    {
         try {
-            return getCharInfoBasedOnPrivilege(entitiesFileName,
-                                method, false);
+            return new CharInfo(entitiesFileName, method, false);
         } catch (Exception e) {}
 
         String absoluteEntitiesFileName;
@@ -363,8 +350,7 @@ final class CharInfo
             }
         }
 
-        return getCharInfoBasedOnPrivilege(entitiesFileName,
-                                method, false);
+        return new CharInfo(absoluteEntitiesFileName, method, false);
     }
 
     

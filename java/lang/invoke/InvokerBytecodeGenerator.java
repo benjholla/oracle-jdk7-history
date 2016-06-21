@@ -237,8 +237,9 @@ class InvokerBytecodeGenerator {
 
     
     private void classFilePrologue() {
+        final int NOT_ACC_PUBLIC = 0;  
         cw = new ClassWriter(ClassWriter.COMPUTE_MAXS + ClassWriter.COMPUTE_FRAMES);
-        cw.visit(Opcodes.V1_6, Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL + Opcodes.ACC_SUPER, className, null, superName, null);
+        cw.visit(Opcodes.V1_6, NOT_ACC_PUBLIC + Opcodes.ACC_FINAL + Opcodes.ACC_SUPER, className, null, superName, null);
         cw.visitSource(sourceFile, null);
 
         String invokerDesc = invokerType.toMethodDescriptorString();

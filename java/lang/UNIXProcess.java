@@ -34,11 +34,58 @@ final class UNIXProcess extends Process {
     private  InputStream  stdout;
     private  InputStream  stderr;
 
+    private static enum LaunchMechanism {
+        FORK(1),
+        VFORK(3);
+
+        private int value;
+        LaunchMechanism(int x) {value = x;}
+    };
+
+    
+    private static final LaunchMechanism launchMechanism;
+    private static byte[] helperpath;
+
+    private static byte[] toCString(String s) {
+        if (s == null)
+            return null;
+        byte[] bytes = s.getBytes();
+        byte[] result = new byte[bytes.length + 1];
+        System.arraycopy(bytes, 0,
+                         result, 0,
+                         bytes.length);
+        result[result.length-1] = (byte)0;
+        return result;
+    }
+
+    static {
+        launchMechanism = AccessController.doPrivileged(
+                new PrivilegedAction<LaunchMechanism>()
+        {
+            public LaunchMechanism run() {
+                String javahome = System.getProperty("java.home");
+                String osArch = System.getProperty("os.arch");
+
+                helperpath = toCString(javahome + "/lib/" + osArch + "/jspawnhelper");
+                String s = System.getProperty(
+                    "jdk.lang.Process.launchMechanism", "vfork");
+
+                try {
+                    return LaunchMechanism.valueOf(s.toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    throw new Error(s + " is not a supported " +
+                        "process launch mechanism on this platform.");
+                }
+            }
+        });
+    }
+
     
     private native int waitForProcessExit(int pid);
 
     
-    private native int forkAndExec(byte[] prog,
+    private native int forkAndExec(int mode, byte[] helperpath,
+                                   byte[] prog,
                                    byte[] argBlock, int argc,
                                    byte[] envBlock, int envc,
                                    byte[] dir,
@@ -86,7 +133,9 @@ final class UNIXProcess extends Process {
                 final boolean redirectErrorStream)
             throws IOException {
 
-        pid = forkAndExec(prog,
+        pid = forkAndExec(launchMechanism.value,
+                          helperpath,
+                          prog,
                           argBlock, argc,
                           envBlock, envc,
                           dir,
@@ -190,11 +239,10 @@ final class UNIXProcess extends Process {
         try { stderr.close(); } catch (IOException ignored) {}
     }
 
-    
-    private static native void initIDs();
+    private static native void init();
 
     static {
-        initIDs();
+        init();
     }
 
     

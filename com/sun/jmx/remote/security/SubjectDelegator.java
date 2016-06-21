@@ -12,6 +12,8 @@ import javax.security.auth.Subject;
 import javax.management.remote.SubjectDelegationPermission;
 
 import com.sun.jmx.remote.util.CacheMap;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class SubjectDelegator {
     private static final int PRINCIPALS_CACHE_SIZE = 10;
@@ -27,11 +29,14 @@ public class SubjectDelegator {
                          boolean removeCallerContext)
             throws SecurityException {
 
+        if (System.getSecurityManager() != null && authenticatedACC == null) {
+            throw new SecurityException("Illegal AccessControlContext: null");
+        }
         if (principalsCache == null || accCache == null) {
             principalsCache =
-                    new CacheMap<Subject, Principal[]>(PRINCIPALS_CACHE_SIZE);
+                    new CacheMap<>(PRINCIPALS_CACHE_SIZE);
             accCache =
-                    new CacheMap<Subject, AccessControlContext>(ACC_CACHE_SIZE);
+                    new CacheMap<>(ACC_CACHE_SIZE);
         }
 
         
@@ -75,14 +80,15 @@ public class SubjectDelegator {
         
         
         final Principal[] dp = delegatedPrincipals;
+        final Collection<Permission> permissions = new ArrayList<>(dp.length);
+        for(Principal p : dp) {
+            final String pname = p.getClass().getName() + "." + p.getName();
+            permissions.add(new SubjectDelegationPermission(pname));
+        }
         PrivilegedAction<Void> action =
             new PrivilegedAction<Void>() {
                 public Void run() {
-                    for (int i = 0 ; i < dp.length ; i++) {
-                        final String pname =
-                            dp[i].getClass().getName() + "." + dp[i].getName();
-                        Permission sdp =
-                            new SubjectDelegationPermission(pname);
+                    for (Permission sdp : permissions) {
                         AccessController.checkPermission(sdp);
                     }
                     return null;

@@ -14,8 +14,11 @@ import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 
 import javax.naming.*;
+import sun.reflect.misc.ReflectUtil;
 
 
 public class SyncFactory {
@@ -87,7 +90,7 @@ public class SyncFactory {
         
         
         
-        Properties properties = new Properties();
+        final Properties properties = new Properties();
 
         if (implementations == null) {
             implementations = new Hashtable();
@@ -114,6 +117,7 @@ public class SyncFactory {
                         }
                     });
                 } catch (Exception ex) {
+                    System.out.println("errorget rowset.properties: " + ex);
                     strRowsetProperties = null;
                 }
                 if (strRowsetProperties != null) {
@@ -131,16 +135,33 @@ public class SyncFactory {
                         strFileSep + "rowset" + strFileSep +
                         "rowset.properties";
 
-                ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                final ClassLoader cl = Thread.currentThread().getContextClassLoader();
 
-                try (InputStream stream =
-                         (cl == null) ? ClassLoader.getSystemResourceAsStream(ROWSET_PROPERTIES)
-                                      : cl.getResourceAsStream(ROWSET_PROPERTIES)) {
-                    if (stream == null) {
-                        throw new SyncFactoryException(
-                            "Resource " + ROWSET_PROPERTIES + " not found");
+                try {
+                    AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+                        @Override
+                        public Void run()  throws SyncFactoryException, IOException, FileNotFoundException {
+                            try (InputStream stream  = (cl == null) ?
+                                    ClassLoader.getSystemResourceAsStream(ROWSET_PROPERTIES)
+                                    : cl.getResourceAsStream(ROWSET_PROPERTIES)) {
+                                if (stream == null) {
+                                    throw new SyncFactoryException("Resource " + ROWSET_PROPERTIES + " not found");
+                                }
+                                properties.load(stream);
+                            }
+                            return null;
+                        }
+
+                    });
+                } catch (PrivilegedActionException ex) {
+                    Throwable e = ex.getException();
+                    if (e instanceof SyncFactoryException) {
+                      throw (SyncFactoryException) e;
+                    } else {
+                        SyncFactoryException sfe = new SyncFactoryException();
+                        sfe.initCause(ex.getException());
+                        throw sfe;
                     }
-                    properties.load(stream);
                 }
 
                 parseProperties(properties);
@@ -274,6 +295,13 @@ public class SyncFactory {
             return new com.sun.rowset.providers.RIOptimisticProvider();
         }
 
+        try {
+            ReflectUtil.checkPackageAccess(providerID);
+        } catch (java.security.AccessControlException e) {
+            SyncFactoryException sfe = new SyncFactoryException();
+            sfe.initCause(e);
+            throw sfe;
+        }
         
         Class c = null;
         try {

@@ -35,6 +35,10 @@ public final class ResourceManager {
     private static final String JRELIB_PROPERTY_FILE_NAME = "jndi.properties";
 
     
+    private static final String DISABLE_APP_RESOURCE_FILES =
+        "com.sun.naming.disable.app.resource.files";
+
+    
     private static final String[] listProperties = {
         Context.OBJECT_FACTORIES,
         Context.URL_PKG_PREFIXES,
@@ -139,6 +143,13 @@ public final class ResourceManager {
                     env.put(props[i], val);
                 }
             }
+        }
+
+        
+        
+        String disableAppRes = (String)env.get(DISABLE_APP_RESOURCE_FILES);
+        if (disableAppRes != null && disableAppRes.equalsIgnoreCase("true")) {
+            return env;
         }
 
         

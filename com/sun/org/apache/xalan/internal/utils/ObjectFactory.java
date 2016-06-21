@@ -19,8 +19,8 @@ public class ObjectFactory {
     
     
     
-     private static final String XALAN_INTERNAL = "com.sun.org.apache.xalan.internal";
-     private static final String XERCES_INTERNAL = "com.sun.org.apache.xerces.internal";
+     private static final String JAXP_INTERNAL = "com.sun.org.apache";
+     private static final String STAX_INTERNAL = "com.sun.xml.internal";
 
     
     private static final String DEFAULT_PROPERTIES_FILENAME =
@@ -342,12 +342,8 @@ public class ObjectFactory {
     public static Class findProviderClass(String className, boolean doFallback)
         throws ClassNotFoundException, ConfigurationError
     {
-        if (System.getSecurityManager()!=null) {
-            return Class.forName(className);
-        } else {
-            return findProviderClass (className,
+        return findProviderClass (className,
                 findClassLoader (), doFallback);
-        }
     }
 
     
@@ -360,8 +356,8 @@ public class ObjectFactory {
         SecurityManager security = System.getSecurityManager();
         try{
             if (security != null){
-                if (className.startsWith(XALAN_INTERNAL) ||
-                    className.startsWith(XERCES_INTERNAL)) {
+                if (className.startsWith(JAXP_INTERNAL) ||
+                    className.startsWith(STAX_INTERNAL)) {
                     cl = null;
                 } else {
                     final int lastDot = className.lastIndexOf(".");
@@ -376,16 +372,7 @@ public class ObjectFactory {
 
         Class providerClass;
         if (cl == null) {
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            providerClass = Class.forName(className);
+            providerClass = Class.forName(className, false, ObjectFactory.class.getClassLoader());
         } else {
             try {
                 providerClass = cl.loadClass(className);

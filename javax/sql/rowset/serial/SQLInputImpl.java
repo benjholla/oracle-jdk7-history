@@ -7,6 +7,7 @@ import javax.sql.*;
 import java.io.*;
 import java.math.*;
 import java.util.Map;
+import sun.reflect.misc.ReflectUtil;
 
 
 public class SQLInputImpl implements SQLInput {
@@ -290,13 +291,9 @@ public class SQLInputImpl implements SQLInput {
                     
                     SQLData obj = null;
                     try {
-                        obj = (SQLData)c.newInstance();
-                    } catch (java.lang.InstantiationException ex) {
-                        throw new SQLException("Unable to instantiate: " +
-                                               ex.getMessage());
-                    } catch (java.lang.IllegalAccessException ex) {
-                        throw new SQLException("Unable to instantiate: " +
-                                               ex.getMessage());
+                        obj = (SQLData)ReflectUtil.newInstance(c);
+                    } catch (Exception ex) {
+                        throw new SQLException("Unable to Instantiate: ", ex);
                     }
                     
                     Object attribs[] = s.getAttributes(map);

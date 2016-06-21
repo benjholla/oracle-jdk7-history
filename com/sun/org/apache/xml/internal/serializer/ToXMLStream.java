@@ -25,7 +25,7 @@ public final class ToXMLStream extends ToStream
     
     private static CharInfo m_xmlcharInfo =
 
-        CharInfo.getCharInfo(CharInfo.XML_ENTITIES_RESOURCE, Method.XML);
+        CharInfo.getCharInfoInternal(CharInfo.XML_ENTITIES_RESOURCE, Method.XML);
 
     
     public ToXMLStream()

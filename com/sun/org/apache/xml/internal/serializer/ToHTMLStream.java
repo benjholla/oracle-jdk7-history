@@ -28,7 +28,7 @@ public final class ToHTMLStream extends ToStream
     
     private static final CharInfo m_htmlcharInfo =
 
-        CharInfo.getCharInfo(CharInfo.HTML_ENTITIES_RESOURCE, Method.HTML);
+        CharInfo.getCharInfoInternal(CharInfo.HTML_ENTITIES_RESOURCE, Method.HTML);
 
     
     static final Trie m_elementFlags = new Trie();

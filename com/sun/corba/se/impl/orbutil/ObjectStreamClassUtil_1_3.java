@@ -71,7 +71,7 @@ public final class ObjectStreamClassUtil_1_3 {
         });
     }
 
-    public static long computeStructuralUID(boolean hasWriteObject, Class cl) {
+    public static long computeStructuralUID(boolean hasWriteObject, Class<?> cl) {
         ByteArrayOutputStream devnull = new ByteArrayOutputStream(512);
 
         long h = 0;
@@ -96,7 +96,7 @@ public final class ObjectStreamClassUtil_1_3 {
             
 
             
-            Class parent = cl.getSuperclass();
+            Class<?> parent = cl.getSuperclass();
             if ((parent != null) && (parent != java.lang.Object.class)) {
                 boolean hasWriteObjectFlag = false;
                 Class [] args = {java.io.ObjectOutputStream.class};
@@ -431,19 +431,6 @@ public final class ObjectStreamClassUtil_1_3 {
             Class classWithThisMethod = null;
 
             try {
-                try {
-                    
-                    
-                    
-                    
-                    
-                    
-                    classWithThisMethod = Class.forName("sun.misc.ClassReflector");
-                } catch (ClassNotFoundException cnfe) {
-                    
-                    
-                    
-                }
                 if (classWithThisMethod == null)
                     classWithThisMethod = java.io.ObjectStreamClass.class;
 

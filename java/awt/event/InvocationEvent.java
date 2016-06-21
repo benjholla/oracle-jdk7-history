@@ -2,11 +2,27 @@
 
 package java.awt.event;
 
+import sun.awt.AWTAccessor;
+
 import java.awt.ActiveEvent;
 import java.awt.AWTEvent;
 
 
 public class InvocationEvent extends AWTEvent implements ActiveEvent {
+
+    static {
+        AWTAccessor.setInvocationEventAccessor(new AWTAccessor.InvocationEventAccessor() {
+            @Override
+            public void dispose(InvocationEvent invocationEvent) {
+                invocationEvent.finishedDispatching(false);
+            }
+            @Override
+            public InvocationEvent createEvent(Object source, Runnable runnable, Runnable listener,
+                                               boolean catchThrowables) {
+                return new InvocationEvent(source, runnable, listener, catchThrowables);
+            }
+        });
+    }
 
     
     public static final int INVOCATION_FIRST = 1200;
@@ -22,6 +38,9 @@ public class InvocationEvent extends AWTEvent implements ActiveEvent {
 
     
     protected Object notifier;
+
+    
+    private final Runnable listener;
 
     
     private volatile boolean dispatched = false;
@@ -43,25 +62,36 @@ public class InvocationEvent extends AWTEvent implements ActiveEvent {
 
     
     public InvocationEvent(Object source, Runnable runnable) {
-        this(source, runnable, null, false);
+        this(source, INVOCATION_DEFAULT, runnable, null, null, false);
     }
 
     
     public InvocationEvent(Object source, Runnable runnable, Object notifier,
                            boolean catchThrowables) {
-        this(source, INVOCATION_DEFAULT, runnable, notifier, catchThrowables);
+        this(source, INVOCATION_DEFAULT, runnable, notifier, null, catchThrowables);
+    }
+
+    
+    private InvocationEvent(Object source, Runnable runnable, Runnable listener,
+                           boolean catchThrowables)  {
+        this(source, INVOCATION_DEFAULT, runnable, null, listener, catchThrowables);
     }
 
     
     protected InvocationEvent(Object source, int id, Runnable runnable,
                               Object notifier, boolean catchThrowables) {
+        this(source, id, runnable, notifier, null, catchThrowables);
+    }
+
+    private InvocationEvent(Object source, int id, Runnable runnable,
+                            Object notifier, Runnable listener, boolean catchThrowables) {
         super(source, id);
         this.runnable = runnable;
         this.notifier = notifier;
+        this.listener = listener;
         this.catchExceptions = catchThrowables;
         this.when = System.currentTimeMillis();
     }
-
     
     public void dispatch() {
         try {
@@ -80,13 +110,7 @@ public class InvocationEvent extends AWTEvent implements ActiveEvent {
                 runnable.run();
             }
         } finally {
-            dispatched = true;
-
-            if (notifier != null) {
-                synchronized (notifier) {
-                    notifier.notifyAll();
-                }
-            }
+            finishedDispatching(true);
         }
     }
 
@@ -108,6 +132,21 @@ public class InvocationEvent extends AWTEvent implements ActiveEvent {
     
     public boolean isDispatched() {
         return dispatched;
+    }
+
+    
+    private void finishedDispatching(boolean dispatched) {
+        this.dispatched = dispatched;
+
+        if (notifier != null) {
+            synchronized (notifier) {
+                notifier.notifyAll();
+            }
+        }
+
+        if (listener != null) {
+            listener.run();
+        }
     }
 
     
