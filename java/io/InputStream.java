@@ -6,9 +6,8 @@ package java.io;
 public abstract class InputStream implements Closeable {
 
     
-    private static final int SKIP_BUFFER_SIZE = 2048;
     
-    private static byte[] skipBuffer;
+    private static final int MAX_SKIP_BUFFER_SIZE = 2048;
 
     
     public abstract int read() throws IOException;
@@ -53,18 +52,15 @@ public abstract class InputStream implements Closeable {
 
         long remaining = n;
         int nr;
-        if (skipBuffer == null)
-            skipBuffer = new byte[SKIP_BUFFER_SIZE];
-
-        byte[] localSkipBuffer = skipBuffer;
 
         if (n <= 0) {
             return 0;
         }
 
+        int size = (int)Math.min(MAX_SKIP_BUFFER_SIZE, remaining);
+        byte[] skipBuffer = new byte[size];
         while (remaining > 0) {
-            nr = read(localSkipBuffer, 0,
-                      (int) Math.min(SKIP_BUFFER_SIZE, remaining));
+            nr = read(skipBuffer, 0, (int)Math.min(size, remaining));
             if (nr < 0) {
                 break;
             }

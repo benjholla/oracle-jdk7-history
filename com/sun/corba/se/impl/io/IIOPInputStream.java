@@ -1970,6 +1970,10 @@ public class IIOPInputStream
                 }
 
                 try {
+                    Class fieldCl = fields[i].getClazz();
+                    if (objectValue != null && !fieldCl.isInstance(objectValue)) {
+                        throw new IllegalArgumentException();
+                    }
                     bridge.putObject( o, fields[i].getFieldID(), objectValue ) ;
                     
                 } catch (IllegalArgumentException e) {
@@ -2267,6 +2271,10 @@ public class IIOPInputStream
     {
         try {
             Field fld = c.getDeclaredField( fieldName ) ;
+            Class fieldCl = fld.getType();
+            if(v != null && !fieldCl.isInstance(v)) {
+                throw new Exception();
+            }
             long key = bridge.objectFieldOffset( fld ) ;
             bridge.putObject( o, key, v ) ;
         } catch (Exception e) {
