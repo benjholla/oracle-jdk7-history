@@ -509,11 +509,18 @@ public class KeyEvent extends InputEvent {
                                                long extendedKeyCode) {
                     ev.extendedKeyCode = extendedKeyCode;
                 }
+
+                public Component getOriginalSource( KeyEvent ev ) {
+                    return ev.originalSource;
+                }
             });
     }
 
     
     private static native void initIDs();
+
+    
+    private Component originalSource;
 
     private KeyEvent(Component source, int id, long when, int modifiers,
                     int keyCode, char keyChar, int keyLocation, boolean isProxyActive) {
@@ -550,6 +557,7 @@ public class KeyEvent extends InputEvent {
         } else if ((getModifiers() == 0) && (getModifiersEx() != 0)) {
             setOldModifiers();
         }
+        originalSource = source;
     }
 
     

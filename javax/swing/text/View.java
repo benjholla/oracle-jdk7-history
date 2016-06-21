@@ -467,6 +467,11 @@ public abstract class View implements SwingConstants {
     }
 
     
+    void updateAfterChange() {
+        
+    }
+
+    
     protected void forwardUpdateToView(View v, DocumentEvent e,
                                            Shape a, ViewFactory f) {
         DocumentEvent.EventType type = e.getType();

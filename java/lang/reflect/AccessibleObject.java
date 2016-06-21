@@ -38,7 +38,7 @@ public class AccessibleObject implements AnnotatedElement {
         if (obj instanceof Constructor && flag == true) {
             Constructor<?> c = (Constructor<?>)obj;
             if (c.getDeclaringClass() == Class.class) {
-                throw new SecurityException("Can not make a java.lang.Class" +
+                throw new SecurityException("Cannot make a java.lang.Class" +
                                             " constructor accessible");
             }
         }

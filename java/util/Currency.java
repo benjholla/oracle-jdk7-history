@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -39,7 +41,7 @@ public final class Currency implements Serializable {
 
     
 
-    private static HashMap<String, Currency> instances = new HashMap<String, Currency>(7);
+    private static ConcurrentMap<String, Currency> instances = new ConcurrentHashMap<>(7);
     private static HashSet<Currency> available;
 
 
@@ -212,48 +214,47 @@ public final class Currency implements Serializable {
 
     private static Currency getInstance(String currencyCode, int defaultFractionDigits,
         int numericCode) {
-        synchronized (instances) {
-            
-            
-            
-            Currency instance = instances.get(currencyCode);
-            if (instance != null) {
-                return instance;
-            }
-
-            if (defaultFractionDigits == Integer.MIN_VALUE) {
-                
-                
-                
-                if (currencyCode.length() != 3) {
-                    throw new IllegalArgumentException();
-                }
-                char char1 = currencyCode.charAt(0);
-                char char2 = currencyCode.charAt(1);
-                int tableEntry = getMainTableEntry(char1, char2);
-                if ((tableEntry & COUNTRY_TYPE_MASK) == SIMPLE_CASE_COUNTRY_MASK
-                        && tableEntry != INVALID_COUNTRY_ENTRY
-                        && currencyCode.charAt(2) - 'A' == (tableEntry & SIMPLE_CASE_COUNTRY_FINAL_CHAR_MASK)) {
-                    defaultFractionDigits = (tableEntry & SIMPLE_CASE_COUNTRY_DEFAULT_DIGITS_MASK) >> SIMPLE_CASE_COUNTRY_DEFAULT_DIGITS_SHIFT;
-                    numericCode = (tableEntry & NUMERIC_CODE_MASK) >> NUMERIC_CODE_SHIFT;
-                } else {
-                    
-                    if (currencyCode.charAt(2) == '-') {
-                        throw new IllegalArgumentException();
-                    }
-                    int index = otherCurrencies.indexOf(currencyCode);
-                    if (index == -1) {
-                        throw new IllegalArgumentException();
-                    }
-                    defaultFractionDigits = otherCurrenciesDFD[index / 4];
-                    numericCode = otherCurrenciesNumericCode[index / 4];
-                }
-            }
-
-            instance = new Currency(currencyCode, defaultFractionDigits, numericCode);
-            instances.put(currencyCode, instance);
+        
+        
+        
+        Currency instance = instances.get(currencyCode);
+        if (instance != null) {
             return instance;
         }
+
+        if (defaultFractionDigits == Integer.MIN_VALUE) {
+            
+            
+            
+            if (currencyCode.length() != 3) {
+                throw new IllegalArgumentException();
+            }
+            char char1 = currencyCode.charAt(0);
+            char char2 = currencyCode.charAt(1);
+            int tableEntry = getMainTableEntry(char1, char2);
+            if ((tableEntry & COUNTRY_TYPE_MASK) == SIMPLE_CASE_COUNTRY_MASK
+                    && tableEntry != INVALID_COUNTRY_ENTRY
+                    && currencyCode.charAt(2) - 'A' == (tableEntry & SIMPLE_CASE_COUNTRY_FINAL_CHAR_MASK)) {
+                defaultFractionDigits = (tableEntry & SIMPLE_CASE_COUNTRY_DEFAULT_DIGITS_MASK) >> SIMPLE_CASE_COUNTRY_DEFAULT_DIGITS_SHIFT;
+                numericCode = (tableEntry & NUMERIC_CODE_MASK) >> NUMERIC_CODE_SHIFT;
+            } else {
+                
+                if (currencyCode.charAt(2) == '-') {
+                    throw new IllegalArgumentException();
+                }
+                int index = otherCurrencies.indexOf(currencyCode);
+                if (index == -1) {
+                    throw new IllegalArgumentException();
+                }
+                defaultFractionDigits = otherCurrenciesDFD[index / 4];
+                numericCode = otherCurrenciesNumericCode[index / 4];
+            }
+        }
+
+        Currency currencyVal =
+            new Currency(currencyCode, defaultFractionDigits, numericCode);
+        instance = instances.putIfAbsent(currencyCode, currencyVal);
+        return (instance != null ? instance : currencyVal);
     }
 
     

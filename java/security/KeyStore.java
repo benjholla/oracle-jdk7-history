@@ -11,9 +11,16 @@ import javax.crypto.SecretKey;
 
 import javax.security.auth.callback.*;
 
+import sun.security.util.Debug;
+
 
 
 public class KeyStore {
+
+    private static final Debug pdebug =
+                        Debug.getInstance("provider", "Provider");
+    private static final boolean skipDebug =
+        Debug.isOn("engine=") && !Debug.isOn("keystore");
 
     
     private static final String KEYSTORE_TYPE = "keystore.type";
@@ -226,6 +233,11 @@ public class KeyStore {
         this.keyStoreSpi = keyStoreSpi;
         this.provider = provider;
         this.type = type;
+
+        if (!skipDebug && pdebug != null) {
+            pdebug.println("KeyStore." + type.toUpperCase() + " type from: " +
+                this.provider.getName());
+        }
     }
 
     

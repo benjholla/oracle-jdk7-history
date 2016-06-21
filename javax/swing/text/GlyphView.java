@@ -612,6 +612,14 @@ public class GlyphView extends View implements TabableView, Cloneable {
     }
 
     
+    @Override
+    void updateAfterChange() {
+        
+        
+        breakSpots = null;
+    }
+
+    
     static class JustificationInfo {
         
         final int start;

@@ -8,10 +8,16 @@ import java.security.Provider.Service;
 
 import sun.security.jca.*;
 import sun.security.jca.GetInstance.Instance;
+import sun.security.util.Debug;
 
 
 
 public class SecureRandom extends java.util.Random {
+
+    private static final Debug pdebug =
+                        Debug.getInstance("provider", "Provider");
+    private static final boolean skipDebug =
+        Debug.isOn("engine=") && !Debug.isOn("securerandom");
 
     
     private Provider provider = null;
@@ -83,6 +89,11 @@ public class SecureRandom extends java.util.Random {
         this.secureRandomSpi = secureRandomSpi;
         this.provider = provider;
         this.algorithm = algorithm;
+
+        if (!skipDebug && pdebug != null) {
+            pdebug.println("SecureRandom." + algorithm +
+                " algorithm from: " + this.provider.getName());
+        }
     }
 
     

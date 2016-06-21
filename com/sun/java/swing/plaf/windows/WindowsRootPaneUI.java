@@ -8,6 +8,8 @@ import java.awt.Event;
 import java.awt.KeyEventPostProcessor;
 import java.awt.Window;
 import java.awt.Toolkit;
+
+import sun.awt.AWTAccessor;
 import sun.awt.SunToolkit;
 
 import java.awt.event.ActionEvent;
@@ -104,10 +106,15 @@ public class WindowsRootPaneUI extends BasicRootPaneUI {
                 
                 
                 
+                
+                
                 boolean skip = false;
                 Toolkit tk = Toolkit.getDefaultToolkit();
                 if (tk instanceof SunToolkit) {
-                    skip = ev.getWhen() <= ((SunToolkit)tk).getWindowDeactivationTime(winAncestor);
+                    Component originalSource = AWTAccessor.getKeyEventAccessor()
+                            .getOriginalSource(ev);
+                    skip = SunToolkit.getContainingWindow(originalSource) != winAncestor ||
+                            ev.getWhen() <= ((SunToolkit) tk).getWindowDeactivationTime(winAncestor);
                 }
 
                 if (menu != null && !skip) {

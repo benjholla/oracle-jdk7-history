@@ -10,10 +10,16 @@ import java.security.Provider.Service;
 
 import sun.security.jca.*;
 import sun.security.jca.GetInstance.Instance;
+import sun.security.util.Debug;
 
 
 
 public abstract class KeyPairGenerator extends KeyPairGeneratorSpi {
+
+    private static final Debug pdebug =
+                        Debug.getInstance("provider", "Provider");
+    private static final boolean skipDebug =
+        Debug.isOn("engine=") && !Debug.isOn("keypairgenerator");
 
     private final String algorithm;
 
@@ -40,6 +46,12 @@ public abstract class KeyPairGenerator extends KeyPairGeneratorSpi {
             kpg = new Delegate(spi, algorithm);
         }
         kpg.provider = instance.provider;
+
+        if (!skipDebug && pdebug != null) {
+            pdebug.println("KeyPairGenerator." + algorithm +
+                " algorithm from: " + kpg.provider.getName());
+        }
+
         return kpg;
     }
 
@@ -221,6 +233,11 @@ public abstract class KeyPairGenerator extends KeyPairGeneratorSpi {
             provider = instance.provider;
             this.serviceIterator = serviceIterator;
             initType = I_NONE;
+
+            if (!skipDebug && pdebug != null) {
+                pdebug.println("KeyPairGenerator." + algorithm +
+                    " algorithm from: " + provider.getName());
+            }
         }
 
         

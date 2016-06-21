@@ -169,6 +169,7 @@ class DatagramSocket implements java.io.Closeable {
         }
         
         impl.create();
+        impl.setDatagramSocket(this);
         created = true;
     }
 

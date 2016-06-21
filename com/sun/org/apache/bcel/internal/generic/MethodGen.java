@@ -18,6 +18,7 @@ public class MethodGen extends FieldGenOrMethodGen {
   private boolean         strip_attributes;
 
   private ArrayList       variable_vec    = new ArrayList();
+  private ArrayList       type_vec        = new ArrayList();
   private ArrayList       line_number_vec = new ArrayList();
   private ArrayList       exception_vec   = new ArrayList();
   private ArrayList       throws_vec      = new ArrayList();
@@ -163,7 +164,7 @@ public class MethodGen extends FieldGenOrMethodGen {
             }
           } else if (a instanceof LocalVariableTypeTable) {
              LocalVariable[] lv = ((LocalVariableTypeTable) a).getLocalVariableTypeTable();
-             removeLocalVariables();
+             removeLocalVariableTypes();
              for (int k = 0; k < lv.length; k++) {
                  LocalVariable l = lv[k];
                  InstructionHandle start = il.findHandle(l.getStartPC());
@@ -175,7 +176,7 @@ public class MethodGen extends FieldGenOrMethodGen {
                  if (null == end) {
                      end = il.getEnd();
                  }
-                 addLocalVariable(l.getName(), Type.getType(l.getSignature()), l
+                 addLocalVariableType(l.getName(), Type.getType(l.getSignature()), l
                          .getIndex(), start, end);
               }
           } else
@@ -276,6 +277,26 @@ public class MethodGen extends FieldGenOrMethodGen {
   }
 
   
+  private LocalVariableGen[] getLocalVariableTypes() {
+    int                size = type_vec.size();
+    LocalVariableGen[] lg   = new LocalVariableGen[size];
+    type_vec.toArray(lg);
+
+    for(int i=0; i < size; i++) {
+      if(lg[i].getStart() == null)
+        lg[i].setStart(il.getStart());
+
+      if(lg[i].getEnd() == null)
+        lg[i].setEnd(il.getEnd());
+    }
+
+    if(size > 1)
+      sort(lg, 0, size - 1);
+
+    return lg;
+  }
+
+  
   public LocalVariableTable getLocalVariableTable(ConstantPoolGen cp) {
     LocalVariableGen[] lg   = getLocalVariables();
     int                size = lg.length;
@@ -286,6 +307,52 @@ public class MethodGen extends FieldGenOrMethodGen {
 
     return new LocalVariableTable(cp.addUtf8("LocalVariableTable"),
                                   2 + lv.length * 10, lv, cp.getConstantPool());
+  }
+
+  
+  public LocalVariableTypeTable getLocalVariableTypeTable(ConstantPoolGen cp) {
+    LocalVariableGen[] lg   = getLocalVariableTypes();
+    int                size = lg.length;
+    LocalVariable[]    lv   = new LocalVariable[size];
+
+    for(int i=0; i < size; i++)
+      lv[i] = lg[i].getLocalVariable(cp);
+
+    return new LocalVariableTypeTable(cp.addUtf8("LocalVariableTypeTable"),
+                                  2 + lv.length * 10, lv, cp.getConstantPool());
+  }
+
+  
+  private LocalVariableGen addLocalVariableType(String name, Type type, int slot,
+                                           InstructionHandle start,
+                                           InstructionHandle end) {
+    byte t = type.getType();
+
+    if(t != Constants.T_ADDRESS) {
+      int  add = type.getSize();
+
+      if(slot + add > max_locals)
+        max_locals = slot + add;
+
+      LocalVariableGen l = new LocalVariableGen(slot, name, type, start, end);
+      int i;
+
+      if((i = type_vec.indexOf(l)) >= 0) 
+        type_vec.set(i, l);
+      else
+        type_vec.add(l);
+
+      return l;
+    } else {
+      throw new IllegalArgumentException("Can not use " + type +
+                                         " as type for local variable");
+
+    }
+  }
+
+  
+  private void removeLocalVariableTypes() {
+    type_vec.clear();
   }
 
   
@@ -440,10 +507,14 @@ public class MethodGen extends FieldGenOrMethodGen {
 
     LineNumberTable    lnt = null;
     LocalVariableTable lvt = null;
+    LocalVariableTypeTable lvtt = null;
 
     
     if((variable_vec.size() > 0) && !strip_attributes)
       addCodeAttribute(lvt = getLocalVariableTable(cp));
+
+    if((type_vec.size() > 0) && !strip_attributes)
+      addCodeAttribute(lvtt = getLocalVariableTypeTable(cp));
 
     if((line_number_vec.size() > 0) && !strip_attributes)
       addCodeAttribute(lnt = getLineNumberTable(cp));
@@ -492,6 +563,7 @@ public class MethodGen extends FieldGenOrMethodGen {
 
     
     if(lvt != null)  removeCodeAttribute(lvt);
+    if(lvtt != null) removeCodeAttribute(lvtt);
     if(lnt != null)  removeCodeAttribute(lnt);
     if(code != null) removeAttribute(code);
     if(et != null)   removeAttribute(et);

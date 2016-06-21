@@ -63,8 +63,11 @@ public final
     }
 
     
-    private Class() {}
-
+    private Class(ClassLoader loader) {
+        
+        
+        classLoader = loader;
+    }
 
     
     public String toString() {
@@ -227,8 +230,12 @@ public final
     }
 
     
-    native ClassLoader getClassLoader0();
+    ClassLoader getClassLoader0() { return classLoader; }
 
+    
+    
+    
+    private final ClassLoader classLoader;
 
     
     public TypeVariable<Class<T>>[] getTypeParameters() {
@@ -1079,7 +1086,7 @@ public final
     private native String getGenericSignature();
 
     
-    private transient ClassRepository genericInfo;
+    private volatile transient ClassRepository genericInfo;
 
     
     private GenericsFactory getFactory() {
@@ -1089,11 +1096,13 @@ public final
 
     
     private ClassRepository getGenericInfo() {
+        ClassRepository genericInfo = this.genericInfo;
         
         if (genericInfo == null) {
             
             genericInfo = ClassRepository.make(getGenericSignature(),
                                                getFactory());
+            this.genericInfo = genericInfo;
         }
         return genericInfo; 
     }

@@ -506,8 +506,13 @@ public class HTMLDocument extends DefaultStyledDocument {
             Element parent = elem.getParentElement();
 
             if (parent != null) {
+                
+                
+                if (HTML.Tag.BODY.name.equals(parent.getName())) {
+                    insertInBody = true;
+                }
                 int offset = elem.getEndOffset();
-                if (offset > getLength()) {
+                if (offset > (getLength() + 1)) {
                     offset--;
                 }
                 else if (elem.isLeaf() && getText(offset - 1, 1).
@@ -515,6 +520,10 @@ public class HTMLDocument extends DefaultStyledDocument {
                     offset--;
                 }
                 insertHTML(parent, offset, htmlText, false);
+                
+                if (insertInBody) {
+                    insertInBody = false;
+                }
             }
         }
     }
@@ -820,6 +829,9 @@ public class HTMLDocument extends DefaultStyledDocument {
     static String MAP_PROPERTY = "__MAP__";
 
     private static char[] NEWLINE;
+
+    
+    private boolean insertInBody = false;
 
     
     private static final String I18NProperty = "i18n";
@@ -1326,7 +1338,9 @@ public class HTMLDocument extends DefaultStyledDocument {
                     
                     foundInsertTag(false);
                     foundInsertTag = true;
-                    inParagraph = impliedP = true;
+                    
+                    
+                    inParagraph = impliedP = !insertInBody;
                 }
                 if (data.length >= 1) {
                     addContent(data, 0, data.length);
