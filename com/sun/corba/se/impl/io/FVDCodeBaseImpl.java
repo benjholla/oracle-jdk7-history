@@ -55,7 +55,7 @@ public class FVDCodeBaseImpl extends _CodeBaseImplBase
             
             
             if (vhandler == null) {
-                vhandler = new ValueHandlerImpl(false);
+                vhandler = ValueHandlerImpl.getInstance(false);
             }
 
             
@@ -89,7 +89,7 @@ public class FVDCodeBaseImpl extends _CodeBaseImplBase
                 
                 
                 if (vhandler == null) {
-                    vhandler = new ValueHandlerImpl(false);
+                    vhandler = ValueHandlerImpl.getInstance(false);
                 }
 
                 try{
@@ -130,7 +130,7 @@ public class FVDCodeBaseImpl extends _CodeBaseImplBase
             
             
             if (vhandler == null) {
-                vhandler = new ValueHandlerImpl(false);
+                vhandler = ValueHandlerImpl.getInstance(false);
             }
 
             Stack repIds = new Stack();

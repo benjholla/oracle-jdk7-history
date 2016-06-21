@@ -3,8 +3,10 @@
 
 
 package java.util.concurrent;
-import java.util.concurrent.locks.*;
-import java.util.concurrent.atomic.*;
+import java.util.concurrent.locks.AbstractQueuedSynchronizer;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.*;
 
 
@@ -118,6 +120,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
 
         
         Worker(Runnable firstTask) {
+            setState(-1); 
             this.firstTask = firstTask;
             this.thread = getThreadFactory().newThread(this);
         }
@@ -133,7 +136,7 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         
 
         protected boolean isHeldExclusively() {
-            return getState() == 1;
+            return getState() != 0;
         }
 
         protected boolean tryAcquire(int unused) {
@@ -154,6 +157,16 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         public boolean tryLock()  { return tryAcquire(1); }
         public void unlock()      { release(1); }
         public boolean isLocked() { return isHeldExclusively(); }
+
+        void interruptIfStarted() {
+            Thread t;
+            if (getState() >= 0 && (t = thread) != null && !t.isInterrupted()) {
+                try {
+                    t.interrupt();
+                } catch (SecurityException ignore) {
+                }
+            }
+        }
     }
 
     
@@ -223,12 +236,8 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
         try {
-            for (Worker w : workers) {
-                try {
-                    w.thread.interrupt();
-                } catch (SecurityException ignore) {
-                }
-            }
+            for (Worker w : workers)
+                w.interruptIfStarted();
         } finally {
             mainLock.unlock();
         }
@@ -263,14 +272,6 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
     }
 
     private static final boolean ONLY_ONE = true;
-
-    
-    private void clearInterruptsForTaskRun() {
-        if (runStateLessThan(ctl.get(), STOP) &&
-            Thread.interrupted() &&
-            runStateAtLeast(ctl.get(), STOP))
-            Thread.currentThread().interrupt();
-    }
 
     
 
@@ -333,46 +334,59 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
             }
         }
 
-        Worker w = new Worker(firstTask);
-        Thread t = w.thread;
+        boolean workerStarted = false;
+        boolean workerAdded = false;
+        Worker w = null;
+        try {
+            final ReentrantLock mainLock = this.mainLock;
+            w = new Worker(firstTask);
+            final Thread t = w.thread;
+            if (t != null) {
+                mainLock.lock();
+                try {
+                    
+                    
+                    
+                    int c = ctl.get();
+                    int rs = runStateOf(c);
 
+                    if (rs < SHUTDOWN ||
+                        (rs == SHUTDOWN && firstTask == null)) {
+                        if (t.isAlive()) 
+                            throw new IllegalThreadStateException();
+                        workers.add(w);
+                        int s = workers.size();
+                        if (s > largestPoolSize)
+                            largestPoolSize = s;
+                        workerAdded = true;
+                    }
+                } finally {
+                    mainLock.unlock();
+                }
+                if (workerAdded) {
+                    t.start();
+                    workerStarted = true;
+                }
+            }
+        } finally {
+            if (! workerStarted)
+                addWorkerFailed(w);
+        }
+        return workerStarted;
+    }
+
+    
+    private void addWorkerFailed(Worker w) {
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
         try {
-            
-            
-            
-            int c = ctl.get();
-            int rs = runStateOf(c);
-
-            if (t == null ||
-                (rs >= SHUTDOWN &&
-                 ! (rs == SHUTDOWN &&
-                    firstTask == null))) {
-                decrementWorkerCount();
-                tryTerminate();
-                return false;
-            }
-
-            workers.add(w);
-
-            int s = workers.size();
-            if (s > largestPoolSize)
-                largestPoolSize = s;
+            if (w != null)
+                workers.remove(w);
+            decrementWorkerCount();
+            tryTerminate();
         } finally {
             mainLock.unlock();
         }
-
-        t.start();
-        
-        
-        
-        
-        
-        if (runStateOf(ctl.get()) == STOP && ! t.isInterrupted())
-            t.interrupt();
-
-        return true;
     }
 
     
@@ -450,15 +464,25 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
 
     
     final void runWorker(Worker w) {
+        Thread wt = Thread.currentThread();
         Runnable task = w.firstTask;
         w.firstTask = null;
+        w.unlock(); 
         boolean completedAbruptly = true;
         try {
             while (task != null || (task = getTask()) != null) {
                 w.lock();
-                clearInterruptsForTaskRun();
+                
+                
+                
+                
+                if ((runStateAtLeast(ctl.get(), STOP) ||
+                     (Thread.interrupted() &&
+                      runStateAtLeast(ctl.get(), STOP))) &&
+                    !wt.isInterrupted())
+                    wt.interrupt();
                 try {
-                    beforeExecute(w.thread, task);
+                    beforeExecute(wt, task);
                     Throwable thrown = null;
                     try {
                         task.run();
@@ -955,3 +979,4 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         }
     }
 }
+

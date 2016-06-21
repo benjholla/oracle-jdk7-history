@@ -1,12 +1,15 @@
 
 
 package java.util.logging;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 
 
 public class Level implements java.io.Serializable {
-    private static java.util.ArrayList<Level> known = new java.util.ArrayList<>();
     private static String defaultBundle = "sun.util.logging.resources.logging";
 
     
@@ -17,6 +20,9 @@ public class Level implements java.io.Serializable {
 
     
     private final String resourceBundleName;
+
+    
+    private String localizedLevelName;
 
     
     public static final Level OFF = new Level("OFF",Integer.MAX_VALUE, defaultBundle);
@@ -58,9 +64,8 @@ public class Level implements java.io.Serializable {
         this.name = name;
         this.value = value;
         this.resourceBundleName = resourceBundleName;
-        synchronized (Level.class) {
-            known.add(this);
-        }
+        this.localizedLevelName = resourceBundleName == null ? name : null;
+        KnownLevel.add(this);
     }
 
     
@@ -75,12 +80,76 @@ public class Level implements java.io.Serializable {
 
     
     public String getLocalizedName() {
+        return getLocalizedLevelName();
+    }
+
+    
+    
+    final String getLevelName() {
+        return this.name;
+    }
+
+    final synchronized String getLocalizedLevelName() {
+        if (localizedLevelName != null) {
+            return localizedLevelName;
+        }
+
         try {
             ResourceBundle rb = ResourceBundle.getBundle(resourceBundleName);
-            return rb.getString(name);
+            localizedLevelName = rb.getString(name);
         } catch (Exception ex) {
-            return name;
+            localizedLevelName = name;
         }
+        return localizedLevelName;
+    }
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    static Level findLevel(String name) {
+        if (name == null) {
+            throw new NullPointerException();
+        }
+
+        KnownLevel level;
+
+        
+        level = KnownLevel.findByName(name);
+        if (level != null) {
+            return level.mirroredLevel;
+        }
+
+        
+        
+        
+        try {
+            int x = Integer.parseInt(name);
+            level = KnownLevel.findByValue(x);
+            if (level == null) {
+                
+                Level levelObject = new Level(name, x);
+                level = KnownLevel.findByValue(x);
+            }
+            return level.mirroredLevel;
+        } catch (NumberFormatException ex) {
+            
+            
+        }
+
+        level = KnownLevel.findByLocalizedLevelName(name);
+        if (level != null) {
+            return level.mirroredLevel;
+        }
+
+        return null;
     }
 
     
@@ -98,21 +167,15 @@ public class Level implements java.io.Serializable {
     
     
     private Object readResolve() {
-        synchronized (Level.class) {
-            for (int i = 0; i < known.size(); i++) {
-                Level other = known.get(i);
-                if (this.name.equals(other.name) && this.value == other.value
-                        && (this.resourceBundleName == other.resourceBundleName ||
-                            (this.resourceBundleName != null &&
-                            this.resourceBundleName.equals(other.resourceBundleName)))) {
-                    return other;
-                }
-            }
-            
-            
-            known.add(this);
-            return this;
+        KnownLevel o = KnownLevel.matches(this);
+        if (o != null) {
+            return o.levelObject;
         }
+
+        
+        
+        Level level = new Level(this.name, this.value, this.resourceBundleName);
+        return level;
     }
 
     
@@ -120,12 +183,12 @@ public class Level implements java.io.Serializable {
         
         name.length();
 
+        KnownLevel level;
+
         
-        for (int i = 0; i < known.size(); i++) {
-            Level l = known.get(i);
-            if (name.equals(l.name)) {
-                return l;
-            }
+        level = KnownLevel.findByName(name);
+        if (level != null) {
+            return level.levelObject;
         }
 
         
@@ -133,14 +196,13 @@ public class Level implements java.io.Serializable {
         
         try {
             int x = Integer.parseInt(name);
-            for (int i = 0; i < known.size(); i++) {
-                Level l = known.get(i);
-                if (l.value == x) {
-                    return l;
-                }
+            level = KnownLevel.findByValue(x);
+            if (level == null) {
+                
+                Level levelObject = new Level(name, x);
+                level = KnownLevel.findByValue(x);
             }
-            
-            return new Level(name, x);
+            return level.levelObject;
         } catch (NumberFormatException ex) {
             
             
@@ -149,11 +211,9 @@ public class Level implements java.io.Serializable {
         
         
         
-        for (int i = 0; i < known.size(); i++) {
-            Level l =  known.get(i);
-            if (name.equals(l.getLocalizedName())) {
-                return l;
-            }
+        level = KnownLevel.findByLocalizedName(name);
+        if (level != null) {
+            return level.levelObject;
         }
 
         
@@ -174,4 +234,124 @@ public class Level implements java.io.Serializable {
     public int hashCode() {
         return this.value;
     }
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    static final class KnownLevel {
+        private static Map<String, List<KnownLevel>> nameToLevels = new HashMap<>();
+        private static Map<Integer, List<KnownLevel>> intToLevels = new HashMap<>();
+        final Level levelObject;     
+        final Level mirroredLevel;   
+        KnownLevel(Level l) {
+            this.levelObject = l;
+            if (l.getClass() == Level.class) {
+                this.mirroredLevel = l;
+            } else {
+                this.mirroredLevel = new Level(l.name, l.value, l.resourceBundleName);
+            }
+        }
+
+        static synchronized void add(Level l) {
+            
+            
+            KnownLevel o = new KnownLevel(l);
+            List<KnownLevel> list = nameToLevels.get(l.name);
+            if (list == null) {
+                list = new ArrayList<>();
+                nameToLevels.put(l.name, list);
+            }
+            list.add(o);
+
+            list = intToLevels.get(l.value);
+            if (list == null) {
+                list = new ArrayList<>();
+                intToLevels.put(l.value, list);
+            }
+            list.add(o);
+        }
+
+        
+        static synchronized KnownLevel findByName(String name) {
+            List<KnownLevel> list = nameToLevels.get(name);
+            if (list != null) {
+                return list.get(0);
+            }
+            return null;
+        }
+
+        
+        static synchronized KnownLevel findByValue(int value) {
+            List<KnownLevel> list = intToLevels.get(value);
+            if (list != null) {
+                return list.get(0);
+            }
+            return null;
+        }
+
+        
+        
+        
+        
+        
+        static synchronized KnownLevel findByLocalizedLevelName(String name) {
+            for (List<KnownLevel> levels : nameToLevels.values()) {
+                for (KnownLevel l : levels) {
+                    String lname = l.levelObject.getLocalizedLevelName();
+                    if (name.equals(lname)) {
+                        return l;
+                    }
+                }
+            }
+            return null;
+        }
+
+        
+        
+        static synchronized KnownLevel findByLocalizedName(String name) {
+            for (List<KnownLevel> levels : nameToLevels.values()) {
+                for (KnownLevel l : levels) {
+                    String lname = l.levelObject.getLocalizedName();
+                    if (name.equals(lname)) {
+                        return l;
+                    }
+                }
+            }
+            return null;
+        }
+
+        static synchronized KnownLevel matches(Level l) {
+            List<KnownLevel> list = nameToLevels.get(l.name);
+            if (list != null) {
+                for (KnownLevel level : list) {
+                    Level other = level.mirroredLevel;
+                    if (l.value == other.value &&
+                           (l.resourceBundleName == other.resourceBundleName ||
+                               (l.resourceBundleName != null &&
+                                l.resourceBundleName.equals(other.resourceBundleName)))) {
+                        return level;
+                    }
+                }
+            }
+            return null;
+        }
+    }
+
 }

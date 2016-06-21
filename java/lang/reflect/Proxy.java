@@ -4,6 +4,9 @@ package java.lang.reflect;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.security.AccessController;
+import java.security.Permission;
+import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,6 +16,9 @@ import java.util.Set;
 import java.util.List;
 import java.util.WeakHashMap;
 import sun.misc.ProxyGenerator;
+import sun.reflect.Reflection;
+import sun.reflect.misc.ReflectUtil;
+import sun.security.util.SecurityConstants;
 
 
 public class Proxy implements java.io.Serializable {
@@ -50,7 +56,62 @@ public class Proxy implements java.io.Serializable {
 
     
     protected Proxy(InvocationHandler h) {
+        doNewInstanceCheck();
         this.h = h;
+    }
+
+    private static class ProxyAccessHelper {
+        
+        static final Permission PROXY_PERMISSION =
+            new ReflectPermission("proxyConstructorNewInstance");
+        
+        
+        static final boolean allowNewInstance;
+        static final boolean allowNullLoader;
+        static {
+            allowNewInstance = getBooleanProperty("sun.reflect.proxy.allowsNewInstance");
+            allowNullLoader = getBooleanProperty("sun.reflect.proxy.allowsNullLoader");
+        }
+
+        private static boolean getBooleanProperty(final String key) {
+            String s = AccessController.doPrivileged(new PrivilegedAction<String>() {
+                public String run() {
+                    return System.getProperty(key);
+                }
+            });
+            return Boolean.valueOf(s);
+        }
+
+        static boolean needsNewInstanceCheck(Class<?> proxyClass) {
+            if (!Proxy.isProxyClass(proxyClass) || allowNewInstance) {
+                return false;
+            }
+
+            if (proxyClass.getName().startsWith(ReflectUtil.PROXY_PACKAGE + ".")) {
+                
+                return false;
+            }
+            for (Class<?> intf : proxyClass.getInterfaces()) {
+                if (!Modifier.isPublic(intf.getModifiers())) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    
+    private void doNewInstanceCheck() {
+        SecurityManager sm = System.getSecurityManager();
+        Class<?> proxyClass = this.getClass();
+        if (sm != null && ProxyAccessHelper.needsNewInstanceCheck(proxyClass)) {
+            try {
+                sm.checkPermission(ProxyAccessHelper.PROXY_PERMISSION);
+            } catch (SecurityException e) {
+                throw new SecurityException("Not allowed to construct a Proxy "
+                        + "instance that implements a non-public interface", e);
+            }
+        }
     }
 
     
@@ -58,6 +119,34 @@ public class Proxy implements java.io.Serializable {
                                          Class<?>... interfaces)
         throws IllegalArgumentException
     {
+        return getProxyClass0(loader, interfaces); 
+    }
+
+    private static void checkProxyLoader(ClassLoader ccl,
+                                         ClassLoader loader)
+    {
+        SecurityManager sm = System.getSecurityManager();
+        if (sm != null) {
+            if (loader == null && ccl != null) {
+                if (!ProxyAccessHelper.allowNullLoader) {
+                    sm.checkPermission(SecurityConstants.GET_CLASSLOADER_PERMISSION);
+                }
+            }
+        }
+    }
+
+    
+    private static Class<?> getProxyClass0(ClassLoader loader,
+                                           Class<?>... interfaces) {
+        SecurityManager sm = System.getSecurityManager();
+        if (sm != null) {
+            final int CALLER_FRAME = 3; 
+            final Class<?> caller = Reflection.getCallerClass(CALLER_FRAME);
+            final ClassLoader ccl = caller.getClassLoader();
+            checkProxyLoader(ccl, loader);
+            ReflectUtil.checkProxyPackageAccess(ccl, interfaces);
+        }
+
         if (interfaces.length > 65535) {
             throw new IllegalArgumentException("interface limit exceeded");
         }
@@ -159,8 +248,9 @@ public class Proxy implements java.io.Serializable {
                 }
             }
 
-            if (proxyPkg == null) {     
-                proxyPkg = "";          
+            if (proxyPkg == null) {
+                
+                proxyPkg = ReflectUtil.PROXY_PACKAGE + ".";
             }
 
             {
@@ -211,20 +301,41 @@ public class Proxy implements java.io.Serializable {
         }
 
         
-        Class<?> cl = getProxyClass(loader, interfaces);
+        Class<?> cl = getProxyClass0(loader, interfaces); 
 
         
         try {
-            Constructor cons = cl.getConstructor(constructorParams);
-            return cons.newInstance(new Object[] { h });
+            final Constructor<?> cons = cl.getConstructor(constructorParams);
+            final InvocationHandler ih = h;
+            SecurityManager sm = System.getSecurityManager();
+            if (sm != null && ProxyAccessHelper.needsNewInstanceCheck(cl)) {
+                
+                
+                return AccessController.doPrivileged(new PrivilegedAction<Object>() {
+                    public Object run() {
+                        return newInstance(cons, ih);
+                    }
+                });
+            } else {
+                return newInstance(cons, ih);
+            }
         } catch (NoSuchMethodException e) {
             throw new InternalError(e.toString());
-        } catch (IllegalAccessException e) {
-            throw new InternalError(e.toString());
-        } catch (InstantiationException e) {
+        }
+    }
+
+    private static Object newInstance(Constructor<?> cons, InvocationHandler h) {
+        try {
+            return cons.newInstance(new Object[] {h} );
+        } catch (IllegalAccessException | InstantiationException e) {
             throw new InternalError(e.toString());
         } catch (InvocationTargetException e) {
-            throw new InternalError(e.toString());
+            Throwable t = e.getCause();
+            if (t instanceof RuntimeException) {
+                throw (RuntimeException) t;
+            } else {
+                throw new InternalError(t.toString());
+            }
         }
     }
 

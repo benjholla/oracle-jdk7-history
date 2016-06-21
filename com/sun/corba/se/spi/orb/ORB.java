@@ -75,6 +75,7 @@ import com.sun.corba.se.impl.logging.OMGSystemException ;
 import com.sun.corba.se.impl.presentation.rmi.PresentationManagerImpl ;
 
 import com.sun.corba.se.impl.orbutil.ORBClassLoader ;
+import sun.awt.AppContext;
 
 public abstract class ORB extends com.sun.corba.se.org.omg.CORBA.ORB
     implements Broker, TypeCodeFactory
@@ -150,14 +151,7 @@ public abstract class ORB extends com.sun.corba.se.org.omg.CORBA.ORB
 
     protected MonitoringManager monitoringManager;
 
-    
-    
-    
-    
-    
-    protected static PresentationManager globalPM = null ;
-
-    static {
+    private static PresentationManager setupPresentationManager() {
         staticWrapper = ORBUtilSystemException.get(
             CORBALogDomains.RPC_PRESENTATION ) ;
 
@@ -195,12 +189,13 @@ public abstract class ORB extends com.sun.corba.se.org.omg.CORBA.ORB
                         return sff ;
                     }
                 }
-            ) ;
+            );
 
-        globalPM = new PresentationManagerImpl( useDynamicStub ) ;
-        globalPM.setStubFactoryFactory( false,
+        PresentationManager pm = new PresentationManagerImpl( useDynamicStub ) ;
+        pm.setStubFactoryFactory( false,
             PresentationDefaults.getStaticStubFactoryFactory() ) ;
-        globalPM.setStubFactoryFactory( true, dynamicStubFactoryFactory ) ;
+        pm.setStubFactoryFactory( true, dynamicStubFactoryFactory ) ;
+        return pm;
     }
 
     public void destroy() {
@@ -214,15 +209,22 @@ public abstract class ORB extends com.sun.corba.se.org.omg.CORBA.ORB
     
     public static PresentationManager getPresentationManager()
     {
-        return globalPM ;
+        AppContext ac = AppContext.getAppContext();
+        PresentationManager pm = (PresentationManager) ac.get(PresentationManager.class);
+        if (pm == null) {
+            pm = setupPresentationManager();
+            ac.put(PresentationManager.class, pm);
+        }
+        return pm;
     }
 
     
     public static PresentationManager.StubFactoryFactory
         getStubFactoryFactory()
     {
-        boolean useDynamicStubs = globalPM.useDynamicStubs() ;
-        return globalPM.getStubFactoryFactory( useDynamicStubs ) ;
+        PresentationManager gPM = getPresentationManager();
+        boolean useDynamicStubs = gPM.useDynamicStubs() ;
+        return gPM.getStubFactoryFactory( useDynamicStubs ) ;
     }
 
     protected ORB()
@@ -488,6 +490,7 @@ public abstract class ORB extends com.sun.corba.se.org.omg.CORBA.ORB
     public abstract ThreadPoolManager getThreadPoolManager();
 
     public abstract CopierManager getCopierManager() ;
+
 }
 
 

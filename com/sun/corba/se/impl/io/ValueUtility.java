@@ -62,6 +62,14 @@ public class ValueUtility {
         null,       
     };
 
+    static {
+        sun.corba.SharedSecrets.setJavaCorbaAccess(new sun.corba.JavaCorbaAccess() {
+            public ValueHandlerImpl newValueHandlerImpl() {
+                return ValueHandlerImpl.getInstance();
+            }
+        });
+    }
+
     public static String getSignature(ValueMember member)
         throws ClassNotFoundException {
 

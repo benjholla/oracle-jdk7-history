@@ -239,8 +239,8 @@ public class CDRInputStream_1_0 extends CDRInputStreamBase
 
     private final void createRepositoryIdHandlers()
     {
-        repIdUtil = RepositoryIdFactory.getRepIdUtility(orb);
-        repIdStrs = RepositoryIdFactory.getRepIdStringsFactory(orb);
+        repIdUtil = RepositoryIdFactory.getRepIdUtility();
+        repIdStrs = RepositoryIdFactory.getRepIdStringsFactory();
     }
 
     public GIOPVersion getGIOPVersion() {
@@ -534,10 +534,7 @@ public class CDRInputStream_1_0 extends CDRInputStreamBase
 
         checkForNegativeLength(len);
 
-        if (orb != null && ORBUtility.isLegacyORB((ORB)orb))
-            return legacyReadString(len);
-        else
-            return internalReadString(len);
+        return internalReadString(len);
     }
 
     private final String internalReadString(int len) {
@@ -556,54 +553,6 @@ public class CDRInputStream_1_0 extends CDRInputStreamBase
         read_octet();
 
         return new String(result, 0, getCharConverter().getNumChars());
-    }
-
-    private final String legacyReadString(int len) {
-
-        
-        
-        
-        
-        
-        
-        
-        
-        if (len == 0)
-            return new String("");
-
-        len--;
-        char[] c = new char[len];
-
-        int n = 0;
-        while (n < len) {
-            int avail;
-            int bytes;
-            int wanted;
-
-            avail = bbwi.buflen - bbwi.position();
-            if (avail <= 0) {
-                grow(1, 1);
-                avail = bbwi.buflen - bbwi.position();
-            }
-            wanted = len - n;
-            bytes = (wanted < avail) ? wanted : avail;
-            
-            
-            for (int i=0; i<bytes; i++) {
-                c[n+i] = (char) (bbwi.byteBuffer.get(bbwi.position()+i) & 0xFF);
-            }
-            bbwi.position(bbwi.position() + bytes);
-            n += bytes;
-        }
-
-        
-        
-        
-        if (bbwi.position() + 1 > bbwi.buflen)
-            alignAndCheck(1, 1);
-        bbwi.position(bbwi.position() + 1);
-
-        return new String(c);
     }
 
     public final String read_string() {
@@ -1004,7 +953,7 @@ public class CDRInputStream_1_0 extends CDRInputStreamBase
 
                 try {
                     if (valueHandler == null)
-                        valueHandler = ORBUtility.createValueHandler(orb);
+                        valueHandler = ORBUtility.createValueHandler();
 
                     value = valueHandler.readValue(parent,
                                                    indirection,

@@ -11,6 +11,7 @@ import java.security.CodeSigner;
 import java.security.cert.Certificate;
 import java.security.AccessController;
 import java.security.CodeSource;
+import sun.misc.IOUtils;
 import sun.security.action.GetPropertyAction;
 import sun.security.util.ManifestEntryVerifier;
 import sun.misc.SharedSecrets;
@@ -197,6 +198,9 @@ class JarFile extends ZipFile {
             if (names != null) {
                 for (int i = 0; i < names.length; i++) {
                     JarEntry e = getJarEntry(names[i]);
+                    if (e == null) {
+                        throw new JarException("corrupted jar file");
+                    }
                     if (!e.isDirectory()) {
                         if (mev == null) {
                             mev = new ManifestEntryVerifier
@@ -216,6 +220,10 @@ class JarFile extends ZipFile {
             
             jv = null;
             verify = false;
+            if (JarVerifier.debug != null) {
+                JarVerifier.debug.println("jarfile parsing error!");
+                ex.printStackTrace();
+            }
         }
 
         
@@ -240,11 +248,9 @@ class JarFile extends ZipFile {
 
     
     private byte[] getBytes(ZipEntry ze) throws IOException {
-        byte[] b = new byte[(int)ze.getSize()];
-        try (DataInputStream is = new DataInputStream(super.getInputStream(ze))) {
-            is.readFully(b, 0, b.length);
+        try (InputStream is = super.getInputStream(ze)) {
+            return IOUtils.readFully(is, (int)ze.getSize(), true);
         }
-        return b;
     }
 
     
@@ -332,12 +338,7 @@ class JarFile extends ZipFile {
         if (!isKnownToNotHaveClassPathAttribute()) {
             JarEntry manEntry = getManEntry();
             if (manEntry != null) {
-                byte[] b = new byte[(int)manEntry.getSize()];
-                try (DataInputStream dis = new DataInputStream(
-                         super.getInputStream(manEntry))) {
-                    dis.readFully(b, 0, b.length);
-                }
-
+                byte[] b = getBytes(manEntry);
                 int last = b.length - src.length;
                 int i = 0;
                 next:

@@ -94,7 +94,8 @@ public class EventQueue {
                 }
                 public void removeSourceEvents(EventQueue eventQueue,
                                                Object source,
-                                               boolean removeAllEvents) {
+                                               boolean removeAllEvents)
+                {
                     eventQueue.removeSourceEvents(source, removeAllEvents);
                 }
                 public boolean noEvents(EventQueue eventQueue) {
@@ -102,6 +103,11 @@ public class EventQueue {
                 }
                 public void wakeup(EventQueue eventQueue, boolean isShutdown) {
                     eventQueue.wakeup(isShutdown);
+                }
+                public void invokeAndWait(Object source, Runnable r)
+                    throws InterruptedException, InvocationTargetException
+                {
+                    EventQueue.invokeAndWait(source, r);
                 }
             });
     }
@@ -868,8 +874,14 @@ public class EventQueue {
 
     
     public static void invokeAndWait(Runnable runnable)
-             throws InterruptedException, InvocationTargetException {
+        throws InterruptedException, InvocationTargetException
+    {
+        invokeAndWait(Toolkit.getDefaultToolkit(), runnable);
+    }
 
+    static void invokeAndWait(Object source, Runnable runnable)
+        throws InterruptedException, InvocationTargetException
+    {
         if (EventQueue.isDispatchThread()) {
             throw new Error("Cannot call invokeAndWait from the event dispatcher thread");
         }
@@ -878,8 +890,7 @@ public class EventQueue {
         Object lock = new AWTInvocationLock();
 
         InvocationEvent event =
-            new InvocationEvent(Toolkit.getDefaultToolkit(), runnable, lock,
-                                true);
+            new InvocationEvent(source, runnable, lock, true);
 
         synchronized (lock) {
             Toolkit.getEventQueue().postEvent(event);

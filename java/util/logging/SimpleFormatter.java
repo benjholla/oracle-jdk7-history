@@ -42,7 +42,7 @@ public class SimpleFormatter extends Formatter {
                              dat,
                              source,
                              record.getLoggerName(),
-                             record.getLevel().getLocalizedName(),
+                             record.getLevel().getLocalizedLevelName(),
                              message,
                              throwable);
     }

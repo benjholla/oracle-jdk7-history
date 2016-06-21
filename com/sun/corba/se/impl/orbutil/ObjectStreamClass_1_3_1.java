@@ -871,8 +871,8 @@ public class ObjectStreamClass_1_3_1 implements java.io.Serializable {
     private boolean hasExternalizableBlockData;
     Method writeObjectMethod;
     Method readObjectMethod;
-    private Method writeReplaceObjectMethod;
-    private Method readResolveObjectMethod;
+    private transient Method writeReplaceObjectMethod;
+    private transient Method readResolveObjectMethod;
 
     
     private ObjectStreamClass_1_3_1 localClassDesc;

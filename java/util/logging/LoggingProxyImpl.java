@@ -12,7 +12,8 @@ class LoggingProxyImpl implements LoggingProxy {
 
     @Override
     public Object getLogger(String name) {
-        return Logger.getLogger(name);
+        
+        return Logger.getPlatformLogger(name);
     }
 
     @Override
@@ -67,12 +68,16 @@ class LoggingProxyImpl implements LoggingProxy {
 
     @Override
     public Object parseLevel(String levelName) {
-        return Level.parse(levelName);
+        Level level = Level.findLevel(levelName);
+        if (level == null) {
+            throw new IllegalArgumentException("Unknown level \"" + levelName + "\"");
+        }
+        return level;
     }
 
     @Override
     public String getLevelName(Object level) {
-        return ((Level) level).getName();
+        return ((Level) level).getLevelName();
     }
 
     @Override

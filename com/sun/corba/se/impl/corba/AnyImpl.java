@@ -1073,7 +1073,7 @@ public class AnyImpl extends Any
         
         
         RepositoryIdStrings repStrs
-            = RepositoryIdFactory.getRepIdStringsFactory(tcORB);
+            = RepositoryIdFactory.getRepIdStringsFactory();
 
 
         
@@ -1106,7 +1106,7 @@ public class AnyImpl extends Any
         
         
         classTC = (TypeCodeImpl)ValueUtility.createTypeCodeForClass(
-            tcORB, c, ORBUtility.createValueHandler(tcORB));
+            tcORB, c, ORBUtility.createValueHandler());
         
         classTC.setCaching(true);
         

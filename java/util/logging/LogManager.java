@@ -11,6 +11,8 @@ import java.lang.ref.WeakReference;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.net.URL;
+import sun.misc.JavaAWTAccess;
+import sun.misc.SharedSecrets;
 import sun.security.action.GetPropertyAction;
 
 
@@ -26,9 +28,8 @@ public class LogManager {
     private final static Level defaultLevel = Level.INFO;
 
     
-    private Hashtable<String,LoggerWeakRef> namedLoggers = new Hashtable<>();
-    
-    private LogNode root = new LogNode(null);
+    private final LoggerContext systemContext = new SystemLoggerContext();
+    private final LoggerContext userContext = new LoggerContext();
     private Logger rootLogger;
 
     
@@ -67,6 +68,7 @@ public class LogManager {
                     
                     manager.rootLogger = manager.new RootLogger();
                     manager.addLogger(manager.rootLogger);
+                    manager.systemContext.addLocalLogger(manager.rootLogger);
 
                     
                     
@@ -140,14 +142,14 @@ public class LogManager {
                         return;
                     }
                     readPrimordialConfiguration = true;
+
                     try {
-                        AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-                                public Object run() throws Exception {
+                        AccessController.doPrivileged(new PrivilegedExceptionAction<Void>() {
+                                public Void run() throws Exception {
                                     readConfiguration();
 
                                     
                                     sun.util.logging.PlatformLogger.redirectPlatformLoggers();
-
                                     return null;
                                 }
                             });
@@ -177,18 +179,63 @@ public class LogManager {
 
     
     
-    
-    
-    
+    private LoggerContext getUserContext() {
+        LoggerContext context = null;
+
+        SecurityManager sm = System.getSecurityManager();
+        JavaAWTAccess javaAwtAccess = SharedSecrets.getJavaAWTAccess();
+        if (sm != null && javaAwtAccess != null) {
+            synchronized (javaAwtAccess) {
+                
+                
+                
+                
+                Object ecx = javaAwtAccess.getExecutionContext();
+                if (ecx == null) {
+                    
+                    ecx = javaAwtAccess.getContext();
+                }
+                context = (LoggerContext)javaAwtAccess.get(ecx, LoggerContext.class);
+                if (context == null) {
+                    if (javaAwtAccess.isMainAppContext()) {
+                        context = userContext;
+                    } else {
+                        context = new LoggerContext();
+                        context.addLocalLogger(manager.rootLogger);
+                    }
+                    javaAwtAccess.put(ecx, LoggerContext.class, context);
+                }
+            }
+        } else {
+            context = userContext;
+        }
+        return context;
+    }
+
+    private List<LoggerContext> contexts() {
+        List<LoggerContext> cxs = new ArrayList<>();
+        cxs.add(systemContext);
+        cxs.add(getUserContext());
+        return cxs;
+    }
 
     
     
     
-    Logger demandLogger(String name) {
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    Logger demandLogger(String name, String resourceBundleName) {
         Logger result = getLogger(name);
         if (result == null) {
             
-            Logger newLogger = new Logger(name, null);
+            Logger newLogger = new Logger(name, resourceBundleName);
             do {
                 if (addLogger(newLogger)) {
                     
@@ -213,24 +260,228 @@ public class LogManager {
         return result;
     }
 
-    
-    
-    private void processParentHandlers(Logger logger, String name) {
-        int ix = 1;
-        for (;;) {
-            int ix2 = name.indexOf(".", ix);
-            if (ix2 < 0) {
-                break;
-            }
-            String pname = name.substring(0,ix2);
+    Logger demandSystemLogger(String name, String resourceBundleName) {
+        return systemContext.demandLogger(name, resourceBundleName);
+    }
 
-            if (getProperty(pname+".level")    != null ||
-                getProperty(pname+".handlers") != null) {
-                
-                
-                demandLogger(pname);
+    
+    
+    
+    
+    
+    
+    
+    static class LoggerContext {
+        
+        private final Hashtable<String,LoggerWeakRef> namedLoggers = new Hashtable<>();
+        
+        private final LogNode root;
+
+        private LoggerContext() {
+            this.root = new LogNode(null, this);
+        }
+
+        Logger demandLogger(String name, String resourceBundleName) {
+            
+            
+            return manager.demandLogger(name, resourceBundleName);
+        }
+
+        synchronized Logger findLogger(String name) {
+            LoggerWeakRef ref = namedLoggers.get(name);
+            if (ref == null) {
+                return null;
             }
-            ix = ix2+1;
+            Logger logger = ref.get();
+            if (logger == null) {
+                
+                
+                removeLogger(name);
+            }
+            return logger;
+        }
+
+        
+        
+        synchronized boolean addLocalLogger(Logger logger) {
+            final String name = logger.getName();
+            if (name == null) {
+                throw new NullPointerException();
+            }
+
+            
+            manager.drainLoggerRefQueueBounded();
+
+            LoggerWeakRef ref = namedLoggers.get(name);
+            if (ref != null) {
+                if (ref.get() == null) {
+                    
+                    
+                    
+                    removeLogger(name);
+                } else {
+                    
+                    return false;
+                }
+            }
+
+            
+            
+            ref = manager.new LoggerWeakRef(logger);
+            namedLoggers.put(name, ref);
+
+            
+            Level level = manager.getLevelProperty(name + ".level", null);
+            if (level != null) {
+                doSetLevel(logger, level);
+            }
+
+            processParentHandlers(logger, name);
+
+            
+            LogNode node = getNode(name);
+            node.loggerRef = ref;
+            Logger parent = null;
+            LogNode nodep = node.parent;
+            while (nodep != null) {
+                LoggerWeakRef nodeRef = nodep.loggerRef;
+                if (nodeRef != null) {
+                    parent = nodeRef.get();
+                    if (parent != null) {
+                        break;
+                    }
+                }
+                nodep = nodep.parent;
+            }
+
+            if (parent != null) {
+                doSetParent(logger, parent);
+            }
+            
+            node.walkAndSetParent(logger);
+            
+            ref.setNode(node);
+            return true;
+        }
+
+        void removeLogger(String name) {
+            namedLoggers.remove(name);
+        }
+
+        synchronized Enumeration<String> getLoggerNames() {
+            return namedLoggers.keys();
+        }
+
+        
+        
+        private void processParentHandlers(final Logger logger, final String name) {
+            AccessController.doPrivileged(new PrivilegedAction<Void>() {
+                public Void run() {
+                    if (logger != manager.rootLogger) {
+                        boolean useParent = manager.getBooleanProperty(name + ".useParentHandlers", true);
+                        if (!useParent) {
+                            logger.setUseParentHandlers(false);
+                        }
+                    }
+                    return null;
+                }
+            });
+
+            int ix = 1;
+            for (;;) {
+                int ix2 = name.indexOf(".", ix);
+                if (ix2 < 0) {
+                    break;
+                }
+                String pname = name.substring(0, ix2);
+                if (manager.getProperty(pname + ".level") != null ||
+                    manager.getProperty(pname + ".handlers") != null) {
+                    
+                    
+                    demandLogger(pname, null);
+                }
+                ix = ix2+1;
+            }
+        }
+
+        
+        
+        LogNode getNode(String name) {
+            if (name == null || name.equals("")) {
+                return root;
+            }
+            LogNode node = root;
+            while (name.length() > 0) {
+                int ix = name.indexOf(".");
+                String head;
+                if (ix > 0) {
+                    head = name.substring(0, ix);
+                    name = name.substring(ix + 1);
+                } else {
+                    head = name;
+                    name = "";
+                }
+                if (node.children == null) {
+                    node.children = new HashMap<>();
+                }
+                LogNode child = node.children.get(head);
+                if (child == null) {
+                    child = new LogNode(node, this);
+                    node.children.put(head, child);
+                }
+                node = child;
+            }
+            return node;
+        }
+    }
+
+    static class SystemLoggerContext extends LoggerContext {
+        
+        
+        
+        
+        Logger demandLogger(String name, String resourceBundleName) {
+            Logger result = findLogger(name);
+            if (result == null) {
+                
+                Logger newLogger = new Logger(name, resourceBundleName);
+                do {
+                    if (addLocalLogger(newLogger)) {
+                        
+                        
+                        result = newLogger;
+                    } else {
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        result = findLogger(name);
+                    }
+                } while (result == null);
+            }
+            
+            
+            if (!manager.addLogger(result) && result.getHandlers().length == 0) {
+                
+                final Logger l = manager.getLogger(name);
+                final Logger logger = result;
+                AccessController.doPrivileged(new PrivilegedAction<Void>() {
+                    public Void run() {
+                        for (Handler hdl : l.getHandlers()) {
+                            logger.addHandler(hdl);
+                        }
+                        return null;
+                    }
+                });
+            }
+            return result;
         }
     }
 
@@ -239,32 +490,27 @@ public class LogManager {
     
     
     private void loadLoggerHandlers(final Logger logger, final String name,
-                                    final String handlersPropertyName) {
+                                    final String handlersPropertyName)
+    {
         AccessController.doPrivileged(new PrivilegedAction<Object>() {
             public Object run() {
-                if (logger != rootLogger) {
-                    boolean useParent = getBooleanProperty(name + ".useParentHandlers", true);
-                    if (!useParent) {
-                        logger.setUseParentHandlers(false);
-                    }
-                }
-
                 String names[] = parseClassNames(handlersPropertyName);
                 for (int i = 0; i < names.length; i++) {
                     String word = names[i];
                     try {
-                        Class   clz = ClassLoader.getSystemClassLoader().loadClass(word);
+                        Class clz = ClassLoader.getSystemClassLoader().loadClass(word);
                         Handler hdl = (Handler) clz.newInstance();
-                        try {
-                            
-                            
-                            String levs = getProperty(word + ".level");
-                            if (levs != null) {
-                                hdl.setLevel(Level.parse(levs));
+                        
+                        
+                        String levs = getProperty(word + ".level");
+                        if (levs != null) {
+                            Level l = Level.findLevel(levs);
+                            if (l != null) {
+                                hdl.setLevel(l);
+                            } else {
+                                
+                                System.err.println("Can't set level for " + word);
                             }
-                        } catch (Exception ex) {
-                            System.err.println("Can't set level for " + word);
-                            
                         }
                         
                         logger.addHandler(hdl);
@@ -275,7 +521,8 @@ public class LogManager {
                     }
                 }
                 return null;
-            }});
+            }
+        });
     }
 
 
@@ -320,7 +567,7 @@ public class LogManager {
             if (node != null) {
                 
                 
-                manager.namedLoggers.remove(name);
+                node.context.removeLogger(name);
                 name = null;  
 
                 node.loggerRef = null;  
@@ -394,72 +641,21 @@ public class LogManager {
     }
 
     
-    public synchronized boolean addLogger(Logger logger) {
+    public boolean addLogger(Logger logger) {
         final String name = logger.getName();
         if (name == null) {
             throw new NullPointerException();
         }
-
-        
-        drainLoggerRefQueueBounded();
-
-        LoggerWeakRef ref = namedLoggers.get(name);
-        if (ref != null) {
-            if (ref.get() == null) {
-                
-                
-                
-                namedLoggers.remove(name);
-            } else {
-                
-                return false;
-            }
+        LoggerContext cx = getUserContext();
+        if (cx.addLocalLogger(logger)) {
+            
+            
+            loadLoggerHandlers(logger, name, name + ".handlers");
+            return true;
+        } else {
+            return false;
         }
-
-        
-        
-        ref = new LoggerWeakRef(logger);
-        namedLoggers.put(name, ref);
-
-        
-        Level level = getLevelProperty(name+".level", null);
-        if (level != null) {
-            doSetLevel(logger, level);
-        }
-
-        
-        
-        loadLoggerHandlers(logger, name, name+".handlers");
-        processParentHandlers(logger, name);
-
-        
-        LogNode node = findNode(name);
-        node.loggerRef = ref;
-        Logger parent = null;
-        LogNode nodep = node.parent;
-        while (nodep != null) {
-            LoggerWeakRef nodeRef = nodep.loggerRef;
-            if (nodeRef != null) {
-                parent = nodeRef.get();
-                if (parent != null) {
-                    break;
-                }
-            }
-            nodep = nodep.parent;
-        }
-
-        if (parent != null) {
-            doSetParent(logger, parent);
-        }
-        
-        node.walkAndSetParent(logger);
-
-        
-        ref.setNode(node);
-
-        return true;
     }
-
 
     
     
@@ -478,8 +674,6 @@ public class LogManager {
                 return null;
             }});
     }
-
-
 
     
     
@@ -500,53 +694,13 @@ public class LogManager {
     }
 
     
-    
-    private LogNode findNode(String name) {
-        if (name == null || name.equals("")) {
-            return root;
-        }
-        LogNode node = root;
-        while (name.length() > 0) {
-            int ix = name.indexOf(".");
-            String head;
-            if (ix > 0) {
-                head = name.substring(0,ix);
-                name = name.substring(ix+1);
-            } else {
-                head = name;
-                name = "";
-            }
-            if (node.children == null) {
-                node.children = new HashMap<>();
-            }
-            LogNode child = node.children.get(head);
-            if (child == null) {
-                child = new LogNode(node);
-                node.children.put(head, child);
-            }
-            node = child;
-        }
-        return node;
+    public Logger getLogger(String name) {
+        return getUserContext().findLogger(name);
     }
 
     
-    public synchronized Logger getLogger(String name) {
-        LoggerWeakRef ref = namedLoggers.get(name);
-        if (ref == null) {
-            return null;
-        }
-        Logger logger = ref.get();
-        if (logger == null) {
-            
-            
-            namedLoggers.remove(name);
-        }
-        return logger;
-    }
-
-    
-    public synchronized Enumeration<String> getLoggerNames() {
-        return namedLoggers.keys();
+    public Enumeration<String> getLoggerNames() {
+        return getUserContext().getLoggerNames();
     }
 
     
@@ -607,20 +761,20 @@ public class LogManager {
             
             initializedGlobalHandlers = true;
         }
-        Enumeration enum_ = getLoggerNames();
-        while (enum_.hasMoreElements()) {
-            String name = (String)enum_.nextElement();
-            resetLogger(name);
+        for (LoggerContext cx : contexts()) {
+            Enumeration<String> enum_ = cx.getLoggerNames();
+            while (enum_.hasMoreElements()) {
+                String name = enum_.nextElement();
+                Logger logger = cx.findLogger(name);
+                if (logger != null) {
+                    resetLogger(logger);
+                }
+            }
         }
     }
 
-
     
-    private void resetLogger(String name) {
-        Logger logger = getLogger(name);
-        if (logger == null) {
-            return;
-        }
+    private void resetLogger(Logger logger) {
         
         Handler[] targets = logger.getHandlers();
         for (int i = 0; i < targets.length; i++) {
@@ -632,6 +786,7 @@ public class LogManager {
                 
             }
         }
+        String name = logger.getName();
         if (name != null && name.equals("")) {
             
             logger.setLevel(defaultLevel);
@@ -762,11 +917,8 @@ public class LogManager {
         if (val == null) {
             return defaultValue;
         }
-        try {
-            return Level.parse(val.trim());
-        } catch (Exception ex) {
-            return defaultValue;
-        }
+        Level l = Level.findLevel(val.trim());
+        return l != null ? l : defaultValue;
     }
 
     
@@ -829,7 +981,6 @@ public class LogManager {
         loadLoggerHandlers(rootLogger, null, "handlers");
     }
 
-
     private final Permission controlPermission = new LoggingPermission("control", null);
 
     void checkPermission() {
@@ -848,9 +999,11 @@ public class LogManager {
         HashMap<String,LogNode> children;
         LoggerWeakRef loggerRef;
         LogNode parent;
+        final LoggerContext context;
 
-        LogNode(LogNode parent) {
+        LogNode(LogNode parent, LoggerContext context) {
             this.parent = parent;
+            this.context = context;
         }
 
         
@@ -877,7 +1030,6 @@ public class LogManager {
     
     
     private class RootLogger extends Logger {
-
         private RootLogger() {
             super("", null);
             setLevel(defaultLevel);
@@ -909,7 +1061,7 @@ public class LogManager {
     
     
     synchronized private void setLevelsOnExistingLoggers() {
-        Enumeration enum_ = props.propertyNames();
+        Enumeration<?> enum_ = props.propertyNames();
         while (enum_.hasMoreElements()) {
             String key = (String)enum_.nextElement();
             if (!key.endsWith(".level")) {
@@ -923,11 +1075,13 @@ public class LogManager {
                 System.err.println("Bad level value for property: " + key);
                 continue;
             }
-            Logger l = getLogger(name);
-            if (l == null) {
-                continue;
+            for (LoggerContext cx : contexts()) {
+                Logger l = cx.findLogger(name);
+                if (l == null) {
+                    continue;
+                }
+                l.setLevel(level);
             }
-            l.setLevel(level);
         }
     }
 

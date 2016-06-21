@@ -132,33 +132,8 @@ public final class ORBUtility {
     }
 
     
-    public static ValueHandler createValueHandler(ORB orb) {
-
-        if (orb == null)
-            return Util.createValueHandler();
-
-        ORBVersion version = orb.getORBVersion();
-
-        if (version == null)
-            return Util.createValueHandler();
-
-        if (version.equals(ORBVersionFactory.getOLD()))
-            return new ValueHandlerImpl_1_3();
-        if (version.equals(ORBVersionFactory.getNEW()))
-            return new ValueHandlerImpl_1_3_1();
-
+    public static ValueHandler createValueHandler() {
         return Util.createValueHandler();
-    }
-
-    
-    public static boolean isLegacyORB(ORB orb)
-    {
-        try {
-            ORBVersion currentORB = orb.getORBVersion();
-            return currentORB.equals( ORBVersionFactory.getOLD() ) ;
-        } catch (SecurityException se) {
-            return false;
-        }
     }
 
     

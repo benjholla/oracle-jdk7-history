@@ -126,7 +126,7 @@ public class FuncSystemProperty extends FunctionOneArg
   }
 
   
-  public void loadPropertyFile(String file, Properties target)
+  private void loadPropertyFile(String file, Properties target)
   {
     try
     {

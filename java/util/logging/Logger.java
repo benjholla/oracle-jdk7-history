@@ -86,6 +86,40 @@ public class Logger {
     }
 
     
+    
+    
+    
+    
+    
+    
+    
+    private static class SystemLoggerHelper {
+        static boolean disableCallerCheck = getBooleanProperty("sun.util.logging.disableCallerCheck");
+        private static boolean getBooleanProperty(final String key) {
+            String s = AccessController.doPrivileged(new PrivilegedAction<String>() {
+                public String run() {
+                    return System.getProperty(key);
+                }
+            });
+            return Boolean.valueOf(s);
+        }
+    }
+
+    private static Logger demandLogger(String name, String resourceBundleName) {
+        LogManager manager = LogManager.getLogManager();
+        SecurityManager sm = System.getSecurityManager();
+        if (sm != null && !SystemLoggerHelper.disableCallerCheck) {
+            
+            final int SKIP_FRAMES = 3;
+            Class<?> caller = sun.reflect.Reflection.getCallerClass(SKIP_FRAMES);
+            if (caller.getClassLoader() == null) {
+                return manager.demandSystemLogger(name, resourceBundleName);
+            }
+        }
+        return manager.demandLogger(name, resourceBundleName);
+    }
+
+    
 
     
     
@@ -100,8 +134,7 @@ public class Logger {
         
         
         
-        LogManager manager = LogManager.getLogManager();
-        return manager.demandLogger(name);
+        return demandLogger(name, null);
     }
 
     
@@ -109,8 +142,7 @@ public class Logger {
     
     
     public static Logger getLogger(String name, String resourceBundleName) {
-        LogManager manager = LogManager.getLogManager();
-        Logger result = manager.demandLogger(name);
+        Logger result = demandLogger(name, resourceBundleName);
         if (result.resourceBundleName == null) {
             
             result.setupResourceInfo(resourceBundleName);
@@ -121,6 +153,17 @@ public class Logger {
         return result;
     }
 
+    
+    
+    
+    static Logger getPlatformLogger(String name) {
+        LogManager manager = LogManager.getLogManager();
+
+        
+        
+        Logger result = manager.demandSystemLogger(name, SYSTEM_LOGGER_RB_NAME);
+        return result;
+    }
 
     
     public static Logger getAnonymousLogger() {
@@ -196,7 +239,7 @@ public class Logger {
     private void doLog(LogRecord lr) {
         lr.setLoggerName(name);
         String ebname = getEffectiveResourceBundleName();
-        if (ebname != null) {
+        if (ebname != null && !ebname.equals(SYSTEM_LOGGER_RB_NAME)) {
             lr.setResourceBundleName(ebname);
             lr.setResourceBundle(findResourceBundle(ebname));
         }
@@ -571,6 +614,23 @@ public class Logger {
     
     
 
+    static final String SYSTEM_LOGGER_RB_NAME = "sun.util.logging.resources.logging";
+
+    private static ResourceBundle findSystemResourceBundle(final Locale locale) {
+        
+        return AccessController.doPrivileged(new PrivilegedAction<ResourceBundle>() {
+            public ResourceBundle run() {
+                try {
+                    return ResourceBundle.getBundle(SYSTEM_LOGGER_RB_NAME,
+                                                    locale,
+                                                    ClassLoader.getSystemClassLoader());
+                } catch (MissingResourceException e) {
+                    throw new InternalError(e.toString());
+                }
+            }
+        });
+    }
+
     private synchronized ResourceBundle findResourceBundle(String name) {
         
         if (name == null) {
@@ -582,6 +642,13 @@ public class Logger {
         
         if (catalog != null && currentLocale == catalogLocale
                                         && name == catalogName) {
+            return catalog;
+        }
+
+        if (name.equals(SYSTEM_LOGGER_RB_NAME)) {
+            catalog = findSystemResourceBundle(currentLocale);
+            catalogName = name;
+            catalogLocale = currentLocale;
             return catalog;
         }
 
@@ -600,7 +667,6 @@ public class Logger {
             
             
         }
-
 
         
         

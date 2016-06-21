@@ -34,9 +34,6 @@ public class TextComponent extends Component implements Accessible {
     
     boolean backgroundSetByClientCode = false;
 
-    
-    transient private boolean canAccessClipboard;
-
     transient protected TextListener textListener;
 
     
@@ -47,7 +44,6 @@ public class TextComponent extends Component implements Accessible {
         GraphicsEnvironment.checkHeadless();
         this.text = (text != null) ? text : "";
         setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-        checkSystemClipboardAccess();
     }
 
     private void enableInputMethodsIfNecessary() {
@@ -347,17 +343,14 @@ public class TextComponent extends Component implements Accessible {
     }
 
     
-    private void checkSystemClipboardAccess() {
-        canAccessClipboard = true;
+    private boolean canAccessClipboard() {
         SecurityManager sm = System.getSecurityManager();
-        if (sm != null) {
-            try {
-                sm.checkSystemClipboardAccess();
-            }
-            catch (SecurityException e) {
-                canAccessClipboard = false;
-            }
-        }
+        if (sm == null) return true;
+        try {
+            sm.checkSystemClipboardAccess();
+            return true;
+        } catch (SecurityException e) {}
+        return false;
     }
 
     
@@ -408,7 +401,6 @@ public class TextComponent extends Component implements Accessible {
             }
         }
         enableInputMethodsIfNecessary();
-        checkSystemClipboardAccess();
     }
 
 

@@ -25,7 +25,7 @@ import com.sun.corba.se.spi.logging.CORBALogDomains;
 import com.sun.corba.se.impl.logging.OMGSystemException;
 import com.sun.corba.se.impl.logging.UtilSystemException;
 
-public class ValueHandlerImpl implements javax.rmi.CORBA.ValueHandlerMultiFormat {
+public final class ValueHandlerImpl implements javax.rmi.CORBA.ValueHandlerMultiFormat {
 
     
     public static final String FORMAT_VERSION_PROPERTY
@@ -122,12 +122,20 @@ public class ValueHandlerImpl implements javax.rmi.CORBA.ValueHandlerMultiFormat
         writeValueWithVersion(out, value, streamFormatVersion);
     }
 
-    public ValueHandlerImpl(){}
+    private ValueHandlerImpl(){}
 
-    public ValueHandlerImpl(boolean isInputStream) {
+    private ValueHandlerImpl(boolean isInputStream) {
         this();
         useHashtables = false;
         this.isInputStream = isInputStream;
+    }
+
+    static ValueHandlerImpl getInstance() {
+        return new ValueHandlerImpl();
+    }
+
+    static ValueHandlerImpl getInstance(boolean isInputStream) {
+        return new ValueHandlerImpl(isInputStream);
     }
 
     
@@ -397,8 +405,7 @@ public class ValueHandlerImpl implements javax.rmi.CORBA.ValueHandlerMultiFormat
         return ObjectStreamClass.lookup(value.getClass()).writeReplace(value);
     }
 
-    
-    protected void writeCharArray(org.omg.CORBA_2_3.portable.OutputStream out,
+    private void writeCharArray(org.omg.CORBA_2_3.portable.OutputStream out,
                                 char[] array,
                                 int offset,
                                 int length)
@@ -511,8 +518,7 @@ public class ValueHandlerImpl implements javax.rmi.CORBA.ValueHandlerMultiFormat
         }
     }
 
-    
-    protected void readCharArray(org.omg.CORBA_2_3.portable.InputStream in,
+    private void readCharArray(org.omg.CORBA_2_3.portable.InputStream in,
                                  char[] array,
                                  int offset,
                                  int length)
@@ -726,7 +732,7 @@ public class ValueHandlerImpl implements javax.rmi.CORBA.ValueHandlerMultiFormat
         return RepositoryId.cache.getId(repId).isSequence();
     }
 
-    protected String getOutputStreamClassName() {
+    private String getOutputStreamClassName() {
         return "com.sun.corba.se.impl.io.IIOPOutputStream";
     }
 
@@ -769,29 +775,11 @@ public class ValueHandlerImpl implements javax.rmi.CORBA.ValueHandlerMultiFormat
     private IIOPOutputStream createOutputStreamBuiltInNoPriv(
         final String name
     ) throws IOException {
-        return
-            name.equals(
-                IIOPOutputStream
-                    .class.getName()
-            ) ?
-            new IIOPOutputStream() :
-
-            name.equals(
-                com.sun.corba.se.impl.orbutil.IIOPOutputStream_1_3
-                    .class.getName()
-            ) ?
-            new com.sun.corba.se.impl.orbutil.IIOPOutputStream_1_3() :
-
-            name.equals(
-                com.sun.corba.se.impl.orbutil.IIOPOutputStream_1_3_1
-                    .class.getName()
-            ) ?
-            new com.sun.corba.se.impl.orbutil.IIOPOutputStream_1_3_1() :
-
-            null;
+        return name.equals(IIOPOutputStream.class.getName()) ?
+                new IIOPOutputStream() : null;
     }
 
-    protected String getInputStreamClassName() {
+    private String getInputStreamClassName() {
         return "com.sun.corba.se.impl.io.IIOPInputStream";
     }
 
@@ -834,26 +822,8 @@ public class ValueHandlerImpl implements javax.rmi.CORBA.ValueHandlerMultiFormat
      private IIOPInputStream createInputStreamBuiltInNoPriv(
          final String name
      ) throws IOException {
-         return
-             name.equals(
-                 IIOPInputStream
-                     .class.getName()
-             ) ?
-             new IIOPInputStream() :
-
-             name.equals(
-                 com.sun.corba.se.impl.orbutil.IIOPInputStream_1_3
-                     .class.getName()
-             ) ?
-             new com.sun.corba.se.impl.orbutil.IIOPInputStream_1_3() :
-
-             name.equals(
-                 com.sun.corba.se.impl.orbutil.IIOPInputStream_1_3_1
-                     .class.getName()
-             ) ?
-             new com.sun.corba.se.impl.orbutil.IIOPInputStream_1_3_1() :
-
-             null;
+         return name.equals(IIOPInputStream.class.getName()) ?
+                new IIOPInputStream() : null;
      }
 
      
@@ -877,8 +847,7 @@ public class ValueHandlerImpl implements javax.rmi.CORBA.ValueHandlerMultiFormat
 
     }
 
-    
-    protected TCKind getJavaCharTCKind() {
+    TCKind getJavaCharTCKind() {
         return TCKind.tk_wchar;
     }
 }

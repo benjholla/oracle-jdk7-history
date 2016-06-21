@@ -121,7 +121,12 @@ public class NimbusLookAndFeel extends SynthLookAndFeel {
 
             
             uiDefaults.put("Table.scrollPaneCornerComponent",
-                    TableScrollPaneCorner.class);
+                    new UIDefaults.ActiveValue() {
+                        @Override
+                        public Object createValue(UIDefaults table) {
+                            return new TableScrollPaneCorner();
+                        }
+                    });
 
             
             

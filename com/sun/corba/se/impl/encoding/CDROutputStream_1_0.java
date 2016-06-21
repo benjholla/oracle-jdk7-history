@@ -161,18 +161,8 @@ public class CDROutputStream_1_0 extends CDROutputStreamBase
 
     private final void createRepositoryIdHandlers()
     {
-        if (orb != null) {
-            
-            
-            repIdUtil
-                = RepositoryIdFactory.getRepIdUtility(orb);
-            repIdStrs
-                = RepositoryIdFactory.getRepIdStringsFactory(orb);
-        } else {
-            
-            repIdUtil = RepositoryIdFactory.getRepIdUtility();
-            repIdStrs = RepositoryIdFactory.getRepIdStringsFactory();
-        }
+        repIdUtil = RepositoryIdFactory.getRepIdUtility();
+        repIdStrs = RepositoryIdFactory.getRepIdStringsFactory();
     }
 
     public BufferManagerWrite getBufferManager()
@@ -677,7 +667,7 @@ public class CDROutputStream_1_0 extends CDROutputStreamBase
     private void writeArray(Serializable array, Class clazz) {
 
         if (valueHandler == null)
-            valueHandler = ORBUtility.createValueHandler(orb); 
+            valueHandler = ORBUtility.createValueHandler(); 
 
         
         int indirection = writeValueTag(mustChunk, true,
@@ -740,7 +730,7 @@ public class CDROutputStream_1_0 extends CDROutputStreamBase
 
     private void writeRMIIIOPValueType(Serializable object, Class clazz) {
         if (valueHandler == null)
-            valueHandler = ORBUtility.createValueHandler(orb); 
+            valueHandler = ORBUtility.createValueHandler(); 
 
         Serializable key = object;
 

@@ -84,6 +84,9 @@ import com.sun.corba.se.impl.util.JDKBridge;
 import com.sun.corba.se.impl.orbutil.ORBClassLoader;
 import com.sun.corba.se.impl.logging.UtilSystemException;
 import com.sun.corba.se.spi.logging.CORBALogDomains;
+import sun.corba.SharedSecrets;
+import sun.corba.JavaCorbaAccess;
+
 
 
 public class Util implements javax.rmi.CORBA.UtilDelegate
@@ -94,7 +97,8 @@ public class Util implements javax.rmi.CORBA.UtilDelegate
     
     private static IdentityHashtable exportedServants = new IdentityHashtable();
 
-    private static ValueHandlerImpl valueHandlerSingleton = new ValueHandlerImpl();
+    private static final ValueHandlerImpl valueHandlerSingleton =
+        SharedSecrets.getJavaCorbaAccess().newValueHandlerImpl();
 
     private UtilSystemException utilWrapper = UtilSystemException.get(
                                                   CORBALogDomains.RPC_ENCODING);
