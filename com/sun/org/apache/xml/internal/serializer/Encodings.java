@@ -138,7 +138,7 @@ public final class Encodings extends Object
                 
                 
                 
-                encoding = System.getProperty("file.encoding", "UTF8");
+                encoding = SecuritySupport.getSystemProperty("file.encoding", "UTF8");
 
                 if (null != encoding)
                 {
@@ -208,7 +208,7 @@ public final class Encodings extends Object
 
             try
             {
-                urlString = System.getProperty(ENCODINGS_PROP, "");
+                urlString = SecuritySupport.getSystemProperty(ENCODINGS_PROP, "");
             }
             catch (SecurityException e)
             {

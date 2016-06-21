@@ -12,6 +12,7 @@ import java.util.Properties;
 
 
 class FactoryFinder {
+    private static final String DEFAULT_PACKAGE = "com.sun.org.apache.xalan.internal.";
 
     
     private static boolean debug = false;
@@ -89,6 +90,14 @@ class FactoryFinder {
     static Object newInstance(String className, ClassLoader cl, boolean doFallback, boolean useBSClsLoader, boolean useServicesMechanism)
         throws ConfigurationError
     {
+        
+        if (System.getSecurityManager() != null) {
+            if (className != null && className.startsWith(DEFAULT_PACKAGE)) {
+                cl = null;
+                useBSClsLoader = true;
+            }
+        }
+
         try {
             Class providerClass = getProviderClass(className, cl, doFallback, useBSClsLoader);
             Object instance = null;
@@ -127,7 +136,7 @@ class FactoryFinder {
                 providerClass.getDeclaredMethod(
                     "newTransformerFactoryNoServiceLoader"
                 );
-                return creationMethod.invoke(null, null);
+                return creationMethod.invoke(null, (Object[])null);
             } catch (NoSuchMethodException exc) {
                 return null;
             } catch (Exception exc) {

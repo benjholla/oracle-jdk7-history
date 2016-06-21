@@ -170,17 +170,27 @@ public class JPEGImageReader extends ImageReader {
 
     
     protected void warningOccurred(int code) {
-        if ((code < 0) || (code > MAX_WARNING)){
-            throw new InternalError("Invalid warning index");
+        cbLock.lock();
+        try {
+            if ((code < 0) || (code > MAX_WARNING)){
+                throw new InternalError("Invalid warning index");
+            }
+            processWarningOccurred
+                ("com.sun.imageio.plugins.jpeg.JPEGImageReaderResources",
+                 Integer.toString(code));
+        } finally {
+            cbLock.unlock();
         }
-        processWarningOccurred
-            ("com.sun.imageio.plugins.jpeg.JPEGImageReaderResources",
-             Integer.toString(code));
     }
 
     
     protected void warningWithMessage(String msg) {
-        processWarningOccurred(msg);
+        cbLock.lock();
+        try {
+            processWarningOccurred(msg);
+        } finally {
+            cbLock.unlock();
+        }
     }
 
     public void setInput(Object input,
@@ -189,18 +199,39 @@ public class JPEGImageReader extends ImageReader {
     {
         setThreadLock();
         try {
+            cbLock.check();
+
             super.setInput(input, seekForwardOnly, ignoreMetadata);
             this.ignoreMetadata = ignoreMetadata;
             resetInternalState();
             iis = (ImageInputStream) input; 
-            setSource(structPointer, iis);
+            setSource(structPointer);
         } finally {
             clearThreadLock();
         }
     }
 
-    private native void setSource(long structPointer,
-                                  ImageInputStream source);
+    
+    private int readInputData(byte[] buf, int off, int len) throws IOException {
+        cbLock.lock();
+        try {
+            return iis.read(buf, off, len);
+        } finally {
+            cbLock.unlock();
+        }
+    }
+
+    
+    private long skipInputBytes(long n) throws IOException {
+        cbLock.lock();
+        try {
+            return iis.skipBytes(n);
+        } finally {
+            cbLock.unlock();
+        }
+    }
+
+    private native void setSource(long structPointer);
 
     private void checkTablesOnly() throws IOException {
         if (debug) {
@@ -252,6 +283,8 @@ public class JPEGImageReader extends ImageReader {
     public int getNumImages(boolean allowSearch) throws IOException {
         setThreadLock();
         try { 
+            cbLock.check();
+
             return getNumImagesOnThread(allowSearch);
         } finally {
             clearThreadLock();
@@ -428,8 +461,13 @@ public class JPEGImageReader extends ImageReader {
         if (debug) {
             System.out.println("pushing back " + num + " bytes");
         }
-        iis.seek(iis.getStreamPosition()-num);
-        
+        cbLock.lock();
+        try {
+            iis.seek(iis.getStreamPosition()-num);
+            
+        } finally {
+            cbLock.unlock();
+        }
     }
 
     
@@ -503,7 +541,12 @@ public class JPEGImageReader extends ImageReader {
             } catch (CMMException e) {
                 
                 iccCS = null;
-                warningOccurred(WARNING_IGNORE_INVALID_ICC);
+                cbLock.lock();
+                try {
+                    warningOccurred(WARNING_IGNORE_INVALID_ICC);
+                } finally {
+                    cbLock.unlock();
+                }
             }
         }
     }
@@ -512,6 +555,7 @@ public class JPEGImageReader extends ImageReader {
         setThreadLock();
         try {
             if (currentImage != imageIndex) {
+                cbLock.check();
                 readHeader(imageIndex, true);
             }
             return width;
@@ -524,6 +568,7 @@ public class JPEGImageReader extends ImageReader {
         setThreadLock();
         try {
             if (currentImage != imageIndex) {
+                cbLock.check();
                 readHeader(imageIndex, true);
             }
             return height;
@@ -549,6 +594,8 @@ public class JPEGImageReader extends ImageReader {
         setThreadLock();
         try {
             if (currentImage != imageIndex) {
+                cbLock.check();
+
                 readHeader(imageIndex, true);
             }
 
@@ -572,6 +619,7 @@ public class JPEGImageReader extends ImageReader {
     private Iterator getImageTypesOnThread(int imageIndex)
         throws IOException {
         if (currentImage != imageIndex) {
+            cbLock.check();
             readHeader(imageIndex, true);
         }
 
@@ -775,6 +823,7 @@ public class JPEGImageReader extends ImageReader {
         setThreadLock();
         try {
             if (!tablesOnlyChecked) {
+                cbLock.check();
                 checkTablesOnly();
             }
             return streamMetadata;
@@ -795,6 +844,8 @@ public class JPEGImageReader extends ImageReader {
                 return imageMetadata;
             }
 
+            cbLock.check();
+
             gotoImage(imageIndex);
 
             imageMetadata = new JPEGMetadata(false, false, iis, this);
@@ -811,6 +862,7 @@ public class JPEGImageReader extends ImageReader {
         throws IOException {
         setThreadLock();
         try {
+            cbLock.check();
             try {
                 readInternal(imageIndex, param, false);
             } catch (RuntimeException e) {
@@ -1031,58 +1083,63 @@ public class JPEGImageReader extends ImageReader {
         }
         target.setRect(destROI.x, destROI.y + y, raster);
 
-        processImageUpdate(image,
-                           destROI.x, destROI.y+y,
-                           raster.getWidth(), 1,
-                           1, 1,
-                           destinationBands);
-        if ((y > 0) && (y%progInterval == 0)) {
-            int height = target.getHeight()-1;
-            float percentOfPass = ((float)y)/height;
-            if (progressive) {
-                if (knownPassCount != UNKNOWN) {
-                    processImageProgress((pass + percentOfPass)*100.0F
-                                         / knownPassCount);
-                } else if (maxProgressivePass != Integer.MAX_VALUE) {
-                    
-                    processImageProgress((pass + percentOfPass)*100.0F
-                        / (maxProgressivePass - minProgressivePass + 1));
-                } else {
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    int remainingPasses = 
-                        Math.max(2, MIN_ESTIMATED_PASSES-pass);
-                    int totalPasses = pass + remainingPasses-1;
-                    progInterval = Math.max(height/20*totalPasses,
-                                            totalPasses);
-                    if (y%progInterval == 0) {
-                        percentToDate = previousPassPercentage +
-                            (1.0F - previousPassPercentage)
-                            * (percentOfPass)/remainingPasses;
-                        if (debug) {
-                            System.out.print("pass= " + pass);
-                            System.out.print(", y= " + y);
-                            System.out.print(", progInt= " + progInterval);
-                            System.out.print(", % of pass: " + percentOfPass);
-                            System.out.print(", rem. passes: "
-                                             + remainingPasses);
-                            System.out.print(", prev%: "
-                                             + previousPassPercentage);
-                            System.out.print(", %ToDate: " + percentToDate);
-                            System.out.print(" ");
+        cbLock.lock();
+        try {
+            processImageUpdate(image,
+                               destROI.x, destROI.y+y,
+                               raster.getWidth(), 1,
+                               1, 1,
+                               destinationBands);
+            if ((y > 0) && (y%progInterval == 0)) {
+                int height = target.getHeight()-1;
+                float percentOfPass = ((float)y)/height;
+                if (progressive) {
+                    if (knownPassCount != UNKNOWN) {
+                        processImageProgress((pass + percentOfPass)*100.0F
+                                             / knownPassCount);
+                    } else if (maxProgressivePass != Integer.MAX_VALUE) {
+                        
+                        processImageProgress((pass + percentOfPass)*100.0F
+                                             / (maxProgressivePass - minProgressivePass + 1));
+                    } else {
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        
+                        int remainingPasses = 
+                            Math.max(2, MIN_ESTIMATED_PASSES-pass);
+                        int totalPasses = pass + remainingPasses-1;
+                        progInterval = Math.max(height/20*totalPasses,
+                                                totalPasses);
+                        if (y%progInterval == 0) {
+                            percentToDate = previousPassPercentage +
+                                (1.0F - previousPassPercentage)
+                                * (percentOfPass)/remainingPasses;
+                            if (debug) {
+                                System.out.print("pass= " + pass);
+                                System.out.print(", y= " + y);
+                                System.out.print(", progInt= " + progInterval);
+                                System.out.print(", % of pass: " + percentOfPass);
+                                System.out.print(", rem. passes: "
+                                                 + remainingPasses);
+                                System.out.print(", prev%: "
+                                                 + previousPassPercentage);
+                                System.out.print(", %ToDate: " + percentToDate);
+                                System.out.print(" ");
+                            }
+                            processImageProgress(percentToDate*100.0F);
                         }
-                        processImageProgress(percentToDate*100.0F);
                     }
+                } else {
+                    processImageProgress(percentOfPass * 100.0F);
                 }
-            } else {
-                processImageProgress(percentOfPass * 100.0F);
             }
+        } finally {
+            cbLock.unlock();
         }
     }
 
@@ -1095,33 +1152,58 @@ public class JPEGImageReader extends ImageReader {
     }
 
     private void passStarted (int pass) {
-        this.pass = pass;
-        previousPassPercentage = percentToDate;
-        processPassStarted(image,
-                           pass,
-                           minProgressivePass,
-                           maxProgressivePass,
-                           0, 0,
-                           1,1,
-                           destinationBands);
+        cbLock.lock();
+        try {
+            this.pass = pass;
+            previousPassPercentage = percentToDate;
+            processPassStarted(image,
+                               pass,
+                               minProgressivePass,
+                               maxProgressivePass,
+                               0, 0,
+                               1,1,
+                               destinationBands);
+        } finally {
+            cbLock.unlock();
+        }
     }
 
     private void passComplete () {
-        processPassComplete(image);
+        cbLock.lock();
+        try {
+            processPassComplete(image);
+        } finally {
+            cbLock.unlock();
+        }
     }
 
     void thumbnailStarted(int thumbnailIndex) {
-        processThumbnailStarted(currentImage, thumbnailIndex);
+        cbLock.lock();
+        try {
+            processThumbnailStarted(currentImage, thumbnailIndex);
+        } finally {
+            cbLock.unlock();
+        }
     }
 
     
     void thumbnailProgress(float percentageDone) {
-        processThumbnailProgress(percentageDone);
+        cbLock.lock();
+        try {
+            processThumbnailProgress(percentageDone);
+        } finally {
+            cbLock.unlock();
+        }
     }
 
     
     void thumbnailComplete() {
-        processThumbnailComplete();
+        cbLock.lock();
+        try {
+            processThumbnailComplete();
+        } finally {
+            cbLock.unlock();
+        }
     }
 
     
@@ -1143,6 +1225,8 @@ public class JPEGImageReader extends ImageReader {
     public void abort() {
         setThreadLock();
         try {
+            
+
             super.abort();
             abortRead(structPointer);
         } finally {
@@ -1165,6 +1249,7 @@ public class JPEGImageReader extends ImageReader {
         setThreadLock();
         Raster retval = null;
         try {
+            cbLock.check();
             
 
             
@@ -1200,6 +1285,8 @@ public class JPEGImageReader extends ImageReader {
     public int getNumThumbnails(int imageIndex) throws IOException {
         setThreadLock();
         try {
+            cbLock.check();
+
             getImageMetadata(imageIndex);  
             
             JFIFMarkerSegment jfif =
@@ -1220,6 +1307,8 @@ public class JPEGImageReader extends ImageReader {
         throws IOException {
         setThreadLock();
         try {
+            cbLock.check();
+
             if ((thumbnailIndex < 0)
                 || (thumbnailIndex >= getNumThumbnails(imageIndex))) {
                 throw new IndexOutOfBoundsException("No such thumbnail");
@@ -1238,6 +1327,8 @@ public class JPEGImageReader extends ImageReader {
         throws IOException {
         setThreadLock();
         try {
+            cbLock.check();
+
             if ((thumbnailIndex < 0)
                 || (thumbnailIndex >= getNumThumbnails(imageIndex))) {
                 throw new IndexOutOfBoundsException("No such thumbnail");
@@ -1257,6 +1348,8 @@ public class JPEGImageReader extends ImageReader {
         throws IOException {
         setThreadLock();
         try {
+            cbLock.check();
+
             if ((thumbnailIndex < 0)
                 || (thumbnailIndex >= getNumThumbnails(imageIndex))) {
                 throw new IndexOutOfBoundsException("No such thumbnail");
@@ -1297,6 +1390,7 @@ public class JPEGImageReader extends ImageReader {
     public void reset() {
         setThreadLock();
         try {
+            cbLock.check();
             super.reset();
         } finally {
             clearThreadLock();
@@ -1308,6 +1402,8 @@ public class JPEGImageReader extends ImageReader {
     public void dispose() {
         setThreadLock();
         try {
+            cbLock.check();
+
             if (structPointer != 0) {
                 disposerRecord.dispose();
                 structPointer = 0;
@@ -1367,6 +1463,36 @@ public class JPEGImageReader extends ImageReader {
         theLockCount --;
         if (theLockCount == 0) {
             theThread = null;
+        }
+    }
+
+    private CallBackLock cbLock = new CallBackLock();
+
+    private static class CallBackLock {
+
+        private State lockState;
+
+        CallBackLock() {
+            lockState = State.Unlocked;
+        }
+
+        void check() {
+            if (lockState != State.Unlocked) {
+                throw new IllegalStateException("Access to the reader is not allowed");
+            }
+        }
+
+        private void lock() {
+            lockState = State.Locked;
+        }
+
+        private void unlock() {
+            lockState = State.Unlocked;
+        }
+
+        private static enum State {
+            Unlocked,
+            Locked
         }
     }
 }

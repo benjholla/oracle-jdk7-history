@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
+import java.security.AccessControlException;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
@@ -334,8 +335,9 @@ public final class ProcessBuilder
         String prog = cmdarray[0];
 
         SecurityManager security = System.getSecurityManager();
-        if (security != null)
+        if (security != null) {
             security.checkExec(prog);
+        }
 
         String dir = directory == null ? null : directory.toString();
 
@@ -346,13 +348,24 @@ public final class ProcessBuilder
                                      redirects,
                                      redirectErrorStream);
         } catch (IOException e) {
+            String exceptionInfo = ": " + e.getMessage();
+            Throwable cause = e;
+            if (security != null) {
+                
+                try {
+                    security.checkRead(prog);
+                } catch (AccessControlException ace) {
+                    exceptionInfo = "";
+                    cause = ace;
+                }
+            }
             
             
             throw new IOException(
                 "Cannot run program \"" + prog + "\""
                 + (dir == null ? "" : " (in directory \"" + dir + "\")")
-                + ": " + e.getMessage(),
-                e);
+                + exceptionInfo,
+                cause);
         }
     }
 }

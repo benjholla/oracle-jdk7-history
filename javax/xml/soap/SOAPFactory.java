@@ -14,6 +14,10 @@ public abstract class SOAPFactory {
         "javax.xml.soap.SOAPFactory";
 
     
+    static final String DEFAULT_SOAP_FACTORY
+        = "com.sun.xml.internal.messaging.saaj.soap.ver1_1.SOAPFactory1_1Impl";
+
+    
     public SOAPElement createElement(Element domElement) throws SOAPException {
         throw new UnsupportedOperationException("createElement(org.w3c.dom.Element) must be overridden by all subclasses of SOAPFactory.");
     }
@@ -62,7 +66,7 @@ public abstract class SOAPFactory {
         throws SOAPException
     {
         try {
-            SOAPFactory factory = (SOAPFactory) FactoryFinder.find(SOAP_FACTORY_PROPERTY);
+            SOAPFactory factory = (SOAPFactory) FactoryFinder.find(SOAP_FACTORY_PROPERTY, DEFAULT_SOAP_FACTORY, false);
             if (factory != null)
                 return factory;
             return newInstance(SOAPConstants.SOAP_1_1_PROTOCOL);

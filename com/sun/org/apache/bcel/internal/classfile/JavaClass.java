@@ -8,6 +8,7 @@ import  com.sun.org.apache.bcel.internal.util.SyntheticRepository;
 import  com.sun.org.apache.bcel.internal.util.ClassVector;
 import  com.sun.org.apache.bcel.internal.util.ClassQueue;
 import  com.sun.org.apache.bcel.internal.generic.Type;
+import com.sun.org.apache.xalan.internal.utils.SecuritySupport;
 
 import  java.io.*;
 import  java.util.StringTokenizer;
@@ -282,9 +283,9 @@ public class JavaClass extends AccessFlags implements Cloneable, Node {
     String debug = null, sep = null;
 
     try {
-      debug = System.getProperty("JavaClass.debug");
+      debug = SecuritySupport.getSystemProperty("JavaClass.debug");
       
-      sep = System.getProperty("file.separator");
+      sep = SecuritySupport.getSystemProperty("file.separator");
     }
     catch (SecurityException e) {
         

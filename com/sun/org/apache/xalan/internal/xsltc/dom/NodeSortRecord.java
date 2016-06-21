@@ -14,6 +14,7 @@ import com.sun.org.apache.xalan.internal.xsltc.TransletException;
 import com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet;
 import com.sun.org.apache.xml.internal.utils.StringComparable;
 import com.sun.org.apache.xalan.internal.utils.ObjectFactory;
+import com.sun.org.apache.xalan.internal.utils.SecuritySupport;
 
 
 public abstract class NodeSortRecord {
@@ -70,7 +71,7 @@ public abstract class NodeSortRecord {
         try {
             
             colFactClassname =
-                System.getProperty("com.sun.org.apache.xalan.internal.xsltc.COLLATOR_FACTORY");
+                SecuritySupport.getSystemProperty("com.sun.org.apache.xalan.internal.xsltc.COLLATOR_FACTORY");
         }
         catch (SecurityException e) {
             

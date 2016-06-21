@@ -3,6 +3,8 @@
 
 package com.sun.org.apache.xerces.internal.util;
 import com.sun.org.apache.xerces.internal.impl.Constants;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 public final class SecurityManager {
 
@@ -71,41 +73,48 @@ public final class SecurityManager {
 
         private void readSystemProperties(){
 
-                
-                try {
-                        String value = System.getProperty(Constants.ENTITY_EXPANSION_LIMIT);
-                        if(value != null && !value.equals("")){
-                                entityExpansionLimit = Integer.parseInt(value);
-                                if (entityExpansionLimit < 0)
-                                        entityExpansionLimit = DEFAULT_ENTITY_EXPANSION_LIMIT;
-                        }
-                        else
-                                entityExpansionLimit = DEFAULT_ENTITY_EXPANSION_LIMIT;
-                }catch(Exception ex){}
+            
+            try {
+                    String value = getSystemProperty(Constants.ENTITY_EXPANSION_LIMIT);
+                    if(value != null && !value.equals("")){
+                            entityExpansionLimit = Integer.parseInt(value);
+                            if (entityExpansionLimit < 0)
+                                    entityExpansionLimit = DEFAULT_ENTITY_EXPANSION_LIMIT;
+                    }
+                    else
+                            entityExpansionLimit = DEFAULT_ENTITY_EXPANSION_LIMIT;
+            }catch(Exception ex){}
 
-                try {
-                        String value = System.getProperty(Constants.MAX_OCCUR_LIMIT);
-                        if(value != null && !value.equals("")){
-                                maxOccurLimit = Integer.parseInt(value);
-                                if (maxOccurLimit < 0)
-                                        maxOccurLimit = DEFAULT_MAX_OCCUR_NODE_LIMIT;
-                        }
-                        else
-                                maxOccurLimit = DEFAULT_MAX_OCCUR_NODE_LIMIT;
-                }catch(Exception ex){}
+            try {
+                    String value = getSystemProperty(Constants.MAX_OCCUR_LIMIT);
+                    if(value != null && !value.equals("")){
+                            maxOccurLimit = Integer.parseInt(value);
+                            if (maxOccurLimit < 0)
+                                    maxOccurLimit = DEFAULT_MAX_OCCUR_NODE_LIMIT;
+                    }
+                    else
+                            maxOccurLimit = DEFAULT_MAX_OCCUR_NODE_LIMIT;
+            }catch(Exception ex){}
 
-                try {
-                        String value = System.getProperty(Constants.SYSTEM_PROPERTY_ELEMENT_ATTRIBUTE_LIMIT);
-                        if(value != null && !value.equals("")){
-                                fElementAttributeLimit = Integer.parseInt(value);
-                                if ( fElementAttributeLimit < 0)
-                                        fElementAttributeLimit = DEFAULT_ELEMENT_ATTRIBUTE_LIMIT;
-                        }
-                        else
-                                fElementAttributeLimit = DEFAULT_ELEMENT_ATTRIBUTE_LIMIT;
+            try {
+                    String value = getSystemProperty(Constants.SYSTEM_PROPERTY_ELEMENT_ATTRIBUTE_LIMIT);
+                    if(value != null && !value.equals("")){
+                            fElementAttributeLimit = Integer.parseInt(value);
+                            if ( fElementAttributeLimit < 0)
+                                    fElementAttributeLimit = DEFAULT_ELEMENT_ATTRIBUTE_LIMIT;
+                    }
+                    else
+                            fElementAttributeLimit = DEFAULT_ELEMENT_ATTRIBUTE_LIMIT;
 
                 }catch(Exception ex){}
 
         }
 
+    private String getSystemProperty(final String propName) {
+        return AccessController.doPrivileged(new PrivilegedAction<String>() {
+            public String run() {
+                return System.getProperty(propName);
+            }
+        });
+    }
 } 

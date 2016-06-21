@@ -6,6 +6,7 @@
 package com.sun.org.apache.xml.internal.resolver;
 
 import com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl;
+import com.sun.org.apache.xerces.internal.utils.SecuritySupport;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -462,7 +463,7 @@ public class Catalog {
       
       catalogCwd = FileURL.makeURL("basename");
     } catch (MalformedURLException e) {
-      String userdir = System.getProperty("user.dir");
+      String userdir = SecuritySupport.getSystemProperty("user.dir");
       userdir.replace('\\', '/');
       catalogManager.debug.message(1, "Malformed URL on cwd", userdir);
       catalogCwd = null;
@@ -1167,7 +1168,7 @@ public class Catalog {
   protected String resolveLocalSystem(String systemId)
     throws MalformedURLException, IOException {
 
-    String osname = System.getProperty("os.name");
+    String osname = SecuritySupport.getSystemProperty("os.name");
     boolean windows = (osname.indexOf("Windows") >= 0);
     Enumeration en = catalogEntries.elements();
     while (en.hasMoreElements()) {

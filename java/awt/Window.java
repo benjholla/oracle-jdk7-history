@@ -1152,7 +1152,7 @@ public class Window extends Container implements Accessible {
                 WindowPeer peer = (WindowPeer)this.peer;
                 synchronized(getTreeLock()) {
                     if (peer != null) {
-                        peer.setAlwaysOnTop(alwaysOnTop);
+                        peer.updateAlwaysOnTopState();
                     }
                 }
             }

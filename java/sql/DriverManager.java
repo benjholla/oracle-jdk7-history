@@ -287,7 +287,7 @@ public class DriverManager {
                 
                 try{
                     while(driversIterator.hasNext()) {
-                        println(" Loading done by the java.util.ServiceLoader :  "+driversIterator.next());
+                        driversIterator.next();
                     }
                 } catch(Throwable t) {
                 

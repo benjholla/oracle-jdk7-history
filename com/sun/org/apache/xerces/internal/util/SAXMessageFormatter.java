@@ -2,10 +2,10 @@
 
 package com.sun.org.apache.xerces.internal.util;
 
+import com.sun.org.apache.xerces.internal.utils.SecuritySupport;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import java.util.PropertyResourceBundle;
 
 
 public class SAXMessageFormatter {
@@ -18,11 +18,11 @@ public class SAXMessageFormatter {
         ResourceBundle resourceBundle = null;
         if (locale != null) {
             resourceBundle =
-                PropertyResourceBundle.getBundle("com.sun.org.apache.xerces.internal.impl.msg.SAXMessages", locale);
+                SecuritySupport.getResourceBundle("com.sun.org.apache.xerces.internal.impl.msg.SAXMessages", locale);
         }
         else {
             resourceBundle =
-                PropertyResourceBundle.getBundle("com.sun.org.apache.xerces.internal.impl.msg.SAXMessages");
+                SecuritySupport.getResourceBundle("com.sun.org.apache.xerces.internal.impl.msg.SAXMessages");
         }
 
         

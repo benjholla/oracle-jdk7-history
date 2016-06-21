@@ -23,6 +23,7 @@ class SchemaFactoryFinder  {
     private static boolean debug = false;
     
     private static SecuritySupport ss = new SecuritySupport();
+    private static final String DEFAULT_PACKAGE = "com.sun.org.apache.xerces.internal";
     
         private static Properties cacheProps = new Properties();
 
@@ -145,8 +146,6 @@ class SchemaFactoryFinder  {
         }
 
         
-
-        
         Iterator sitr = createServiceFileIterator();
         while(sitr.hasNext()) {
             URL resource = (URL)sitr.next();
@@ -176,14 +175,20 @@ class SchemaFactoryFinder  {
     
     private Class createClass(String className) {
             Class clazz;
+        
+        boolean internal = false;
+        if (System.getSecurityManager() != null) {
+            if (className != null && className.startsWith(DEFAULT_PACKAGE)) {
+                internal = true;
+            }
+        }
 
-            
             try {
-                    if (classLoader != null) {
-                            clazz = classLoader.loadClass(className);
-                    } else {
-                            clazz = Class.forName(className);
-                    }
+                if (classLoader != null && !internal) {
+                        clazz = classLoader.loadClass(className);
+                } else {
+                        clazz = Class.forName(className);
+                }
             } catch (Throwable t) {
                 if(debug)   t.printStackTrace();
                     return null;
@@ -253,7 +258,7 @@ class SchemaFactoryFinder  {
                 providerClass.getDeclaredMethod(
                     "newXMLSchemaFactoryNoServiceLoader"
                 );
-                return creationMethod.invoke(null, null);
+                return creationMethod.invoke(null, (Object[])null);
             } catch (NoSuchMethodException exc) {
                 return null;
             } catch (Exception exc) {

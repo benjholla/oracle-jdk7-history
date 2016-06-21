@@ -3,9 +3,9 @@
 
 package com.sun.org.apache.xerces.internal.util;
 
+import com.sun.org.apache.xerces.internal.utils.SecuritySupport;
 import java.util.Locale;
 import java.util.MissingResourceException;
-import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 
 
@@ -21,11 +21,11 @@ public class DatatypeMessageFormatter {
         ResourceBundle resourceBundle = null;
         if (locale != null) {
             resourceBundle =
-                PropertyResourceBundle.getBundle(BASE_NAME, locale);
+                SecuritySupport.getResourceBundle(BASE_NAME, locale);
         }
         else {
             resourceBundle =
-                PropertyResourceBundle.getBundle(BASE_NAME);
+                SecuritySupport.getResourceBundle(BASE_NAME);
         }
 
         

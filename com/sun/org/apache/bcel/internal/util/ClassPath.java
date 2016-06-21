@@ -21,7 +21,7 @@ public class ClassPath implements Serializable {
     ArrayList vec = new ArrayList();
 
     for(StringTokenizer tok=new StringTokenizer(class_path,
-                                                System.getProperty("path.separator"));
+                            SecuritySupport.getSystemProperty("path.separator"));
         tok.hasMoreTokens();)
     {
       String path = tok.nextToken();
@@ -30,7 +30,7 @@ public class ClassPath implements Serializable {
         File file = new File(path);
 
         try {
-          if(file.exists()) {
+          if(SecuritySupport.getFileExists(file)) {
             if(file.isDirectory())
               vec.add(new Dir(path));
             else
@@ -77,8 +77,9 @@ public class ClassPath implements Serializable {
         String name = tok.nextToken();
         File   file = new File(name);
 
-        if(file.exists())
+        if(SecuritySupport.getFileExists(file)) {
           list.add(name);
+        }
       }
     }
   }
@@ -89,9 +90,9 @@ public class ClassPath implements Serializable {
     String class_path, boot_path, ext_path;
 
     try {
-      class_path = System.getProperty("java.class.path");
-      boot_path  = System.getProperty("sun.boot.class.path");
-      ext_path   = System.getProperty("java.ext.dirs");
+      class_path = SecuritySupport.getSystemProperty("java.class.path");
+      boot_path  = SecuritySupport.getSystemProperty("sun.boot.class.path");
+      ext_path   = SecuritySupport.getSystemProperty("java.ext.dirs");
     }
     catch (SecurityException e) {
         return "";
@@ -106,8 +107,8 @@ public class ClassPath implements Serializable {
     getPathComponents(ext_path, dirs);
 
     for(Iterator e = dirs.iterator(); e.hasNext(); ) {
-      File     ext_dir    = new File((String)e.next());
-      String[] extensions = ext_dir.list(new FilenameFilter() {
+      File ext_dir = new File((String)e.next());
+      String[] extensions = SecuritySupport.getFileList(ext_dir, new FilenameFilter() {
         public boolean accept(File dir, String name) {
           name = name.toLowerCase();
           return name.endsWith(".zip") || name.endsWith(".jar");
@@ -236,7 +237,7 @@ public class ClassPath implements Serializable {
       final File file = new File(dir + File.separatorChar +
                                  name.replace('.', File.separatorChar) + suffix);
 
-      return file.exists()? new ClassFile() {
+      return SecuritySupport.getFileExists(file)? new ClassFile() {
         public InputStream getInputStream() throws IOException { return new FileInputStream(file); }
 
         public String      getPath()        { try {

@@ -11,8 +11,6 @@ package org.xml.sax.helpers;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import org.xml.sax.XMLReader;
 import org.xml.sax.SAXException;
 
@@ -26,51 +24,53 @@ final public class XMLReaderFactory
     }
 
     private static final String property = "org.xml.sax.driver";
+    private static SecuritySupport ss = new SecuritySupport();
 
-    private static String _clsFromJar = null;
     private static boolean _jarread = false;
     
     public static XMLReader createXMLReader ()
         throws SAXException
     {
         String          className = null;
-        ClassLoader     loader = NewInstance.getClassLoader ();
+        ClassLoader     cl = ss.getContextClassLoader();
 
         
-        try { className = System.getProperty (property); }
+        try {
+            className = ss.getSystemProperty(property);
+        }
         catch (RuntimeException e) {  }
 
         
         if (className == null) {
             if (!_jarread) {
-                final ClassLoader       loader1 = loader;
                 _jarread = true;
-                _clsFromJar =  (String)
-                AccessController.doPrivileged(new PrivilegedAction() {
-                    public Object run() {
-                        String clsName = null;
-                        try {
-                            String      service = "META-INF/services/" + property;
-                            InputStream in;
-                            BufferedReader      reader;
-                            if (loader1 == null)
-                                in = ClassLoader.getSystemResourceAsStream (service);
-                            else
-                                in = loader1.getResourceAsStream (service);
+                String      service = "META-INF/services/" + property;
+                InputStream in;
+                BufferedReader      reader;
 
-                            if (in != null) {
-                                reader = new BufferedReader (
-                                        new InputStreamReader (in, "UTF8"));
-                                clsName = reader.readLine ();
-                                in.close ();
-                            }
-                        } catch (Exception e) {
+                try {
+                    if (cl != null) {
+                        in = ss.getResourceAsStream(cl, service);
+
+                        
+                        if (in == null) {
+                            cl = null;
+                            in = ss.getResourceAsStream(cl, service);
                         }
-                        return clsName;
+                    } else {
+                        
+                        in = ss.getResourceAsStream(cl, service);
                     }
-                });
+
+                    if (in != null) {
+                        reader = new BufferedReader (
+                                new InputStreamReader (in, "UTF8"));
+                        className = reader.readLine ();
+                        in.close ();
+                    }
+                } catch (Exception e) {
+                }
             }
-            className = _clsFromJar;
         }
 
         
@@ -87,7 +87,7 @@ final public class XMLReaderFactory
 
         
         if (className != null)
-            return loadClass (loader, className);
+            return loadClass (cl, className);
 
         
         try {
@@ -103,7 +103,7 @@ final public class XMLReaderFactory
     public static XMLReader createXMLReader (String className)
         throws SAXException
     {
-        return loadClass (NewInstance.getClassLoader (), className);
+        return loadClass (ss.getContextClassLoader(), className);
     }
 
     private static XMLReader loadClass (ClassLoader loader, String className)

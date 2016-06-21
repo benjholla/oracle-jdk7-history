@@ -62,6 +62,13 @@ public class LogStream extends PrintStream {
     
     @Deprecated
     public static synchronized void setDefaultStream(PrintStream newDefault) {
+        SecurityManager sm = System.getSecurityManager();
+
+        if (sm != null) {
+            sm.checkPermission(
+                new java.util.logging.LoggingPermission("control", null));
+        }
+
         defaultStream = newDefault;
     }
 

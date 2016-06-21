@@ -19,6 +19,7 @@ import java.util.Properties;
 
 
 class XPathFactoryFinder  {
+    private static final String DEFAULT_PACKAGE = "com.sun.org.apache.xpath.internal";
 
     private static SecuritySupport ss = new SecuritySupport() ;
     
@@ -176,18 +177,25 @@ class XPathFactoryFinder  {
     
     private Class createClass(String className) {
             Class clazz;
-
-            
-            try {
-                    if (classLoader != null) {
-                            clazz = classLoader.loadClass(className);
-                    } else {
-                            clazz = Class.forName(className);
-                    }
-            } catch (Throwable t) {
-                if(debug)   t.printStackTrace();
-                    return null;
+        
+        boolean internal = false;
+        if (System.getSecurityManager() != null) {
+            if (className != null && className.startsWith(DEFAULT_PACKAGE)) {
+                internal = true;
             }
+        }
+
+        
+        try {
+            if (classLoader != null && !internal) {
+                    clazz = classLoader.loadClass(className);
+            } else {
+                    clazz = Class.forName(className);
+            }
+        } catch (Throwable t) {
+            if(debug)   t.printStackTrace();
+                return null;
+        }
 
             return clazz;
     }
@@ -252,7 +260,7 @@ class XPathFactoryFinder  {
                 providerClass.getDeclaredMethod(
                     "newXPathFactoryNoServiceLoader"
                 );
-                return creationMethod.invoke(null, null);
+                return creationMethod.invoke(null, (Object[])null);
             } catch (NoSuchMethodException exc) {
                 return null;
             } catch (Exception exc) {

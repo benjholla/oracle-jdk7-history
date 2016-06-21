@@ -223,7 +223,7 @@ public class MethodHandles {
         }
         private MethodHandle accessConstructor(Class<?> refc, MemberName ctor) throws IllegalAccessException {
             assert(ctor.isConstructor());
-            checkAccess(refc, ctor);
+            checkAccess(refc, ctor, false );
             MethodHandle rawMH = MethodHandleImpl.findMethod(ctor, false, lookupClassOrNull());
             MethodHandle allocMH = MethodHandleImpl.makeAllocator(rawMH);
             assert(!MethodHandleNatives.isCallerSensitive(ctor));  
@@ -263,6 +263,29 @@ public class MethodHandles {
                                            Class<?> callerClass,
                                            Class<?> specialCaller) throws NoSuchMethodException, IllegalAccessException {
             checkMethod(refc, method, false);
+
+            Class<?> refcAsSuper;
+            if (refc != lookupClass() &&
+                refc != (refcAsSuper = lookupClass().getSuperclass()) &&
+                refc.isAssignableFrom(lookupClass())) {
+                assert(!method.getName().equals("<init>"));  
+                
+                
+                
+                
+                
+                MemberName m2 = new MemberName(refcAsSuper,
+                                               method.getName(),
+                                               method.getMethodType(),
+                                               REF_invokeSpecial);
+                m2 = IMPL_NAMES.resolveOrNull(m2, true, lookupClassOrNull());
+                if (m2 == null)  throw new InternalError(method.toString());
+                method = m2;
+                refc = refcAsSuper;
+                
+                checkMethod(refc, method, false);
+            }
+
             MethodHandle mh = MethodHandleImpl.findMethod(method, false, specialCaller);
             mh = maybeBindCaller(method, mh, callerClass);
             return restrictReceiver(method, mh, specialCaller);
@@ -368,7 +391,7 @@ public class MethodHandles {
             if (c.isAccessible()) {
                 rawCtor = MethodHandleImpl.findMethod(ctor, false,  null);
             } else {
-                checkAccess(c.getDeclaringClass(), ctor);
+                checkAccess(c.getDeclaringClass(), ctor, false );
                 rawCtor = MethodHandleImpl.findMethod(ctor, false, lookupClassOrNull());
             }
             assert(!MethodHandleNatives.isCallerSensitive(ctor));  
@@ -474,14 +497,17 @@ public class MethodHandles {
             else if (wantStatic != m.isStatic())
                 message = wantStatic ? "expected a static method" : "expected a non-static method";
             else
-                { checkAccess(refc, m); return; }
+                { checkAccess(refc, m, false ); return; }
             throw m.makeAccessException(message, this);
         }
 
-        void checkAccess(Class<?> refc, MemberName m) throws IllegalAccessException {
+        void checkAccess(Class<?> refc, MemberName m, boolean isSetter) throws IllegalAccessException {
             int allowedModes = this.allowedModes;
             if (allowedModes == TRUSTED)  return;
             int mods = m.getModifiers();
+            if (m.isField() && Modifier.isFinal(mods) && isSetter) {
+              throw m.makeAccessException("unexpected set of a final field", this);
+            }
             if (Modifier.isPublic(mods) && Modifier.isPublic(refc.getModifiers()) && allowedModes != 0)
                 return;  
             int requestedModes = fixmods(mods);  
@@ -580,7 +606,7 @@ public class MethodHandles {
                                                 : "expected a non-static field", this);
             if (trusted)
                 return MethodHandleImpl.accessField(field, isSetter,  null);
-            checkAccess(refc, field);
+            checkAccess(refc, field, isSetter);
             MethodHandle mh = MethodHandleImpl.accessField(field, isSetter, lookupClassOrNull());
             return restrictProtectedReceiver(field, mh);
         }

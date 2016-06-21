@@ -16,7 +16,7 @@ public interface WindowPeer extends ContainerPeer {
     void toBack();
 
     
-    void setAlwaysOnTop(boolean alwaysOnTop);
+    void updateAlwaysOnTopState();
 
     
     void updateFocusableWindowState();

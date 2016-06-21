@@ -6,14 +6,13 @@ import com.sun.beans.finder.BeanInfoFinder;
 import com.sun.beans.finder.PropertyEditorFinder;
 
 import java.awt.GraphicsEnvironment;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 
 
 final class ThreadGroupContext {
 
-    private static final Map<ThreadGroup, ThreadGroupContext> contexts = new WeakHashMap<>();
+    private static final WeakIdentityMap<ThreadGroupContext> contexts = new WeakIdentityMap<>();
 
     
     static ThreadGroupContext getContext() {
@@ -35,6 +34,8 @@ final class ThreadGroupContext {
     private BeanInfoFinder beanInfoFinder;
     private PropertyEditorFinder propertyEditorFinder;
 
+    private ThreadGroupContext() {
+    }
 
     boolean isDesignTime() {
         return this.isDesignTime;

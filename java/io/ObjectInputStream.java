@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import static java.io.ObjectStreamClass.processQueue;
+import sun.reflect.misc.ReflectUtil;
 
 
 public class ObjectInputStream
@@ -714,6 +715,12 @@ public class ObjectInputStream
         }
     }
 
+    private boolean isCustomSubclass() {
+        
+        return getClass().getClassLoader()
+                    != ObjectInputStream.class.getClassLoader();
+    }
+
     
     private ObjectStreamClass readProxyDesc(boolean unshared)
         throws IOException
@@ -738,6 +745,15 @@ public class ObjectInputStream
         try {
             if ((cl = resolveProxyClass(ifaces)) == null) {
                 resolveEx = new ClassNotFoundException("null class");
+            } else if (!Proxy.isProxyClass(cl)) {
+                throw new InvalidClassException("Not a proxy");
+            } else {
+                
+                
+                
+                ReflectUtil.checkProxyPackageAccess(
+                        getClass().getClassLoader(),
+                        cl.getInterfaces());
             }
         } catch (ClassNotFoundException ex) {
             resolveEx = ex;
@@ -774,9 +790,12 @@ public class ObjectInputStream
         Class cl = null;
         ClassNotFoundException resolveEx = null;
         bin.setBlockDataMode(true);
+        final boolean checksRequired = isCustomSubclass();
         try {
             if ((cl = resolveClass(readDesc)) == null) {
                 resolveEx = new ClassNotFoundException("null class");
+            } else if (checksRequired) {
+                ReflectUtil.checkPackageAccess(cl);
             }
         } catch (ClassNotFoundException ex) {
             resolveEx = ex;

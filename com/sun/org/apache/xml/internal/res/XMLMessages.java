@@ -3,10 +3,9 @@
 
 package com.sun.org.apache.xml.internal.res;
 
+import com.sun.org.apache.xalan.internal.utils.SecuritySupport;
 import java.util.ListResourceBundle;
 import java.util.Locale;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 
 
 public class XMLMessages
@@ -43,8 +42,9 @@ public class XMLMessages
   
   public static final String createXMLMessage(String msgKey, Object args[])
   {
-    if (XMLBundle == null)
-      XMLBundle = loadResourceBundle(XML_ERROR_RESOURCES);
+    if (XMLBundle == null) {
+        XMLBundle = SecuritySupport.getResourceBundle(XML_ERROR_RESOURCES);
+    }
 
     if (XMLBundle != null)
     {
@@ -107,47 +107,4 @@ public class XMLMessages
     return fmsg;
   }
 
-  
-  public static ListResourceBundle loadResourceBundle(String className)
-          throws MissingResourceException
-  {
-    Locale locale = Locale.getDefault();
-
-    try
-    {
-      return (ListResourceBundle)ResourceBundle.getBundle(className, locale);
-    }
-    catch (MissingResourceException e)
-    {
-      try  
-      {
-
-        
-        
-        return (ListResourceBundle)ResourceBundle.getBundle(
-          className, new Locale("en", "US"));
-      }
-      catch (MissingResourceException e2)
-      {
-
-        
-        
-        throw new MissingResourceException(
-          "Could not load any resource bundles." + className, className, "");
-      }
-    }
-  }
-
-  
-  protected static String getResourceSuffix(Locale locale)
-  {
-
-    String suffix = "_" + locale.getLanguage();
-    String country = locale.getCountry();
-
-    if (country.equals("TW"))
-      suffix += "_" + country;
-
-    return suffix;
-  }
 }

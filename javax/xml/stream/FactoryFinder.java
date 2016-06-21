@@ -2,17 +2,17 @@
 
 package javax.xml.stream;
 
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.File;
-import java.io.FileInputStream;
-
-import java.util.Properties;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Properties;
 
 
 class FactoryFinder {
+    
+    private static final String DEFAULT_PACKAGE = "com.sun.xml.internal.";
 
     
     private static boolean debug = false;
@@ -48,16 +48,20 @@ class FactoryFinder {
 
     
     static private Class getProviderClass(String className, ClassLoader cl,
-            boolean doFallback) throws ClassNotFoundException
+            boolean doFallback, boolean useBSClsLoader) throws ClassNotFoundException
     {
         try {
             if (cl == null) {
-                cl = ss.getContextClassLoader();
-                if (cl == null) {
-                    throw new ClassNotFoundException();
-                }
-                else {
-                    return cl.loadClass(className);
+                if (useBSClsLoader) {
+                    return Class.forName(className, true, FactoryFinder.class.getClassLoader());
+                } else {
+                    cl = ss.getContextClassLoader();
+                    if (cl == null) {
+                        throw new ClassNotFoundException();
+                    }
+                    else {
+                        return cl.loadClass(className);
+                    }
                 }
             }
             else {
@@ -79,8 +83,23 @@ class FactoryFinder {
     static Object newInstance(String className, ClassLoader cl, boolean doFallback)
         throws ConfigurationError
     {
+        return newInstance(className, cl, doFallback, false);
+    }
+
+    
+    static Object newInstance(String className, ClassLoader cl, boolean doFallback, boolean useBSClsLoader)
+        throws ConfigurationError
+    {
+        
+        if (System.getSecurityManager() != null) {
+            if (className != null && className.startsWith(DEFAULT_PACKAGE)) {
+                cl = null;
+                useBSClsLoader = true;
+            }
+        }
+
         try {
-            Class providerClass = getProviderClass(className, cl, doFallback);
+            Class providerClass = getProviderClass(className, cl, doFallback, useBSClsLoader);
             Object instance = providerClass.newInstance();
             if (debug) {    
                 dPrint("created new instance of " + providerClass +
@@ -147,9 +166,9 @@ class FactoryFinder {
                             if (ss.doesFileExist(f)) {
                                 dPrint("Read properties file "+f);
                                 cacheProps.load(ss.getFileInputStream(f));
-                            }
-                        }
                     }
+                }
+            }
                 }
             }
             factoryClassName = cacheProps.getProperty(factoryId);
@@ -186,6 +205,7 @@ class FactoryFinder {
 
         
         ClassLoader cl = ss.getContextClassLoader();
+        boolean useBSClsLoader = false;
         if (cl != null) {
             is = ss.getResourceAsStream(cl, serviceId);
 
@@ -193,11 +213,13 @@ class FactoryFinder {
             if (is == null) {
                 cl = FactoryFinder.class.getClassLoader();
                 is = ss.getResourceAsStream(cl, serviceId);
+                useBSClsLoader = true;
             }
         } else {
             
             cl = FactoryFinder.class.getClassLoader();
             is = ss.getResourceAsStream(cl, serviceId);
+            useBSClsLoader = true;
         }
 
         if (is == null) {
@@ -235,7 +257,7 @@ class FactoryFinder {
             
             
             
-            return newInstance(factoryClassName, cl, false);
+            return newInstance(factoryClassName, cl, false, useBSClsLoader);
         }
 
         

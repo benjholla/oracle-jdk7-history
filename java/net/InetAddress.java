@@ -11,8 +11,12 @@ import java.util.List;
 import java.util.ArrayList;
 import java.security.AccessController;
 import java.io.ObjectStreamException;
+import java.io.ObjectStreamField;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectInputStream.GetField;
+import java.io.ObjectOutputStream;
+import java.io.ObjectOutputStream.PutField;
 import sun.security.action.*;
 import sun.net.InetAddressCachePolicy;
 import sun.net.util.IPAddressUtil;
@@ -31,14 +35,42 @@ class InetAddress implements java.io.Serializable {
     
     static transient boolean preferIPv6Address = false;
 
-    
-    String hostName;
+    static class InetAddressHolder {
 
-    
-    int address;
+        InetAddressHolder() {}
 
-    
-    int family;
+        InetAddressHolder(String hostName, int address, int family) {
+            this.hostName = hostName;
+            this.address = address;
+            this.family = family;
+        }
+
+        String hostName;
+
+        String getHostName() {
+            return hostName;
+        }
+
+        
+        int address;
+
+        int getAddress() {
+            return address;
+        }
+
+        
+        int family;
+
+        int getFamily() {
+            return family;
+        }
+    }
+
+    final transient InetAddressHolder holder;
+
+    InetAddressHolder holder() {
+        return holder;
+    }
 
     
     private static List<NameService> nameServices = null;
@@ -59,12 +91,13 @@ class InetAddress implements java.io.Serializable {
 
     
     InetAddress() {
+        holder = new InetAddressHolder();
     }
 
     
     private Object readResolve() throws ObjectStreamException {
         
-        return new Inet4Address(this.hostName, this.address);
+        return new Inet4Address(holder().getHostName(), holder().getAddress());
     }
 
     
@@ -141,10 +174,10 @@ class InetAddress implements java.io.Serializable {
 
     
     String getHostName(boolean check) {
-        if (hostName == null) {
-            hostName = InetAddress.getHostFromNameService(this, check);
+        if (holder().getHostName() == null) {
+            holder().hostName = InetAddress.getHostFromNameService(this, check);
         }
-        return hostName;
+        return holder().getHostName();
     }
 
     
@@ -225,6 +258,7 @@ class InetAddress implements java.io.Serializable {
 
     
     public String toString() {
+        String hostName = holder().getHostName();
         return ((hostName != null) ? hostName : "")
             + "/" + getHostAddress();
     }
@@ -896,14 +930,54 @@ class InetAddress implements java.io.Serializable {
         }
     }
 
+    private static final long FIELDS_OFFSET;
+    private static final sun.misc.Unsafe UNSAFE;
+
+    static {
+        try {
+            sun.misc.Unsafe unsafe = sun.misc.Unsafe.getUnsafe();
+            FIELDS_OFFSET = unsafe.objectFieldOffset(
+                InetAddress.class.getDeclaredField("holder")
+            );
+            UNSAFE = unsafe;
+        } catch (ReflectiveOperationException e) {
+            throw new Error(e);
+        }
+    }
+
     private void readObject (ObjectInputStream s) throws
                          IOException, ClassNotFoundException {
-        s.defaultReadObject ();
         if (getClass().getClassLoader() != null) {
-            hostName = null;
-            address = 0;
             throw new SecurityException ("invalid address type");
         }
+        GetField gf = s.readFields();
+        String host = (String)gf.get("hostName", null);
+        int address= gf.get("address", 0);
+        int family= gf.get("family", 0);
+        InetAddressHolder h = new InetAddressHolder(host, address, family);
+        UNSAFE.putObject(this, FIELDS_OFFSET, h);
+    }
+
+    
+
+    
+    private static final ObjectStreamField[] serialPersistentFields = {
+        new ObjectStreamField("hostName", String.class),
+        new ObjectStreamField("address", int.class),
+        new ObjectStreamField("family", int.class),
+    };
+
+    private void writeObject (ObjectOutputStream s) throws
+                        IOException {
+        if (getClass().getClassLoader() != null) {
+            throw new SecurityException ("invalid address type");
+        }
+        PutField pf = s.putFields();
+        pf.put("hostName", holder().hostName);
+        pf.put("address", holder().address);
+        pf.put("family", holder().family);
+        s.writeFields();
+        s.flush();
     }
 }
 

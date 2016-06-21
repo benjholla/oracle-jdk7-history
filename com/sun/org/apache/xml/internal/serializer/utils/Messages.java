@@ -3,6 +3,7 @@
 
 package com.sun.org.apache.xml.internal.serializer.utils;
 
+import com.sun.org.apache.xalan.internal.utils.SecuritySupport;
 import java.util.ListResourceBundle;
 import java.util.Locale;
 import java.util.MissingResourceException;
@@ -29,11 +30,6 @@ public final class Messages
         m_resourceBundleName = resourceBundle;
     }
 
-    
-
-
-
-
 
     
     private Locale getLocale()
@@ -42,16 +38,10 @@ public final class Messages
     }
 
     
-    private ListResourceBundle getResourceBundle()
-    {
-        return m_resourceBundle;
-    }
-
-    
     public final String createMessage(String msgKey, Object args[])
     {
         if (m_resourceBundle == null)
-            m_resourceBundle = loadResourceBundle(m_resourceBundleName);
+            m_resourceBundle = SecuritySupport.getResourceBundle(m_resourceBundleName);
 
         if (m_resourceBundle != null)
         {
@@ -153,59 +143,4 @@ public final class Messages
         return fmsg;
     }
 
-    
-    private ListResourceBundle loadResourceBundle(String resourceBundle)
-        throws MissingResourceException
-    {
-        m_resourceBundleName = resourceBundle;
-        Locale locale = getLocale();
-
-        ListResourceBundle lrb;
-
-        try
-        {
-
-            ResourceBundle rb =
-                ResourceBundle.getBundle(m_resourceBundleName, locale);
-            lrb = (ListResourceBundle) rb;
-        }
-        catch (MissingResourceException e)
-        {
-            try 
-                {
-
-                
-                
-                lrb =
-                    (ListResourceBundle) ResourceBundle.getBundle(
-                        m_resourceBundleName,
-                        new Locale("en", "US"));
-            }
-            catch (MissingResourceException e2)
-            {
-
-                
-                
-                throw new MissingResourceException(
-                    "Could not load any resource bundles." + m_resourceBundleName,
-                    m_resourceBundleName,
-                    "");
-            }
-        }
-        m_resourceBundle = lrb;
-        return lrb;
-    }
-
-    
-    private static String getResourceSuffix(Locale locale)
-    {
-
-        String suffix = "_" + locale.getLanguage();
-        String country = locale.getCountry();
-
-        if (country.equals("TW"))
-            suffix += "_" + country;
-
-        return suffix;
-    }
 }

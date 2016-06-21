@@ -4,6 +4,7 @@
 package com.sun.org.apache.xalan.internal.xslt;
 
 import com.sun.org.apache.xalan.internal.utils.ObjectFactory;
+import com.sun.org.apache.xalan.internal.utils.SecuritySupport;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -391,7 +392,7 @@ public class EnvironmentCheck
     
     try
     {
-      String javaVersion = System.getProperty("java.version");
+      String javaVersion = SecuritySupport.getSystemProperty("java.version");
 
       h.put("java.version", javaVersion);
     }
@@ -410,7 +411,7 @@ public class EnvironmentCheck
     {
 
       
-      String cp = System.getProperty("java.class.path");
+      String cp = SecuritySupport.getSystemProperty("java.class.path");
 
       h.put("java.class.path", cp);
 
@@ -420,7 +421,7 @@ public class EnvironmentCheck
         h.put(FOUNDCLASSES + "java.class.path", classpathJars);
 
       
-      String othercp = System.getProperty("sun.boot.class.path");
+      String othercp = SecuritySupport.getSystemProperty("sun.boot.class.path");
 
       if (null != othercp)
       {
@@ -434,7 +435,7 @@ public class EnvironmentCheck
 
       
       
-      othercp = System.getProperty("java.ext.dirs");
+      othercp = SecuritySupport.getSystemProperty("java.ext.dirs");
 
       if (null != othercp)
       {
@@ -759,7 +760,7 @@ public class EnvironmentCheck
     {
       Class clazz = ObjectFactory.findProviderClass(DOM_CLASS, true);
 
-      Method method = clazz.getMethod(DOM_LEVEL3_METHOD, null);
+      Method method = clazz.getMethod(DOM_LEVEL3_METHOD, (Class<?>[])null);
 
       
       

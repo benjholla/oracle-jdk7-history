@@ -31,6 +31,8 @@ public final class DOMImplementationRegistry {
     
     private static final String FALLBACK_CLASS =
             "com.sun.org.apache.xerces.internal.dom.DOMXSImplementationSourceImpl";
+    private static final String DEFAULT_PACKAGE =
+            "com.sun.org.apache.xerces.internal.dom";
     
     private DOMImplementationRegistry(final Vector srcs) {
         sources = srcs;
@@ -67,9 +69,14 @@ public final class DOMImplementationRegistry {
             while (st.hasMoreTokens()) {
                 String sourceName = st.nextToken();
                 
-                
+                boolean internal = false;
+                if (System.getSecurityManager() != null) {
+                    if (sourceName != null && sourceName.startsWith(DEFAULT_PACKAGE)) {
+                        internal = true;
+                    }
+                }
                 Class sourceClass = null;
-                if (classLoader != null) {
+                if (classLoader != null && !internal) {
                     sourceClass = classLoader.loadClass(sourceName);
                 } else {
                     sourceClass = Class.forName(sourceName);

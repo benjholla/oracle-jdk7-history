@@ -11,7 +11,7 @@ import java.util.Properties;
 
 
 class FactoryFinder {
-
+    private static final String DEFAULT_PACKAGE = "com.sun.org.apache.xerces.internal";
     
     private static boolean debug = false;
 
@@ -88,6 +88,14 @@ class FactoryFinder {
     static Object newInstance(String className, ClassLoader cl, boolean doFallback, boolean useBSClsLoader)
         throws ConfigurationError
     {
+        
+        if (System.getSecurityManager() != null) {
+            if (className != null && className.startsWith(DEFAULT_PACKAGE)) {
+                cl = null;
+                useBSClsLoader = true;
+            }
+        }
+
         try {
             Class providerClass = getProviderClass(className, cl, doFallback, useBSClsLoader);
             Object instance = providerClass.newInstance();

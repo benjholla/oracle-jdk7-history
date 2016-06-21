@@ -5,9 +5,6 @@ package com.sun.org.apache.xml.internal.res;
 
 
 import java.util.ListResourceBundle;
-import java.util.Locale;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 
 
 public class XMLErrorResources_ca extends ListResourceBundle
@@ -352,55 +349,6 @@ public class XMLErrorResources_ca extends ListResourceBundle
   public Object[][] getContents()
   {
     return _contents;
-  }
-
-  
-  public static final XMLErrorResources loadResourceBundle(String className)
-          throws MissingResourceException
-  {
-
-    Locale locale = Locale.getDefault();
-    String suffix = getResourceSuffix(locale);
-
-    try
-    {
-
-      
-      return (XMLErrorResources) ResourceBundle.getBundle(className
-              + suffix, locale);
-    }
-    catch (MissingResourceException e)
-    {
-      try  
-      {
-
-        
-        
-        return (XMLErrorResources) ResourceBundle.getBundle(className,
-                new Locale("ca", "ES"));
-      }
-      catch (MissingResourceException e2)
-      {
-
-        
-        
-        throw new MissingResourceException(
-          "Could not load any resource bundles.", className, "");
-      }
-    }
-  }
-
-  
-  private static final String getResourceSuffix(Locale locale)
-  {
-
-    String suffix = "_" + locale.getLanguage();
-    String country = locale.getCountry();
-
-    if (country.equals("TW"))
-      suffix += "_" + country;
-
-    return suffix;
   }
 
 }

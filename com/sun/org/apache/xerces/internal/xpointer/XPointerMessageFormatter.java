@@ -7,6 +7,7 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.PropertyResourceBundle;
 import com.sun.org.apache.xerces.internal.util.MessageFormatter;
+import com.sun.org.apache.xerces.internal.utils.SecuritySupport;
 
 
 class XPointerMessageFormatter implements MessageFormatter {
@@ -24,14 +25,14 @@ class XPointerMessageFormatter implements MessageFormatter {
 
         if (fResourceBundle == null || locale != fLocale) {
             if (locale != null) {
-                fResourceBundle = PropertyResourceBundle.getBundle(
+                fResourceBundle = SecuritySupport.getResourceBundle(
                         "com.sun.org.apache.xerces.internal.impl.msg.XPointerMessages", locale);
                 
                 fLocale = locale;
             }
             if (fResourceBundle == null)
-                fResourceBundle = PropertyResourceBundle
-                        .getBundle("com.sun.org.apache.xerces.internal.impl.msg.XPointerMessages");
+                fResourceBundle = SecuritySupport.getResourceBundle(
+                        "com.sun.org.apache.xerces.internal.impl.msg.XPointerMessages");
         }
 
         String msg = fResourceBundle.getString(key);

@@ -379,7 +379,7 @@ public class Parser implements Constants, ContentHandler {
             }
         }
         catch (TypeCheckError e) {
-            reportError(ERROR, new ErrorMsg(e));
+            reportError(ERROR, new ErrorMsg(ErrorMsg.JAXP_COMPILE_ERR, e));
         }
     }
 
@@ -394,7 +394,7 @@ public class Parser implements Constants, ContentHandler {
         }
         catch (IOException e) {
             if (_xsltc.debug()) e.printStackTrace();
-            reportError(ERROR,new ErrorMsg(e));
+            reportError(ERROR,new ErrorMsg(ErrorMsg.JAXP_COMPILE_ERR, e));
         }
         catch (SAXException e) {
             Throwable ex = e.getException();
@@ -402,15 +402,15 @@ public class Parser implements Constants, ContentHandler {
                 e.printStackTrace();
                 if (ex != null) ex.printStackTrace();
             }
-            reportError(ERROR, new ErrorMsg(e));
+            reportError(ERROR, new ErrorMsg(ErrorMsg.JAXP_COMPILE_ERR, e));
         }
         catch (CompilerException e) {
             if (_xsltc.debug()) e.printStackTrace();
-            reportError(ERROR, new ErrorMsg(e));
+            reportError(ERROR, new ErrorMsg(ErrorMsg.JAXP_COMPILE_ERR, e));
         }
         catch (Exception e) {
             if (_xsltc.debug()) e.printStackTrace();
-            reportError(ERROR, new ErrorMsg(e));
+            reportError(ERROR, new ErrorMsg(ErrorMsg.JAXP_COMPILE_ERR, e));
         }
         return null;
     }

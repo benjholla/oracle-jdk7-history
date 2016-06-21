@@ -3,6 +3,7 @@
 
 package com.sun.org.apache.xml.internal.serializer;
 
+import com.sun.org.apache.xalan.internal.utils.SecuritySupport;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -68,7 +69,7 @@ abstract public class ToStream extends SerializerBase
 
     
     protected char[] m_lineSep =
-        System.getProperty("line.separator").toCharArray();
+        SecuritySupport.getSystemProperty("line.separator").toCharArray();
 
     
     protected boolean m_lineSepUse = true;

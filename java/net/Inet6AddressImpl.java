@@ -44,7 +44,7 @@ class Inet6AddressImpl implements InetAddressImpl {
         if (anyLocalAddress == null) {
             if (InetAddress.preferIPv6Address) {
                 anyLocalAddress = new Inet6Address();
-                anyLocalAddress.hostName = "::";
+                anyLocalAddress.holder().hostName = "::";
             } else {
                 anyLocalAddress = (new Inet4AddressImpl()).anyLocalAddress();
             }

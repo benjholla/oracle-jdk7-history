@@ -14,14 +14,22 @@ import java.lang.reflect.InvocationTargetException;
 
 
 class NewInstance {
-
+    private static final String DEFAULT_PACKAGE = "com.sun.org.apache.xerces.internal";
     
     static Object newInstance (ClassLoader classLoader, String className)
         throws ClassNotFoundException, IllegalAccessException,
             InstantiationException
     {
+        
+        boolean internal = false;
+        if (System.getSecurityManager() != null) {
+            if (className != null && className.startsWith(DEFAULT_PACKAGE)) {
+                internal = true;
+            }
+        }
+
         Class driverClass;
-        if (classLoader == null) {
+        if (classLoader == null || internal) {
             driverClass = Class.forName(className);
         } else {
             driverClass = classLoader.loadClass(className);
@@ -29,26 +37,4 @@ class NewInstance {
         return driverClass.newInstance();
     }
 
-    
-    static ClassLoader getClassLoader ()
-    {
-        Method m = null;
-
-        try {
-            m = Thread.class.getMethod("getContextClassLoader", (Class[]) null);
-        } catch (NoSuchMethodException e) {
-            
-            return NewInstance.class.getClassLoader();
-        }
-
-        try {
-            return (ClassLoader) m.invoke(Thread.currentThread(), (Object[]) null);
-        } catch (IllegalAccessException e) {
-            
-            throw new UnknownError(e.getMessage());
-        } catch (InvocationTargetException e) {
-            
-            throw new UnknownError(e.getMessage());
-        }
-    }
 }

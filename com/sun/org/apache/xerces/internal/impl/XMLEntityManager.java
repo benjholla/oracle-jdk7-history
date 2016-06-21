@@ -35,6 +35,7 @@ import com.sun.org.apache.xerces.internal.xni.XMLResourceIdentifier;
 import com.sun.org.apache.xerces.internal.xni.XNIException;
 import com.sun.org.apache.xerces.internal.xni.parser.*;
 import com.sun.org.apache.xerces.internal.impl.Constants;
+import com.sun.org.apache.xerces.internal.utils.SecuritySupport;
 import com.sun.xml.internal.stream.Entity;
 import com.sun.org.apache.xerces.internal.xni.Augmentations;
 
@@ -454,7 +455,7 @@ protected static final String PARSER_SETTINGS =
         if (reader == null) {
             stream = xmlInputSource.getByteStream();
             if (stream == null) {
-                URL location = new URL(escapeNonUSAscii(expandedSystemId));
+                URL location = new URL(expandedSystemId);
                 URLConnection connect = location.openConnection();
                 if (!(connect instanceof HttpURLConnection)) {
                     stream = connect.getInputStream();
@@ -1398,7 +1399,7 @@ protected static final String PARSER_SETTINGS =
         
         String userDir = "";
         try {
-            userDir = System.getProperty("user.dir");
+            userDir = SecuritySupport.getSystemProperty("user.dir");
         }
         catch (SecurityException se) {
         }
@@ -2108,46 +2109,6 @@ protected static final String PARSER_SETTINGS =
 
     } 
 
-    
-    protected static String escapeNonUSAscii(String str) {
-        if (str == null) {
-            return str;
-        }
-
-        
-        StringBuffer buffer = new StringBuffer();
-        byte[] bytes = null;
-        byte b;
-        try {
-            bytes = str.getBytes("UTF-8");
-        } catch (java.io.UnsupportedEncodingException e) {
-            
-            return str;
-        }
-        int len = bytes.length;
-        int ch;
-
-        
-        for (int i = 0; i < len; i++) {
-            b = bytes[i];
-            
-            if (b < 0) {
-                ch = b + 256;
-                buffer.append('%');
-                buffer.append(gHexChs[ch >> 4]);
-                buffer.append(gHexChs[ch & 0xf]);
-            }
-            else if (b != '%' && b != '#' && gNeedEscaping[b]) {
-                buffer.append('%');
-                buffer.append(gAfterEscaping1[b]);
-                buffer.append(gAfterEscaping2[b]);
-            }
-            else {
-                buffer.append((char)b);
-            }
-        }
-        return buffer.toString();
-    }
 
     
     

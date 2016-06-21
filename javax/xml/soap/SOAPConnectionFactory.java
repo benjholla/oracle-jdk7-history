@@ -5,7 +5,7 @@ package javax.xml.soap;
 
 public abstract class SOAPConnectionFactory {
     
-    static private final String DEFAULT_SOAP_CONNECTION_FACTORY
+    static final String DEFAULT_SOAP_CONNECTION_FACTORY
         = "com.sun.xml.internal.messaging.saaj.client.p2p.HttpSOAPConnectionFactory";
 
     
