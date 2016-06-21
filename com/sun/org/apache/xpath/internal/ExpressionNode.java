@@ -1,0 +1,23 @@
+
+
+
+package com.sun.org.apache.xpath.internal;
+
+import javax.xml.transform.SourceLocator;
+
+
+public interface ExpressionNode extends SourceLocator
+{
+  
+  public void exprSetParent(ExpressionNode n);
+  public ExpressionNode exprGetParent();
+
+  
+  public void exprAddChild(ExpressionNode n, int i);
+
+  
+  public ExpressionNode exprGetChild(int i);
+
+  
+  public int exprGetNumChildren();
+}

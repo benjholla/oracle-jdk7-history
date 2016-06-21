@@ -1,0 +1,15 @@
+
+
+
+
+package org.w3c.dom;
+
+
+public interface Notation extends Node {
+    
+    public String getPublicId();
+
+    
+    public String getSystemId();
+
+}

@@ -1,0 +1,13 @@
+
+
+
+
+package org.w3c.dom.html;
+
+
+public interface HTMLParagraphElement extends HTMLElement {
+    
+    public String getAlign();
+    public void setAlign(String align);
+
+}
