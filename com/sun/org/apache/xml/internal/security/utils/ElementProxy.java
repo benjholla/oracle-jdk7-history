@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2007, 2014, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
 /**
@@ -468,9 +468,12 @@ public abstract class ElementProxy {
      * @param namespace
      * @param prefix
      * @throws XMLSecurityException
+     * @throws SecurityException if a security manager is installed and the
+     *    caller does not have permission to set the default prefix
      */
     public static void setDefaultPrefix(String namespace, String prefix)
         throws XMLSecurityException {
+        JavaUtils.checkRegisterPermission();
         if (prefixMappings.containsValue(prefix)) {
             String storedPrefix = prefixMappings.get(namespace);
             if (!storedPrefix.equals(prefix)) {

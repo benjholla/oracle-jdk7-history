@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2007, 2014, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
 /*
@@ -1658,6 +1658,15 @@ public final class BasisLibrary {
                                      "","$colon$","$ques$","$hash$","$per$",
                                      "$aster$"});
 
+    }
+
+    /**
+     *  Utility method to calculate string-length as a number of code points,
+     *  to avoid possible errors with string that contains
+     *  complementary characters
+     */
+    public static int getStringLength(String str) {
+        return str.codePointCount(0,str.length());
     }
 
     //-- End utility functions
