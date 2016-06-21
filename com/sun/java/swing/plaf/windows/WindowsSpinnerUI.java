@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2006, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2014, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
  *
@@ -63,6 +63,9 @@ public class WindowsSpinnerUI extends BasicSpinnerUI {
 
     private void paintXPBackground(Graphics g, JComponent c) {
         XPStyle xp = XPStyle.getXP();
+        if (xp == null) {
+            return;
+        }
         Skin skin = xp.getSkin(c, Part.EP_EDIT);
         State state = getXPState(c);
         skin.paintSkin(g, 0, 0, c.getWidth(), c.getHeight(), state);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2005, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2014, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
  *
@@ -215,7 +215,6 @@ public class WindowsSliderUI extends BasicSliderUI
     }
 
     private Part getXPThumbPart() {
-        XPStyle xp = XPStyle.getXP();
         Part part;
         boolean vertical = (slider.getOrientation() == JSlider.VERTICAL);
         boolean leftToRight = slider.getComponentOrientation().isLeftToRight();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996, 2008, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1996, 2014, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
  *
@@ -758,7 +758,6 @@ public class MouseEvent extends InputEvent {
 
             if (getModifiersEx() != 0) { //There is at least one more button in a pressed state.
                 if (id == MouseEvent.MOUSE_RELEASED || id == MouseEvent.MOUSE_CLICKED){
-                    System.out.println("MEvent. CASE!");
                     shouldExcludeButtonFromExtModifiers = true;
                 }
             }

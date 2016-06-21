@@ -548,14 +548,14 @@ final class NimbusDefaults {
         d.put("List.cellNoFocusBorder", new BorderUIResource(BorderFactory.createEmptyBorder(2, 5, 2, 5)));
         d.put("List.focusCellHighlightBorder", new BorderUIResource(new PainterBorder("Tree:TreeCell[Enabled+Focused].backgroundPainter", new Insets(2, 5, 2, 5))));
         addColor(d, "List.dropLineColor", "nimbusFocus", 0.0f, 0.0f, 0.0f, 0);
-        addColor(d, "List[Selected].textForeground", "nimbusLightBackground", 0.0f, 0.0f, 0.0f, 0, false);
-        addColor(d, "List[Selected].textBackground", "nimbusSelectionBackground", 0.0f, 0.0f, 0.0f, 0, false);
-        addColor(d, "List[Disabled+Selected].textBackground", "nimbusSelectionBackground", 0.0f, 0.0f, 0.0f, 0, false);
-        addColor(d, "List[Disabled].textForeground", "nimbusDisabledText", 0.0f, 0.0f, 0.0f, 0, false);
+        addColor(d, "List[Selected].textForeground", "nimbusLightBackground", 0.0f, 0.0f, 0.0f, 0);
+        addColor(d, "List[Selected].textBackground", "nimbusSelectionBackground", 0.0f, 0.0f, 0.0f, 0);
+        addColor(d, "List[Disabled+Selected].textBackground", "nimbusSelectionBackground", 0.0f, 0.0f, 0.0f, 0);
+        addColor(d, "List[Disabled].textForeground", "nimbusDisabledText", 0.0f, 0.0f, 0.0f, 0);
         d.put("List:\"List.cellRenderer\".contentMargins", new InsetsUIResource(0, 0, 0, 0));
         d.put("List:\"List.cellRenderer\".opaque", Boolean.TRUE);
         addColor(d, "List:\"List.cellRenderer\"[Disabled].textForeground", "nimbusDisabledText", 0.0f, 0.0f, 0.0f, 0);
-        addColor(d, "List:\"List.cellRenderer\"[Disabled].background", "nimbusSelectionBackground", 0.0f, 0.0f, 0.0f, 0, false);
+        addColor(d, "List:\"List.cellRenderer\"[Disabled].background", "nimbusSelectionBackground", 0.0f, 0.0f, 0.0f, 0);
 
         //Initialize MenuBar
         d.put("MenuBar.contentMargins", new InsetsUIResource(2, 6, 2, 6));

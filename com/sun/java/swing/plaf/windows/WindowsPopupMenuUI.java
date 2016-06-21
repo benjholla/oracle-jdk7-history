@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2006, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2014, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
  *
@@ -194,8 +194,8 @@ public class WindowsPopupMenuUI extends BasicPopupMenuUI {
 
     @Override
     public void paint(Graphics g, JComponent c) {
-        if (WindowsMenuItemUI.isVistaPainting()) {
-            XPStyle xp = XPStyle.getXP();
+        XPStyle xp = XPStyle.getXP();
+        if (WindowsMenuItemUI.isVistaPainting(xp)) {
             Skin skin = xp.getSkin(c, Part.MP_POPUPBACKGROUND);
             skin.paintSkin(g, 0, 0, c.getWidth(),c.getHeight(), State.NORMAL);
             int textOffset = getTextOffset(c);
