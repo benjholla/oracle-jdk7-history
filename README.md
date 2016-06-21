@@ -1,9 +1,12 @@
 # oracle-jdk7-history
+
 This repository contains two other branches containing the release history of this version of Java.
 - oracle-jdk7-history
 - oracle-jdk7-history-comments-stripped
+
 ## Releases
 This repository was generated from the following build releases.
+
 - jdk-7-linux-x64
 - jdk-7u1-linux-x64
 - jdk-7u2-linux-x64
