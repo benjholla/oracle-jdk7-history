@@ -309,8 +309,18 @@ public class SynthComboBoxUI extends BasicComboBoxUI implements
     private class SynthComboBoxRenderer extends JLabel implements ListCellRenderer, UIResource {
         public SynthComboBoxRenderer() {
             super();
-            setName("ComboBox.renderer");
             setText(" ");
+        }
+
+        @Override
+        public String getName() {
+            
+            
+            
+            
+            String name = super.getName();
+
+            return name == null ? "ComboBox.renderer" : name;
         }
 
         @Override

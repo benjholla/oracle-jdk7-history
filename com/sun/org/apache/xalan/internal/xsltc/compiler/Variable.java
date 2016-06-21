@@ -9,6 +9,7 @@ import com.sun.org.apache.bcel.internal.generic.ACONST_NULL;
 import com.sun.org.apache.bcel.internal.generic.ConstantPoolGen;
 import com.sun.org.apache.bcel.internal.generic.DCONST;
 import com.sun.org.apache.bcel.internal.generic.ICONST;
+import com.sun.org.apache.bcel.internal.generic.InstructionHandle;
 import com.sun.org.apache.bcel.internal.generic.InstructionList;
 import com.sun.org.apache.bcel.internal.generic.PUTFIELD;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.BooleanType;
@@ -100,7 +101,7 @@ final class Variable extends VariableBase {
             if (_local == null) {
                 _local = methodGen.addLocalVariable2(getEscapedName(),
                                                      _type.toJCType(),
-                                                     il.getEnd());
+                                                     null);
             }
             
             if ((_type instanceof IntType) ||
@@ -111,7 +112,10 @@ final class Variable extends VariableBase {
                 il.append(new DCONST(0)); 
             else
                 il.append(new ACONST_NULL()); 
-            il.append(_type.STORE(_local.getIndex()));
+
+            
+            _local.setStart(il.append(_type.STORE(_local.getIndex())));
+
         }
     }
 
@@ -135,10 +139,20 @@ final class Variable extends VariableBase {
             translateValue(classGen, methodGen);
 
             
-            if (_local == null) {
+            boolean createLocal = _local == null;
+            if (createLocal) {
                 mapRegister(methodGen);
             }
+            InstructionHandle storeInst =
             il.append(_type.STORE(_local.getIndex()));
+
+            
+            
+            
+            
+            if (createLocal) {
+                _local.setStart(storeInst);
+        }
         }
         else {
             String signature = _type.toSignature();

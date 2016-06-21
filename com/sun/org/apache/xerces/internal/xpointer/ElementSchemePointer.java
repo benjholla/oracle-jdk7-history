@@ -34,10 +34,10 @@ class ElementSchemePointer implements XPointerPart {
 
     
     private boolean fIsElementFound = false;
-    
+
     
     private boolean fWasOnlyEmptyElementFound = false;
-    
+
     
     boolean fIsShortHand = false;
 
@@ -122,7 +122,7 @@ class ElementSchemePointer implements XPointerPart {
         if (!success) {
             reportError("InvalidElementSchemeXPointer",
                     new Object[] { xpointer });
-        }    
+        }
 
         
         
@@ -229,7 +229,7 @@ class ElementSchemePointer implements XPointerPart {
     
     protected boolean matchChildSequence(QName element, int event)
             throws XNIException {
-    	
+
         
         if (fCurrentChildDepth >= fCurrentChildSequence.length) {
             int tmpCurrentChildSequence[] = new int[fCurrentChildSequence.length];
@@ -278,7 +278,7 @@ class ElementSchemePointer implements XPointerPart {
 
                 fCurrentChildDepth--;
                 fCurrentChildPosition = fCurrentChildSequence[fCurrentChildDepth] + 1;
-                
+
             } else if (event == XPointerPart.EVENT_ELEMENT_EMPTY) {
 
                 fCurrentChildSequence[fCurrentChildDepth] = fCurrentChildPosition;
@@ -294,7 +294,7 @@ class ElementSchemePointer implements XPointerPart {
                         fIsElementFound = false;
                     }
                 
-                
+
             }
         }
 
@@ -351,24 +351,24 @@ class ElementSchemePointer implements XPointerPart {
         return fIsFragmentResolved ;
     }
 
-        
-    public boolean isChildFragmentResolved() {
-    	
-    	if (fIsShortHand && fShortHandPointer != null && fChildSequence.length <= 0) {
-    		return fShortHandPointer.isChildFragmentResolved();
-    	} else {
-    		return fWasOnlyEmptyElementFound ? !fWasOnlyEmptyElementFound
-    				: (fIsFragmentResolved && (fCurrentChildDepth >= fFoundDepth));
-    	}
-    }
     
+    public boolean isChildFragmentResolved() {
+        
+        if (fIsShortHand && fShortHandPointer != null && fChildSequence.length <= 0) {
+                return fShortHandPointer.isChildFragmentResolved();
+        } else {
+                return fWasOnlyEmptyElementFound ? !fWasOnlyEmptyElementFound
+                                : (fIsFragmentResolved && (fCurrentChildDepth >= fFoundDepth));
+        }
+    }
+
     
     protected void reportError(String key, Object[] arguments)
             throws XNIException {
-    	        
-    	throw new XNIException((fErrorReporter
-    			.getMessageFormatter(XPointerMessageFormatter.XPOINTER_DOMAIN))
-				.formatMessage(fErrorReporter.getLocale(), key, arguments));
+        
+        throw new XNIException((fErrorReporter
+                        .getMessageFormatter(XPointerMessageFormatter.XPOINTER_DOMAIN))
+                                .formatMessage(fErrorReporter.getLocale(), key, arguments));
     }
 
     
@@ -397,7 +397,7 @@ class ElementSchemePointer implements XPointerPart {
         fCurrentChildDepth = 0;
         fIsFragmentResolved = false;
         fShortHandPointer = null;
-        
+
         initErrorReporter();
     }
 

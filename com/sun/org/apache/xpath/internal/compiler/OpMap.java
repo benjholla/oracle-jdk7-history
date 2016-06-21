@@ -144,7 +144,7 @@ public class OpMap
     else
     {
       throw new RuntimeException(
-        XSLMessages.createXPATHMessage(XPATHErrorResources.ER_UNKNOWN_STEP, new Object[]{new Integer(stepType).toString()}));
+        XSLMessages.createXPATHMessage(XPATHErrorResources.ER_UNKNOWN_STEP, new Object[]{String.valueOf(stepType)}));
       
     }
   }

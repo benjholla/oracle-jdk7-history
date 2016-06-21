@@ -99,7 +99,7 @@ public class DocumentImpl
         
         newdoc.mutationEvents = mutationEvents;
 
-    	return newdoc;
+        return newdoc;
 
     } 
 
@@ -128,7 +128,7 @@ public class DocumentImpl
                                            NodeFilter filter,
                                            boolean entityReferenceExpansion)
     {
-        
+
         if (root == null) {
                   String msg = DOMMessageFormatter.formatMessage(DOMMessageFormatter.DOM_DOMAIN, "NOT_SUPPORTED_ERR", null);
                   throw new DOMException(DOMException.NOT_SUPPORTED_ERR, msg);
@@ -161,7 +161,7 @@ public class DocumentImpl
                                        NodeFilter filter,
                                        boolean entityReferenceExpansion)
     {
-    	if (root == null) {
+        if (root == null) {
             String msg = DOMMessageFormatter.formatMessage(DOMMessageFormatter.DOM_DOMAIN, "NOT_SUPPORTED_ERR", null);
             throw new DOMException(DOMException.NOT_SUPPORTED_ERR, msg);
         }
@@ -262,17 +262,17 @@ public class DocumentImpl
 
     
     public Event createEvent(String type)
-	throws DOMException {
-	    if (type.equalsIgnoreCase("Events") || "Event".equals(type))
-	        return new EventImpl();
-	    if (type.equalsIgnoreCase("MutationEvents") ||
+        throws DOMException {
+            if (type.equalsIgnoreCase("Events") || "Event".equals(type))
+                return new EventImpl();
+            if (type.equalsIgnoreCase("MutationEvents") ||
                 "MutationEvent".equals(type))
-	        return new MutationEventImpl();
-	    else {
+                return new MutationEventImpl();
+            else {
             String msg = DOMMessageFormatter.formatMessage(DOMMessageFormatter.DOM_DOMAIN, "NOT_SUPPORTED_ERR", null);
-	        throw new DOMException(DOMException.NOT_SUPPORTED_ERR, msg);
+                throw new DOMException(DOMException.NOT_SUPPORTED_ERR, msg);
         }
-	}
+        }
 
     
     void setMutationEvents(boolean set) {
@@ -325,7 +325,7 @@ public class DocumentImpl
         String type;
         EventListener listener;
         boolean useCapture;
-	    
+
         
         LEntry(String type, EventListener listener, boolean useCapture)
         {
@@ -335,7 +335,7 @@ public class DocumentImpl
         }
 
     } 
-	
+
     
     protected void addEventListener(NodeImpl node, String type,
                                     EventListener listener, boolean useCapture)
@@ -344,18 +344,18 @@ public class DocumentImpl
         
         if (type == null || type.equals("") || listener == null)
             return;
-      
+
         
         
         removeEventListener(node, type, listener, useCapture);
-	    
+
         Vector nodeListeners = getEventListeners(node);
         if(nodeListeners == null) {
             nodeListeners = new Vector();
             setEventListeners(node, nodeListeners);
         }
         nodeListeners.addElement(new LEntry(type, listener, useCapture));
-	    
+
         
         LCount lc = LCount.lookup(type);
         if (useCapture) {
@@ -368,7 +368,7 @@ public class DocumentImpl
         }
 
     } 
-	
+
     
     protected void removeEventListener(NodeImpl node, String type,
                                        EventListener listener,
@@ -386,7 +386,7 @@ public class DocumentImpl
         
         for (int i = nodeListeners.size() - 1; i >= 0; --i) {
             LEntry le = (LEntry) nodeListeners.elementAt(i);
-            if (le.useCapture == useCapture && le.listener == listener && 
+            if (le.useCapture == useCapture && le.listener == listener &&
                 le.type.equals(type)) {
                 nodeListeners.removeElementAt(i);
                 
@@ -411,16 +411,16 @@ public class DocumentImpl
 
     protected void copyEventListeners(NodeImpl src, NodeImpl tgt) {
         Vector nodeListeners = getEventListeners(src);
-	if (nodeListeners == null) {
-	    return;
-	}
-	setEventListeners(tgt, (Vector) nodeListeners.clone());
+        if (nodeListeners == null) {
+            return;
+        }
+        setEventListeners(tgt, (Vector) nodeListeners.clone());
     }
 
     
     protected boolean dispatchEvent(NodeImpl node, Event event) {
         if (event == null) return false;
-        
+
         
         
         EventImpl evt = (EventImpl)event;
@@ -431,7 +431,7 @@ public class DocumentImpl
             String msg = DOMMessageFormatter.formatMessage(DOMMessageFormatter.DOM_DOMAIN, "UNSPECIFIED_EVENT_TYPE_ERR", null);
             throw new EventException(EventException.UNSPECIFIED_EVENT_TYPE_ERR, msg);
         }
-        
+
         
         LCount lc = LCount.lookup(evt.getType());
         if (lc.total == 0)
@@ -444,7 +444,7 @@ public class DocumentImpl
         evt.target = node;
         evt.stopPropagation = false;
         evt.preventDefault = false;
-        
+
         
         
         
@@ -462,7 +462,7 @@ public class DocumentImpl
             p = n;
             n = n.getParentNode();
         }
-        
+
         
         if (lc.captures > 0) {
             evt.eventPhase = Event.CAPTURING_PHASE;
@@ -495,8 +495,8 @@ public class DocumentImpl
                 }
             }
         }
-        
-        
+
+
         
         if (lc.bubbles > 0) {
             
@@ -559,7 +559,7 @@ public class DocumentImpl
                 }
             }
         }
-        
+
         
         
         
@@ -571,11 +571,30 @@ public class DocumentImpl
             
         }
 
-        return evt.preventDefault;        
+        return evt.preventDefault;
     } 
 
     
     protected void dispatchEventToSubtree(Node n, Event e) {
+
+        ((NodeImpl) n).dispatchEvent(e);
+        if (n.getNodeType() == Node.ELEMENT_NODE) {
+            NamedNodeMap a = n.getAttributes();
+            for (int i = a.getLength() - 1; i >= 0; --i)
+                dispatchingEventToSubtree(a.item(i), e);
+        }
+        dispatchingEventToSubtree(n.getFirstChild(), e);
+
+    } 
+
+
+    
+    protected void dispatchingEventToSubtree(Node n, Event e) {
+        if (n==null)
+                return;
+
+        
+        
         
         ((NodeImpl) n).dispatchEvent(e);
         if (n.getNodeType() == Node.ELEMENT_NODE) {
@@ -584,28 +603,9 @@ public class DocumentImpl
                 dispatchingEventToSubtree(a.item(i), e);
         }
         dispatchingEventToSubtree(n.getFirstChild(), e);
-        
-    } 
-
-
-    
-    protected void dispatchingEventToSubtree(Node n, Event e) {
-    	if (n==null) 
-    		return;
-    	
-    	
-        
-        
-    	((NodeImpl) n).dispatchEvent(e);
-        if (n.getNodeType() == Node.ELEMENT_NODE) {
-            NamedNodeMap a = n.getAttributes();
-            for (int i = a.getLength() - 1; i >= 0; --i)
-                dispatchingEventToSubtree(a.item(i), e);
-        }
-        dispatchingEventToSubtree(n.getFirstChild(), e);   
         dispatchingEventToSubtree(n.getNextSibling(), e);
     }
-    
+
     
     class EnclosingAttr implements Serializable {
         private static final long serialVersionUID = 5208387723391647216L;
@@ -622,7 +622,7 @@ public class DocumentImpl
                                     MutationEvent.MODIFICATION);
         else
             dispatchAggregateEvents(node, null, null, (short) 0);
-	        
+
     } 
 
     
@@ -706,45 +706,45 @@ public class DocumentImpl
     
     void modifyingCharacterData(NodeImpl node, boolean replace) {
         if (mutationEvents) {
-        	if (!replace) {
-        		saveEnclosingAttr(node);
-        	}
+                if (!replace) {
+                        saveEnclosingAttr(node);
+                }
         }
     }
 
     
     void modifiedCharacterData(NodeImpl node, String oldvalue, String value, boolean replace) {
         if (mutationEvents) {
-        	if (!replace) {
-        		
-        		LCount lc =
-        			LCount.lookup(MutationEventImpl.DOM_CHARACTER_DATA_MODIFIED);
-        		if (lc.total > 0) {
-        			MutationEvent me = new MutationEventImpl();
-        			me.initMutationEvent(
-                                 	MutationEventImpl.DOM_CHARACTER_DATA_MODIFIED,
-                                     	true, false, null,
-										oldvalue, value, null, (short) 0);
-        			dispatchEvent(node, me);
-        		}
-            
-        		
-        		
-        		dispatchAggregateEvents(node, savedEnclosingAttr);
-        	} 
+                if (!replace) {
+                        
+                        LCount lc =
+                                LCount.lookup(MutationEventImpl.DOM_CHARACTER_DATA_MODIFIED);
+                        if (lc.total > 0) {
+                                MutationEvent me = new MutationEventImpl();
+                                me.initMutationEvent(
+                                        MutationEventImpl.DOM_CHARACTER_DATA_MODIFIED,
+                                        true, false, null,
+                                                                                oldvalue, value, null, (short) 0);
+                                dispatchEvent(node, me);
+                        }
+
+                        
+                        
+                        dispatchAggregateEvents(node, savedEnclosingAttr);
+                } 
         }
     }
-    
+
     
     void replacedCharacterData(NodeImpl node, String oldvalue, String value) {
-    	
-    	
-    	
-    	
-    	modifiedCharacterData(node, oldvalue, value, false);
+        
+        
+        
+        
+        modifiedCharacterData(node, oldvalue, value, false);
     }
-    
-    
+
+
 
     
     void insertingNode(NodeImpl node, boolean replace) {
@@ -808,14 +808,14 @@ public class DocumentImpl
                 dispatchAggregateEvents(node, savedEnclosingAttr);
             }
         }
-        
+
         
         if (ranges != null) {
             int size = ranges.size();
             for (int i = 0; i != size; i++) {
                 ((RangeImpl)ranges.elementAt(i)).insertedNodeFromDOM(newInternal);
             }
-        }        
+        }
     }
 
     
@@ -901,12 +901,12 @@ public class DocumentImpl
             saveEnclosingAttr(node);
         }
     }
-    
+
     
     void replacingData (NodeImpl node) {
-    	if (mutationEvents) {
-    			saveEnclosingAttr(node);
-    	}
+        if (mutationEvents) {
+                        saveEnclosingAttr(node);
+        }
     }
 
     
@@ -947,7 +947,7 @@ public class DocumentImpl
         
         
         if (mutationEvents) {
-    	    
+            
             
             LCount lc = LCount.lookup(MutationEventImpl.DOM_ATTR_MODIFIED);
             if (lc.total > 0) {
@@ -965,16 +965,16 @@ public class DocumentImpl
             dispatchAggregateEvents(oldOwner, null, null, (short) 0);
         }
     }
-    
+
 
     
     void renamedAttrNode(Attr oldAt, Attr newAt) {
-	
+        
     }
 
     
     void renamedElement(Element oldEl, Element newEl) {
-	
+        
     }
 
 } 

@@ -13,7 +13,7 @@ public class ExtendedSchemaDVFactoryImpl extends BaseSchemaDVFactory {
     static {
         createBuiltInTypes();
     }
-    
+
     
     static void createBuiltInTypes() {
         final String ANYATOMICTYPE     = "anyAtomicType";
@@ -21,7 +21,7 @@ public class ExtendedSchemaDVFactoryImpl extends BaseSchemaDVFactory {
         final String YEARMONTHDURATION = "yearMonthDuration";
         final String DAYTIMEDURATION   = "dayTimeDuration";
 
-    	createBuiltInTypes(fBuiltInTypes, XSSimpleTypeDecl.fAnyAtomicType);
+        createBuiltInTypes(fBuiltInTypes, XSSimpleTypeDecl.fAnyAtomicType);
 
         
         fBuiltInTypes.put(ANYATOMICTYPE, XSSimpleTypeDecl.fAnyAtomicType);

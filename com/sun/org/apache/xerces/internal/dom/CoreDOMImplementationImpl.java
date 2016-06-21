@@ -4,7 +4,10 @@ package com.sun.org.apache.xerces.internal.dom;
 
 import com.sun.org.apache.xerces.internal.impl.RevalidationHandler;
 import com.sun.org.apache.xerces.internal.parsers.DOMParserImpl;
+import com.sun.org.apache.xerces.internal.parsers.DTDConfiguration;
+import com.sun.org.apache.xerces.internal.parsers.XIncludeAwareParserConfiguration;
 import com.sun.org.apache.xerces.internal.util.XMLChar;
+import com.sun.org.apache.xerces.internal.utils.ObjectFactory;
 import com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarDescription;
 import com.sun.org.apache.xml.internal.serialize.DOMSerializerImpl;
 import org.w3c.dom.DOMException;
@@ -67,8 +70,7 @@ public class CoreDOMImplementationImpl
                 && (anyVersion || version.equals("3.0"))) {
                 try {
                     Class xpathClass = ObjectFactory.findProviderClass(
-                        "com.sun.org.apache.xpath.internal.domapi.XPathEvaluatorImpl",
-                        ObjectFactory.findClassLoader(), true);
+                        "com.sun.org.apache.xpath.internal.domapi.XPathEvaluatorImpl", true);
 
                 
                 
@@ -204,9 +206,7 @@ public class CoreDOMImplementationImpl
                 if ((feature.equalsIgnoreCase("+XPath"))) {
                     try {
                         Class xpathClass = ObjectFactory.findProviderClass(
-                            "com.sun.org.apache.xpath.internal.domapi.XPathEvaluatorImpl",
-                            ObjectFactory.findClassLoader(), true);
-
+                            "com.sun.org.apache.xpath.internal.domapi.XPathEvaluatorImpl", true);
                         
                         
                         Class interfaces[] = xpathClass.getInterfaces();
@@ -243,14 +243,12 @@ public class CoreDOMImplementationImpl
                 }
                 if (schemaType != null
                         && schemaType.equals("http://www.w3.org/TR/REC-xml")) {
-                        return new DOMParserImpl(
-                                "com.sun.org.apache.xerces.internal.parsers.DTDConfiguration",
+                        return new DOMParserImpl(new DTDConfiguration(),
                                 schemaType);
                 }
                 else {
                         
-                        return new DOMParserImpl(
-                                "com.sun.org.apache.xerces.internal.parsers.XIncludeAwareParserConfiguration",
+                        return new DOMParserImpl(new XIncludeAwareParserConfiguration(),
                                 schemaType);
                 }
         }

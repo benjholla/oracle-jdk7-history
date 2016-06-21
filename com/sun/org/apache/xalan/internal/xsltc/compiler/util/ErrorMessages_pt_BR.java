@@ -295,13 +295,13 @@ public class ErrorMessages_pt_BR extends ListResourceBundle {
         
         {ErrorMsg.XSLTC_SOURCE_ERR,
         "XSLTCSource.build() chamado sem o systemId ser definido."},
-        
+
         { ErrorMsg.ER_RESULT_NULL,
             "O resultado n\u00E3o deve ser nulo"},
 
         
         {ErrorMsg.JAXP_INVALID_SET_PARAM_VALUE,
-        "O valor do par\u00E2metro {0} deve ser um Objeto Java v\u00E1lido"},            
+        "O valor do par\u00E2metro {0} deve ser um Objeto Java v\u00E1lido"},
 
 
         {ErrorMsg.COMPILE_STDIN_ERR,
@@ -377,7 +377,7 @@ public class ErrorMessages_pt_BR extends ListResourceBundle {
         
         {ErrorMsg.ERROR_MSG,
         "ERROR:  ''{0}''"},
-        
+
         
         {ErrorMsg.TRANSFORM_WITH_TRANSLET_STR,
         "Transformar usando translet ''{0}'' "},
@@ -405,10 +405,10 @@ public class ErrorMessages_pt_BR extends ListResourceBundle {
         
         {ErrorMsg.RUNTIME_ERROR_KEY,
         "Erros de translet:"},
-        
+
         
         {ErrorMsg.INVALID_QNAME_ERR,
-        "Um atributo cujo valor deve ser um QName ou uma lista de QNames separada por espa\u00E7os em branco tinha o valor ''{0}''"}, 
+        "Um atributo cujo valor deve ser um QName ou uma lista de QNames separada por espa\u00E7os em branco tinha o valor ''{0}''"},
 
         
         {ErrorMsg.INVALID_NCNAME_ERR,
@@ -417,10 +417,10 @@ public class ErrorMessages_pt_BR extends ListResourceBundle {
         
         {ErrorMsg.INVALID_METHOD_IN_OUTPUT,
         "O atributo method de um elemento <xsl:output> tinha o valor ''{0}''. O valor deve ser um dos seguintes: ''xml'', ''html'', ''text'', ou qname, mas n\u00E3o ncname"},
-        
+
         {ErrorMsg.JAXP_GET_FEATURE_NULL_NAME,
         "O nome do recurso n\u00E3o pode ser nulo em TransformerFactory.getFeature(Nome da string)."},
-        
+
         {ErrorMsg.JAXP_SET_FEATURE_NULL_NAME,
         "O nome do recurso n\u00E3o pode ser nulo em TransformerFactory.setFeature(Nome da string, valor booliano)."},
 

@@ -12,6 +12,7 @@ import com.sun.org.apache.xml.internal.dtm.DTM;
 import com.sun.org.apache.xml.internal.utils.PrefixResolver;
 import com.sun.org.apache.xpath.internal.res.XPATHErrorResources;
 import com.sun.org.apache.xalan.internal.res.XSLMessages;
+import com.sun.org.apache.xalan.internal.utils.FactoryImpl;
 
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
@@ -43,6 +44,7 @@ public class XPathExpressionImpl  implements javax.xml.xpath.XPathExpression{
     
     private boolean featureSecureProcessing = false;
 
+    private boolean useServicesMechanism = true;
     
     protected XPathExpressionImpl() { };
 
@@ -61,12 +63,13 @@ public class XPathExpressionImpl  implements javax.xml.xpath.XPathExpression{
             JAXPPrefixResolver prefixResolver,
             XPathFunctionResolver functionResolver,
             XPathVariableResolver variableResolver,
-            boolean featureSecureProcessing ) {
+            boolean featureSecureProcessing, boolean useServicesMechanism ) {
         this.xpath = xpath;
         this.prefixResolver = prefixResolver;
         this.functionResolver = functionResolver;
         this.variableResolver = variableResolver;
         this.featureSecureProcessing = featureSecureProcessing;
+        this.useServicesMechanism = useServicesMechanism;
     };
 
     public void setXPath (com.sun.org.apache.xpath.internal.XPath xpath ) {
@@ -177,7 +180,7 @@ public class XPathExpressionImpl  implements javax.xml.xpath.XPathExpression{
         }
         try {
             if ( dbf == null ) {
-                dbf = DocumentBuilderFactory.newInstance();
+                dbf = FactoryImpl.getDOMFactory(useServicesMechanism);
                 dbf.setNamespaceAware( true );
                 dbf.setValidating( false );
             }

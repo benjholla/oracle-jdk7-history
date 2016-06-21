@@ -352,54 +352,54 @@ public class DeferredDocumentImpl
     } 
 
 
-	
-	public int setDeferredAttribute(int elementNodeIndex,
-		                        String attrName,
-                          		String attrURI,
-                        		String attrValue,
-                        		boolean specified,
-                        		boolean id,
-                        		Object type) {
+        
+        public int setDeferredAttribute(int elementNodeIndex,
+                                        String attrName,
+                                        String attrURI,
+                                        String attrValue,
+                                        boolean specified,
+                                        boolean id,
+                                        Object type) {
 
-		
-		int attrNodeIndex = createDeferredAttribute(attrName, attrURI, attrValue, specified);
-		int attrChunk = attrNodeIndex >> CHUNK_SHIFT;
-		int attrIndex = attrNodeIndex & CHUNK_MASK;
-		
-		setChunkIndex(fNodeParent, elementNodeIndex, attrChunk, attrIndex);
+                
+                int attrNodeIndex = createDeferredAttribute(attrName, attrURI, attrValue, specified);
+                int attrChunk = attrNodeIndex >> CHUNK_SHIFT;
+                int attrIndex = attrNodeIndex & CHUNK_MASK;
+                
+                setChunkIndex(fNodeParent, elementNodeIndex, attrChunk, attrIndex);
 
-		int elementChunk = elementNodeIndex >> CHUNK_SHIFT;
-		int elementIndex = elementNodeIndex & CHUNK_MASK;
+                int elementChunk = elementNodeIndex >> CHUNK_SHIFT;
+                int elementIndex = elementNodeIndex & CHUNK_MASK;
 
-		
-		int lastAttrNodeIndex = getChunkIndex(fNodeExtra, elementChunk, elementIndex);
-		if (lastAttrNodeIndex != 0) {
-			
-			setChunkIndex(fNodePrevSib, lastAttrNodeIndex, attrChunk, attrIndex);
-		}
-		
-		setChunkIndex(fNodeExtra, attrNodeIndex, elementChunk, elementIndex);
+                
+                int lastAttrNodeIndex = getChunkIndex(fNodeExtra, elementChunk, elementIndex);
+                if (lastAttrNodeIndex != 0) {
+                        
+                        setChunkIndex(fNodePrevSib, lastAttrNodeIndex, attrChunk, attrIndex);
+                }
+                
+                setChunkIndex(fNodeExtra, attrNodeIndex, elementChunk, elementIndex);
 
-		int extra = getChunkIndex(fNodeExtra, attrChunk, attrIndex);
-		if (id) {
-			extra = extra | ID;
-			setChunkIndex(fNodeExtra, extra, attrChunk, attrIndex);
-			String value = getChunkValue(fNodeValue, attrChunk, attrIndex);
-			putIdentifier(value, elementNodeIndex);
-		}
-		
-		if (type != null) {
-			int extraDataIndex = createNode(DeferredNode.TYPE_NODE);
-			int echunk = extraDataIndex >> CHUNK_SHIFT;
-			int eindex = extraDataIndex & CHUNK_MASK;
+                int extra = getChunkIndex(fNodeExtra, attrChunk, attrIndex);
+                if (id) {
+                        extra = extra | ID;
+                        setChunkIndex(fNodeExtra, extra, attrChunk, attrIndex);
+                        String value = getChunkValue(fNodeValue, attrChunk, attrIndex);
+                        putIdentifier(value, elementNodeIndex);
+                }
+                
+                if (type != null) {
+                        int extraDataIndex = createNode(DeferredNode.TYPE_NODE);
+                        int echunk = extraDataIndex >> CHUNK_SHIFT;
+                        int eindex = extraDataIndex & CHUNK_MASK;
 
-			setChunkIndex(fNodeLastChild, extraDataIndex, attrChunk, attrIndex);
-			setChunkValue(fNodeValue, type, echunk, eindex);
-		}
+                        setChunkIndex(fNodeLastChild, extraDataIndex, attrChunk, attrIndex);
+                        setChunkValue(fNodeValue, type, echunk, eindex);
+                }
 
-		
-		return attrNodeIndex;
-	}
+                
+                return attrNodeIndex;
+        }
 
     
     public int setDeferredAttribute(int elementNodeIndex,
@@ -1118,7 +1118,7 @@ public class DeferredDocumentImpl
         return getNodeValue(nodeIndex, true);
     }
 
-	
+        
     public Object getTypeInfo(int nodeIndex) {
         if (nodeIndex == -1) {
             return null;

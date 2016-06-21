@@ -21,67 +21,88 @@ import com.sun.org.apache.xml.internal.serializer.utils.MsgKey;
 import com.sun.org.apache.xml.internal.serializer.utils.SystemIDResolver;
 import com.sun.org.apache.xml.internal.serializer.utils.Utils;
 import com.sun.org.apache.xml.internal.serializer.utils.WrappedRuntimeException;
+import com.sun.org.apache.xalan.internal.utils.ObjectFactory;
 
 
 final class CharInfo
 {
     
-    private HashMap m_charToString = new HashMap();
+    private HashMap m_charToString;
 
     
-    public static final String HTML_ENTITIES_RESOURCE = 
+    public static final String HTML_ENTITIES_RESOURCE =
                 "com.sun.org.apache.xml.internal.serializer.HTMLEntities";
 
     
-    public static final String XML_ENTITIES_RESOURCE = 
+    public static final String XML_ENTITIES_RESOURCE =
                 "com.sun.org.apache.xml.internal.serializer.XMLEntities";
 
     
-    public static final char S_HORIZONAL_TAB = 0x09;
+    static final char S_HORIZONAL_TAB = 0x09;
 
     
-    public static final char S_LINEFEED = 0x0A;
+    static final char S_LINEFEED = 0x0A;
 
     
-    public static final char S_CARRIAGERETURN = 0x0D;
-    
-        
-    final boolean onlyQuotAmpLtGt;
-    
-    
-    private static final int ASCII_MAX = 128;
-    
-    
-    private boolean[] isSpecialAttrASCII = new boolean[ASCII_MAX];
-    
-    
-    private boolean[] isSpecialTextASCII = new boolean[ASCII_MAX];
+    static final char S_CARRIAGERETURN = 0x0D;
+    static final char S_SPACE = 0x20;
+    static final char S_QUOTE = 0x22;
+    static final char S_LT = 0x3C;
+    static final char S_GT = 0x3E;
+    static final char S_NEL = 0x85;
+    static final char S_LINE_SEPARATOR = 0x2028;
 
-    private boolean[] isCleanTextASCII = new boolean[ASCII_MAX];
-
-       
-    private int array_of_bits[] = createEmptySetOfIntegers(65535);
-     
     
+    boolean onlyQuotAmpLtGt;
+
+    
+    static final int ASCII_MAX = 128;
+
+    
+    private final boolean[] shouldMapAttrChar_ASCII;
+
+    
+    private final boolean[] shouldMapTextChar_ASCII;
+
+    
+    private final int array_of_bits[];
+
+
     
     
     private static final int SHIFT_PER_WORD = 5;
-    
+
     
     private static final int LOW_ORDER_BITMASK = 0x1f;
-    
+
     
     private int firstWordNotUsed;
 
 
     
-    private CharInfo(String entitiesResource, String method)
+    private CharInfo()
     {
-        this(entitiesResource, method, false);
+        this.array_of_bits = createEmptySetOfIntegers(65535);
+        this.firstWordNotUsed = 0;
+        this.shouldMapAttrChar_ASCII = new boolean[ASCII_MAX];
+        this.shouldMapTextChar_ASCII = new boolean[ASCII_MAX];
+        this.m_charKey = new CharKey();
+
+        
+        
+
+        this.onlyQuotAmpLtGt = true;
+
+
+        return;
     }
 
     private CharInfo(String entitiesResource, String method, boolean internal)
     {
+        
+        this();
+        m_charToString = new HashMap();
+
         ResourceBundle entities = null;
         boolean noExtraEntities = true;
 
@@ -93,7 +114,7 @@ final class CharInfo
         
         
 
-        if (internal) { 
+        if (internal) {
             try {
                 
                 
@@ -107,12 +128,10 @@ final class CharInfo
                 String name = (String) keys.nextElement();
                 String value = entities.getString(name);
                 int code = Integer.parseInt(value);
-                defineEntity(name, (char) code);
-                if (extraEntity(code))
+                boolean extra = defineEntity(name, (char) code);
+                if (extra)
                     noExtraEntities = false;
             }
-            set(S_LINEFEED);
-            set(S_CARRIAGERETURN);
         } else {
             InputStream is = null;
 
@@ -196,8 +215,8 @@ final class CharInfo
 
                             int code = Integer.parseInt(value);
 
-                            defineEntity(name, (char) code);
-                            if (extraEntity(code))
+                            boolean extra = defineEntity(name, (char) code);
+                            if (extra)
                                 noExtraEntities = false;
                         }
                     }
@@ -206,8 +225,6 @@ final class CharInfo
                 }
 
                 is.close();
-                set(S_LINEFEED);
-                set(S_CARRIAGERETURN);
             } catch (Exception e) {
                 throw new RuntimeException(
                     Utils.messages.createMessage(
@@ -224,127 +241,110 @@ final class CharInfo
                 }
             }
         }
-          
-        
-        for (int ch = 0; ch <ASCII_MAX; ch++)
-        if((((0x20 <= ch || (0x0A == ch || 0x0D == ch || 0x09 == ch)))
-             && (!get(ch))) || ('"' == ch))
-        {
-            isCleanTextASCII[ch] = true;
-            isSpecialTextASCII[ch] = false;
-        }
-        else {
-            isCleanTextASCII[ch] = false;
-            isSpecialTextASCII[ch] = true;     
-        }       
-        
-
 
         onlyQuotAmpLtGt = noExtraEntities;
 
         
-        for (int i=0; i<ASCII_MAX; i++)
-            isSpecialAttrASCII[i] = get(i);   
-            
-        
-        if (Method.XML.equals(method)) 
+        if (Method.XML.equals(method))
         {
-            isSpecialAttrASCII[S_HORIZONAL_TAB] = true;
+            
+            shouldMapTextChar_ASCII[S_QUOTE] = false;
         }
+
+        if (Method.HTML.equals(method)) {
+                
+                
+                
+                shouldMapAttrChar_ASCII['<'] = false;
+
+                
+            shouldMapTextChar_ASCII[S_QUOTE] = false;
+    }
     }
 
     
-    private void defineEntity(String name, char value)
+    private boolean defineEntity(String name, char value)
     {
         StringBuilder sb = new StringBuilder("&");
         sb.append(name);
         sb.append(';');
         String entityString = sb.toString();
-        
-        defineChar2StringMapping(entityString, value);
+
+        boolean extra = defineChar2StringMapping(entityString, value);
+        return extra;
     }
+
+    
+    private final CharKey m_charKey;
 
     
     String getOutputStringForChar(char value)
     {
-        CharKey charKey = new CharKey(); 
+        CharKey charKey = new CharKey();
         charKey.setChar(value);
         return (String) m_charToString.get(charKey);
     }
+
     
-    
-    final boolean isSpecialAttrChar(int value)
+    final boolean shouldMapAttrChar(int value)
     {
         
         
 
         if (value < ASCII_MAX)
-            return isSpecialAttrASCII[value];
+            return shouldMapAttrChar_ASCII[value];
 
         
         
         return get(value);
-    }    
+    }
 
     
-    final boolean isSpecialTextChar(int value)
+    final boolean shouldMapTextChar(int value)
     {
         
         
 
         if (value < ASCII_MAX)
-            return isSpecialTextASCII[value];
+            return shouldMapTextChar_ASCII[value];
 
         
         
         return get(value);
     }
-    
-    
-    final boolean isTextASCIIClean(int value)
-    {
-        return isCleanTextASCII[value];
-    }
-    
 
-
-
-
-
-
-
-
-     
     private static CharInfo getCharInfoBasedOnPrivilege(
-        final String entitiesFileName, final String method, 
+        final String entitiesFileName, final String method,
         final boolean internal){
             return (CharInfo) AccessController.doPrivileged(
                 new PrivilegedAction() {
                         public Object run() {
-                            return new CharInfo(entitiesFileName, 
+                            return new CharInfo(entitiesFileName,
                               method, internal);}
-            });            
+            });
     }
-     
+
     
     static CharInfo getCharInfo(String entitiesFileName, String method)
     {
         CharInfo charInfo = (CharInfo) m_getCharInfoCache.get(entitiesFileName);
         if (charInfo != null) {
-            return charInfo;
+            return mutableCopyOf(charInfo);
         }
 
         
         try {
-            charInfo = getCharInfoBasedOnPrivilege(entitiesFileName, 
+            charInfo = getCharInfoBasedOnPrivilege(entitiesFileName,
                                         method, true);
+            
+            
             m_getCharInfoCache.put(entitiesFileName, charInfo);
-            return charInfo;
+            return mutableCopyOf(charInfo);
         } catch (Exception e) {}
 
         
         try {
-            return getCharInfoBasedOnPrivilege(entitiesFileName, 
+            return getCharInfoBasedOnPrivilege(entitiesFileName,
                                 method, false);
         } catch (Exception e) {}
 
@@ -362,11 +362,35 @@ final class CharInfo
             }
         }
 
-        return getCharInfoBasedOnPrivilege(entitiesFileName, 
+        return getCharInfoBasedOnPrivilege(entitiesFileName,
                                 method, false);
     }
 
     
+    private static CharInfo mutableCopyOf(CharInfo charInfo) {
+        CharInfo copy = new CharInfo();
+
+        int max = charInfo.array_of_bits.length;
+        System.arraycopy(charInfo.array_of_bits,0,copy.array_of_bits,0,max);
+
+        copy.firstWordNotUsed = charInfo.firstWordNotUsed;
+
+        max = charInfo.shouldMapAttrChar_ASCII.length;
+        System.arraycopy(charInfo.shouldMapAttrChar_ASCII,0,copy.shouldMapAttrChar_ASCII,0,max);
+
+        max = charInfo.shouldMapTextChar_ASCII.length;
+        System.arraycopy(charInfo.shouldMapTextChar_ASCII,0,copy.shouldMapTextChar_ASCII,0,max);
+
+        
+
+        copy.m_charToString = (HashMap) charInfo.m_charToString.clone();
+
+        copy.onlyQuotAmpLtGt = charInfo.onlyQuotAmpLtGt;
+
+                return copy;
+        }
+
+        
     private static HashMap m_getCharInfoCache = new HashMap();
 
     
@@ -386,19 +410,20 @@ final class CharInfo
 
         int[] arr = new int[arrayIndex(max - 1) + 1];
             return arr;
- 
+
     }
 
     
-    private final void set(int i) {   
-        setASCIIdirty(i);
-             
+    private final void set(int i) {
+        setASCIItextDirty(i);
+        setASCIIattrDirty(i);
+
         int j = (i >> SHIFT_PER_WORD); 
-        int k = j + 1;       
-        
+        int k = j + 1;
+
         if(firstWordNotUsed < k) 
             firstWordNotUsed = k;
-            
+
         array_of_bits[j] |= (1 << (i & LOW_ORDER_BITMASK));
     }
 
@@ -411,59 +436,71 @@ final class CharInfo
         
         
         if(j < firstWordNotUsed)
-            in_the_set = (array_of_bits[j] & 
+            in_the_set = (array_of_bits[j] &
                           (1 << (i & LOW_ORDER_BITMASK))
             ) != 0;  
         return in_the_set;
     }
+
     
-    
-    
-    
-    private boolean extraEntity(int entityValue)
+    private boolean extraEntity(String outputString, int charToMap)
     {
         boolean extra = false;
-        if (entityValue < 128)
+        if (charToMap < ASCII_MAX)
         {
-            switch (entityValue)
+            switch (charToMap)
             {
-                case 34 : 
-                case 38 : 
-                case 60 : 
-                case 62 : 
+                case '"' : 
+                        if (!outputString.equals("&quot;"))
+                                extra = true;
+                    break;
+                case '&' : 
+                        if (!outputString.equals("&amp;"))
+                                extra = true;
+                        break;
+                case '<' : 
+                        if (!outputString.equals("&lt;"))
+                                extra = true;
+                        break;
+                case '>' : 
+                        if (!outputString.equals("&gt;"))
+                                extra = true;
                     break;
                 default : 
                     extra = true;
             }
         }
         return extra;
-    }    
-    
-    
-    private void setASCIIdirty(int j) 
-    {
-        if (0 <= j && j < ASCII_MAX) 
-        {
-            isCleanTextASCII[j] = false;
-            isSpecialTextASCII[j] = true;
-        } 
     }
 
-        
-    private void setASCIIclean(int j)
+    
+    private void setASCIItextDirty(int j)
     {
-        if (0 <= j && j < ASCII_MAX) 
-        {        
-            isCleanTextASCII[j] = true;
-            isSpecialTextASCII[j] = false;
+        if (0 <= j && j < ASCII_MAX)
+        {
+            shouldMapTextChar_ASCII[j] = true;
         }
     }
+
     
-    private void defineChar2StringMapping(String outputString, char inputChar) 
+    private void setASCIIattrDirty(int j)
+    {
+        if (0 <= j && j < ASCII_MAX)
+        {
+            shouldMapAttrChar_ASCII[j] = true;
+        }
+    }
+
+    
+    boolean defineChar2StringMapping(String outputString, char inputChar)
     {
         CharKey character = new CharKey(inputChar);
         m_charToString.put(character, outputString);
-        set(inputChar);        
+        set(inputChar);  
+
+        boolean extraMapping = extraEntity(outputString, inputChar);
+        return extraMapping;
+
     }
 
     
@@ -478,12 +515,12 @@ final class CharInfo
       {
         m_char = key;
       }
-  
+
       
       public CharKey()
       {
       }
-  
+
       
       public final void setChar(char c)
       {
@@ -504,6 +541,6 @@ final class CharInfo
         return ((CharKey)obj).m_char == m_char;
       }
     }
-   
+
 
 }

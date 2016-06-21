@@ -24,4 +24,3 @@ public final class XSCMRepeatingLeaf extends XSCMLeaf {
         return fMaxOccurs;
     }
 }
-

@@ -9,12 +9,12 @@ import com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarPool;
 
 
 final class EmptyXMLSchema extends AbstractXMLSchema implements XMLGrammarPool {
-        
+
     
     private static final Grammar [] ZERO_LENGTH_GRAMMAR_ARRAY = new Grammar [0];
-    
+
     public EmptyXMLSchema() {}
-    
+
     
 
     public Grammar[] retrieveInitialGrammarSet(String grammarType) {
@@ -32,7 +32,7 @@ final class EmptyXMLSchema extends AbstractXMLSchema implements XMLGrammarPool {
     public void unlockPool() {}
 
     public void clear() {}
-    
+
     
 
     public XMLGrammarPool getGrammarPool() {

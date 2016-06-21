@@ -82,14 +82,14 @@ public class XMLErrorResources_it extends ListResourceBundle
   public static final String ER_SYSTEMID_UNKNOWN = "ER_SYSTEMID_UNKNOWN";
   public static final String ER_LOCATION_UNKNOWN = "ER_LOCATION_UNKNOWN";
   public static final String ER_PREFIX_MUST_RESOLVE = "ER_PREFIX_MUST_RESOLVE";
-  public static final String ER_CREATEDOCUMENT_NOT_SUPPORTED = "ER_CREATEDOCUMENT_NOT_SUPPORTED";  
+  public static final String ER_CREATEDOCUMENT_NOT_SUPPORTED = "ER_CREATEDOCUMENT_NOT_SUPPORTED";
   public static final String ER_CHILD_HAS_NO_OWNER_DOCUMENT = "ER_CHILD_HAS_NO_OWNER_DOCUMENT";
-  public static final String ER_CHILD_HAS_NO_OWNER_DOCUMENT_ELEMENT = "ER_CHILD_HAS_NO_OWNER_DOCUMENT_ELEMENT";  
-  public static final String ER_CANT_OUTPUT_TEXT_BEFORE_DOC = "ER_CANT_OUTPUT_TEXT_BEFORE_DOC";  
-  public static final String ER_CANT_HAVE_MORE_THAN_ONE_ROOT = "ER_CANT_HAVE_MORE_THAN_ONE_ROOT";  
-  public static final String ER_ARG_LOCALNAME_NULL = "ER_ARG_LOCALNAME_NULL";  
-  public static final String ER_ARG_LOCALNAME_INVALID = "ER_ARG_LOCALNAME_INVALID";  
-  public static final String ER_ARG_PREFIX_INVALID = "ER_ARG_PREFIX_INVALID";  
+  public static final String ER_CHILD_HAS_NO_OWNER_DOCUMENT_ELEMENT = "ER_CHILD_HAS_NO_OWNER_DOCUMENT_ELEMENT";
+  public static final String ER_CANT_OUTPUT_TEXT_BEFORE_DOC = "ER_CANT_OUTPUT_TEXT_BEFORE_DOC";
+  public static final String ER_CANT_HAVE_MORE_THAN_ONE_ROOT = "ER_CANT_HAVE_MORE_THAN_ONE_ROOT";
+  public static final String ER_ARG_LOCALNAME_NULL = "ER_ARG_LOCALNAME_NULL";
+  public static final String ER_ARG_LOCALNAME_INVALID = "ER_ARG_LOCALNAME_INVALID";
+  public static final String ER_ARG_PREFIX_INVALID = "ER_ARG_PREFIX_INVALID";
   public static final String ER_NAME_CANT_START_WITH_COLON = "ER_NAME_CANT_START_WITH_COLON";
 
   
@@ -116,8 +116,8 @@ public class XMLErrorResources_it extends ListResourceBundle
 
   
     {"ER0000" , "{0}" },
- 
-    { ER_FUNCTION_NOT_SUPPORTED, 
+
+    { ER_FUNCTION_NOT_SUPPORTED,
       "Funzione non supportata."},
 
     { ER_CANNOT_OVERWRITE_CAUSE,
@@ -134,7 +134,7 @@ public class XMLErrorResources_it extends ListResourceBundle
 
     { ER_COROUTINE_NOT_AVAIL,
       "Co-routine non disponibile, ID={0}"},
-    
+
     { ER_COROUTINE_CO_EXIT,
       "CoroutineManager ha ricevuto una richiesta co_exit()"},
 
@@ -170,7 +170,7 @@ public class XMLErrorResources_it extends ListResourceBundle
 
     { ER_NOT_SUPPORTED,
       "Non supportato: {0}"},
-    
+
     { ER_NODE_NON_NULL,
       "Il nodo deve essere non nullo per getDTMHandleFromNode"},
 
@@ -194,7 +194,7 @@ public class XMLErrorResources_it extends ListResourceBundle
 
     { ER_SCHEME_REQUIRED,
        "Lo schema \u00E8 obbligatorio."},
-    
+
     { ER_NO_SCHEME_IN_URI,
        "Nessuno schema trovato nell''URI: {0}"},
 
@@ -233,7 +233,7 @@ public class XMLErrorResources_it extends ListResourceBundle
 
     { ER_CANNOT_CHANGE_WHILE_PARSING,
       "Impossibile modificare {0} {1} durante l''analisi"},
-   
+
     { ER_SELF_CAUSATION_NOT_PERMITTED,
       "Creazione automatica della causa non consentita"},
 
@@ -243,18 +243,18 @@ public class XMLErrorResources_it extends ListResourceBundle
     { ER_NO_PORT_IF_NO_HOST,
       "La porta non pu\u00F2 essere specificata se l'host non \u00E8 specificato"},
 
-    { ER_NO_QUERY_STRING_IN_PATH, 
+    { ER_NO_QUERY_STRING_IN_PATH,
       "La stringa di query non pu\u00F2 essere specificata nella stringa di percorso e query."},
 
     { ER_NO_FRAGMENT_STRING_IN_PATH,
       "Il frammento non pu\u00F2 essere specificato sia nel percorso che nel frammento"},
 
-    { ER_CANNOT_INIT_URI_EMPTY_PARMS, 
+    { ER_CANNOT_INIT_URI_EMPTY_PARMS,
       "Impossibile inizializzare l'URI con i parametri vuoti"},
 
     { ER_METHOD_NOT_SUPPORTED,
       "Metodo attualmente non supportato "},
-    
+
     { ER_INCRSAXSRCFILTER_NOT_RESTARTABLE,
       "IncrementalSAXSource_Filter attualmente non riavviabile"},
 
@@ -293,7 +293,7 @@ public class XMLErrorResources_it extends ListResourceBundle
 
     { ER_ARG_LOCALNAME_NULL,
        "L'argomento 'localName' \u00E8 nullo"},
- 
+
     
     
     
@@ -305,33 +305,33 @@ public class XMLErrorResources_it extends ListResourceBundle
     
     { ER_ARG_PREFIX_INVALID,
        "Il prefisso in QNAME deve essere un NCName valido"},
-       
+
     { ER_NAME_CANT_START_WITH_COLON,
       "Il nome non pu\u00F2 iniziare con i due punti"},
-       
+
     { "BAD_CODE", "Parametro per createMessage fuori limite"},
     { "FORMAT_FAILED", "Eccezione durante la chiamata messageFormat"},
     { "line", "N. riga"},
     { "column","N. colonna"},
-    
+
     {ER_SERIALIZER_NOT_CONTENTHANDLER,
       "La classe serializzatore ''{0}'' non implementa org.xml.sax.ContentHandler."},
-    
+
     {ER_RESOURCE_COULD_NOT_FIND,
       "Risorsa [ {0} ] non trovata.\n {1}" },
-    
+
     {ER_RESOURCE_COULD_NOT_LOAD,
       "Impossibile caricare la risorsa [ {0} ]: {1} \n {2} \t {3}" },
-    
+
     {ER_BUFFER_SIZE_LESSTHAN_ZERO,
       "Dimensione buffer <=0" },
-    
+
     {ER_INVALID_UTF16_SURROGATE,
       "Rilevato surrogato UTF-16 non valido: {0}?" },
-    
+
     {ER_OIERROR,
       "Errore IO" },
-    
+
     {ER_ILLEGAL_ATTRIBUTE_POSITION,
       "Impossibile aggiungere l''attributo {0} dopo i nodi figlio o prima che sia prodotto un elemento. L''attributo verr\u00E0 ignorato."},
 
@@ -351,15 +351,15 @@ public class XMLErrorResources_it extends ListResourceBundle
 
     { ER_ILLEGAL_CHARACTER,
        "Tentativo di eseguire l''output di un carattere di valore integrale {0} non rappresentato nella codifica di output {1} specificata."},
-    
+
     {ER_COULD_NOT_LOAD_METHOD_PROPERTY,
       "Impossibile caricare il file delle propriet\u00E0 ''{0}'' per il metodo di emissione ''{1}'' (verificare CLASSPATH)" }
-    
-  
+
+
   };
 
   
- 
+
     protected Object[][] getContents() {
         return _contents;
     }
@@ -412,5 +412,5 @@ public class XMLErrorResources_it extends ListResourceBundle
 
     return suffix;
   }
-  
+
 }

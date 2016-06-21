@@ -142,7 +142,8 @@ public class Field {
             super.matched(actualValue, valueType, itemValueType, isNil);
             if(isNil && (fIdentityConstraint.getCategory() == IdentityConstraint.IC_KEY)) {
                 String code = "KeyMatchesNillable";
-                fStore.reportError(code, new Object[]{fIdentityConstraint.getElementName()});
+                fStore.reportError(code,
+                    new Object[]{fIdentityConstraint.getElementName(), fIdentityConstraint.getIdentityConstraintName()});
             }
             fStore.addValue(Field.this, actualValue, convertToPrimitiveKind(valueType), convertToPrimitiveKind(itemValueType));
             

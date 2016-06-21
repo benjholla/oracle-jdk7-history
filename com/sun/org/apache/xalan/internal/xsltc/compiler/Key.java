@@ -126,10 +126,10 @@ final class Key extends TopLevelElement {
         final LocalVariableGen parentNode =
             methodGen.addLocalVariable("parentNode",
                                        Util.getJCRefType("I"),
-                                       il.getEnd(), null);
+                                       null, null);
 
         
-        il.append(new ISTORE(parentNode.getIndex()));
+        parentNode.setStart(il.append(new ISTORE(parentNode.getIndex())));
 
         
         il.append(methodGen.loadCurrentNode());
@@ -146,7 +146,7 @@ final class Key extends TopLevelElement {
         
         il.append(classGen.loadTranslet());
         il.append(new PUSH(cpg, _name.toString()));
-        il.append(new ILOAD(parentNode.getIndex()));
+        parentNode.setEnd(il.append(new ILOAD(parentNode.getIndex())));
 
         
         il.append(methodGen.loadDOM());

@@ -16,19 +16,19 @@ public class PSVIElementNSImpl extends ElementNSImpl implements ElementPSVI {
 
     
     static final long serialVersionUID = 6815489624636016068L;
+
     
-    
-    public PSVIElementNSImpl(CoreDocumentImpl ownerDocument, String namespaceURI, 
+    public PSVIElementNSImpl(CoreDocumentImpl ownerDocument, String namespaceURI,
                              String qualifiedName, String localName) {
         super(ownerDocument, namespaceURI, qualifiedName, localName);
     }
+
     
-    
-    public PSVIElementNSImpl(CoreDocumentImpl ownerDocument, String namespaceURI, 
+    public PSVIElementNSImpl(CoreDocumentImpl ownerDocument, String namespaceURI,
                              String qualifiedName) {
         super(ownerDocument, namespaceURI, qualifiedName);
     }
-    
+
     
     protected XSElementDeclaration fDeclaration = null;
 
@@ -73,7 +73,7 @@ public class PSVIElementNSImpl extends ElementNSImpl implements ElementPSVI {
 
     
     protected XSModel fSchemaInformation = null;
-    
+
     
     
     
@@ -128,7 +128,7 @@ public class PSVIElementNSImpl extends ElementNSImpl implements ElementPSVI {
     public XSTypeDefinition getTypeDefinition() {
         return fTypeDecl;
     }
-    
+
     
     public XSSimpleTypeDefinition getMemberTypeDefinition() {
         return fMemberType;
@@ -143,7 +143,7 @@ public class PSVIElementNSImpl extends ElementNSImpl implements ElementPSVI {
     public XSModel getSchemaInformation() {
         return fSchemaInformation;
     }
-    
+
     
     public void setPSVI(ElementPSVI elem) {
         this.fDeclaration = elem.getElementDeclaration();
@@ -177,16 +177,16 @@ public class PSVIElementNSImpl extends ElementNSImpl implements ElementPSVI {
     public ShortList getItemValueTypes() {
         return this.fItemValueTypes;
     }
+
     
     
-    
-    
+
     private void writeObject(ObjectOutputStream out)
         throws IOException {
         throw new NotSerializableException(getClass().getName());
     }
 
-    private void readObject(ObjectInputStream in) 
+    private void readObject(ObjectInputStream in)
         throws IOException, ClassNotFoundException {
         throw new NotSerializableException(getClass().getName());
     }

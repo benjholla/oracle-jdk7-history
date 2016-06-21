@@ -295,13 +295,13 @@ public class ErrorMessages_sv extends ListResourceBundle {
         
         {ErrorMsg.XSLTC_SOURCE_ERR,
         "XSLTCSource.build() anropades utan angivet systemId."},
-        
+
         { ErrorMsg.ER_RESULT_NULL,
             "Result borde inte vara null"},
 
         
         {ErrorMsg.JAXP_INVALID_SET_PARAM_VALUE,
-        "Parameterv\u00E4rdet f\u00F6r {0} m\u00E5ste vara giltigt Java-objekt"},            
+        "Parameterv\u00E4rdet f\u00F6r {0} m\u00E5ste vara giltigt Java-objekt"},
 
 
         {ErrorMsg.COMPILE_STDIN_ERR,
@@ -377,7 +377,7 @@ public class ErrorMessages_sv extends ListResourceBundle {
         
         {ErrorMsg.ERROR_MSG,
         "ERROR:  ''{0}''"},
-        
+
         
         {ErrorMsg.TRANSFORM_WITH_TRANSLET_STR,
         "Transformering via translet ''{0}'' "},
@@ -405,10 +405,10 @@ public class ErrorMessages_sv extends ListResourceBundle {
         
         {ErrorMsg.RUNTIME_ERROR_KEY,
         "Transletfel:"},
-        
+
         
         {ErrorMsg.INVALID_QNAME_ERR,
-        "Ett attribut vars v\u00E4rde m\u00E5ste vara ett QName eller en blankteckenseparerad lista med QNames hade v\u00E4rdet ''{0}''"}, 
+        "Ett attribut vars v\u00E4rde m\u00E5ste vara ett QName eller en blankteckenseparerad lista med QNames hade v\u00E4rdet ''{0}''"},
 
         
         {ErrorMsg.INVALID_NCNAME_ERR,
@@ -417,10 +417,10 @@ public class ErrorMessages_sv extends ListResourceBundle {
         
         {ErrorMsg.INVALID_METHOD_IN_OUTPUT,
         "Metodattributet f\u00F6r ett <xsl:output>-element hade v\u00E4rdet ''{0}''. Endast n\u00E5got av f\u00F6ljande v\u00E4rden kan anv\u00E4ndas: ''xml'', ''html'', ''text'' eller qname-but-not-ncname i XML"},
-        
+
         {ErrorMsg.JAXP_GET_FEATURE_NULL_NAME,
         "Funktionsnamnet kan inte vara null i TransformerFactory.getFeature(namn p\u00E5 str\u00E4ng)."},
-        
+
         {ErrorMsg.JAXP_SET_FEATURE_NULL_NAME,
         "Funktionsnamnet kan inte vara null i TransformerFactory.setFeature(namn p\u00E5 str\u00E4ng, booleskt v\u00E4rde)."},
 

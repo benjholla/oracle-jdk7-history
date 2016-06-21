@@ -40,23 +40,23 @@ public class StandardParserConfiguration
 
 
     
-    protected static final String XMLSCHEMA_VALIDATION = 
+    protected static final String XMLSCHEMA_VALIDATION =
     Constants.XERCES_FEATURE_PREFIX + Constants.SCHEMA_VALIDATION_FEATURE;
 
     
-    protected static final String XMLSCHEMA_FULL_CHECKING = 
+    protected static final String XMLSCHEMA_FULL_CHECKING =
     Constants.XERCES_FEATURE_PREFIX + Constants.SCHEMA_FULL_CHECKING;
+
     
-    
-    protected static final String GENERATE_SYNTHETIC_ANNOTATIONS = 
+    protected static final String GENERATE_SYNTHETIC_ANNOTATIONS =
         Constants.XERCES_FEATURE_PREFIX + Constants.GENERATE_SYNTHETIC_ANNOTATIONS_FEATURE;
-    
+
     
     protected static final String VALIDATE_ANNOTATIONS =
         Constants.XERCES_FEATURE_PREFIX + Constants.VALIDATE_ANNOTATIONS_FEATURE;
+
     
-    
-    protected static final String HONOUR_ALL_SCHEMALOCATIONS = 
+    protected static final String HONOUR_ALL_SCHEMALOCATIONS =
         Constants.XERCES_FEATURE_PREFIX + Constants.HONOUR_ALL_SCHEMALOCATIONS_FEATURE;
 
     
@@ -150,7 +150,7 @@ public class StandardParserConfiguration
         setFeature(TOLERATE_DUPLICATES, false);
 
         
-    
+
         final String[] recognizedProperties = {
             
             
@@ -161,7 +161,7 @@ public class StandardParserConfiguration
             SCHEMA_DV_FACTORY,
             };
 
-			addRecognizedProperties(recognizedProperties);
+                        addRecognizedProperties(recognizedProperties);
 
     } 
 
@@ -175,8 +175,8 @@ public class StandardParserConfiguration
         if ( getFeature(XMLSCHEMA_VALIDATION )) {
             
             if (fSchemaValidator == null) {
-                fSchemaValidator = new XMLSchemaValidator(); 
-            
+                fSchemaValidator = new XMLSchemaValidator();
+
                 
                 fProperties.put(SCHEMA_VALIDATOR, fSchemaValidator);
                 addComponent(fSchemaValidator);
@@ -189,10 +189,10 @@ public class StandardParserConfiguration
             }
             fLastComponent = fSchemaValidator;
             fNamespaceBinder.setDocumentHandler(fSchemaValidator);
-            
+
             fSchemaValidator.setDocumentHandler(fDocumentHandler);
             fSchemaValidator.setDocumentSource(fNamespaceBinder);
-        } 
+        }
 
 
     } 
@@ -209,12 +209,12 @@ public class StandardParserConfiguration
 
         if (featureId.startsWith(Constants.XERCES_FEATURE_PREFIX)) {
             final int suffixLength = featureId.length() - Constants.XERCES_FEATURE_PREFIX.length();
-        	
+
             
             
             
             
-            if (suffixLength == Constants.SCHEMA_VALIDATION_FEATURE.length() && 
+            if (suffixLength == Constants.SCHEMA_VALIDATION_FEATURE.length() &&
                 featureId.endsWith(Constants.SCHEMA_VALIDATION_FEATURE)) {
                 return FeatureState.RECOGNIZED;
             }
@@ -225,13 +225,13 @@ public class StandardParserConfiguration
             }
             
             
-            if (suffixLength == Constants.SCHEMA_NORMALIZED_VALUE.length() && 
+            if (suffixLength == Constants.SCHEMA_NORMALIZED_VALUE.length() &&
                 featureId.endsWith(Constants.SCHEMA_NORMALIZED_VALUE)) {
                 return FeatureState.RECOGNIZED;
-            } 
+            }
             
             
-            if (suffixLength == Constants.SCHEMA_ELEMENT_DEFAULT.length() && 
+            if (suffixLength == Constants.SCHEMA_ELEMENT_DEFAULT.length() &&
                 featureId.endsWith(Constants.SCHEMA_ELEMENT_DEFAULT)) {
                 return FeatureState.RECOGNIZED;
             }
@@ -255,12 +255,12 @@ public class StandardParserConfiguration
 
         if (propertyId.startsWith(Constants.XERCES_PROPERTY_PREFIX)) {
             final int suffixLength = propertyId.length() - Constants.XERCES_PROPERTY_PREFIX.length();
-            
-            if (suffixLength == Constants.SCHEMA_LOCATION.length() && 
+
+            if (suffixLength == Constants.SCHEMA_LOCATION.length() &&
                 propertyId.endsWith(Constants.SCHEMA_LOCATION)) {
                 return PropertyState.RECOGNIZED;
             }
-            if (suffixLength == Constants.SCHEMA_NONS_LOCATION.length() && 
+            if (suffixLength == Constants.SCHEMA_NONS_LOCATION.length() &&
                 propertyId.endsWith(Constants.SCHEMA_NONS_LOCATION)) {
                 return PropertyState.RECOGNIZED;
             }
@@ -268,8 +268,8 @@ public class StandardParserConfiguration
 
         if (propertyId.startsWith(Constants.JAXP_PROPERTY_PREFIX)) {
             final int suffixLength = propertyId.length() - Constants.JAXP_PROPERTY_PREFIX.length();
-        	
-            if (suffixLength == Constants.SCHEMA_SOURCE.length() && 
+
+            if (suffixLength == Constants.SCHEMA_SOURCE.length() &&
                 propertyId.endsWith(Constants.SCHEMA_SOURCE)) {
                 return PropertyState.RECOGNIZED;
             }

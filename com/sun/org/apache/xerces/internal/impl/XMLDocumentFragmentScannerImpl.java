@@ -44,98 +44,98 @@ import javax.xml.stream.events.XMLEvent;
 public class XMLDocumentFragmentScannerImpl
         extends XMLScanner
         implements XMLDocumentScanner, XMLComponent, XMLEntityHandler, XMLBufferListener {
+
     
     
     
-    
-    
+
     protected int fElementAttributeLimit;
-    
+
     
     protected ExternalSubsetResolver fExternalSubsetResolver;
+
     
-    
-    
+
     
     
     protected static final int SCANNER_STATE_START_OF_MARKUP = 21;
-    
+
     
     protected static final int SCANNER_STATE_CONTENT = 22;
-    
+
     
     protected static final int SCANNER_STATE_PI = 23;
-    
+
     
     protected static final int SCANNER_STATE_DOCTYPE = 24;
-    
+
     
     protected static final int SCANNER_STATE_XML_DECL = 25;
-    
+
     
     protected static final int SCANNER_STATE_ROOT_ELEMENT = 26;
-    
+
     
     protected static final int SCANNER_STATE_COMMENT = 27;
-    
+
     
     protected static final int SCANNER_STATE_REFERENCE = 28;
-    
+
     
     protected static final int SCANNER_STATE_ATTRIBUTE = 29;
-    
+
     
     protected static final int SCANNER_STATE_ATTRIBUTE_VALUE = 30;
+
     
     
-    
-    
+
     
     protected static final int SCANNER_STATE_END_OF_INPUT = 33;
-    
+
     
     protected static final int SCANNER_STATE_TERMINATED = 34;
-    
+
     
     protected static final int SCANNER_STATE_CDATA = 35;
-    
+
     
     protected static final int SCANNER_STATE_TEXT_DECL = 36;
-    
+
     
     protected static final int SCANNER_STATE_CHARACTER_DATA = 37;
-    
+
     
     protected static final int SCANNER_STATE_START_ELEMENT_TAG = 38;
-    
+
     
     protected static final int SCANNER_STATE_END_ELEMENT_TAG = 39;
-    
+
     protected static final int SCANNER_STATE_CHAR_REFERENCE = 40;
     protected static final int SCANNER_STATE_BUILT_IN_REFS = 41;
+
     
-    
-    
-    
+
+
     
     protected static final String NOTIFY_BUILTIN_REFS =
             Constants.XERCES_FEATURE_PREFIX + Constants.NOTIFY_BUILTIN_REFS_FEATURE;
-    
+
     
     protected static final String ENTITY_RESOLVER =
             Constants.XERCES_PROPERTY_PREFIX + Constants.ENTITY_RESOLVER_PROPERTY;
-        
+
     
-    
+
     
     private static final String[] RECOGNIZED_FEATURES = {
                 NAMESPACES,
                 VALIDATION,
                 NOTIFY_BUILTIN_REFS,
                 NOTIFY_CHAR_REFS,
-                Constants.STAX_REPORT_CDATA_EVENT                
+                Constants.STAX_REPORT_CDATA_EVENT
     };
-    
+
     
     private static final Boolean[] FEATURE_DEFAULTS = {
                 Boolean.TRUE,
@@ -144,109 +144,109 @@ public class XMLDocumentFragmentScannerImpl
                 Boolean.FALSE,
                 Boolean.TRUE
     };
-    
+
     
     private static final String[] RECOGNIZED_PROPERTIES = {
         SYMBOL_TABLE,
                 ERROR_REPORTER,
                 ENTITY_MANAGER,
     };
-    
+
     
     private static final Object[] PROPERTY_DEFAULTS = {
                 null,
                 null,
                 null,
     };
-    
+
     protected static final char [] cdata = {'[','C','D','A','T','A','['};
     protected static final char [] xmlDecl = {'<','?','x','m','l'};
     protected static final char [] endTag = {'<','/'};
     
-    
+
     
     private static final boolean DEBUG_SCANNER_STATE = false;
-    
+
     
     private static final boolean DEBUG_DISPATCHER = false;
+
     
-    
-    protected static final boolean DEBUG_START_END_ELEMENT = false; 
-    
-    
+    protected static final boolean DEBUG_START_END_ELEMENT = false;
+
+
     
     protected static final boolean DEBUG_NEXT = false ;
-    
+
     
     protected static final boolean DEBUG = false;
     protected static final boolean DEBUG_COALESCE = false;
     
     
     
+
     
-    
-    
+
     
     protected XMLDocumentHandler fDocumentHandler;
     protected int fScannerLastState ;
-    
+
     
     protected XMLEntityStorage fEntityStore;
-    
+
     
     protected int[] fEntityStack = new int[4];
-    
+
     
     protected int fMarkupDepth;
-    
+
     
     protected boolean fEmptyElement ;
-    
+
     
     
     protected boolean fReadingAttributes = false;
-    
+
     
     protected int fScannerState;
-    
+
     
     protected boolean fInScanContent = false;
     protected boolean fLastSectionWasCData = false;
     protected boolean fLastSectionWasEntityReference = false;
-    protected boolean fLastSectionWasCharacterData = false;        
-    
+    protected boolean fLastSectionWasCharacterData = false;
+
     
     protected boolean fHasExternalDTD;
-    
+
     
     protected boolean fStandaloneSet;
     protected boolean fStandalone;
     protected String fVersion;
+
     
-    
-    
+
     
     protected QName fCurrentElement;
-    
+
     
     protected ElementStack fElementStack = new ElementStack();
     protected ElementStack2 fElementStack2 = new ElementStack2();
+
     
+
     
-    
-    
-    
+
     protected String fPITarget ;
-    
+
     
     protected XMLString fPIData  = new XMLString();
+
     
-    
-    
-    
+
+
     
     protected boolean fNotifyBuiltInRefs = false;
-    
+
     
     
     protected boolean fReplaceEntityReferences = true;
@@ -256,61 +256,61 @@ public class XMLDocumentFragmentScannerImpl
     protected String fDeclaredEncoding =  null;
     
     protected boolean fDisallowDoctype = false;
+
     
-    
-    
+
     
     protected Driver fDriver;
-    
+
     
     protected Driver fContentDriver = createContentDriver();
+
     
-    
-    
+
     
     protected QName fElementQName = new QName();
-    
+
     
     protected QName fAttributeQName = new QName();
-    
+
     
     protected XMLAttributesIteratorImpl fAttributes = new XMLAttributesIteratorImpl();
-    
-    
+
+
     
     protected XMLString fTempString = new XMLString();
-    
+
     
     protected XMLString fTempString2 = new XMLString();
-    
+
     
     private String[] fStrings = new String[3];
-    
+
     
     protected XMLStringBuffer fStringBuffer = new XMLStringBuffer();
-    
+
     
     protected XMLStringBuffer fStringBuffer2 = new XMLStringBuffer();
-    
+
     
     
     protected XMLStringBuffer fContentBuffer = new XMLStringBuffer();
-    
+
     
     private final char[] fSingleChar = new char[1];
     private String fCurrentEntityName = null;
-    
+
     
     protected boolean fScanToEnd = false;
-    
+
     protected DTDGrammarUtil dtdGrammarUtil= null;
-    
+
     protected boolean fAddDefaultAttr = false;
-    
+
     protected boolean foundBuiltInRefs = false;
-    
+
     protected SecurityManager fSecurityManager = null;
-    
+
     
     static final short MAX_DEPTH_LIMIT = 5 ;
     static final short ELEMENT_ARRAY_LENGTH = 200 ;
@@ -327,38 +327,38 @@ public class XMLDocumentFragmentScannerImpl
     protected boolean fShouldSkip = false;
     protected boolean fAdd = false ;
     protected boolean fSkip = false;
-    
+
     
     private Augmentations fTempAugmentations = null;
     
     
     
-    
+
     
     public XMLDocumentFragmentScannerImpl() {
     } 
+
     
     
     
-    
-    
+
     
     public void setInputSource(XMLInputSource inputSource) throws IOException {
         fEntityManager.setEntityHandler(this);
         fEntityManager.startEntity("$fragment$", inputSource, false, true);
         
     } 
-    
+
     
    
-    
+
     public boolean scanDocument(boolean complete)
     throws IOException, XNIException {
-        
+
         
         fEntityManager.setEntityHandler(this);
         
-        
+
         int event = next();
         do {
             switch (event) {
@@ -414,60 +414,60 @@ public class XMLDocumentFragmentScannerImpl
                     break;
                 default :
                     throw new InternalError("processing event: " + event);
-                    
+
             }
             
             event = next();
             
         } while (event!=XMLStreamConstants.END_DOCUMENT && complete);
-        
-        if(event == XMLStreamConstants.END_DOCUMENT) {            
+
+        if(event == XMLStreamConstants.END_DOCUMENT) {
             fDocumentHandler.endDocument(null);
             return false;
         }
-        
+
         return true;
-        
+
     } 
-    
-    
-    
+
+
+
     public com.sun.org.apache.xerces.internal.xni.QName getElementQName(){
         if(fScannerLastState == XMLEvent.END_ELEMENT){
             fElementQName.setValues(fElementStack.getLastPoppedElement());
         }
         return fElementQName ;
     }
+
     
-    
-    
+
     public int next() throws IOException, XNIException {
         return fDriver.next();
     }
+
     
     
     
+
     
-    
-    
-    
+
     public void reset(XMLComponentManager componentManager)
     throws XMLConfigurationException {
-        
+
         super.reset(componentManager);
+
         
         
+
         
-                
         
-        
-                
+
         
         fReportCdataEvent = componentManager.getFeature(Constants.STAX_REPORT_CDATA_EVENT, true);
 
         fSecurityManager = (SecurityManager)componentManager.getProperty(Constants.SECURITY_MANAGER, null);
         fElementAttributeLimit = (fSecurityManager != null)?fSecurityManager.getElementAttrLimit():0;
-        
+
         fNotifyBuiltInRefs = componentManager.getFeature(NOTIFY_BUILTIN_REFS, false);
 
         Object resolver = componentManager.getProperty(ENTITY_RESOLVER, null);
@@ -486,7 +486,7 @@ public class XMLDocumentFragmentScannerImpl
         fShouldSkip = false;
         fAdd = false;
         fSkip = false;
-        
+
         
         fReadingAttributes = false;
         
@@ -494,28 +494,28 @@ public class XMLDocumentFragmentScannerImpl
         fSupportExternalEntities = true;
         fReplaceEntityReferences = true;
         fIsCoalesce = false;
-        
+
         
         setScannerState(SCANNER_STATE_CONTENT);
         setDriver(fContentDriver);
         fEntityStore = fEntityManager.getEntityStore();
-        
+
         dtdGrammarUtil = null;
-                
-        
+
+
         
     } 
-    
-    
+
+
     public void reset(PropertyManager propertyManager){
-        
+
         super.reset(propertyManager);
-        
+
         
         
         fNamespaces = ((Boolean)propertyManager.getProperty(XMLInputFactory.IS_NAMESPACE_AWARE)).booleanValue();
         fNotifyBuiltInRefs = false ;
-                
+
         
         fMarkupDepth = 0;
         fCurrentElement = null;
@@ -549,22 +549,22 @@ public class XMLDocumentFragmentScannerImpl
         
         fEntityStore = fEntityManager.getEntityStore();
         
-        
+
         dtdGrammarUtil = null;
-                
+
     } 
-    
+
     
     public String[] getRecognizedFeatures() {
         return (String[])(RECOGNIZED_FEATURES.clone());
     } 
-    
+
     
     public void setFeature(String featureId, boolean state)
     throws XMLConfigurationException {
-        
+
         super.setFeature(featureId, state);
-        
+
         
         if (featureId.startsWith(Constants.XERCES_FEATURE_PREFIX)) {
             String feature = featureId.substring(Constants.XERCES_FEATURE_PREFIX.length());
@@ -572,20 +572,20 @@ public class XMLDocumentFragmentScannerImpl
                 fNotifyBuiltInRefs = state;
             }
         }
-        
+
     } 
-    
+
     
     public String[] getRecognizedProperties() {
         return (String[])(RECOGNIZED_PROPERTIES.clone());
     } 
-    
+
     
     public void setProperty(String propertyId, Object value)
     throws XMLConfigurationException {
-        
+
         super.setProperty(propertyId, value);
-        
+
         
         if (propertyId.startsWith(Constants.XERCES_PROPERTY_PREFIX)) {
             final int suffixLength = propertyId.length() - Constants.XERCES_PROPERTY_PREFIX.length();
@@ -601,8 +601,8 @@ public class XMLDocumentFragmentScannerImpl
                 return;
             }
         }
-        
-        
+
+
                 
         if (propertyId.startsWith(Constants.XERCES_PROPERTY_PREFIX)) {
             String property = propertyId.substring(Constants.XERCES_PROPERTY_PREFIX.length());
@@ -611,9 +611,9 @@ public class XMLDocumentFragmentScannerImpl
             }
             return;
         }
-        
+
     } 
-    
+
     
     public Boolean getFeatureDefault(String featureId) {
         for (int i = 0; i < RECOGNIZED_FEATURES.length; i++) {
@@ -623,7 +623,7 @@ public class XMLDocumentFragmentScannerImpl
         }
         return null;
     } 
-    
+
     
     public Object getPropertyDefault(String propertyId) {
         for (int i = 0; i < RECOGNIZED_PROPERTIES.length; i++) {
@@ -633,32 +633,32 @@ public class XMLDocumentFragmentScannerImpl
         }
         return null;
     } 
+
     
     
     
-    
-    
+
     
     public void setDocumentHandler(XMLDocumentHandler documentHandler) {
         fDocumentHandler = documentHandler;
         
     } 
-    
-    
+
+
     
     public XMLDocumentHandler getDocumentHandler(){
         return fDocumentHandler;
     }
+
     
     
     
-    
-    
+
     
     public void startEntity(String name,
             XMLResourceIdentifier identifier,
             String encoding, Augmentations augs) throws XNIException {
-        
+
         
         if (fEntityDepth == fEntityStack.length) {
             int[] entityarray = new int[fEntityStack.length * 2];
@@ -666,15 +666,15 @@ public class XMLDocumentFragmentScannerImpl
             fEntityStack = entityarray;
         }
         fEntityStack[fEntityDepth] = fMarkupDepth;
-        
+
         super.startEntity(name, identifier, encoding, augs);
-        
+
         
         if(fStandalone && fEntityStore.isEntityDeclInExternalSubset(name)) {
             reportFatalError("MSG_REFERENCE_TO_EXTERNALLY_DECLARED_ENTITY_WHEN_STANDALONE",
                     new Object[]{name});
         }
-        
+
         
         
         if (fDocumentHandler != null && !fScanningAttribute) {
@@ -682,20 +682,20 @@ public class XMLDocumentFragmentScannerImpl
                 fDocumentHandler.startGeneralEntity(name, identifier, encoding, null);
             }
         }
-        
+
     } 
-    
+
     
     public void endEntity(String name, Augmentations augs) throws IOException, XNIException {
-        
+
         
         super.endEntity(name, augs);
-        
+
         
         if (fMarkupDepth != fEntityStack[fEntityDepth]) {
             reportFatalError("MarkupEntityMismatch", null);
         }
-        
+
         
         
         if (fDocumentHandler != null && !fScanningAttribute) {
@@ -703,31 +703,31 @@ public class XMLDocumentFragmentScannerImpl
                 fDocumentHandler.endGeneralEntity(name, null);
             }
         }
-        
-        
+
+
     } 
+
     
     
     
+
     
-    
-    
-    
+
     
     protected Driver createContentDriver() {
         return new FragmentContentDriver();
     } 
+
     
-    
-    
+
     
     protected void scanXMLDeclOrTextDecl(boolean scanningTextDecl)
     throws IOException, XNIException {
-        
+
         
         super.scanXMLDeclOrTextDecl(scanningTextDecl, fStrings);
         fMarkupDepth--;
-        
+
         
         String version = fStrings[0];
         String encoding = fStrings[1];
@@ -739,8 +739,8 @@ public class XMLDocumentFragmentScannerImpl
         
         
         fEntityManager.setStandalone(fStandalone);
-        
-        
+
+
         
         if (fDocumentHandler != null) {
             if (scanningTextDecl) {
@@ -749,7 +749,7 @@ public class XMLDocumentFragmentScannerImpl
                 fDocumentHandler.xmlDecl(version, encoding, standalone, null);
             }
         }
-       
+
         if(version != null){
             fEntityScanner.setVersion(version);
             fEntityScanner.setXMLVersion(version);
@@ -758,17 +758,17 @@ public class XMLDocumentFragmentScannerImpl
         if (encoding != null && !fEntityScanner.getCurrentEntity().isEncodingExternallySpecified()) {
              fEntityScanner.setEncoding(encoding);
         }
-        
+
     } 
-    
+
     public String getPITarget(){
         return fPITarget ;
     }
-    
+
     public XMLStringBuffer getPIData(){
         return fContentBuffer ;
     }
-    
+
     
     public XMLString getCharacterData(){
         if(fUsebuffer){
@@ -776,23 +776,23 @@ public class XMLDocumentFragmentScannerImpl
         }else{
             return fTempString;
         }
-        
+
     }
-    
-    
+
+
     
     protected void scanPIData(String target, XMLStringBuffer data)
     throws IOException, XNIException {
-        
+
         super.scanPIData(target, data);
-        
+
         
         fPITarget = target ;
-        
+
         fMarkupDepth--;
-        
+
     } 
-    
+
     
     protected void scanComment() throws IOException, XNIException {
         fContentBuffer.clear();
@@ -800,20 +800,20 @@ public class XMLDocumentFragmentScannerImpl
         
         fUsebuffer = true;
         fMarkupDepth--;
-        
+
     } 
-    
+
     
     public String getComment(){
         return fContentBuffer.toString();
     }
-    
+
     void addElement(String rawname){
         if(fElementPointer < ELEMENT_ARRAY_LENGTH){
             
             fElementArray[fElementPointer] = rawname ;
             
-            
+
             if(DEBUG_SKIP_ALGORITHM){
                 StringBuffer sb = new StringBuffer() ;
                 sb.append(" Storing element information ") ;
@@ -822,7 +822,7 @@ public class XMLDocumentFragmentScannerImpl
                 sb.append(" fElementStack.fDepth = " + fElementStack.fDepth);
                 System.out.println(sb.toString()) ;
             }
-            
+
             
             if(fElementStack.fDepth < MAX_DEPTH_LIMIT){
                 short column = storePointerForADepth(fElementPointer);
@@ -845,20 +845,20 @@ public class XMLDocumentFragmentScannerImpl
             fElementPointer++ ;
         }
     }
-    
-    
+
+
     void resetPointer(short depth, short column){
         fPointerInfo[depth] [column] = (short)0;
     }
-    
+
     
     short storePointerForADepth(short elementPointer){
         short depth = (short) fElementStack.fDepth ;
-        
+
         
         
         for(short i = 0 ; i < MAX_POINTER_AT_A_DEPTH ; i++){
-            
+
             if(canStore(depth, i)){
                 fPointerInfo[depth][i] = elementPointer ;
                 if(DEBUG_SKIP_ALGORITHM){
@@ -876,22 +876,22 @@ public class XMLDocumentFragmentScannerImpl
         }
         return -1 ;
     }
-    
+
     boolean canStore(short depth, short column){
         
         
         
         return fPointerInfo[depth][column] == 0 ? true : false ;
     }
-    
-    
+
+
     short getElementPointer(short depth, short column){
         
         
         
         return fPointerInfo[depth][column] ;
     }
-    
+
     
     
     boolean skipFromTheBuffer(String rawname) throws IOException{
@@ -908,9 +908,9 @@ public class XMLDocumentFragmentScannerImpl
         } else
             return false ;
     }
-            
+
     boolean skipQElement(String rawname) throws IOException{
-        
+
         final int c = fEntityScanner.getChar(rawname.length());
         
         if(XMLChar.isName(c)){
@@ -919,11 +919,11 @@ public class XMLDocumentFragmentScannerImpl
             return fEntityScanner.skipString(rawname);
         }
     }
-    
+
     protected boolean skipElement() throws IOException {
-        
+
         if(!fShouldSkip) return false ;
-        
+
         if(fLastPointerLocation != 0){
             
             String rawname = fElementArray[fLastPointerLocation + 1] ;
@@ -936,7 +936,7 @@ public class XMLDocumentFragmentScannerImpl
             } else{
                 
                 fLastPointerLocation = 0 ;
-                
+
             }
         }
         
@@ -944,23 +944,23 @@ public class XMLDocumentFragmentScannerImpl
         
         
         return fShouldSkip && skipElement((short)0);
-        
+
     }
-    
+
     
     boolean skipElement(short column) throws IOException {
         short depth = (short)fElementStack.fDepth ;
-        
+
         if(depth > MAX_DEPTH_LIMIT){
             return fShouldSkip = false ;
         }
         for(short i = column ; i < MAX_POINTER_AT_A_DEPTH ; i++){
             short pointer = getElementPointer(depth , i ) ;
-            
+
             if(pointer == 0){
                 return fShouldSkip = false ;
             }
-            
+
             if(fElementArray[pointer] != null && skipFromTheBuffer(fElementArray[pointer])){
                 if(DEBUG_SKIP_ALGORITHM){
                     System.out.println();
@@ -973,28 +973,28 @@ public class XMLDocumentFragmentScannerImpl
         }
         return fShouldSkip = false ;
     }
-    
+
     
     
     
     protected boolean scanStartElement()
     throws IOException, XNIException {
-        
+
         if (DEBUG_START_END_ELEMENT) System.out.println( this.getClass().toString() + ">>> scanStartElement()");
         
         if(fSkip && !fAdd){
             
             
-            
+
             QName name = fElementStack.getNext();
-            
+
             if(DEBUG_SKIP_ALGORITHM){
                 System.out.println("Trying to skip String = " + name.rawname);
             }
-            
+
             
             fSkip = fEntityScanner.skipString(name.rawname);
-                        
+
             if(fSkip){
                 if(DEBUG_SKIP_ALGORITHM){
                     System.out.println("Element SUCESSFULLY skipped = " + name.rawname);
@@ -1009,7 +1009,7 @@ public class XMLDocumentFragmentScannerImpl
                 }
             }
         }
-        
+
         
         
         
@@ -1023,32 +1023,32 @@ public class XMLDocumentFragmentScannerImpl
                 String name = fEntityScanner.scanName();
                 fElementQName.setValues(null, name, name, null);
             }
-            
+
             if(DEBUG)System.out.println("Element scanned in start element is " + fElementQName.toString());
             if(DEBUG_SKIP_ALGORITHM){
                 if(fAdd){
                     System.out.println("Elements are being ADDED -- elemet added is = " + fElementQName.rawname + " at count = " + fElementStack.fCount);
                 }
             }
-            
+
         }
-        
+
         
         if(fAdd){
             
             fElementStack.matchElement(fElementQName);
         }
-        
-        
+
+
         
         fCurrentElement = fElementQName;
-                
+
         String rawname = fElementQName.rawname;
-        
+
         fEmptyElement = false;
-        
+
         fAttributes.removeAllAttributes();
-        
+
         if(!seekCloseOfStartTag()){
             fReadingAttributes = true;
             fAttributeCacheUsedCount =0;
@@ -1056,21 +1056,21 @@ public class XMLDocumentFragmentScannerImpl
             fAddDefaultAttr = true;
             do {
                 scanAttribute(fAttributes);
-                if (fSecurityManager != null && fAttributes.getLength() > fElementAttributeLimit){  
+                if (fSecurityManager != null && fAttributes.getLength() > fElementAttributeLimit){
                     fErrorReporter.reportError(XMLMessageFormatter.XML_DOMAIN,
                                                  "ElementAttributeLimit",
                                                  new Object[]{rawname, new Integer(fAttributes.getLength()) },
                                                  XMLErrorReporter.SEVERITY_FATAL_ERROR );
                 }
-                
+
             } while (!seekCloseOfStartTag());
             fReadingAttributes=false;
         }
-        
+
         if (fEmptyElement) {
             
             fMarkupDepth--;
-            
+
             
             if (fMarkupDepth < fEntityStack[fEntityDepth - 1]) {
                 reportFatalError("ElementEntityMismatch",
@@ -1080,20 +1080,20 @@ public class XMLDocumentFragmentScannerImpl
             if (fDocumentHandler != null) {
                 fDocumentHandler.emptyElement(fElementQName, fAttributes, null);
             }
+
             
             
             
             
             
-            
-            
+
             
             fElementStack.popElement();
-            
+
         } else {
-            
+
             if(dtdGrammarUtil != null)
-                dtdGrammarUtil.startElement(fElementQName, fAttributes); 
+                dtdGrammarUtil.startElement(fElementQName, fAttributes);
             if(fDocumentHandler != null){
                 
                 
@@ -1101,18 +1101,18 @@ public class XMLDocumentFragmentScannerImpl
                 fDocumentHandler.startElement(fElementQName, fAttributes, null);
             }
         }
-        
-        
+
+
         if (DEBUG_START_END_ELEMENT) System.out.println(this.getClass().toString() + "<<< scanStartElement(): "+fEmptyElement);
         return fEmptyElement;
-        
+
     } 
 
     
     protected boolean seekCloseOfStartTag() throws IOException, XNIException {
         
         boolean sawSpace = fEntityScanner.skipSpaces();
-        
+
         
         final int c = fEntityScanner.peekChar();
         if (c == '>') {
@@ -1129,22 +1129,22 @@ public class XMLDocumentFragmentScannerImpl
         } else if (!isValidNameStartChar(c) || !sawSpace) {
             reportFatalError("ElementUnterminated", new Object[]{fElementQName.rawname});
         }
-        
+
         return false;
     }
-    
+
     public boolean hasAttributes(){
         return fAttributes.getLength() > 0 ? true : false ;
     }
+
+
+    
+
     
     
+
     
-    
-    
-    
-    
-    
-    
+
     
     public XMLAttributesIteratorImpl getAttributeIterator(){
         if(dtdGrammarUtil != null && fAddDefaultAttr){
@@ -1153,7 +1153,7 @@ public class XMLDocumentFragmentScannerImpl
         }
         return fAttributes;
     }
-    
+
     
     public boolean standaloneSet(){
         return fStandaloneSet;
@@ -1163,11 +1163,11 @@ public class XMLDocumentFragmentScannerImpl
         return fStandalone ;
     }
     
-    
+
     protected void scanAttribute(XMLAttributes attributes)
     throws IOException, XNIException {
         if (DEBUG_START_END_ELEMENT) System.out.println(this.getClass().toString() +">>> scanAttribute()");
-        
+
         
         if (fNamespaces) {
             fEntityScanner.scanQName(fAttributeQName);
@@ -1175,7 +1175,7 @@ public class XMLDocumentFragmentScannerImpl
             String name = fEntityScanner.scanName();
             fAttributeQName.setValues(null, name, name, null);
         }
-        
+
         
         fEntityScanner.skipSpaces();
         if (!fEntityScanner.skipChar('=')) {
@@ -1183,19 +1183,19 @@ public class XMLDocumentFragmentScannerImpl
                 new Object[] {fCurrentElement.rawname, fAttributeQName.rawname});
         }
         fEntityScanner.skipSpaces();
-        
+
         int attIndex = 0 ;
         
         boolean isVC =  fHasExternalDTD && !fStandalone;
         
         
-        
+
         
         
         
         
         XMLString tmpStr = getString();
-        
+
         scanAttributeValue(tmpStr, fTempString2,
                 fAttributeQName.rawname, attributes,
                 attIndex, isVC);
@@ -1204,7 +1204,7 @@ public class XMLDocumentFragmentScannerImpl
         int oldLen = attributes.getLength();
         
         attIndex = attributes.addAttribute(fAttributeQName, XMLSymbols.fCDATASymbol, null);
-        
+
         
         
         
@@ -1213,7 +1213,7 @@ public class XMLDocumentFragmentScannerImpl
                     new Object[]{fCurrentElement.rawname,
                             fAttributeQName.rawname});
         }
-        
+
         
         
         attributes.setValue(attIndex, null, tmpStr);
@@ -1221,11 +1221,11 @@ public class XMLDocumentFragmentScannerImpl
         
         
         attributes.setSpecified(attIndex, true);
-        
+
         if (DEBUG_START_END_ELEMENT) System.out.println(this.getClass().toString() +"<<< scanAttribute()");
-        
+
     } 
-    
+
     
     
     
@@ -1273,20 +1273,20 @@ public class XMLDocumentFragmentScannerImpl
             
         }
         return c;
-        
+
     } 
-    
-    
+
+
     
     
     protected boolean scanCDATASection(XMLStringBuffer contentBuffer, boolean complete)
     throws IOException, XNIException {
-        
+
         
         if (fDocumentHandler != null) {
             
         }
-        
+
         while (true) {
             
             if (!fEntityScanner.scanData("]]>", contentBuffer)) {
@@ -1312,43 +1312,43 @@ public class XMLDocumentFragmentScannerImpl
             }
         }
         fMarkupDepth--;
-        
+
         if (fDocumentHandler != null && contentBuffer.length > 0) {
             
         }
-        
+
         
         if (fDocumentHandler != null) {
             
         }
-        
+
         return true;
-        
+
     } 
-    
+
     
     protected int scanEndElement() throws IOException, XNIException {
         if (DEBUG_START_END_ELEMENT) System.out.println(this.getClass().toString() +">>> scanEndElement()");
-        
+
         
         QName endElementName = fElementStack.popElement();
-        
+
         String rawname = endElementName.rawname;
         if(DEBUG)System.out.println("endElementName = " + endElementName.toString());
         
         
         
         
+
+        
+
         
         
-        
-        
-        
-        
+
         if (!fEntityScanner.skipString(endElementName.rawname)) {
              reportFatalError("ETagRequired", new Object[]{rawname});
         }
-        
+
         
         fEntityScanner.skipSpaces();
         if (!fEntityScanner.skipChar('>')) {
@@ -1356,55 +1356,55 @@ public class XMLDocumentFragmentScannerImpl
                     new Object[]{rawname});
         }
         fMarkupDepth--;
-        
+
         
         fMarkupDepth--;
-        
+
         
         if (fMarkupDepth < fEntityStack[fEntityDepth - 1]) {
             reportFatalError("ElementEntityMismatch",
                     new Object[]{rawname});
         }
+
+        
+        
+
         
         
         
+
         
-        
-        
-        
-        
-        
-        if (fDocumentHandler != null ) {            
+        if (fDocumentHandler != null ) {
             
             
             
-            
+
             fDocumentHandler.endElement(endElementName, null);
         }
         if(dtdGrammarUtil != null)
             dtdGrammarUtil.endElement(endElementName);
-        
+
         return fMarkupDepth;
-        
+
     } 
-    
+
     
     protected void scanCharReference()
     throws IOException, XNIException {
-        
+
         fStringBuffer2.clear();
         int ch = scanCharReferenceValue(fStringBuffer2, null);
         fMarkupDepth--;
         if (ch != -1) {
             
-            
+
             if (fDocumentHandler != null) {
                 if (fNotifyCharRefs) {
                     fDocumentHandler.startGeneralEntity(fCharRefLiteral, null, null, null);
                 }
                 Augmentations augs = null;
                 if (fValidation && ch <= 0x20) {
-                    if (fTempAugmentations != null) { 
+                    if (fTempAugmentations != null) {
                         fTempAugmentations.removeAllItems();
                     }
                     else {
@@ -1421,10 +1421,10 @@ public class XMLDocumentFragmentScannerImpl
                 }
             }
         }
-        
+
     } 
-    
-    
+
+
     
     protected void scanEntityReference(XMLStringBuffer content) throws IOException, XNIException {
         String name = fEntityScanner.scanName();
@@ -1439,7 +1439,7 @@ public class XMLDocumentFragmentScannerImpl
         }
         fMarkupDepth--;
         fCurrentEntityName = name;
-        
+
         
         if (name == fAmpSymbol) {
             handleCharacter('&', fAmpSymbol, content);
@@ -1462,7 +1462,7 @@ public class XMLDocumentFragmentScannerImpl
             fScannerState = SCANNER_STATE_BUILT_IN_REFS;
             return ;
         }
-        
+
         
         
         
@@ -1494,9 +1494,9 @@ public class XMLDocumentFragmentScannerImpl
         
         
     } 
+
     
-    
-    
+
     
     private void handleCharacter(char c, String entity, XMLStringBuffer content) throws XNIException {
         foundBuiltInRefs = true;
@@ -1508,18 +1508,18 @@ public class XMLDocumentFragmentScannerImpl
             }
             fTempString.setValues(fSingleChar, 0, 1);
             
-            
+
             if (fNotifyBuiltInRefs) {
                 fDocumentHandler.endGeneralEntity(entity, null);
             }
         }
     } 
+
     
-    
-    
+
     
     protected final void setScannerState(int state) {
-        
+
         fScannerState = state;
         if (DEBUG_SCANNER_STATE) {
             System.out.print("### setScannerState: ");
@@ -1527,10 +1527,10 @@ public class XMLDocumentFragmentScannerImpl
             System.out.print(getScannerStateName(state));
             System.out.println();
         }
-        
+
     } 
-    
-    
+
+
     
     protected final void setDriver(Driver driver) {
         fDriver = driver;
@@ -1540,14 +1540,14 @@ public class XMLDocumentFragmentScannerImpl
             System.out.println();
         }
     }
+
     
     
     
-    
-    
+
     
     protected String getScannerStateName(int state) {
-        
+
         switch (state) {
             case SCANNER_STATE_DOCTYPE: return "SCANNER_STATE_DOCTYPE";
             case SCANNER_STATE_ROOT_ELEMENT: return "SCANNER_STATE_ROOT_ELEMENT";
@@ -1566,18 +1566,18 @@ public class XMLDocumentFragmentScannerImpl
             case SCANNER_STATE_END_ELEMENT_TAG: return "SCANNER_STATE_END_ELEMENT_TAG";
             case SCANNER_STATE_CHARACTER_DATA: return "SCANNER_STATE_CHARACTER_DATA" ;
         }
-        
+
         return "??? ("+state+')';
-        
+
     } 
     public String getEntityName(){
         
         return fCurrentEntityName;
     }
-    
+
     
     public String getDriverName(Driver driver) {
-        
+
         if (DEBUG_DISPATCHER) {
             if (driver != null) {
                 String name = driver.getClass().getName();
@@ -1593,52 +1593,52 @@ public class XMLDocumentFragmentScannerImpl
             }
         }
         return "null";
-        
+
     } 
+
     
     
     
-    
-    
+
     
     protected static final class Element {
+
         
         
         
-        
-        
+
         
         public QName qname;
-        
+
         
         public char[] fRawname;
-        
+
         
         public Element next;
+
         
         
         
-        
-        
+
         
         public Element(QName qname, Element next) {
             this.qname.setValues(qname);
             this.fRawname = qname.rawname.toCharArray();
             this.next = next;
         }
-        
+
     } 
-    
+
     
     protected class ElementStack2 {
+
         
         
         
-        
-        
+
         
         protected QName [] fQName = new QName[20];
-        
+
         
         protected int fDepth;
         
@@ -1647,13 +1647,13 @@ public class XMLDocumentFragmentScannerImpl
         protected int fPosition;
         
         protected int fMark;
-        
+
         protected int fLastDepth ;
+
         
         
         
-        
-        
+
         
         public ElementStack2() {
             for (int i = 0; i < fQName.length; i++) {
@@ -1661,7 +1661,7 @@ public class XMLDocumentFragmentScannerImpl
             }
             fMark = fPosition = 1;
         } 
-        
+
         public void resize(){
             
             
@@ -1669,18 +1669,18 @@ public class XMLDocumentFragmentScannerImpl
             QName [] tmp = new QName[oldLength * 2];
             System.arraycopy(fQName, 0, tmp, 0, oldLength);
             fQName = tmp;
-            
+
             for (int i = oldLength; i < fQName.length; i++) {
                 fQName[i] = new QName();
             }
-            
+
         }
+
+
         
         
         
-        
-        
-        
+
         
         public boolean matchElement(QName element) {
             
@@ -1720,10 +1720,10 @@ public class XMLDocumentFragmentScannerImpl
             fLastDepth = fDepth++;
             return match;
         } 
-        
+
         
         public QName nextElement() {
-            
+
             
             if (fCount == fQName.length) {
                 fShouldSkip = false;
@@ -1737,9 +1737,9 @@ public class XMLDocumentFragmentScannerImpl
                 System.out.println("fCount = " + fCount);
             }
             return fQName[fCount++];
-            
+
         }
-        
+
         
         public QName getNext(){
             
@@ -1749,13 +1749,13 @@ public class XMLDocumentFragmentScannerImpl
             }
             return fQName[fPosition++];
         }
-        
+
         
         public int popElement(){
             return fDepth--;
         }
-        
-        
+
+
         
         public void clear() {
             fLastDepth = 0;
@@ -1763,21 +1763,21 @@ public class XMLDocumentFragmentScannerImpl
             fCount = 0 ;
             fPosition = fMark = 1;
         } 
-        
+
     } 
-    
+
     
     protected class ElementStack {
+
         
         
         
-        
-        
+
         
         protected QName[] fElements;
         protected int []  fInt = new int[20];
-        
-        
+
+
         
         protected int fDepth;
         
@@ -1786,13 +1786,13 @@ public class XMLDocumentFragmentScannerImpl
         protected int fPosition;
         
         protected int fMark;
-        
+
         protected int fLastDepth ;
+
         
         
         
-        
-        
+
         
         public ElementStack() {
             fElements = new QName[20];
@@ -1800,11 +1800,11 @@ public class XMLDocumentFragmentScannerImpl
                 fElements[i] = new QName();
             }
         } 
+
         
         
         
-        
-        
+
         
         
         public QName pushElement(QName element) {
@@ -1819,8 +1819,8 @@ public class XMLDocumentFragmentScannerImpl
             fElements[fDepth].setValues(element);
             return fElements[fDepth++];
         } 
-        
-        
+
+
         
         public QName getNext(){
             
@@ -1836,13 +1836,13 @@ public class XMLDocumentFragmentScannerImpl
             
             return fElements[fPosition];
         }
-        
+
         
         public void push(){
-            
+
             fInt[++fDepth] = fPosition++;
         }
-        
+
         
         public boolean matchElement(QName element) {
             
@@ -1896,7 +1896,7 @@ public class XMLDocumentFragmentScannerImpl
                 
                 fInt[fDepth] = fCount - 1;
             }
-            
+
             
             
             if (fCount == fElements.length) {
@@ -1923,8 +1923,8 @@ public class XMLDocumentFragmentScannerImpl
             fLastDepth = fDepth;
             return match;
         } 
-        
-        
+
+
         
         public QName nextElement() {
             if(fSkip){
@@ -1939,12 +1939,12 @@ public class XMLDocumentFragmentScannerImpl
                     fElements[i] = new QName();
                 }
             }
-            
+
             return fElements[fDepth++];
-            
+
         } 
-        
-        
+
+
         
         public QName popElement() {
             
@@ -1964,7 +1964,7 @@ public class XMLDocumentFragmentScannerImpl
             }
             
         } 
-        
+
         
         public void reposition(){
             for( int i = 2 ; i <= fDepth ; i++){
@@ -1976,48 +1976,48 @@ public class XMLDocumentFragmentScannerImpl
                 }
             }
         }
-        
+
         
         public void clear() {
             fDepth = 0;
             fLastDepth = 0;
             fCount = 0 ;
             fPosition = fMark = 1;
-            
+
         } 
+
         
-        
-        
+
         public QName getLastPoppedElement(){
             return fElements[fDepth];
         }
     } 
-    
+
     
     protected interface Driver {
+
+
         
-        
-        
-        
+
         public int next() throws IOException, XNIException;
-        
+
     } 
-    
+
     
     protected class FragmentContentDriver
             implements Driver {
-        
+
         
         
         
         private boolean fContinueDispatching = true;
         private boolean fScanningForMarkup = true;
-        
+
         
         private void startOfMarkup() throws IOException {
             fMarkupDepth++;
             final int ch = fEntityScanner.peekChar();
-            
+
             switch(ch){
                 case '?' :{
                     setScannerState(SCANNER_STATE_PI);
@@ -2054,9 +2054,9 @@ public class XMLDocumentFragmentScannerImpl
                     }
                 }
             }
-            
+
         }
-        
+
         private void startOfContent() throws IOException {
             if (fEntityScanner.skipChar('<')) {
                 setScannerState(SCANNER_STATE_START_OF_MARKUP);
@@ -2067,19 +2067,19 @@ public class XMLDocumentFragmentScannerImpl
                 setScannerState(SCANNER_STATE_CHARACTER_DATA);
             }
         }
-        
-        
+
+
         
         public void decideSubState() throws IOException {
             while( fScannerState == SCANNER_STATE_CONTENT || fScannerState == SCANNER_STATE_START_OF_MARKUP){
-                
+
                 switch (fScannerState) {
-                    
+
                     case SCANNER_STATE_CONTENT: {
                         startOfContent() ;
                         break;
                     }
-                    
+
                     case SCANNER_STATE_START_OF_MARKUP: {
                         startOfMarkup() ;
                         break;
@@ -2087,9 +2087,9 @@ public class XMLDocumentFragmentScannerImpl
                 }
             }
         }
+
         
-        
-        
+
         public int next() throws IOException, XNIException {
             while (true) {
             try {
@@ -2546,57 +2546,57 @@ public class XMLDocumentFragmentScannerImpl
             }
             } 
         }
+
+
         
         
         
+
+        
+
         
         
-        
-        
-        
-        
-        
-        
+
         
         protected boolean scanForDoctypeHook()
         throws IOException, XNIException {
             return false;
         } 
-        
+
         
         protected boolean elementDepthIsZeroHook()
         throws IOException, XNIException {
             return false;
         } 
-        
+
         
         protected boolean scanRootElementHook()
         throws IOException, XNIException {
             return false;
         } 
-        
+
         
         protected void endOfFileHook(EOFException e)
         throws IOException, XNIException {
-            
+
             
             
             if (fMarkupDepth != 0) {
                 reportFatalError("PrematureEOF", null);
             }
-            
+
         } 
-        
+
     } 
-    
+
     static void pr(String str) {
         System.out.println(str) ;
     }
-    
+
     protected boolean fUsebuffer ;
+
     
-    
-    
+
     protected XMLString getString(){
         if(fAttributeCacheUsedCount < initialCacheCount || fAttributeCacheUsedCount < attributeValueCache.size()){
             return (XMLString)attributeValueCache.get(fAttributeCacheUsedCount++);
@@ -2609,7 +2609,7 @@ public class XMLDocumentFragmentScannerImpl
     }
 
     
-    
+
     public void refresh(){
         refresh(0);
     }
@@ -2630,5 +2630,5 @@ public class XMLDocumentFragmentScannerImpl
             fUsebuffer = true;
         }
     }
-    
+
 } 

@@ -17,9 +17,9 @@ import com.sun.org.apache.xpath.internal.*;
 import com.sun.org.apache.xpath.internal.objects.XObject;
 import com.sun.org.apache.xpath.internal.res.XPATHErrorResources;
 import com.sun.org.apache.xalan.internal.res.XSLMessages;
+import com.sun.org.apache.xalan.internal.utils.FactoryImpl;
 
 import org.w3c.dom.Node;
-import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.traversal.NodeIterator;
 
@@ -44,6 +44,7 @@ public class XPathImpl implements javax.xml.xpath.XPath {
     
     
     private boolean featureSecureProcessing = false;
+    private boolean useServiceMechanism = true;
 
     XPathImpl( XPathVariableResolver vr, XPathFunctionResolver fr ) {
         this.origVariableResolver = this.variableResolver = vr;
@@ -51,10 +52,11 @@ public class XPathImpl implements javax.xml.xpath.XPath {
     }
 
     XPathImpl( XPathVariableResolver vr, XPathFunctionResolver fr,
-            boolean featureSecureProcessing ) {
+            boolean featureSecureProcessing, boolean useServiceMechanism ) {
         this.origVariableResolver = this.variableResolver = vr;
         this.origFunctionResolver = this.functionResolver = fr;
         this.featureSecureProcessing = featureSecureProcessing;
+        this.useServiceMechanism = useServiceMechanism;
     }
 
     
@@ -108,7 +110,7 @@ public class XPathImpl implements javax.xml.xpath.XPath {
 
     private static Document d = null;
 
-    private static DocumentBuilder getParser() {
+    private DocumentBuilder getParser() {
         try {
             
             
@@ -121,7 +123,7 @@ public class XPathImpl implements javax.xml.xpath.XPath {
             
             
             
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilderFactory dbf = FactoryImpl.getDOMFactory(useServiceMechanism);
             dbf.setNamespaceAware( true );
             dbf.setValidating( false );
             return dbf.newDocumentBuilder();
@@ -129,17 +131,6 @@ public class XPathImpl implements javax.xml.xpath.XPath {
             
             throw new Error(e);
         }
-    }
-
-    private static Document getDummyDocument( ) {
-        
-        
-        if(d==null) {
-            DOMImplementation dim = getParser().getDOMImplementation();
-            d = dim.createDocument("http://java.sun.com/jaxp/xpath",
-                "dummyroot", null);
-        }
-        return d;
     }
 
 
@@ -282,7 +273,7 @@ public class XPathImpl implements javax.xml.xpath.XPath {
             
             XPathExpressionImpl ximpl = new XPathExpressionImpl (xpath,
                     prefixResolver, functionResolver, variableResolver,
-                    featureSecureProcessing );
+                    featureSecureProcessing, useServiceMechanism );
             return ximpl;
         } catch ( javax.xml.transform.TransformerException te ) {
             throw new XPathExpressionException ( te ) ;

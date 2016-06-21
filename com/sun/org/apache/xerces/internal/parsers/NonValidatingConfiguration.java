@@ -32,7 +32,7 @@ import com.sun.org.apache.xerces.internal.xni.parser.XMLPullParserConfiguration;
 
 
 public class NonValidatingConfiguration
-    extends BasicParserConfiguration 
+    extends BasicParserConfiguration
     implements XMLPullParserConfiguration {
 
     
@@ -48,17 +48,17 @@ public class NonValidatingConfiguration
     
     protected static final String WARN_ON_DUPLICATE_ENTITYDEF =
         Constants.XERCES_FEATURE_PREFIX + Constants.WARN_ON_DUPLICATE_ENTITYDEF_FEATURE;
-    
+
     
     protected static final String WARN_ON_UNDECLARED_ELEMDEF =
         Constants.XERCES_FEATURE_PREFIX + Constants.WARN_ON_UNDECLARED_ELEMDEF_FEATURE;
+
     
-    
-    protected static final String ALLOW_JAVA_ENCODINGS = 
+    protected static final String ALLOW_JAVA_ENCODINGS =
         Constants.XERCES_FEATURE_PREFIX + Constants.ALLOW_JAVA_ENCODINGS_FEATURE;
+
     
-    
-    protected static final String CONTINUE_AFTER_FATAL_ERROR = 
+    protected static final String CONTINUE_AFTER_FATAL_ERROR =
         Constants.XERCES_FEATURE_PREFIX + Constants.CONTINUE_AFTER_FATAL_ERROR_FEATURE;
 
     
@@ -68,11 +68,11 @@ public class NonValidatingConfiguration
     
     protected static final String NOTIFY_BUILTIN_REFS =
         Constants.XERCES_FEATURE_PREFIX + Constants.NOTIFY_BUILTIN_REFS_FEATURE;
-    
+
     
     protected static final String NOTIFY_CHAR_REFS =
         Constants.XERCES_FEATURE_PREFIX + Constants.NOTIFY_CHAR_REFS_FEATURE;
-    
+
 
     
     protected static final String NORMALIZE_DATA =
@@ -86,27 +86,27 @@ public class NonValidatingConfiguration
     
 
     
-    protected static final String ERROR_REPORTER = 
+    protected static final String ERROR_REPORTER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.ERROR_REPORTER_PROPERTY;
 
     
-    protected static final String ENTITY_MANAGER = 
+    protected static final String ENTITY_MANAGER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.ENTITY_MANAGER_PROPERTY;
+
     
-    
-    protected static final String DOCUMENT_SCANNER = 
+    protected static final String DOCUMENT_SCANNER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.DOCUMENT_SCANNER_PROPERTY;
 
     
-    protected static final String DTD_SCANNER = 
+    protected static final String DTD_SCANNER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.DTD_SCANNER_PROPERTY;
 
     
-    protected static final String XMLGRAMMAR_POOL = 
+    protected static final String XMLGRAMMAR_POOL =
         Constants.XERCES_PROPERTY_PREFIX + Constants.XMLGRAMMAR_POOL_PROPERTY;
+
     
-    
-    protected static final String DTD_VALIDATOR = 
+    protected static final String DTD_VALIDATOR =
         Constants.XERCES_PROPERTY_PREFIX + Constants.DTD_VALIDATOR_PROPERTY;
 
     
@@ -114,7 +114,7 @@ public class NonValidatingConfiguration
         Constants.XERCES_PROPERTY_PREFIX + Constants.NAMESPACE_BINDER_PROPERTY;
 
     
-    protected static final String DATATYPE_VALIDATOR_FACTORY = 
+    protected static final String DATATYPE_VALIDATOR_FACTORY =
         Constants.XERCES_PROPERTY_PREFIX + Constants.DATATYPE_VALIDATOR_FACTORY_PROPERTY;
 
     protected static final String VALIDATION_MANAGER =
@@ -172,10 +172,10 @@ public class NonValidatingConfiguration
 
     
     private XMLDocumentScannerImpl fNonNSScanner;
-    
-    
-	
-	protected boolean fConfigUpdated = false;
+
+
+        
+        protected boolean fConfigUpdated = false;
 
 
     
@@ -213,9 +213,9 @@ public class NonValidatingConfiguration
         super(symbolTable, parentSettings);
 
         
-        final String[] recognizedFeatures = {        	
-        	PARSER_SETTINGS,
-			NAMESPACES,
+        final String[] recognizedFeatures = {
+                PARSER_SETTINGS,
+                        NAMESPACES,
             
             
             
@@ -232,8 +232,8 @@ public class NonValidatingConfiguration
         
         
         fFeatures.put(CONTINUE_AFTER_FATAL_ERROR, Boolean.FALSE);
-		fFeatures.put(PARSER_SETTINGS, Boolean.TRUE);
-		fFeatures.put(NAMESPACES, Boolean.TRUE);
+                fFeatures.put(PARSER_SETTINGS, Boolean.TRUE);
+                fFeatures.put(NAMESPACES, Boolean.TRUE);
         
         
         
@@ -241,31 +241,31 @@ public class NonValidatingConfiguration
 
         
         final String[] recognizedProperties = {
-            ERROR_REPORTER,             
-            ENTITY_MANAGER, 
+            ERROR_REPORTER,
+            ENTITY_MANAGER,
             DOCUMENT_SCANNER,
             DTD_SCANNER,
             DTD_VALIDATOR,
             NAMESPACE_BINDER,
-            XMLGRAMMAR_POOL,   
+            XMLGRAMMAR_POOL,
             DATATYPE_VALIDATOR_FACTORY,
             VALIDATION_MANAGER,
             LOCALE
         };
         addRecognizedProperties(recognizedProperties);
-	
+
         fGrammarPool = grammarPool;
         if(fGrammarPool != null){
-			fProperties.put(XMLGRAMMAR_POOL, fGrammarPool);
+                        fProperties.put(XMLGRAMMAR_POOL, fGrammarPool);
         }
 
         fEntityManager = createEntityManager();
-		fProperties.put(ENTITY_MANAGER, fEntityManager);
+                fProperties.put(ENTITY_MANAGER, fEntityManager);
         addComponent(fEntityManager);
 
         fErrorReporter = createErrorReporter();
         fErrorReporter.setDocumentLocator(fEntityManager.getEntityScanner());
-		fProperties.put(ERROR_REPORTER, fErrorReporter);
+                fProperties.put(ERROR_REPORTER, fErrorReporter);
         addComponent(fErrorReporter);
 
         
@@ -273,7 +273,7 @@ public class NonValidatingConfiguration
 
         fDTDScanner = createDTDScanner();
         if (fDTDScanner != null) {
-			fProperties.put(DTD_SCANNER, fDTDScanner);
+                        fProperties.put(DTD_SCANNER, fDTDScanner);
             if (fDTDScanner instanceof XMLComponent) {
                 addComponent((XMLComponent)fDTDScanner);
             }
@@ -281,13 +281,13 @@ public class NonValidatingConfiguration
 
         fDatatypeValidatorFactory = createDatatypeValidatorFactory();
         if (fDatatypeValidatorFactory != null) {
-			fProperties.put(DATATYPE_VALIDATOR_FACTORY,
+                        fProperties.put(DATATYPE_VALIDATOR_FACTORY,
                         fDatatypeValidatorFactory);
         }
         fValidationManager = createValidationManager();
 
         if (fValidationManager != null) {
-			fProperties.put(VALIDATION_MANAGER, fValidationManager);
+                        fProperties.put(VALIDATION_MANAGER, fValidationManager);
         }
         
         if (fErrorReporter.getMessageFormatter(XMLMessageFormatter.XML_DOMAIN) == null) {
@@ -295,8 +295,8 @@ public class NonValidatingConfiguration
             fErrorReporter.putMessageFormatter(XMLMessageFormatter.XML_DOMAIN, xmft);
             fErrorReporter.putMessageFormatter(XMLMessageFormatter.XMLNS_DOMAIN, xmft);
         }
-        
-		fConfigUpdated = false;
+
+                fConfigUpdated = false;
 
         
         try {
@@ -312,11 +312,11 @@ public class NonValidatingConfiguration
     
     
     
-	public void setFeature(String featureId, boolean state)
-		throws XMLConfigurationException {
-		fConfigUpdated = true;
-		super.setFeature(featureId, state);
-	}
+        public void setFeature(String featureId, boolean state)
+                throws XMLConfigurationException {
+                fConfigUpdated = true;
+                super.setFeature(featureId, state);
+        }
 
         public PropertyState getPropertyState(String propertyId)
              throws XMLConfigurationException {
@@ -340,16 +340,16 @@ public class NonValidatingConfiguration
         super.setLocale(locale);
         fErrorReporter.setLocale(locale);
     } 
-    
-	public FeatureState getFeatureState(String featureId)
-		throws XMLConfigurationException {
-			
-		if (featureId.equals(PARSER_SETTINGS)){
-			return FeatureState.is(fConfigUpdated);
-		}
-		return super.getFeatureState(featureId);
 
-	} 
+        public FeatureState getFeatureState(String featureId)
+                throws XMLConfigurationException {
+                        
+                if (featureId.equals(PARSER_SETTINGS)){
+                        return FeatureState.is(fConfigUpdated);
+                }
+                return super.getFeatureState(featureId);
+
+        } 
     
     
     
@@ -359,14 +359,14 @@ public class NonValidatingConfiguration
     
     public void setInputSource(XMLInputSource inputSource)
         throws XMLConfigurationException, IOException {
-        
+
         
         
         
         
 
         fInputSource = inputSource;
-        
+
     } 
 
     
@@ -379,17 +379,17 @@ public class NonValidatingConfiguration
                 reset();
                 fScanner.setInputSource(fInputSource);
                 fInputSource = null;
-            } 
+            }
             catch (XNIException ex) {
                 if (PRINT_EXCEPTION_STACK_TRACE)
                     ex.printStackTrace();
                 throw ex;
-            } 
+            }
             catch (IOException ex) {
                 if (PRINT_EXCEPTION_STACK_TRACE)
                     ex.printStackTrace();
                 throw ex;
-            } 
+            }
             catch (RuntimeException ex) {
                 if (PRINT_EXCEPTION_STACK_TRACE)
                     ex.printStackTrace();
@@ -404,17 +404,17 @@ public class NonValidatingConfiguration
 
         try {
             return fScanner.scanDocument(complete);
-        } 
+        }
         catch (XNIException ex) {
             if (PRINT_EXCEPTION_STACK_TRACE)
                 ex.printStackTrace();
             throw ex;
-        } 
+        }
         catch (IOException ex) {
             if (PRINT_EXCEPTION_STACK_TRACE)
                 ex.printStackTrace();
             throw ex;
-        } 
+        }
         catch (RuntimeException ex) {
             if (PRINT_EXCEPTION_STACK_TRACE)
                 ex.printStackTrace();
@@ -432,7 +432,7 @@ public class NonValidatingConfiguration
     public void cleanup() {
         fEntityManager.closeReaders();
     }
-    
+
     
     
     
@@ -449,12 +449,12 @@ public class NonValidatingConfiguration
         try {
             setInputSource(source);
             parse(true);
-        } 
+        }
         catch (XNIException ex) {
             if (PRINT_EXCEPTION_STACK_TRACE)
                 ex.printStackTrace();
             throw ex;
-        } 
+        }
         catch (IOException ex) {
             if (PRINT_EXCEPTION_STACK_TRACE)
                 ex.printStackTrace();
@@ -464,7 +464,7 @@ public class NonValidatingConfiguration
             if (PRINT_EXCEPTION_STACK_TRACE)
                 ex.printStackTrace();
             throw ex;
-        }              
+        }
         catch (Exception ex) {
             if (PRINT_EXCEPTION_STACK_TRACE)
                 ex.printStackTrace();
@@ -481,7 +481,7 @@ public class NonValidatingConfiguration
     
     
     
-    
+
     
     protected void reset() throws XNIException {
 
@@ -505,7 +505,7 @@ public class NonValidatingConfiguration
             fProperties.put(DOCUMENT_SCANNER, fNamespaceScanner);
             fNamespaceScanner.setDTDValidator(null);
             fScanner = fNamespaceScanner;
-        } 
+        }
         else {
             if (fNonNSScanner == null) {
                 fNonNSScanner = new XMLDocumentScannerImpl();
@@ -538,21 +538,21 @@ public class NonValidatingConfiguration
 
         if (featureId.startsWith(Constants.XERCES_FEATURE_PREFIX)) {
             final int suffixLength = featureId.length() - Constants.XERCES_FEATURE_PREFIX.length();
-        	
+
             
             
             
             
             
             
-            if (suffixLength == Constants.DYNAMIC_VALIDATION_FEATURE.length() && 
+            if (suffixLength == Constants.DYNAMIC_VALIDATION_FEATURE.length() &&
                 featureId.endsWith(Constants.DYNAMIC_VALIDATION_FEATURE)) {
                 return FeatureState.RECOGNIZED;
             }
             
             
             
-            if (suffixLength == Constants.DEFAULT_ATTRIBUTE_VALUES_FEATURE.length() && 
+            if (suffixLength == Constants.DEFAULT_ATTRIBUTE_VALUES_FEATURE.length() &&
                 featureId.endsWith(Constants.DEFAULT_ATTRIBUTE_VALUES_FEATURE)) {
                 
                 return FeatureState.NOT_SUPPORTED;
@@ -560,7 +560,7 @@ public class NonValidatingConfiguration
             
             
             
-            if (suffixLength == Constants.VALIDATE_CONTENT_MODELS_FEATURE.length() && 
+            if (suffixLength == Constants.VALIDATE_CONTENT_MODELS_FEATURE.length() &&
                 featureId.endsWith(Constants.VALIDATE_CONTENT_MODELS_FEATURE)) {
                 
                 return FeatureState.NOT_SUPPORTED;
@@ -568,14 +568,14 @@ public class NonValidatingConfiguration
             
             
             
-            if (suffixLength == Constants.LOAD_DTD_GRAMMAR_FEATURE.length() && 
+            if (suffixLength == Constants.LOAD_DTD_GRAMMAR_FEATURE.length() &&
                 featureId.endsWith(Constants.LOAD_DTD_GRAMMAR_FEATURE)) {
                 return FeatureState.RECOGNIZED;
             }
             
             
             
-            if (suffixLength == Constants.LOAD_EXTERNAL_DTD_FEATURE.length() && 
+            if (suffixLength == Constants.LOAD_EXTERNAL_DTD_FEATURE.length() &&
                 featureId.endsWith(Constants.LOAD_EXTERNAL_DTD_FEATURE)) {
                 return FeatureState.RECOGNIZED;
             }
@@ -583,7 +583,7 @@ public class NonValidatingConfiguration
             
             
             
-            if (suffixLength == Constants.VALIDATE_DATATYPES_FEATURE.length() && 
+            if (suffixLength == Constants.VALIDATE_DATATYPES_FEATURE.length() &&
                 featureId.endsWith(Constants.VALIDATE_DATATYPES_FEATURE)) {
                 return FeatureState.NOT_SUPPORTED;
             }
@@ -607,8 +607,8 @@ public class NonValidatingConfiguration
 
         if (propertyId.startsWith(Constants.XERCES_PROPERTY_PREFIX)) {
             final int suffixLength = propertyId.length() - Constants.XERCES_PROPERTY_PREFIX.length();
-            
-            if (suffixLength == Constants.DTD_SCANNER_PROPERTY.length() && 
+
+            if (suffixLength == Constants.DTD_SCANNER_PROPERTY.length() &&
                 propertyId.endsWith(Constants.DTD_SCANNER_PROPERTY)) {
                 return PropertyState.RECOGNIZED;
             }
@@ -617,7 +617,7 @@ public class NonValidatingConfiguration
         if (propertyId.startsWith(Constants.JAXP_PROPERTY_PREFIX)) {
             final int suffixLength = propertyId.length() - Constants.JAXP_PROPERTY_PREFIX.length();
 
-            if (suffixLength == Constants.SCHEMA_SOURCE.length() && 
+            if (suffixLength == Constants.SCHEMA_SOURCE.length() &&
                 propertyId.endsWith(Constants.SCHEMA_SOURCE)) {
                 return PropertyState.RECOGNIZED;
             }

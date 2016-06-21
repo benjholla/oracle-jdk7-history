@@ -4,12 +4,12 @@
 package com.sun.org.apache.xerces.internal.xni;
 
 
-public class XNIException 
+public class XNIException
     extends RuntimeException {
 
     
     static final long serialVersionUID = 9019819772686063775L;
-    
+
     
     
     

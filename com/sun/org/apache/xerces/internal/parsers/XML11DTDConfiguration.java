@@ -61,48 +61,48 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
         "com.sun.org.apache.xerces.internal.impl.dv.dtd.XML11DTDDVFactoryImpl";
 
     
-    
+
     
     protected static final String VALIDATION =
         Constants.SAX_FEATURE_PREFIX + Constants.VALIDATION_FEATURE;
-    
+
     
     protected static final String NAMESPACES =
         Constants.SAX_FEATURE_PREFIX + Constants.NAMESPACES_FEATURE;
-    
+
     
     protected static final String EXTERNAL_GENERAL_ENTITIES =
         Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE;
-    
+
     
     protected static final String EXTERNAL_PARAMETER_ENTITIES =
         Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE;
-    
+
     
     protected static final String CONTINUE_AFTER_FATAL_ERROR =
         Constants.XERCES_FEATURE_PREFIX + Constants.CONTINUE_AFTER_FATAL_ERROR_FEATURE;
-    
+
     
     protected static final String LOAD_EXTERNAL_DTD =
         Constants.XERCES_FEATURE_PREFIX + Constants.LOAD_EXTERNAL_DTD_FEATURE;
+
     
-    
 
-	
-	protected static final String XML_STRING = 
-		Constants.SAX_PROPERTY_PREFIX + Constants.XML_STRING_PROPERTY;
+        
+        protected static final String XML_STRING =
+                Constants.SAX_PROPERTY_PREFIX + Constants.XML_STRING_PROPERTY;
 
-	
-	protected static final String SYMBOL_TABLE = 
-		Constants.XERCES_PROPERTY_PREFIX + Constants.SYMBOL_TABLE_PROPERTY;
+        
+        protected static final String SYMBOL_TABLE =
+                Constants.XERCES_PROPERTY_PREFIX + Constants.SYMBOL_TABLE_PROPERTY;
 
-	
-	protected static final String ERROR_HANDLER = 
-		Constants.XERCES_PROPERTY_PREFIX + Constants.ERROR_HANDLER_PROPERTY;
+        
+        protected static final String ERROR_HANDLER =
+                Constants.XERCES_PROPERTY_PREFIX + Constants.ERROR_HANDLER_PROPERTY;
 
-	
-	protected static final String ENTITY_RESOLVER = 
-		Constants.XERCES_PROPERTY_PREFIX + Constants.ENTITY_RESOLVER_PROPERTY;
+        
+        protected static final String ENTITY_RESOLVER =
+                Constants.XERCES_PROPERTY_PREFIX + Constants.ENTITY_RESOLVER_PROPERTY;
 
     
     protected static final String ERROR_REPORTER =
@@ -145,11 +145,11 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
 
     
     protected static final String JAXP_SCHEMA_LANGUAGE =
-        Constants.JAXP_PROPERTY_PREFIX + Constants.SCHEMA_LANGUAGE; 
+        Constants.JAXP_PROPERTY_PREFIX + Constants.SCHEMA_LANGUAGE;
 
     
     protected static final String JAXP_SCHEMA_SOURCE =
-        Constants.JAXP_PROPERTY_PREFIX + Constants.SCHEMA_SOURCE; 
+        Constants.JAXP_PROPERTY_PREFIX + Constants.SCHEMA_SOURCE;
 
     
 
@@ -165,81 +165,81 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
     protected XMLVersionDetector fVersionDetector;
     protected XMLLocator fLocator;
     protected Locale fLocale;
-    
+
     
     protected ArrayList fComponents;
-    
+
     
     protected ArrayList fXML11Components = null;
-    
+
     
     protected ArrayList fCommonComponents = null;
-    
+
     
     protected XMLDocumentHandler fDocumentHandler;
-    
+
     
     protected XMLDTDHandler fDTDHandler;
-    
+
     
     protected XMLDTDContentModelHandler fDTDContentModelHandler;
+
     
-         
     protected XMLDocumentSource fLastComponent;
-    
+
     
     protected boolean fParseInProgress = false;
-    
+
     
     protected boolean fConfigUpdated = false;
+
     
     
     
-    
-    
+
     
     protected DTDDVFactory fDatatypeValidatorFactory;
-    
+
     
     protected XMLNSDocumentScannerImpl fNamespaceScanner;
-    
+
     
     protected XMLDocumentScannerImpl fNonNSScanner;
-    
+
     
     protected XMLDTDValidator fDTDValidator;
-    
+
     
     protected XMLDTDValidator fNonNSDTDValidator;
-    
+
     
     protected XMLDTDScanner fDTDScanner;
-    
+
     
     protected XMLDTDProcessor fDTDProcessor;
+
     
     
     
-    
-    
+
     
     protected DTDDVFactory fXML11DatatypeFactory = null;
-    
+
     
     protected XML11NSDocumentScannerImpl fXML11NSDocScanner = null;
-    
+
     
     protected XML11DocumentScannerImpl fXML11DocScanner = null;
-    
+
     
     protected XML11NSDTDValidator fXML11NSDTDValidator = null;
-    
+
     
     protected XML11DTDValidator fXML11DTDValidator = null;
-    
+
     
     protected XML11DTDScannerImpl fXML11DTDScanner = null;
-    
+
     
     protected XML11DTDProcessor fXML11DTDProcessor = null;
 
@@ -258,10 +258,10 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
 
     
     protected XMLDocumentScanner fCurrentScanner;
-    
+
     
     protected DTDDVFactory fCurrentDVFactory;
-    
+
     
     protected XMLDTDScanner fCurrentDTDScanner;
 
@@ -292,105 +292,105 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
         SymbolTable symbolTable,
         XMLGrammarPool grammarPool,
         XMLComponentManager parentSettings) {
-		
-		super(parentSettings);
 
-		
-		
-		fComponents = new ArrayList();
-		
-		fXML11Components = new ArrayList();
-		
-		fCommonComponents = new ArrayList();
+                super(parentSettings);
 
-		
-		fFeatures = new HashMap();
-		fProperties = new HashMap();
+                
+                
+                fComponents = new ArrayList();
+                
+                fXML11Components = new ArrayList();
+                
+                fCommonComponents = new ArrayList();
+
+                
+                fFeatures = new HashMap();
+                fProperties = new HashMap();
 
         
         final String[] recognizedFeatures =
-            {   
-            	CONTINUE_AFTER_FATAL_ERROR, LOAD_EXTERNAL_DTD, 
-				VALIDATION,                 
-				NAMESPACES,
- 				EXTERNAL_GENERAL_ENTITIES,  
-				EXTERNAL_PARAMETER_ENTITIES,
-				PARSER_SETTINGS
-			};
+            {
+                CONTINUE_AFTER_FATAL_ERROR, LOAD_EXTERNAL_DTD, 
+                                VALIDATION,
+                                NAMESPACES,
+                                EXTERNAL_GENERAL_ENTITIES,
+                                EXTERNAL_PARAMETER_ENTITIES,
+                                PARSER_SETTINGS
+                        };
         addRecognizedFeatures(recognizedFeatures);
-		
-		fFeatures.put(VALIDATION, Boolean.FALSE);
-		fFeatures.put(NAMESPACES, Boolean.TRUE);
-		fFeatures.put(EXTERNAL_GENERAL_ENTITIES, Boolean.TRUE);
-		fFeatures.put(EXTERNAL_PARAMETER_ENTITIES, Boolean.TRUE);
-		fFeatures.put(CONTINUE_AFTER_FATAL_ERROR, Boolean.FALSE);
-		fFeatures.put(LOAD_EXTERNAL_DTD, Boolean.TRUE);
-		fFeatures.put(PARSER_SETTINGS, Boolean.TRUE);
+                
+                fFeatures.put(VALIDATION, Boolean.FALSE);
+                fFeatures.put(NAMESPACES, Boolean.TRUE);
+                fFeatures.put(EXTERNAL_GENERAL_ENTITIES, Boolean.TRUE);
+                fFeatures.put(EXTERNAL_PARAMETER_ENTITIES, Boolean.TRUE);
+                fFeatures.put(CONTINUE_AFTER_FATAL_ERROR, Boolean.FALSE);
+                fFeatures.put(LOAD_EXTERNAL_DTD, Boolean.TRUE);
+                fFeatures.put(PARSER_SETTINGS, Boolean.TRUE);
 
         
         final String[] recognizedProperties =
-            {				     
-				SYMBOL_TABLE,
-				ERROR_HANDLER,  
-				ENTITY_RESOLVER,
+            {
+                                SYMBOL_TABLE,
+                                ERROR_HANDLER,
+                                ENTITY_RESOLVER,
                 ERROR_REPORTER,
                 ENTITY_MANAGER,
                 DOCUMENT_SCANNER,
                 DTD_SCANNER,
                 DTD_PROCESSOR,
                 DTD_VALIDATOR,
-				DATATYPE_VALIDATOR_FACTORY,
-				VALIDATION_MANAGER,
-				XML_STRING,
-                XMLGRAMMAR_POOL, 
+                                DATATYPE_VALIDATOR_FACTORY,
+                                VALIDATION_MANAGER,
+                                XML_STRING,
+                XMLGRAMMAR_POOL,
                 JAXP_SCHEMA_SOURCE,
                 JAXP_SCHEMA_LANGUAGE};
         addRecognizedProperties(recognizedProperties);
-		
-		if (symbolTable == null) {
-			symbolTable = new SymbolTable();
-		}
-		fSymbolTable = symbolTable;
-		fProperties.put(SYMBOL_TABLE, fSymbolTable);
-		
+
+                if (symbolTable == null) {
+                        symbolTable = new SymbolTable();
+                }
+                fSymbolTable = symbolTable;
+                fProperties.put(SYMBOL_TABLE, fSymbolTable);
+
         fGrammarPool = grammarPool;
         if (fGrammarPool != null) {
-			fProperties.put(XMLGRAMMAR_POOL, fGrammarPool);
+                        fProperties.put(XMLGRAMMAR_POOL, fGrammarPool);
         }
 
         fEntityManager = new XMLEntityManager();
-		fProperties.put(ENTITY_MANAGER, fEntityManager);
+                fProperties.put(ENTITY_MANAGER, fEntityManager);
         addCommonComponent(fEntityManager);
 
         fErrorReporter = new XMLErrorReporter();
         fErrorReporter.setDocumentLocator(fEntityManager.getEntityScanner());
-		fProperties.put(ERROR_REPORTER, fErrorReporter);
+                fProperties.put(ERROR_REPORTER, fErrorReporter);
         addCommonComponent(fErrorReporter);
 
         fNamespaceScanner = new XMLNSDocumentScannerImpl();
-		fProperties.put(DOCUMENT_SCANNER, fNamespaceScanner);
+                fProperties.put(DOCUMENT_SCANNER, fNamespaceScanner);
         addComponent((XMLComponent) fNamespaceScanner);
 
         fDTDScanner = new XMLDTDScannerImpl();
-		fProperties.put(DTD_SCANNER, fDTDScanner);
+                fProperties.put(DTD_SCANNER, fDTDScanner);
         addComponent((XMLComponent) fDTDScanner);
 
         fDTDProcessor = new XMLDTDProcessor();
-		fProperties.put(DTD_PROCESSOR, fDTDProcessor);
+                fProperties.put(DTD_PROCESSOR, fDTDProcessor);
         addComponent((XMLComponent) fDTDProcessor);
 
         fDTDValidator = new XMLNSDTDValidator();
-		fProperties.put(DTD_VALIDATOR, fDTDValidator);
+                fProperties.put(DTD_VALIDATOR, fDTDValidator);
         addComponent(fDTDValidator);
-        
+
         fDatatypeValidatorFactory = DTDDVFactory.getInstance();
-		fProperties.put(DATATYPE_VALIDATOR_FACTORY, fDatatypeValidatorFactory);
+                fProperties.put(DATATYPE_VALIDATOR_FACTORY, fDatatypeValidatorFactory);
 
         fValidationManager = new ValidationManager();
-		fProperties.put(VALIDATION_MANAGER, fValidationManager);
-        
+                fProperties.put(VALIDATION_MANAGER, fValidationManager);
+
         fVersionDetector = new XMLVersionDetector();
-        
+
         
         if (fErrorReporter.getMessageFormatter(XMLMessageFormatter.XML_DOMAIN) == null) {
             XMLMessageFormatter xmft = new XMLMessageFormatter();
@@ -405,8 +405,8 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
             
             
         }
-        
-		fConfigUpdated = false;
+
+                fConfigUpdated = false;
 
     } 
 
@@ -431,63 +431,63 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
         fLocale = locale;
         fErrorReporter.setLocale(locale);
     } 
-    
-	
-	public void setDocumentHandler(XMLDocumentHandler documentHandler) {
-		fDocumentHandler = documentHandler;
-		if (fLastComponent != null) {
-			fLastComponent.setDocumentHandler(fDocumentHandler);
-			if (fDocumentHandler !=null){
-				fDocumentHandler.setDocumentSource(fLastComponent);
-			}
-		}
-	} 
 
-	
-	public XMLDocumentHandler getDocumentHandler() {
-		return fDocumentHandler;
-	} 
+        
+        public void setDocumentHandler(XMLDocumentHandler documentHandler) {
+                fDocumentHandler = documentHandler;
+                if (fLastComponent != null) {
+                        fLastComponent.setDocumentHandler(fDocumentHandler);
+                        if (fDocumentHandler !=null){
+                                fDocumentHandler.setDocumentSource(fLastComponent);
+                        }
+                }
+        } 
 
-	
-	public void setDTDHandler(XMLDTDHandler dtdHandler) {
-		fDTDHandler = dtdHandler;
-	} 
+        
+        public XMLDocumentHandler getDocumentHandler() {
+                return fDocumentHandler;
+        } 
 
-	
-	public XMLDTDHandler getDTDHandler() {
-		return fDTDHandler;
-	} 
+        
+        public void setDTDHandler(XMLDTDHandler dtdHandler) {
+                fDTDHandler = dtdHandler;
+        } 
 
-	
-	public void setDTDContentModelHandler(XMLDTDContentModelHandler handler) {
-		fDTDContentModelHandler = handler;
-	} 
+        
+        public XMLDTDHandler getDTDHandler() {
+                return fDTDHandler;
+        } 
 
-	
-	public XMLDTDContentModelHandler getDTDContentModelHandler() {
-		return fDTDContentModelHandler;
-	} 
+        
+        public void setDTDContentModelHandler(XMLDTDContentModelHandler handler) {
+                fDTDContentModelHandler = handler;
+        } 
 
-	
-	public void setEntityResolver(XMLEntityResolver resolver) {
-		fProperties.put(ENTITY_RESOLVER, resolver);
-	} 
+        
+        public XMLDTDContentModelHandler getDTDContentModelHandler() {
+                return fDTDContentModelHandler;
+        } 
 
-	
-	public XMLEntityResolver getEntityResolver() {
-		return (XMLEntityResolver)fProperties.get(ENTITY_RESOLVER);
-	} 
-	
-	
-	public void setErrorHandler(XMLErrorHandler errorHandler) {
-		fProperties.put(ERROR_HANDLER, errorHandler);
-	} 
+        
+        public void setEntityResolver(XMLEntityResolver resolver) {
+                fProperties.put(ENTITY_RESOLVER, resolver);
+        } 
 
-	
-	public XMLErrorHandler getErrorHandler() {
-		
-		return (XMLErrorHandler)fProperties.get(ERROR_HANDLER);
-	} 
+        
+        public XMLEntityResolver getEntityResolver() {
+                return (XMLEntityResolver)fProperties.get(ENTITY_RESOLVER);
+        } 
+
+        
+        public void setErrorHandler(XMLErrorHandler errorHandler) {
+                fProperties.put(ERROR_HANDLER, errorHandler);
+        } 
+
+        
+        public XMLErrorHandler getErrorHandler() {
+                
+                return (XMLErrorHandler)fProperties.get(ERROR_HANDLER);
+        } 
 
 
     
@@ -536,7 +536,7 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
         
         if (fInputSource != null) {
             try {
-				fValidationManager.reset();
+                                fValidationManager.reset();
                 fVersionDetector.reset(this);
                 resetCommon();
 
@@ -549,7 +549,7 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
                     configurePipeline();
                     reset();
                 }
-                
+
                 
                 fConfigUpdated = false;
 
@@ -596,121 +596,121 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
         }
 
     } 
-    
-	
-	public FeatureState getFeatureState(String featureId)
-		throws XMLConfigurationException {
-			
+
+        
+        public FeatureState getFeatureState(String featureId)
+                throws XMLConfigurationException {
+                        
         if (featureId.equals(PARSER_SETTINGS)){
-        	return FeatureState.is(fConfigUpdated);
+                return FeatureState.is(fConfigUpdated);
         }
         return super.getFeatureState(featureId);
 
-	} 
-    
-	
-	public void setFeature(String featureId, boolean state)
-		throws XMLConfigurationException {
-		fConfigUpdated = true;
-		
-		int count = fComponents.size();
-		for (int i = 0; i < count; i++) {
-			XMLComponent c = (XMLComponent) fComponents.get(i);
-			c.setFeature(featureId, state);
-		}
-		
-		count = fCommonComponents.size();
-		for (int i = 0; i < count; i++) {
-			XMLComponent c = (XMLComponent) fCommonComponents.get(i);
-			c.setFeature(featureId, state);
-		}
-				
-		
-		count = fXML11Components.size();
-		for (int i = 0; i < count; i++) {
-			XMLComponent c = (XMLComponent) fXML11Components.get(i);
-			try{            
-				c.setFeature(featureId, state);
-			}
-			catch (Exception e){
-				
-			}
-		}
-		
-		super.setFeature(featureId, state);
+        } 
 
-	} 
-	
-	
-	public void setProperty(String propertyId, Object value)
-		throws XMLConfigurationException {
-		fConfigUpdated = true;
-		
-		int count = fComponents.size();
-		for (int i = 0; i < count; i++) {
-			XMLComponent c = (XMLComponent) fComponents.get(i);
-			c.setProperty(propertyId, value);
-		}
-		
-		count = fCommonComponents.size();
-		for (int i = 0; i < count; i++) {
-			XMLComponent c = (XMLComponent) fCommonComponents.get(i);
-			c.setProperty(propertyId, value);
-		}
-		
-		count = fXML11Components.size();
-		for (int i = 0; i < count; i++) {
-			XMLComponent c = (XMLComponent) fXML11Components.get(i);
-			try{			
-				c.setProperty(propertyId, value);
-			}
-			catch (Exception e){
-				
-			}
-		}
+        
+        public void setFeature(String featureId, boolean state)
+                throws XMLConfigurationException {
+                fConfigUpdated = true;
+                
+                int count = fComponents.size();
+                for (int i = 0; i < count; i++) {
+                        XMLComponent c = (XMLComponent) fComponents.get(i);
+                        c.setFeature(featureId, state);
+                }
+                
+                count = fCommonComponents.size();
+                for (int i = 0; i < count; i++) {
+                        XMLComponent c = (XMLComponent) fCommonComponents.get(i);
+                        c.setFeature(featureId, state);
+                }
 
-		
-		super.setProperty(propertyId, value);
+                
+                count = fXML11Components.size();
+                for (int i = 0; i < count; i++) {
+                        XMLComponent c = (XMLComponent) fXML11Components.get(i);
+                        try{
+                                c.setFeature(featureId, state);
+                        }
+                        catch (Exception e){
+                                
+                        }
+                }
+                
+                super.setFeature(featureId, state);
 
-	} 
-    
+        } 
 
-	
-	public Locale getLocale() {
-		return fLocale;
-	} 
-	
-	
-	protected void reset() throws XNIException {
-		int count = fComponents.size();
-		for (int i = 0; i < count; i++) {
-			XMLComponent c = (XMLComponent) fComponents.get(i);
-			c.reset(this);
-		}
+        
+        public void setProperty(String propertyId, Object value)
+                throws XMLConfigurationException {
+                fConfigUpdated = true;
+                
+                int count = fComponents.size();
+                for (int i = 0; i < count; i++) {
+                        XMLComponent c = (XMLComponent) fComponents.get(i);
+                        c.setProperty(propertyId, value);
+                }
+                
+                count = fCommonComponents.size();
+                for (int i = 0; i < count; i++) {
+                        XMLComponent c = (XMLComponent) fCommonComponents.get(i);
+                        c.setProperty(propertyId, value);
+                }
+                
+                count = fXML11Components.size();
+                for (int i = 0; i < count; i++) {
+                        XMLComponent c = (XMLComponent) fXML11Components.get(i);
+                        try{
+                                c.setProperty(propertyId, value);
+                        }
+                        catch (Exception e){
+                                
+                        }
+                }
 
-	} 
-    
-	
-	protected void resetCommon() throws XNIException {
-		
-		int count = fCommonComponents.size();
-		for (int i = 0; i < count; i++) {
-			XMLComponent c = (XMLComponent) fCommonComponents.get(i);
-			c.reset(this);
-		}
+                
+                super.setProperty(propertyId, value);
 
-	} 
-    
-	
-	protected void resetXML11() throws XNIException {
-		
-		int count = fXML11Components.size();
-		for (int i = 0; i < count; i++) {			
-			XMLComponent c = (XMLComponent) fXML11Components.get(i);
-			c.reset(this);
-		}
+        } 
 
-	} 
+
+        
+        public Locale getLocale() {
+                return fLocale;
+        } 
+
+        
+        protected void reset() throws XNIException {
+                int count = fComponents.size();
+                for (int i = 0; i < count; i++) {
+                        XMLComponent c = (XMLComponent) fComponents.get(i);
+                        c.reset(this);
+                }
+
+        } 
+
+        
+        protected void resetCommon() throws XNIException {
+                
+                int count = fCommonComponents.size();
+                for (int i = 0; i < count; i++) {
+                        XMLComponent c = (XMLComponent) fCommonComponents.get(i);
+                        c.reset(this);
+                }
+
+        } 
+
+        
+        protected void resetXML11() throws XNIException {
+                
+                int count = fXML11Components.size();
+                for (int i = 0; i < count; i++) {
+                        XMLComponent c = (XMLComponent) fXML11Components.get(i);
+                        c.reset(this);
+                }
+
+        } 
 
     
     protected void configureXML11Pipeline() {
@@ -721,7 +721,7 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
         if (fCurrentDTDScanner != fXML11DTDScanner) {
             fCurrentDTDScanner = fXML11DTDScanner;
             setProperty(DTD_SCANNER, fCurrentDTDScanner);
-			setProperty(DTD_PROCESSOR, fXML11DTDProcessor);
+                        setProperty(DTD_PROCESSOR, fXML11DTDProcessor);
         }
 
         fXML11DTDScanner.setDTDHandler(fXML11DTDProcessor);
@@ -757,14 +757,14 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
             fLastComponent = fXML11NSDTDValidator;
 
         } else {
-			
-			  if (fXML11DocScanner == null) {
-					
-					fXML11DocScanner = new XML11DocumentScannerImpl();
-					addXML11Component(fXML11DocScanner);
-					fXML11DTDValidator = new XML11DTDValidator();
-					addXML11Component(fXML11DTDValidator);
-			  }
+                        
+                          if (fXML11DocScanner == null) {
+                                        
+                                        fXML11DocScanner = new XML11DocumentScannerImpl();
+                                        addXML11Component(fXML11DocScanner);
+                                        fXML11DTDValidator = new XML11DTDValidator();
+                                        addXML11Component(fXML11DTDValidator);
+                          }
             if (fCurrentScanner != fXML11DocScanner) {
                 fCurrentScanner = fXML11DocScanner;
                 setProperty(DOCUMENT_SCANNER, fXML11DocScanner);
@@ -863,14 +863,14 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
 
         if (featureId.startsWith(Constants.XERCES_FEATURE_PREFIX)) {
             final int suffixLength = featureId.length() - Constants.XERCES_FEATURE_PREFIX.length();
+
             
             
             
             
             
             
-            
-            if (suffixLength == Constants.DYNAMIC_VALIDATION_FEATURE.length() && 
+            if (suffixLength == Constants.DYNAMIC_VALIDATION_FEATURE.length() &&
                 featureId.endsWith(Constants.DYNAMIC_VALIDATION_FEATURE)) {
                 return FeatureState.RECOGNIZED;
             }
@@ -886,7 +886,7 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
             
             
             
-            if (suffixLength == Constants.VALIDATE_CONTENT_MODELS_FEATURE.length() && 
+            if (suffixLength == Constants.VALIDATE_CONTENT_MODELS_FEATURE.length() &&
                 featureId.endsWith(Constants.VALIDATE_CONTENT_MODELS_FEATURE)) {
                 
                 return FeatureState.NOT_SUPPORTED;
@@ -894,14 +894,14 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
             
             
             
-            if (suffixLength == Constants.LOAD_DTD_GRAMMAR_FEATURE.length() && 
+            if (suffixLength == Constants.LOAD_DTD_GRAMMAR_FEATURE.length() &&
                 featureId.endsWith(Constants.LOAD_DTD_GRAMMAR_FEATURE)) {
                 return FeatureState.RECOGNIZED;
             }
             
             
             
-            if (suffixLength == Constants.LOAD_EXTERNAL_DTD_FEATURE.length() && 
+            if (suffixLength == Constants.LOAD_EXTERNAL_DTD_FEATURE.length() &&
                 featureId.endsWith(Constants.LOAD_EXTERNAL_DTD_FEATURE)) {
                 return FeatureState.RECOGNIZED;
             }
@@ -909,13 +909,13 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
             
             
             
-            if (suffixLength == Constants.VALIDATE_DATATYPES_FEATURE.length() && 
+            if (suffixLength == Constants.VALIDATE_DATATYPES_FEATURE.length() &&
                 featureId.endsWith(Constants.VALIDATE_DATATYPES_FEATURE)) {
                 return FeatureState.NOT_SUPPORTED;
             }
-            			 
+
             
-            if (suffixLength == Constants.PARSER_SETTINGS.length() && 
+            if (suffixLength == Constants.PARSER_SETTINGS.length() &&
                 featureId.endsWith(Constants.PARSER_SETTINGS)) {
                 return FeatureState.NOT_SUPPORTED;
             }
@@ -939,16 +939,16 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
         if (propertyId.startsWith(Constants.XERCES_PROPERTY_PREFIX)) {
             final int suffixLength = propertyId.length() - Constants.XERCES_PROPERTY_PREFIX.length();
 
-            if (suffixLength == Constants.DTD_SCANNER_PROPERTY.length() && 
+            if (suffixLength == Constants.DTD_SCANNER_PROPERTY.length() &&
                 propertyId.endsWith(Constants.DTD_SCANNER_PROPERTY)) {
                 return PropertyState.RECOGNIZED;
             }
         }
-        
+
         
         if (propertyId.startsWith(Constants.SAX_PROPERTY_PREFIX)) {
             final int suffixLength = propertyId.length() - Constants.SAX_PROPERTY_PREFIX.length();
-			
+
             
             
             
@@ -959,7 +959,7 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
             
             
             
-            if (suffixLength == Constants.XML_STRING_PROPERTY.length() && 
+            if (suffixLength == Constants.XML_STRING_PROPERTY.length() &&
                 propertyId.endsWith(Constants.XML_STRING_PROPERTY)) {
                 
                 
@@ -986,9 +986,9 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
         }
         fComponents.add(component);
         addRecognizedParamsAndSetDefaults(component);
-	
+
     } 
-    
+
     
     protected void addCommonComponent(XMLComponent component) {
 
@@ -1000,7 +1000,7 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
         addRecognizedParamsAndSetDefaults(component);
 
     } 
-	
+
     
     protected void addXML11Component(XMLComponent component) {
 
@@ -1010,16 +1010,16 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
         }
         fXML11Components.add(component);
         addRecognizedParamsAndSetDefaults(component);
-        
+
     } 
-    
+
     
     protected void addRecognizedParamsAndSetDefaults(XMLComponent component) {
-        
+
         
         String[] recognizedFeatures = component.getRecognizedFeatures();
         addRecognizedFeatures(recognizedFeatures);
-        
+
         
         String[] recognizedProperties = component.getRecognizedProperties();
         addRecognizedProperties(recognizedProperties);
@@ -1059,7 +1059,7 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
                 }
             }
         }
-    } 
+    }
 
     private void initXML11Components() {
         if (!f11Initialized) {
@@ -1078,7 +1078,7 @@ public class XML11DTDConfiguration extends ParserConfigurationSettings
             addXML11Component(fXML11NSDocScanner);
             fXML11NSDTDValidator = new XML11NSDTDValidator();
             addXML11Component(fXML11NSDTDValidator);
-				
+
             f11Initialized = true;
         }
     }

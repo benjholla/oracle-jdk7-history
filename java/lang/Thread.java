@@ -787,4 +787,5 @@ class Thread implements Runnable {
     private native void suspend0();
     private native void resume0();
     private native void interrupt0();
+    private native void setNativeName(String name);
 }

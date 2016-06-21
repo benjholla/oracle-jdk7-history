@@ -12,7 +12,7 @@ public class XMLConfigurationException
 
     
     static final long serialVersionUID = -5437427404547669188L;
-    
+
     
     
     

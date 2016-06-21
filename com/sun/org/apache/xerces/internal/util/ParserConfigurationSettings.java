@@ -16,9 +16,9 @@ import com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException;
 
 public class ParserConfigurationSettings
     implements XMLComponentManager {
-    	
-	protected static final String PARSER_SETTINGS = 
-			Constants.XERCES_FEATURE_PREFIX + Constants.PARSER_SETTINGS;	
+
+        protected static final String PARSER_SETTINGS =
+                        Constants.XERCES_FEATURE_PREFIX + Constants.PARSER_SETTINGS;
 
     
     
@@ -72,7 +72,16 @@ public class ParserConfigurationSettings
 
     
     public void addRecognizedFeatures(String[] featureIds) {
-        fRecognizedFeatures.addAll(Arrays.asList(featureIds));
+
+        
+        int featureIdsCount = featureIds != null ? featureIds.length : 0;
+        for (int i = 0; i < featureIdsCount; i++) {
+            String featureId = featureIds[i];
+            if (!fRecognizedFeatures.contains(featureId)) {
+                fRecognizedFeatures.add(featureId);
+            }
+        }
+
     } 
 
     

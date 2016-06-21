@@ -9,8 +9,8 @@ package org.xml.sax;
 
 
 public class SAXParseException extends SAXException {
-    
-    
+
+
     
     
     
@@ -18,85 +18,85 @@ public class SAXParseException extends SAXException {
 
     
     public SAXParseException (String message, Locator locator) {
-	super(message);
-	if (locator != null) {
-	    init(locator.getPublicId(), locator.getSystemId(),
-		 locator.getLineNumber(), locator.getColumnNumber());
-	} else {
-	    init(null, null, -1, -1);
-	}
+        super(message);
+        if (locator != null) {
+            init(locator.getPublicId(), locator.getSystemId(),
+                 locator.getLineNumber(), locator.getColumnNumber());
+        } else {
+            init(null, null, -1, -1);
+        }
     }
-    
-    
+
+
     
     public SAXParseException (String message, Locator locator,
-			      Exception e) {
-	super(message, e);
-	if (locator != null) {
-	    init(locator.getPublicId(), locator.getSystemId(),
-		 locator.getLineNumber(), locator.getColumnNumber());
-	} else {
-	    init(null, null, -1, -1);
-	}
+                              Exception e) {
+        super(message, e);
+        if (locator != null) {
+            init(locator.getPublicId(), locator.getSystemId(),
+                 locator.getLineNumber(), locator.getColumnNumber());
+        } else {
+            init(null, null, -1, -1);
+        }
     }
-    
-    
+
+
     
     public SAXParseException (String message, String publicId, String systemId,
-			      int lineNumber, int columnNumber)
+                              int lineNumber, int columnNumber)
     {
-	super(message);
-	init(publicId, systemId, lineNumber, columnNumber);
+        super(message);
+        init(publicId, systemId, lineNumber, columnNumber);
     }
-    
-    
+
+
     
     public SAXParseException (String message, String publicId, String systemId,
-			      int lineNumber, int columnNumber, Exception e)
+                              int lineNumber, int columnNumber, Exception e)
     {
-	super(message, e);
-	init(publicId, systemId, lineNumber, columnNumber);
+        super(message, e);
+        init(publicId, systemId, lineNumber, columnNumber);
     }
 
 
     
     private void init (String publicId, String systemId,
-		       int lineNumber, int columnNumber)
+                       int lineNumber, int columnNumber)
     {
-	this.publicId = publicId;
-	this.systemId = systemId;
-	this.lineNumber = lineNumber;
-	this.columnNumber = columnNumber;
+        this.publicId = publicId;
+        this.systemId = systemId;
+        this.lineNumber = lineNumber;
+        this.columnNumber = columnNumber;
     }
-    
-    
+
+
     
     public String getPublicId ()
     {
-	return this.publicId;
+        return this.publicId;
     }
-    
-    
+
+
     
     public String getSystemId ()
     {
-	return this.systemId;
+        return this.systemId;
     }
-    
-    
+
+
     
     public int getLineNumber ()
     {
-	return this.lineNumber;
+        return this.lineNumber;
     }
-    
-    
+
+
     
     public int getColumnNumber ()
     {
-	return this.columnNumber;
+        return this.columnNumber;
     }
-    
+
     
     public String toString() {
         StringBuilder buf = new StringBuilder(getClass().getName());
@@ -108,15 +108,15 @@ public class SAXParseException extends SAXException {
 
        
         if (message!=null)     buf.append("; ").append(message);
-        return buf.toString();    
+        return buf.toString();
     }
-    
+
     
     
     
 
 
-        
+    
     private String publicId;
 
 
@@ -130,7 +130,7 @@ public class SAXParseException extends SAXException {
 
     
     private int columnNumber;
-    
+
     
     static final long serialVersionUID = -5651165872476709336L;
 }

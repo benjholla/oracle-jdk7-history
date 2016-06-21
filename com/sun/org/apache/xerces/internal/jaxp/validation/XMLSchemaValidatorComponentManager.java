@@ -36,13 +36,13 @@ import org.xml.sax.ErrorHandler;
 
 final class XMLSchemaValidatorComponentManager extends ParserConfigurationSettings implements
         XMLComponentManager {
+
     
-    
-    
+
     
     private static final String SCHEMA_VALIDATION =
         Constants.XERCES_FEATURE_PREFIX + Constants.SCHEMA_VALIDATION_FEATURE;
-    
+
     
     private static final String VALIDATION =
         Constants.SAX_FEATURE_PREFIX + Constants.VALIDATION_FEATURE;
@@ -50,49 +50,49 @@ final class XMLSchemaValidatorComponentManager extends ParserConfigurationSettin
     
     private static final String SCHEMA_ELEMENT_DEFAULT =
         Constants.XERCES_FEATURE_PREFIX + Constants.SCHEMA_ELEMENT_DEFAULT;
-    
+
     
     private static final String USE_GRAMMAR_POOL_ONLY =
         Constants.XERCES_FEATURE_PREFIX + Constants.USE_GRAMMAR_POOL_ONLY_FEATURE;
-    
+
     
 
     
     private static final String ENTITY_MANAGER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.ENTITY_MANAGER_PROPERTY;
-    
+
     
     private static final String ENTITY_RESOLVER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.ENTITY_RESOLVER_PROPERTY;
+
     
-    
-    private static final String ERROR_HANDLER = 
+    private static final String ERROR_HANDLER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.ERROR_HANDLER_PROPERTY;
-    
+
     
     private static final String ERROR_REPORTER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.ERROR_REPORTER_PROPERTY;
-    
+
     
     private static final String NAMESPACE_CONTEXT =
         Constants.XERCES_PROPERTY_PREFIX + Constants.NAMESPACE_CONTEXT_PROPERTY;
-    
+
     
     private static final String SCHEMA_VALIDATOR =
         Constants.XERCES_PROPERTY_PREFIX + Constants.SCHEMA_VALIDATOR_PROPERTY;
-    
+
     
     private static final String SECURITY_MANAGER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.SECURITY_MANAGER_PROPERTY;
-    
+
     
     private static final String SYMBOL_TABLE =
         Constants.XERCES_PROPERTY_PREFIX + Constants.SYMBOL_TABLE_PROPERTY;
-    
+
     
     private static final String VALIDATION_MANAGER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.VALIDATION_MANAGER_PROPERTY;
-    
+
     
     private static final String XMLGRAMMAR_POOL =
         Constants.XERCES_PROPERTY_PREFIX + Constants.XMLGRAMMAR_POOL_PROPERTY;
@@ -106,32 +106,32 @@ final class XMLSchemaValidatorComponentManager extends ParserConfigurationSettin
     
     
     private boolean _isSecureMode = false;
-    
+
     
     private boolean fConfigUpdated = true;
-    
+
     
     private boolean fUseGrammarPoolOnly;
-    
+
     
     private final HashMap fComponents = new HashMap();
+
     
     
     
-    
-    
+
     
     private XMLEntityManager fEntityManager;
-    
+
     
     private XMLErrorReporter fErrorReporter;
-    
+
     
     private NamespaceContext fNamespaceContext;
-    
+
     
     private XMLSchemaValidator fSchemaValidator;
-       
+
     
     private ValidationManager fValidationManager;
 
@@ -147,14 +147,14 @@ final class XMLSchemaValidatorComponentManager extends ParserConfigurationSettin
 
     
     private final SecurityManager fInitSecurityManager;
+
     
     
     
-    
-    
+
     
     private ErrorHandler fErrorHandler = null;
-    
+
     
     private LSResourceResolver fResourceResolver = null;
 
@@ -166,19 +166,19 @@ final class XMLSchemaValidatorComponentManager extends ParserConfigurationSettin
         
         fEntityManager = new XMLEntityManager();
         fComponents.put(ENTITY_MANAGER, fEntityManager);
-        
+
         fErrorReporter = new XMLErrorReporter();
         fComponents.put(ERROR_REPORTER, fErrorReporter);
-        
+
         fNamespaceContext = new NamespaceSupport();
         fComponents.put(NAMESPACE_CONTEXT, fNamespaceContext);
-        
+
         fSchemaValidator = new XMLSchemaValidator();
         fComponents.put(SCHEMA_VALIDATOR, fSchemaValidator);
-        
+
         fValidationManager = new ValidationManager();
         fComponents.put(VALIDATION_MANAGER, fValidationManager);
-        
+
         
         fComponents.put(ENTITY_RESOLVER, null);
         fComponents.put(ERROR_HANDLER, null);
@@ -186,18 +186,18 @@ final class XMLSchemaValidatorComponentManager extends ParserConfigurationSettin
         if (System.getSecurityManager() != null) {
             _isSecureMode = true;
             setProperty(SECURITY_MANAGER, new SecurityManager());
-        } else {        
+        } else {
             fComponents.put(SECURITY_MANAGER, null);
         }
         fComponents.put(SYMBOL_TABLE, new SymbolTable());
-        
+
         
         fComponents.put(XMLGRAMMAR_POOL, grammarContainer.getGrammarPool());
         fUseGrammarPoolOnly = grammarContainer.isFullyComposed();
-        
+
         
         fErrorReporter.putMessageFormatter(XSMessageFormatter.SCHEMA_DOMAIN, new XSMessageFormatter());
-        
+
         
         addRecognizedParamsAndSetDefaults(fEntityManager, grammarContainer);
         addRecognizedParamsAndSetDefaults(fErrorReporter, grammarContainer);
@@ -235,7 +235,7 @@ final class XMLSchemaValidatorComponentManager extends ParserConfigurationSettin
         }
         return super.getFeatureState(featureId);
     }
-    
+
     
     public void setFeature(String featureId, boolean value) throws XMLConfigurationException {
         if (PARSER_SETTINGS.equals(featureId)) {
@@ -264,7 +264,7 @@ final class XMLSchemaValidatorComponentManager extends ParserConfigurationSettin
         }
         super.setFeature(featureId, value);
     }
-    
+
     
     public PropertyState getPropertyState(String propertyId)
             throws XMLConfigurationException {
@@ -280,7 +280,7 @@ final class XMLSchemaValidatorComponentManager extends ParserConfigurationSettin
         }
         return super.getPropertyState(propertyId);
     }
-    
+
     
     public void setProperty(String propertyId, Object value) throws XMLConfigurationException {
         if ( ENTITY_MANAGER.equals(propertyId) || ERROR_REPORTER.equals(propertyId) ||
@@ -293,7 +293,7 @@ final class XMLSchemaValidatorComponentManager extends ParserConfigurationSettin
         fEntityManager.setProperty(propertyId, value);
         fErrorReporter.setProperty(propertyId, value);
         fSchemaValidator.setProperty(propertyId, value);
-        if (ENTITY_RESOLVER.equals(propertyId) || ERROR_HANDLER.equals(propertyId) || 
+        if (ENTITY_RESOLVER.equals(propertyId) || ERROR_HANDLER.equals(propertyId) ||
                 SECURITY_MANAGER.equals(propertyId)) {
             fComponents.put(propertyId, value);
             return;
@@ -308,14 +308,14 @@ final class XMLSchemaValidatorComponentManager extends ParserConfigurationSettin
         }
         super.setProperty(propertyId, value);
     }
-    
+
     
     public void addRecognizedParamsAndSetDefaults(XMLComponent component, XSGrammarPoolContainer grammarContainer) {
-        
+
         
         final String[] recognizedFeatures = component.getRecognizedFeatures();
         addRecognizedFeatures(recognizedFeatures);
-        
+
         
         final String[] recognizedProperties = component.getRecognizedProperties();
         addRecognizedProperties(recognizedProperties);
@@ -324,7 +324,7 @@ final class XMLSchemaValidatorComponentManager extends ParserConfigurationSettin
         setFeatureDefaults(component, recognizedFeatures, grammarContainer);
         setPropertyDefaults(component, recognizedProperties);
     }
-    
+
     
     public void reset() throws XNIException {
         fNamespaceContext.reset();
@@ -335,22 +335,22 @@ final class XMLSchemaValidatorComponentManager extends ParserConfigurationSettin
         
         fConfigUpdated = false;
     }
-    
+
     void setErrorHandler(ErrorHandler errorHandler) {
         fErrorHandler = errorHandler;
-        setProperty(ERROR_HANDLER, (errorHandler != null) ? new ErrorHandlerWrapper(errorHandler) : 
+        setProperty(ERROR_HANDLER, (errorHandler != null) ? new ErrorHandlerWrapper(errorHandler) :
                 new ErrorHandlerWrapper(DraconianErrorHandler.getInstance()));
     }
-    
+
     ErrorHandler getErrorHandler() {
         return fErrorHandler;
     }
-    
+
     void setResourceResolver(LSResourceResolver resourceResolver) {
         fResourceResolver = resourceResolver;
         setProperty(ENTITY_RESOLVER, new DOMEntityResolverWrapper(resourceResolver));
     }
-    
+
     LSResourceResolver getResourceResolver() {
         return fResourceResolver;
     }
@@ -367,7 +367,7 @@ final class XMLSchemaValidatorComponentManager extends ParserConfigurationSettin
     
     void restoreInitialState() {
         fConfigUpdated = true;
-        
+
         
         fComponents.put(ENTITY_RESOLVER, null);
         fComponents.put(ERROR_HANDLER, null);
@@ -375,7 +375,7 @@ final class XMLSchemaValidatorComponentManager extends ParserConfigurationSettin
         
         setLocale(null);
         fComponents.put(LOCALE, null);
-       
+
         
         fComponents.put(SECURITY_MANAGER, fInitSecurityManager);
 
@@ -405,7 +405,7 @@ final class XMLSchemaValidatorComponentManager extends ParserConfigurationSettin
             fInitProperties.clear();
         }
     }
-    
+
     
     private void setFeatureDefaults(final XMLComponent component,
             final String [] recognizedFeatures, XSGrammarPoolContainer grammarContainer) {
@@ -430,7 +430,7 @@ final class XMLSchemaValidatorComponentManager extends ParserConfigurationSettin
             }
         }
     }
-    
+
     
     private void setPropertyDefaults(final XMLComponent component, final String [] recognizedProperties) {
         if (recognizedProperties != null) {
@@ -451,6 +451,5 @@ final class XMLSchemaValidatorComponentManager extends ParserConfigurationSettin
             }
         }
     }
-    
+
 } 
- 

@@ -71,6 +71,10 @@ public final class OutputPropertiesFactory
         S_BUILTIN_OLD_EXTENSIONS_UNIVERSAL.length();
 
     
+        
+    public static final String ORACLE_IS_STANDALONE = "http://www.oracle.com/xml/is-standalone";
+
+    
     
     
 

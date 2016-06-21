@@ -65,6 +65,7 @@ public class Window extends Container implements Accessible {
     static boolean systemSyncLWRequests = false;
     boolean     syncLWRequests = false;
     transient boolean beforeFirstShow = true;
+    private transient boolean disposing = false;
 
     static final int OPENED = 0x01;
 
@@ -230,7 +231,7 @@ public class Window extends Container implements Accessible {
 
         modalExclusionType = Dialog.ModalExclusionType.NO_EXCLUDE;
 
-        SunToolkit.checkAndSetPolicy(this, false);
+        SunToolkit.checkAndSetPolicy(this);
     }
 
     
@@ -540,36 +541,41 @@ public class Window extends Container implements Accessible {
     void doDispose() {
     class DisposeAction implements Runnable {
         public void run() {
-            
-            
-            
-            GraphicsDevice gd = getGraphicsConfiguration().getDevice();
-            if (gd.getFullScreenWindow() == Window.this) {
-                gd.setFullScreenWindow(null);
-            }
+            disposing = true;
+            try {
+                
+                
+                
+                GraphicsDevice gd = getGraphicsConfiguration().getDevice();
+                if (gd.getFullScreenWindow() == Window.this) {
+                    gd.setFullScreenWindow(null);
+                }
 
-            Object[] ownedWindowArray;
-            synchronized(ownedWindowList) {
-                ownedWindowArray = new Object[ownedWindowList.size()];
-                ownedWindowList.copyInto(ownedWindowArray);
-            }
-            for (int i = 0; i < ownedWindowArray.length; i++) {
-                Window child = (Window) (((WeakReference)
-                               (ownedWindowArray[i])).get());
-                if (child != null) {
-                    child.disposeImpl();
+                Object[] ownedWindowArray;
+                synchronized(ownedWindowList) {
+                    ownedWindowArray = new Object[ownedWindowList.size()];
+                    ownedWindowList.copyInto(ownedWindowArray);
                 }
-            }
-            hide();
-            beforeFirstShow = true;
-            removeNotify();
-            synchronized (inputContextLock) {
-                if (inputContext != null) {
-                    inputContext.dispose();
-                    inputContext = null;
+                for (int i = 0; i < ownedWindowArray.length; i++) {
+                    Window child = (Window) (((WeakReference)
+                                   (ownedWindowArray[i])).get());
+                    if (child != null) {
+                        child.disposeImpl();
+                    }
                 }
+                hide();
+                beforeFirstShow = true;
+                removeNotify();
+                synchronized (inputContextLock) {
+                    if (inputContext != null) {
+                        inputContext.dispose();
+                        inputContext = null;
+                    }
+                }
+                clearCurrentFocusCycleRootOnHide();
+            } finally {
+                disposing = false;
             }
-            clearCurrentFocusCycleRootOnHide();
         }
     }
         DisposeAction action = new DisposeAction();
@@ -1351,6 +1357,10 @@ public class Window extends Container implements Accessible {
     
     public boolean isShowing() {
         return visible;
+    }
+
+    boolean isDisposing() {
+        return disposing;
     }
 
     

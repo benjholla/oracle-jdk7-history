@@ -224,25 +224,25 @@ public class DocumentBuilderImpl extends DocumentBuilder
                             domParser.setProperty(JAXP_SCHEMA_LANGUAGE, W3C_XML_SCHEMA);
                         }
                     }
-        		} else if(JAXP_SCHEMA_SOURCE.equals(name)){
-               		if( isValidating() ) {
-						String value=(String)dbfAttrs.get(JAXP_SCHEMA_LANGUAGE);
-						if(value !=null && W3C_XML_SCHEMA.equals(value)){
-            				domParser.setProperty(name, val);
-						}else{
+                        } else if(JAXP_SCHEMA_SOURCE.equals(name)){
+                        if( isValidating() ) {
+                                                String value=(String)dbfAttrs.get(JAXP_SCHEMA_LANGUAGE);
+                                                if(value !=null && W3C_XML_SCHEMA.equals(value)){
+                                        domParser.setProperty(name, val);
+                                                }else{
                             throw new IllegalArgumentException(
                                 DOMMessageFormatter.formatMessage(DOMMessageFormatter.DOM_DOMAIN,
                                 "jaxp-order-not-supported",
                                 new Object[] {JAXP_SCHEMA_LANGUAGE, JAXP_SCHEMA_SOURCE}));
-						}
-					}
-            	} else {
+                                                }
+                                        }
+                } else {
                     
                     domParser.setProperty(name, val);
-				}
-			}
-		}
-	}
+                                }
+                        }
+                }
+        }
 
     
     public Document newDocument() {

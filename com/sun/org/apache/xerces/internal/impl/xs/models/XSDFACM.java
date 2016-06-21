@@ -47,7 +47,7 @@ public class XSDFACM
 
     
     private int fElemMapId[] = null;
-    
+
     
     private int fElemMapSize = 0;
 
@@ -92,7 +92,7 @@ public class XSDFACM
 
     
     private int fTransTableSize = 0;
-    
+
     
     private int fElemMapCounter[];
 
@@ -111,7 +111,7 @@ public class XSDFACM
     
 
    public XSDFACM(CMNode syntaxTree, int leafCount) {
-   
+
         
         fLeafCount = leafCount;
 
@@ -148,7 +148,7 @@ public class XSDFACM
     
     
     
-    
+
     
     public boolean isFinalState (int state) {
         return (state < 0)? false :
@@ -505,7 +505,7 @@ public class XSDFACM
                     fElemMapCounterLowerBound[fElemMapSize] = -1;
                     fElemMapCounterUpperBound[fElemMapSize] = -1;
                 }
-                
+
                 fElemMapSize++;
             }
         }

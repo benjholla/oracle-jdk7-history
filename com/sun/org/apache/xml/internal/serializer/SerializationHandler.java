@@ -53,5 +53,7 @@ public interface SerializationHandler
     
     public void setDTDEntityExpansion(boolean expand);
 
+    
+    public void setIsStandalone(boolean b);
 
 }

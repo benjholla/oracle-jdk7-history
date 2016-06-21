@@ -357,6 +357,8 @@ public class SynthTreeUI extends BasicTreeUI
 
         
         rendererPane.removeAll();
+
+        paintContext = null;
     }
 
     private void configureRenderer(SynthContext context) {

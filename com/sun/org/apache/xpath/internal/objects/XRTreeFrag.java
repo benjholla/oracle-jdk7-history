@@ -27,16 +27,16 @@ public class XRTreeFrag extends XObject implements Cloneable
   {
     super(null);
     exprSetParent(parent);
-    initDTM(root, xctxt);    
+    initDTM(root, xctxt);
   }
-  
+
   
   public XRTreeFrag(int root, XPathContext xctxt)
   {
-    super(null); 
-   initDTM(root, xctxt); 
+    super(null);
+   initDTM(root, xctxt);
   }
-  
+
   private final void initDTM(int root, XPathContext xctxt){
     m_dtmRoot = root;
     final DTM dtm = xctxt.getDTM(root);
@@ -44,7 +44,7 @@ public class XRTreeFrag extends XObject implements Cloneable
       m_DTMXRTreeFrag = xctxt.getDTMXRTreeFrag(xctxt.getDTMIdentity(dtm));
     }
   }
-  
+
   
   public Object object()
   {
@@ -53,13 +53,13 @@ public class XRTreeFrag extends XObject implements Cloneable
     else
       return super.object();
   }
-  
+
   
   public XRTreeFrag(Expression expr)
   {
     super(expr);
   }
-    
+
   
   public void allowDetachToRelease(boolean allowRelease)
   {
@@ -69,11 +69,11 @@ public class XRTreeFrag extends XObject implements Cloneable
   
   public void detach(){
     if(m_allowRelease){
-    	m_DTMXRTreeFrag.destruct();
+        m_DTMXRTreeFrag.destruct();
       setObject(null);
     }
   }
-  
+
   
   public int getType()
   {
@@ -101,18 +101,18 @@ public class XRTreeFrag extends XObject implements Cloneable
   {
     return true;
   }
-  
+
   private XMLString m_xmlStr = null;
-  
+
   
   public XMLString xstr()
   {
     if(null == m_xmlStr)
       m_xmlStr = m_DTMXRTreeFrag.getDTM().getStringValue(m_dtmRoot);
-    
+
     return m_xmlStr;
   }
-  
+
   
   public void appendToFsb(com.sun.org.apache.xml.internal.utils.FastStringBuffer fsb)
   {
@@ -159,7 +159,7 @@ public class XRTreeFrag extends XObject implements Cloneable
     {
       if (XObject.CLASS_NODESET == obj2.getType())
       {
-  
+
         
         
         
@@ -183,7 +183,7 @@ public class XRTreeFrag extends XObject implements Cloneable
       }
       else if (XObject.CLASS_RTREEFRAG == obj2.getType())
       {
-  
+
         
         return xstr().equals(obj2.xstr());
       }

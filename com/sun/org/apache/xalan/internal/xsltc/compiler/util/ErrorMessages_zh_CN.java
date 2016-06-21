@@ -295,13 +295,13 @@ public class ErrorMessages_zh_CN extends ListResourceBundle {
         
         {ErrorMsg.XSLTC_SOURCE_ERR,
         "\u8C03\u7528 XSLTCSource.build() \u65F6\u672A\u8BBE\u7F6E systemId\u3002"},
-        
+
         { ErrorMsg.ER_RESULT_NULL,
             "Result \u4E0D\u80FD\u4E3A\u7A7A\u503C"},
 
         
         {ErrorMsg.JAXP_INVALID_SET_PARAM_VALUE,
-        "\u53C2\u6570 {0} \u7684\u503C\u5FC5\u987B\u662F\u6709\u6548 Java \u5BF9\u8C61"},            
+        "\u53C2\u6570 {0} \u7684\u503C\u5FC5\u987B\u662F\u6709\u6548 Java \u5BF9\u8C61"},
 
 
         {ErrorMsg.COMPILE_STDIN_ERR,
@@ -377,7 +377,7 @@ public class ErrorMessages_zh_CN extends ListResourceBundle {
         
         {ErrorMsg.ERROR_MSG,
         "ERROR:  ''{0}''"},
-        
+
         
         {ErrorMsg.TRANSFORM_WITH_TRANSLET_STR,
         "\u4F7F\u7528 translet ''{0}'' \u8FDB\u884C\u8F6C\u6362 "},
@@ -405,10 +405,10 @@ public class ErrorMessages_zh_CN extends ListResourceBundle {
         
         {ErrorMsg.RUNTIME_ERROR_KEY,
         "Translet \u9519\u8BEF:"},
-        
+
         
         {ErrorMsg.INVALID_QNAME_ERR,
-        "\u5176\u503C\u5FC5\u987B\u4E3A QName \u6216\u7531\u7A7A\u683C\u5206\u9694\u7684 QName \u5217\u8868\u7684\u5C5E\u6027\u5177\u6709\u503C ''{0}''"}, 
+        "\u5176\u503C\u5FC5\u987B\u4E3A QName \u6216\u7531\u7A7A\u683C\u5206\u9694\u7684 QName \u5217\u8868\u7684\u5C5E\u6027\u5177\u6709\u503C ''{0}''"},
 
         
         {ErrorMsg.INVALID_NCNAME_ERR,
@@ -417,10 +417,10 @@ public class ErrorMessages_zh_CN extends ListResourceBundle {
         
         {ErrorMsg.INVALID_METHOD_IN_OUTPUT,
         "<xsl:output> \u5143\u7D20\u7684 method \u5C5E\u6027\u5177\u6709\u503C ''{0}''\u3002\u8BE5\u503C\u5FC5\u987B\u662F ''xml'', ''html'', ''text'' \u6216 qname-but-not-ncname \u4E4B\u4E00"},
-        
+
         {ErrorMsg.JAXP_GET_FEATURE_NULL_NAME,
         "TransformerFactory.getFeature(String name) \u4E2D\u7684\u529F\u80FD\u540D\u79F0\u4E0D\u80FD\u4E3A\u7A7A\u503C\u3002"},
-        
+
         {ErrorMsg.JAXP_SET_FEATURE_NULL_NAME,
         "TransformerFactory.setFeature(String name, boolean value) \u4E2D\u7684\u529F\u80FD\u540D\u79F0\u4E0D\u80FD\u4E3A\u7A7A\u503C\u3002"},
 

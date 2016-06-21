@@ -58,4 +58,3 @@ public class ByteListImpl extends AbstractList implements ByteList {
         return getLength();
     }
 }
-

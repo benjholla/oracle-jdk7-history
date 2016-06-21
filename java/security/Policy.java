@@ -14,6 +14,7 @@ import java.util.PropertyPermission;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.WeakHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import sun.security.jca.GetInstance;
 import sun.security.util.Debug;
 import sun.security.util.SecurityConstants;
@@ -28,7 +29,21 @@ public abstract class Policy {
                         new UnsupportedEmptyCollection();
 
     
-    private static Policy policy; 
+    private static class PolicyInfo {
+        
+        final Policy policy;
+        
+        final boolean initialized;
+
+        PolicyInfo(Policy policy, boolean initialized) {
+            this.policy = policy;
+            this.initialized = initialized;
+        }
+    }
+
+    
+    private static AtomicReference<PolicyInfo> policy =
+        new AtomicReference<>(new PolicyInfo(null, false));
 
     private static final Debug debug = Debug.getInstance("policy");
 
@@ -38,7 +53,8 @@ public abstract class Policy {
     
     static boolean isSet()
     {
-        return policy != null;
+        PolicyInfo pi = policy.get();
+        return pi.policy != null && pi.initialized == true;
     }
 
     private static void checkPermission(String type) {
@@ -58,66 +74,79 @@ public abstract class Policy {
     }
 
     
-    static synchronized Policy getPolicyNoCheck()
+    static Policy getPolicyNoCheck()
     {
-        if (policy == null) {
-            String policy_class = null;
-            policy_class = AccessController.doPrivileged(
-                new PrivilegedAction<String>() {
-                    public String run() {
-                        return Security.getProperty("policy.provider");
-                    }
-                });
-            if (policy_class == null) {
-                policy_class = "sun.security.provider.PolicyFile";
-            }
-
-            try {
-                policy = (Policy)
-                    Class.forName(policy_class).newInstance();
-            } catch (Exception e) {
-                
-
-                
-                policy = new sun.security.provider.PolicyFile();
-
-                final String pc = policy_class;
-                Policy p = AccessController.doPrivileged(
-                    new PrivilegedAction<Policy>() {
-                        public Policy run() {
-                            try {
-                                ClassLoader cl =
-                                        ClassLoader.getSystemClassLoader();
-                                
-                                ClassLoader extcl = null;
-                                while (cl != null) {
-                                    extcl = cl;
-                                    cl = cl.getParent();
-                                }
-                                return (extcl != null ? (Policy)Class.forName(
-                                        pc, true, extcl).newInstance() : null);
-                            } catch (Exception e) {
-                                if (debug != null) {
-                                    debug.println("policy provider " +
-                                                pc +
-                                                " not available");
-                                    e.printStackTrace();
-                                }
-                                return null;
-                            }
+        PolicyInfo pi = policy.get();
+        
+        
+        if (pi.initialized == false || pi.policy == null) {
+            synchronized (Policy.class) {
+                PolicyInfo pinfo = policy.get();
+                if (pinfo.policy == null) {
+                    String policy_class = AccessController.doPrivileged(
+                        new PrivilegedAction<String>() {
+                        public String run() {
+                            return Security.getProperty("policy.provider");
                         }
                     });
-                
-                if (p != null) {
-                    policy = p;
-                } else {
-                    if (debug != null) {
-                        debug.println("using sun.security.provider.PolicyFile");
+                    if (policy_class == null) {
+                        policy_class = "sun.security.provider.PolicyFile";
                     }
+
+                    try {
+                        pinfo = new PolicyInfo(
+                            (Policy) Class.forName(policy_class).newInstance(),
+                            true);
+                    } catch (Exception e) {
+                        
+
+                        
+                        Policy polFile = new sun.security.provider.PolicyFile();
+                        pinfo = new PolicyInfo(polFile, false);
+                        policy.set(pinfo);
+
+                        final String pc = policy_class;
+                        Policy pol = AccessController.doPrivileged(
+                            new PrivilegedAction<Policy>() {
+                            public Policy run() {
+                                try {
+                                    ClassLoader cl =
+                                            ClassLoader.getSystemClassLoader();
+                                    
+                                    ClassLoader extcl = null;
+                                    while (cl != null) {
+                                        extcl = cl;
+                                        cl = cl.getParent();
+                                    }
+                                    return (extcl != null ? (Policy)Class.forName(
+                                            pc, true, extcl).newInstance() : null);
+                                } catch (Exception e) {
+                                    if (debug != null) {
+                                        debug.println("policy provider " +
+                                                    pc +
+                                                    " not available");
+                                        e.printStackTrace();
+                                    }
+                                    return null;
+                                }
+                            }
+                        });
+                        
+                        if (pol != null) {
+                            pinfo = new PolicyInfo(pol, true);
+                        } else {
+                            if (debug != null) {
+                                debug.println("using sun.security.provider.PolicyFile");
+                            }
+                            pinfo = new PolicyInfo(polFile, true);
+                        }
+                    }
+                    policy.set(pinfo);
                 }
+                return pinfo.policy;
             }
         }
-        return policy;
+        return pi.policy;
     }
 
     
@@ -130,7 +159,7 @@ public abstract class Policy {
             initPolicy(p);
         }
         synchronized (Policy.class) {
-            Policy.policy = p;
+            policy.set(new PolicyInfo(p, p != null));
         }
     }
 
@@ -149,14 +178,14 @@ public abstract class Policy {
         PermissionCollection policyPerms = null;
         synchronized (p) {
             if (p.pdMapping == null) {
-                p.pdMapping =
-                    new WeakHashMap<ProtectionDomain.Key, PermissionCollection>();
+                p.pdMapping = new WeakHashMap<>();
            }
         }
 
         if (policyDomain.getCodeSource() != null) {
-            if (Policy.isSet()) {
-                policyPerms = policy.getPermissions(policyDomain);
+            Policy pol = policy.get().policy;
+            if (pol != null) {
+                policyPerms = pol.getPermissions(policyDomain);
             }
 
             if (policyPerms == null) { 
@@ -214,7 +243,7 @@ public abstract class Policy {
                                                         type,
                                                         params);
         } catch (NoSuchAlgorithmException nsae) {
-            return handleException (nsae);
+            return handleException(nsae);
         }
     }
 
@@ -240,7 +269,7 @@ public abstract class Policy {
                                                         type,
                                                         params);
         } catch (NoSuchAlgorithmException nsae) {
-            return handleException (nsae);
+            return handleException(nsae);
         }
     }
 

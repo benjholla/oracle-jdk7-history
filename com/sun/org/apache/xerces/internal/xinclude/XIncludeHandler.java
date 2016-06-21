@@ -49,6 +49,7 @@ import com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
 import com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration;
 import com.sun.org.apache.xerces.internal.xpointer.XPointerHandler;
 import com.sun.org.apache.xerces.internal.xpointer.XPointerProcessor;
+import com.sun.org.apache.xerces.internal.utils.ObjectFactory;
 
 
 public class XIncludeHandler
@@ -821,7 +822,8 @@ public class XIncludeHandler
                 setState(STATE_IGNORE);
             }
             else {
-                reportFatalError("NoFallback");
+                reportFatalError("NoFallback",
+                    new Object[] { attributes.getValue(null, "href") });
             }
         }
         else if (isFallbackElement(element)) {
@@ -879,7 +881,8 @@ public class XIncludeHandler
             
             if (getState() == STATE_EXPECT_FALLBACK
                 && !getSawFallback(fDepth + 1)) {
-                reportFatalError("NoFallback");
+                reportFatalError("NoFallback",
+                    new Object[] { "unknown" });
             }
         }
         if (isFallbackElement(element)) {
@@ -1403,7 +1406,6 @@ public class XIncludeHandler
                 fChildConfig =
                     (XMLParserConfiguration)ObjectFactory.newInstance(
                         parserName,
-                        ObjectFactory.findClassLoader(),
                         true);
 
                 

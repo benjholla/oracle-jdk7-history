@@ -44,9 +44,9 @@ public class XSCMUniOp extends CMNode {
         
         
         if (type() == XSParticleDecl.PARTICLE_ONE_OR_MORE)
-	        return fChild.isNullable();
-	    else
-	        return true;
+                return fChild.isNullable();
+            else
+                return true;
     }
 
 
@@ -80,4 +80,3 @@ public class XSCMUniOp extends CMNode {
     
     private CMNode  fChild;
 } 
-

@@ -114,7 +114,7 @@ public class XSModelGroupImpl implements XSModelGroup {
     
     private String fDescription = null;
     public String toString() {
-    	
+        
         if (fDescription == null) {
             StringBuffer buffer = new StringBuffer();
             if (fCompositor == MODELGROUP_ALL)

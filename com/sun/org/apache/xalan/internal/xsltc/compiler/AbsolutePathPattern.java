@@ -65,9 +65,9 @@ final class AbsolutePathPattern extends LocationPathPattern {
                     
                     methodGen.addLocalVariable2("apptmp",
                                                 Util.getJCRefType(NODE_SIG),
-                                                il.getEnd());
+                                                null);
                 il.append(DUP);
-                il.append(new ISTORE(local.getIndex()));
+                local.setStart(il.append(new ISTORE(local.getIndex())));
                 _left.translate(classGen, methodGen);
                 il.append(methodGen.loadDOM());
                 local.setEnd(il.append(new ILOAD(local.getIndex())));

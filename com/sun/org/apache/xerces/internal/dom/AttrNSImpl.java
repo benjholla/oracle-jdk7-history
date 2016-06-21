@@ -18,7 +18,7 @@ public class AttrNSImpl
 
     
     static final long serialVersionUID = -781906615369795414L;
-    
+
     static final String xmlnsURI = "http://www.w3.org/2000/xmlns/";
     static final String xmlURI = "http://www.w3.org/XML/1998/namespace";
 
@@ -28,16 +28,16 @@ public class AttrNSImpl
 
     
     protected String namespaceURI;
-  
+
     
     protected String localName;
 
     
     public AttrNSImpl(){}
-        
+
    
-    protected AttrNSImpl(CoreDocumentImpl ownerDocument, 
-                         String namespaceURI, 
+    protected AttrNSImpl(CoreDocumentImpl ownerDocument,
+                         String namespaceURI,
                          String qualifiedName) {
 
         super(ownerDocument, qualifiedName);
@@ -52,7 +52,7 @@ public class AttrNSImpl
         if (namespaceURI !=null) {
             this.namespaceURI = (namespaceURI.length() == 0)? null
                     : namespaceURI;
-            
+
         }
         int colon1 = qname.indexOf(':');
         int colon2 = qname.lastIndexOf(':');
@@ -62,7 +62,7 @@ public class AttrNSImpl
             localName = qname;
             if (ownerDocument.errorChecking) {
                 ownerDocument.checkQName(null, localName);
-                
+
                 if (qname.equals("xmlns") && (namespaceURI == null
                     || !namespaceURI.equals(NamespaceContext.XMLNS_URI))
                     || (namespaceURI!=null && namespaceURI.equals(NamespaceContext.XMLNS_URI)
@@ -82,21 +82,21 @@ public class AttrNSImpl
             ownerDocument.checkQName(prefix, localName);
             ownerDocument.checkDOMNSErr(prefix, namespaceURI);
         }
-    } 
+    }
 
     
-    public AttrNSImpl(CoreDocumentImpl ownerDocument, 
-                         String namespaceURI, 
+    public AttrNSImpl(CoreDocumentImpl ownerDocument,
+                         String namespaceURI,
                          String qualifiedName,
                          String localName) {
         super(ownerDocument, qualifiedName);
-        
+
         this.localName = localName;
         this.namespaceURI = namespaceURI;
     }
+
     
-    
-    protected AttrNSImpl(CoreDocumentImpl ownerDocument, 
+    protected AttrNSImpl(CoreDocumentImpl ownerDocument,
                          String value) {
         super(ownerDocument, value);
     }
@@ -109,13 +109,13 @@ public class AttrNSImpl
         if (needsSyncData()) {
             synchronizeData();
         }
-		this.name = qualifiedName;
+                this.name = qualifiedName;
         setName(namespaceURI, qualifiedName);
     }
 
     
-    public void setValues (CoreDocumentImpl ownerDocument, 
-                         String namespaceURI, 
+    public void setValues (CoreDocumentImpl ownerDocument,
+                         String namespaceURI,
                          String qualifiedName,
                          String localName){
 
@@ -145,7 +145,7 @@ public class AttrNSImpl
         
         return namespaceURI;
     }
-    
+
     
     public String getPrefix()
     {
@@ -153,9 +153,9 @@ public class AttrNSImpl
             synchronizeData();
         }
         int index = name.indexOf(':');
-        return index < 0 ? null : name.substring(0, index); 
+        return index < 0 ? null : name.substring(0, index);
     }
-    
+
     
     public void setPrefix(String prefix)
         throws DOMException
@@ -177,7 +177,7 @@ public class AttrNSImpl
                 if (namespaceURI == null || prefix.indexOf(':') >=0) {
                     String msg = DOMMessageFormatter.formatMessage(DOMMessageFormatter.DOM_DOMAIN, "NAMESPACE_ERR", null);
                     throw new DOMException(DOMException.NAMESPACE_ERR, msg);
-               
+
                 }
                if (prefix.equals("xmlns")) {
                     if (!namespaceURI.equals(xmlnsURI)){
@@ -193,7 +193,7 @@ public class AttrNSImpl
                     String msg = DOMMessageFormatter.formatMessage(DOMMessageFormatter.DOM_DOMAIN, "NAMESPACE_ERR", null);
                     throw new DOMException(DOMException.NAMESPACE_ERR, msg);
                 }
-            } 
+            }
         }
 
         
@@ -204,7 +204,7 @@ public class AttrNSImpl
             name = localName;
         }
     }
-                                        
+
     
     public String getLocalName()
     {
@@ -213,8 +213,8 @@ public class AttrNSImpl
         }
         return localName;
     }
-    
-    
+
+
     
     public String getTypeName() {
         if (type !=null){
@@ -227,15 +227,15 @@ public class AttrNSImpl
     }
 
     
-    public boolean isDerivedFrom(String typeNamespaceArg, 
-                                 String typeNameArg, 
+    public boolean isDerivedFrom(String typeNamespaceArg,
+                                 String typeNameArg,
                                  int derivationMethod) {
         if (type != null) {
             if (type instanceof XSSimpleTypeDecl) {
                 return ((XSSimpleTypeDecl) type).isDOMDerivedFrom(
                         typeNamespaceArg, typeNameArg, derivationMethod);
-            }    
-        } 
+            }
+        }
         return false;
     }
 
@@ -249,5 +249,5 @@ public class AttrNSImpl
         }
         return null;
     }
-    
+
 }

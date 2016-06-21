@@ -68,7 +68,7 @@ public abstract class BaseSchemaDVFactory extends SchemaDVFactory {
         final String YEARMONTH         = "gYearMonth";
 
         final XSFacets facets = new XSFacets();
-        
+
         builtInTypes.put(ANYSIMPLETYPE, XSSimpleTypeDecl.fAnySimpleType);
 
         XSSimpleTypeDecl stringDV = new XSSimpleTypeDecl(baseAtomicType, STRING, XSSimpleTypeDecl.DV_STRING, XSSimpleType.ORDERED_FALSE, false, false, false , true, XSConstants.STRING_DT);
@@ -226,7 +226,7 @@ public abstract class BaseSchemaDVFactory extends SchemaDVFactory {
     
     public XSSimpleType createTypeRestriction(String name, String targetNamespace,
                                               short finalSet, XSSimpleType base, XSObjectList annotations) {
-        
+
         if (fDeclPool != null) {
            XSSimpleTypeDecl st= fDeclPool.getSimpleTypeDecl();
            return st.setRestrictionValues((XSSimpleTypeDecl)base, name, targetNamespace, finalSet, annotations);

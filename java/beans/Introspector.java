@@ -271,7 +271,7 @@ public class Introspector {
             
             for (int i = 0; i < methodList.length; i++) {
                 Method method = methodList[i];
-                if (method == null || method.isSynthetic()) {
+                if (method == null) {
                     continue;
                 }
                 

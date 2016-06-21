@@ -23,6 +23,7 @@ import com.sun.org.apache.xml.internal.utils.SystemIDResolver;
 import com.sun.org.apache.xalan.internal.xsltc.trax.DOM2SAX;
 import com.sun.org.apache.xalan.internal.xsltc.trax.StAXEvent2SAX;
 import com.sun.org.apache.xalan.internal.xsltc.trax.StAXStream2SAX;
+import com.sun.org.apache.xalan.internal.utils.ObjectFactory;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXNotRecognizedException;
@@ -60,9 +61,22 @@ public class XSLTCDTMManager extends DTMManagerDefault
 
     
     public static Class getDTMManagerClass() {
-        Class mgrClass = ObjectFactory.lookUpFactoryClass(DEFAULT_PROP_NAME,
+        return getDTMManagerClass(true);
+    }
+
+    public static Class getDTMManagerClass(boolean useServicesMechanism) {
+        Class mgrClass = null;
+        if (useServicesMechanism) {
+            mgrClass = ObjectFactory.lookUpFactoryClass(DEFAULT_PROP_NAME,
                                                           null,
                                                           DEFAULT_CLASS_NAME);
+        } else {
+            try {
+                mgrClass = ObjectFactory.findProviderClass(DEFAULT_CLASS_NAME, true);
+            } catch (Exception e) {
+                
+            }
+        }
         
         
         

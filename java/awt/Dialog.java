@@ -164,7 +164,7 @@ public class Dialog extends Window {
 
         this.title = title;
         setModalityType(modalityType);
-        SunToolkit.checkAndSetPolicy(this, false);
+        SunToolkit.checkAndSetPolicy(this);
     }
 
     
@@ -181,7 +181,7 @@ public class Dialog extends Window {
 
         this.title = title;
         setModalityType(modalityType);
-        SunToolkit.checkAndSetPolicy(this, false);
+        SunToolkit.checkAndSetPolicy(this);
     }
 
     

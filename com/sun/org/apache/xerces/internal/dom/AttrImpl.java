@@ -26,7 +26,7 @@ public class AttrImpl
 
     
     static final long serialVersionUID = 7277707688218972102L;
-    
+
     
     static final String DTD_URI = "http://www.w3.org/TR/REC-xml";
 
@@ -39,7 +39,7 @@ public class AttrImpl
 
     
     protected String name;
-    
+
     
     
     transient Object type;
@@ -52,7 +52,7 @@ public class AttrImpl
 
     
     protected AttrImpl(CoreDocumentImpl ownerDocument, String name) {
-    	super(ownerDocument);
+        super(ownerDocument);
         this.name = name;
         
         isSpecified(true);
@@ -121,7 +121,7 @@ public class AttrImpl
     
     
     
-    
+
     public Node cloneNode(boolean deep) {
 
         if (needsSyncChildren()) {
@@ -130,7 +130,7 @@ public class AttrImpl
         AttrImpl clone = (AttrImpl) super.cloneNode(deep);
 
         
-    	if (!clone.hasStringValue()) {
+        if (!clone.hasStringValue()) {
 
             
             clone.value = null;
@@ -162,9 +162,9 @@ public class AttrImpl
 
     
     public void setNodeValue(String value) throws DOMException {
-    	setValue(value);
+        setValue(value);
     }
-    
+
     
     public String getTypeName() {
         return (String)type;
@@ -177,7 +177,7 @@ public class AttrImpl
         }
         return null;
     }
-    
+
     
     public TypeInfo getSchemaTypeInfo(){
       return this;
@@ -185,7 +185,7 @@ public class AttrImpl
 
     
     public String getNodeValue() {
-    	return getValue();
+        return getValue();
     }
 
     
@@ -198,7 +198,7 @@ public class AttrImpl
         if (needsSyncData()) {
             synchronizeData();
         }
-    	return name;
+        return name;
 
     } 
 
@@ -206,12 +206,12 @@ public class AttrImpl
     public void setValue(String newvalue) {
 
         CoreDocumentImpl ownerDocument = ownerDocument();
-        
+
         if (ownerDocument.errorChecking && isReadOnly()) {
             String msg = DOMMessageFormatter.formatMessage(DOMMessageFormatter.DOM_DOMAIN, "NO_MODIFICATION_ALLOWED_ERR", null);
             throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, msg);
         }
-        
+
         Element ownerElement = getOwnerElement();
         String oldvalue = "";
         if (needsSyncData()) {
@@ -277,7 +277,7 @@ public class AttrImpl
         
         
         
-    	isSpecified(true);
+        isSpecified(true);
         if (ownerDocument.getMutationEvents()) {
             
             internalInsertBefore(ownerDocument.createTextNode(newvalue),
@@ -312,7 +312,7 @@ public class AttrImpl
         if (hasStringValue()) {
             return (String) value;
         }
-        
+
         ChildNode firstChild = ((ChildNode) value);
 
         String data = null;
@@ -322,13 +322,13 @@ public class AttrImpl
         else {
                 data =  firstChild.getNodeValue();
         }
-        
+
         ChildNode node = firstChild.nextSibling;
-        
+
         if (node == null || data == null)  return (data == null)?"":data;
-        
+
         StringBuffer value = new StringBuffer(data);
-    	while (node != null) {
+        while (node != null) {
             if (node.getNodeType()  == Node.ENTITY_REFERENCE_NODE){
                 data = ((EntityReferenceImpl)node).getEntityRefValue();
                 if (data == null) return "";
@@ -338,19 +338,19 @@ public class AttrImpl
                 value.append(node.getNodeValue());
             }
             node = node.nextSibling;
-    	}
-    	return value.toString();
+        }
+        return value.toString();
 
     } 
-    
-    
+
+
     
     public boolean getSpecified() {
 
         if (needsSyncData()) {
             synchronizeData();
         }
-    	return isSpecified();
+        return isSpecified();
 
     } 
 
@@ -371,7 +371,7 @@ public class AttrImpl
         
         return (Element) (isOwned() ? ownerNode : null);
     }
-    
+
     public void normalize() {
 
         
@@ -421,11 +421,11 @@ public class AttrImpl
         if (needsSyncData()) {
             synchronizeData();
         }
-    	isSpecified(arg);
+        isSpecified(arg);
 
     } 
-    
-	
+
+        
     public void setType (Object type){
         this.type = type;
     }
@@ -436,7 +436,7 @@ public class AttrImpl
 
     
     public String toString() {
-    	return getName() + "=" + "\"" + getValue() + "\"";
+        return getName() + "=" + "\"" + getValue() + "\"";
     }
 
     
@@ -465,7 +465,7 @@ public class AttrImpl
             synchronizeChildren();
         }
         makeChildNode();
-    	return (Node) value;
+        return (Node) value;
 
     }   
 
@@ -493,14 +493,14 @@ public class AttrImpl
     }
 
     
-    public Node insertBefore(Node newChild, Node refChild) 
+    public Node insertBefore(Node newChild, Node refChild)
         throws DOMException {
         
         return internalInsertBefore(newChild, refChild, false);
     } 
-     
+
     
-    Node internalInsertBefore(Node newChild, Node refChild, boolean replace) 
+    Node internalInsertBefore(Node newChild, Node refChild, boolean replace)
         throws DOMException {
 
         CoreDocumentImpl ownerDocument = ownerDocument();
@@ -657,17 +657,17 @@ public class AttrImpl
     } 
 
     
-    public Node removeChild(Node oldChild) 
+    public Node removeChild(Node oldChild)
         throws DOMException {
         
         if (hasStringValue()) {
             
             String msg = DOMMessageFormatter.formatMessage(DOMMessageFormatter.DOM_DOMAIN, "NOT_FOUND_ERR", null);
-            throw new DOMException(DOMException.NOT_FOUND_ERR, msg);            
+            throw new DOMException(DOMException.NOT_FOUND_ERR, msg);
         }
         return internalRemoveChild(oldChild, false);
     } 
-     
+
     
     Node internalRemoveChild(Node oldChild, boolean replace)
         throws DOMException {
@@ -799,7 +799,7 @@ public class AttrImpl
         ChildNode node = (ChildNode) value;
         for (int i = 0; i < index && node != null; i++) {
             node = node.nextSibling;
-        } 
+        }
         return node;
 
     } 
@@ -814,13 +814,13 @@ public class AttrImpl
     }
 
     
-    public boolean isDerivedFrom(String typeNamespaceArg, 
-                                 String typeNameArg, 
+    public boolean isDerivedFrom(String typeNamespaceArg,
+                                 String typeNameArg,
                                  int derivationMethod) {
-                                 	
+
         return false;
     }
-        
+
 
     
     

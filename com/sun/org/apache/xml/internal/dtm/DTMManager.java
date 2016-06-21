@@ -7,6 +7,7 @@ import com.sun.org.apache.xml.internal.res.XMLErrorResources;
 import com.sun.org.apache.xml.internal.res.XMLMessages;
 import com.sun.org.apache.xml.internal.utils.PrefixResolver;
 import com.sun.org.apache.xml.internal.utils.XMLStringFactory;
+import com.sun.org.apache.xalan.internal.utils.ObjectFactory;
 
 
 public abstract class DTMManager
@@ -23,6 +24,7 @@ public abstract class DTMManager
   
   protected XMLStringFactory m_xsf = null;
 
+  private boolean _useServicesMechanism;
   
   protected DTMManager(){}
 
@@ -42,13 +44,23 @@ public abstract class DTMManager
   public static DTMManager newInstance(XMLStringFactory xsf)
            throws DTMConfigurationException
   {
+    return newInstance(xsf, true);
+  }
+
+  public static DTMManager newInstance(XMLStringFactory xsf, boolean useServicesMechanism)
+           throws DTMConfigurationException
+  {
     DTMManager factoryImpl = null;
     try
     {
-      factoryImpl = (DTMManager) ObjectFactory
-        .createObject(defaultPropName, defaultClassName);
+        if (useServicesMechanism) {
+            factoryImpl = (DTMManager) ObjectFactory
+                .createObject(defaultPropName, defaultClassName);
+        } else {
+            factoryImpl = new com.sun.org.apache.xml.internal.dtm.ref.DTMManagerDefault();
+        }
     }
-    catch (ObjectFactory.ConfigurationError e)
+    catch (ConfigurationError e)
     {
       throw new DTMConfigurationException(XMLMessages.createXMLMessage(
         XMLErrorResources.ER_NO_DEFAULT_IMPL, null), e.getException());
@@ -128,6 +140,15 @@ public abstract class DTMManager
     m_source_location = sourceLocation;
   }
 
+    
+    public boolean useServicesMechnism() {
+        return _useServicesMechanism;
+    }
+
+    
+    public void setServicesMechnism(boolean flag) {
+        _useServicesMechanism = flag;
+    }
 
   
 
@@ -172,5 +193,41 @@ public abstract class DTMManager
   {
     return IDENT_NODE_DEFAULT;
   }
+
+    
+    
+    
+
+    
+    static class ConfigurationError
+        extends Error {
+                static final long serialVersionUID = 5122054096615067992L;
+        
+        
+        
+
+        
+        private Exception exception;
+
+        
+        
+        
+
+        
+        ConfigurationError(String msg, Exception x) {
+            super(msg);
+            this.exception = x;
+        } 
+
+        
+        
+        
+
+        
+        Exception getException() {
+            return exception;
+        } 
+
+    } 
 
 }

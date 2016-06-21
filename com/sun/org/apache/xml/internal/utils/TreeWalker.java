@@ -98,9 +98,16 @@ public class TreeWalker
   
   public void traverse(Node pos) throws org.xml.sax.SAXException
   {
-
         this.m_contentHandler.startDocument();
 
+        traverseFragment(pos);
+
+        this.m_contentHandler.endDocument();
+  }
+
+  
+  public void traverseFragment(Node pos) throws org.xml.sax.SAXException
+  {
     Node top = pos;
 
     while (null != pos)
@@ -136,7 +143,6 @@ public class TreeWalker
 
       pos = nextNode;
     }
-    this.m_contentHandler.endDocument();
   }
 
   

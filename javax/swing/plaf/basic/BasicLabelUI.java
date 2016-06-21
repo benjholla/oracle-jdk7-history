@@ -285,8 +285,7 @@ public class BasicLabelUI extends LabelUI implements  PropertyChangeListener
                                 JComponent.WHEN_IN_FOCUSED_WINDOW, inputMap);
             }
             inputMap.clear();
-            inputMap.put(KeyStroke.getKeyStroke(dka, ActionEvent.ALT_MASK,
-                                              false), "press");
+            inputMap.put(KeyStroke.getKeyStroke(dka, BasicLookAndFeel.getFocusAcceleratorKeyMask(), false), "press");
         }
         else {
             InputMap inputMap = SwingUtilities.getUIInputMap
@@ -376,7 +375,7 @@ public class BasicLabelUI extends LabelUI implements  PropertyChangeListener
                     SwingUtilities.replaceUIInputMap(label, JComponent.WHEN_FOCUSED, inputMap);
                 }
                 int dka = label.getDisplayedMnemonic();
-                inputMap.put(KeyStroke.getKeyStroke(dka, ActionEvent.ALT_MASK, true), RELEASE);
+                inputMap.put(KeyStroke.getKeyStroke(dka, BasicLookAndFeel.getFocusAcceleratorKeyMask(), true), RELEASE);
                 
                 inputMap.put(KeyStroke.getKeyStroke(dka, 0, true), RELEASE);
                 
@@ -392,7 +391,7 @@ public class BasicLabelUI extends LabelUI implements  PropertyChangeListener
                 if (inputMap != null) {
                     
                     int dka = label.getDisplayedMnemonic();
-                    inputMap.remove(KeyStroke.getKeyStroke(dka, ActionEvent.ALT_MASK, true));
+                    inputMap.remove(KeyStroke.getKeyStroke(dka, BasicLookAndFeel.getFocusAcceleratorKeyMask(), true));
                     inputMap.remove(KeyStroke.getKeyStroke(dka, 0, true));
                     inputMap.remove(KeyStroke.getKeyStroke(KeyEvent.VK_ALT, 0, true));
                 }

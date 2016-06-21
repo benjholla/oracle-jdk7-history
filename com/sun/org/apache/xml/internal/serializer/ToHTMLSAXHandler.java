@@ -25,7 +25,7 @@ public final class ToHTMLSAXHandler extends ToSAXHandler
         private boolean m_dtdHandled = false;
 
     
-    protected boolean m_escapeSetting = false;
+    protected boolean m_escapeSetting = true;
 
     
     public Properties getOutputFormat()
@@ -408,6 +408,6 @@ public final class ToHTMLSAXHandler extends ToSAXHandler
     
     private void resetToHTMLSAXHandler()
     {
-        this.m_escapeSetting = false;
+        this.m_escapeSetting = true;
     }
 }

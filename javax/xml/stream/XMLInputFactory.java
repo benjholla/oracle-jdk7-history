@@ -17,15 +17,15 @@ public abstract class XMLInputFactory {
   
   public static final String IS_VALIDATING=
     "javax.xml.stream.isValidating";
-  
+
   
   public static final String IS_COALESCING=
     "javax.xml.stream.isCoalescing";
-  
+
   
   public static final String IS_REPLACING_ENTITY_REFERENCES=
     "javax.xml.stream.isReplacingEntityReferences";
-  
+
   
   public static final String IS_SUPPORTING_EXTERNAL_ENTITIES=
     "javax.xml.stream.isSupportingExternalEntities";
@@ -41,7 +41,7 @@ public abstract class XMLInputFactory {
   
   public static final String RESOLVER=
     "javax.xml.stream.resolver";
-  
+
   
   public static final String ALLOCATOR=
     "javax.xml.stream.allocator";
@@ -95,15 +95,15 @@ public abstract class XMLInputFactory {
   }
 
   
-  public abstract XMLStreamReader createXMLStreamReader(java.io.Reader reader) 
+  public abstract XMLStreamReader createXMLStreamReader(java.io.Reader reader)
     throws XMLStreamException;
 
   
-  public abstract XMLStreamReader createXMLStreamReader(Source source) 
+  public abstract XMLStreamReader createXMLStreamReader(Source source)
     throws XMLStreamException;
 
   
-  public abstract XMLStreamReader createXMLStreamReader(java.io.InputStream stream) 
+  public abstract XMLStreamReader createXMLStreamReader(java.io.InputStream stream)
     throws XMLStreamException;
 
   
@@ -119,7 +119,7 @@ public abstract class XMLInputFactory {
     throws XMLStreamException;
 
   
-  public abstract XMLEventReader createXMLEventReader(java.io.Reader reader) 
+  public abstract XMLEventReader createXMLEventReader(java.io.Reader reader)
     throws XMLStreamException;
 
   
@@ -127,19 +127,19 @@ public abstract class XMLInputFactory {
     throws XMLStreamException;
 
   
-  public abstract XMLEventReader createXMLEventReader(XMLStreamReader reader) 
+  public abstract XMLEventReader createXMLEventReader(XMLStreamReader reader)
     throws XMLStreamException;
 
   
-  public abstract XMLEventReader createXMLEventReader(Source source) 
+  public abstract XMLEventReader createXMLEventReader(Source source)
     throws XMLStreamException;
 
   
-  public abstract XMLEventReader createXMLEventReader(java.io.InputStream stream) 
+  public abstract XMLEventReader createXMLEventReader(java.io.InputStream stream)
     throws XMLStreamException;
 
   
-  public abstract XMLEventReader createXMLEventReader(java.io.InputStream stream, String encoding) 
+  public abstract XMLEventReader createXMLEventReader(java.io.InputStream stream, String encoding)
     throws XMLStreamException;
 
   
@@ -147,11 +147,11 @@ public abstract class XMLInputFactory {
     throws XMLStreamException;
 
   
-  public abstract XMLStreamReader createFilteredReader(XMLStreamReader reader, StreamFilter filter) 
+  public abstract XMLStreamReader createFilteredReader(XMLStreamReader reader, StreamFilter filter)
     throws XMLStreamException;
 
   
-  public abstract XMLEventReader createFilteredReader(XMLEventReader reader, EventFilter filter) 
+  public abstract XMLEventReader createFilteredReader(XMLEventReader reader, EventFilter filter)
     throws XMLStreamException;
 
   
@@ -167,12 +167,12 @@ public abstract class XMLInputFactory {
   public abstract void setXMLReporter(XMLReporter reporter);
 
   
-  public abstract void setProperty(java.lang.String name, Object value) 
-    throws java.lang.IllegalArgumentException;  
+  public abstract void setProperty(java.lang.String name, Object value)
+    throws java.lang.IllegalArgumentException;
 
   
-  public abstract Object getProperty(java.lang.String name) 
-    throws java.lang.IllegalArgumentException;  
+  public abstract Object getProperty(java.lang.String name)
+    throws java.lang.IllegalArgumentException;
 
 
   
@@ -185,4 +185,3 @@ public abstract class XMLInputFactory {
   public abstract XMLEventAllocator getEventAllocator();
 
 }
-

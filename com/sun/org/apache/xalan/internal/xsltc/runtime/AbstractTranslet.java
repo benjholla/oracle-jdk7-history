@@ -4,6 +4,7 @@
 
 package com.sun.org.apache.xalan.internal.xsltc.runtime;
 
+import com.sun.org.apache.xalan.internal.utils.FactoryImpl;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
@@ -41,6 +42,8 @@ public abstract class AbstractTranslet implements Translet {
     public String  _encoding = "UTF-8";
     public boolean _omitHeader = false;
     public String  _standalone = null;
+    
+    public boolean  _isStandalone = false;
     public String  _doctypePublic = null;
     public String  _doctypeSystem = null;
     public boolean _indent = false;
@@ -64,10 +67,10 @@ public abstract class AbstractTranslet implements Translet {
     protected String[] urisArray;
     protected int[]    typesArray;
     protected String[] namespaceArray;
-    
+
     
     protected Templates _templates = null;
-    
+
     
     protected boolean _hasIdCall = false;
 
@@ -80,25 +83,26 @@ public abstract class AbstractTranslet implements Translet {
     
     private final static String ID_INDEX_NAME = "##id";
 
-    
+    private boolean _useServicesMechanism;
+
     
     public void printInternalState() {
-	System.out.println("-------------------------------------");
-	System.out.println("AbstractTranslet this = " + this);
-	System.out.println("pbase = " + pbase);
-	System.out.println("vframe = " + pframe);
-	System.out.println("paramsStack.size() = " + paramsStack.size());
-	System.out.println("namesArray.size = " + namesArray.length);
-	System.out.println("namespaceArray.size = " + namespaceArray.length);
-	System.out.println("");
-	System.out.println("Total memory = " + Runtime.getRuntime().totalMemory());
+        System.out.println("-------------------------------------");
+        System.out.println("AbstractTranslet this = " + this);
+        System.out.println("pbase = " + pbase);
+        System.out.println("vframe = " + pframe);
+        System.out.println("paramsStack.size() = " + paramsStack.size());
+        System.out.println("namesArray.size = " + namesArray.length);
+        System.out.println("namespaceArray.size = " + namespaceArray.length);
+        System.out.println("");
+        System.out.println("Total memory = " + Runtime.getRuntime().totalMemory());
     }
 
     
     public final DOMAdapter makeDOMAdapter(DOM dom)
-	throws TransletException {
+        throws TransletException {
         setRootForKeys(dom.getDocument());
-	return new DOMAdapter(dom, namesArray, urisArray, typesArray, namespaceArray);
+        return new DOMAdapter(dom, namesArray, urisArray, typesArray, namespaceArray);
     }
 
     
@@ -110,56 +114,56 @@ public abstract class AbstractTranslet implements Translet {
 
     
     public final void pushParamFrame() {
-	paramsStack.add(pframe, new Integer(pbase));
-	pbase = ++pframe;
+        paramsStack.add(pframe, new Integer(pbase));
+        pbase = ++pframe;
     }
 
     
     public final void popParamFrame() {
-	if (pbase > 0) {
-	    final int oldpbase = ((Integer)paramsStack.get(--pbase)).intValue();
-	    for (int i = pframe - 1; i >= pbase; i--) {
-		paramsStack.remove(i);
-	    }
-	    pframe = pbase; pbase = oldpbase;
-	}
+        if (pbase > 0) {
+            final int oldpbase = ((Integer)paramsStack.get(--pbase)).intValue();
+            for (int i = pframe - 1; i >= pbase; i--) {
+                paramsStack.remove(i);
+            }
+            pframe = pbase; pbase = oldpbase;
+        }
     }
 
     
     public final Object addParameter(String name, Object value) {
         name = BasisLibrary.mapQNameToJavaName (name);
-	return addParameter(name, value, false);
+        return addParameter(name, value, false);
     }
 
     
-    public final Object addParameter(String name, Object value, 
-	boolean isDefault) 
+    public final Object addParameter(String name, Object value,
+        boolean isDefault)
     {
-	
-	for (int i = pframe - 1; i >= pbase; i--) {
-	    final Parameter param = (Parameter) paramsStack.get(i);
+        
+        for (int i = pframe - 1; i >= pbase; i--) {
+            final Parameter param = (Parameter) paramsStack.get(i);
 
-	    if (param._name.equals(name)) {
-		
-		
-		if (param._isDefault || !isDefault) {
-		    param._value = value;
-		    param._isDefault = isDefault;
-		    return value;
-		}
-		return param._value;
-	    }
-	}
+            if (param._name.equals(name)) {
+                
+                
+                if (param._isDefault || !isDefault) {
+                    param._value = value;
+                    param._isDefault = isDefault;
+                    return value;
+                }
+                return param._value;
+            }
+        }
 
-	
-	paramsStack.add(pframe++, new Parameter(name, value, isDefault));
-	return value;
+        
+        paramsStack.add(pframe++, new Parameter(name, value, isDefault));
+        return value;
     }
 
     
-    public void clearParameters() {  
-	pbase = pframe = 0;
-	paramsStack.clear();
+    public void clearParameters() {
+        pbase = pframe = 0;
+        paramsStack.clear();
     }
 
     
@@ -167,11 +171,11 @@ public abstract class AbstractTranslet implements Translet {
 
         name = BasisLibrary.mapQNameToJavaName (name);
 
-	for (int i = pframe - 1; i >= pbase; i--) {
-	    final Parameter param = (Parameter)paramsStack.get(i);
-	    if (param._name.equals(name)) return param._value;
-	}
-	return null;
+        for (int i = pframe - 1; i >= pbase; i--) {
+            final Parameter param = (Parameter)paramsStack.get(i);
+            if (param._name.equals(name)) return param._value;
+        }
+        return null;
     }
 
     
@@ -183,17 +187,17 @@ public abstract class AbstractTranslet implements Translet {
 
     
     public final void setMessageHandler(MessageHandler handler) {
-	_msgHandler = handler;
+        _msgHandler = handler;
     }
 
     
     public final void displayMessage(String msg) {
-	if (_msgHandler == null) {
+        if (_msgHandler == null) {
             System.err.println(msg);
-	}
-	else {
-	    _msgHandler.displayMessage(msg);
-	}
+        }
+        else {
+            _msgHandler.displayMessage(msg);
+        }
     }
 
     
@@ -203,32 +207,32 @@ public abstract class AbstractTranslet implements Translet {
 
     
     public void addDecimalFormat(String name, DecimalFormatSymbols symbols) {
-	
-	if (_formatSymbols == null) _formatSymbols = new Hashtable();
+        
+        if (_formatSymbols == null) _formatSymbols = new Hashtable();
 
-	
-	if (name == null) name = EMPTYSTRING;
+        
+        if (name == null) name = EMPTYSTRING;
 
-	
-	final DecimalFormat df = new DecimalFormat();
-	if (symbols != null) {
-	    df.setDecimalFormatSymbols(symbols);
-	}
-	_formatSymbols.put(name, df);
+        
+        final DecimalFormat df = new DecimalFormat();
+        if (symbols != null) {
+            df.setDecimalFormatSymbols(symbols);
+        }
+        _formatSymbols.put(name, df);
     }
 
     
     public final DecimalFormat getDecimalFormat(String name) {
 
-	if (_formatSymbols != null) {
-	    
-	    if (name == null) name = EMPTYSTRING;
+        if (_formatSymbols != null) {
+            
+            if (name == null) name = EMPTYSTRING;
 
-	    DecimalFormat df = (DecimalFormat)_formatSymbols.get(name);
-	    if (df == null) df = (DecimalFormat)_formatSymbols.get(EMPTYSTRING);
-	    return df;
-	}
-	return(null);
+            DecimalFormat df = (DecimalFormat)_formatSymbols.get(name);
+            if (df == null) df = (DecimalFormat)_formatSymbols.get(EMPTYSTRING);
+            return df;
+        }
+        return(null);
     }
 
     
@@ -243,7 +247,7 @@ public abstract class AbstractTranslet implements Translet {
 
         if (document instanceof DOMEnhancedForDTM) {
             DOMEnhancedForDTM enhancedDOM = (DOMEnhancedForDTM)document;
-            
+
             
             
             
@@ -255,7 +259,7 @@ public abstract class AbstractTranslet implements Translet {
                 final Hashtable elementsByID = enhancedDOM.getElementsWithIDs();
 
                 if (elementsByID == null) {
-            	    return;
+                    return;
                 }
 
                 
@@ -265,18 +269,18 @@ public abstract class AbstractTranslet implements Translet {
                 boolean hasIDValues = false;
 
                 while (idValues.hasMoreElements()) {
-            	    final Object idValue = idValues.nextElement();
-            	    final int element =
+                    final Object idValue = idValues.nextElement();
+                    final int element =
                             document.getNodeHandle(
                                         ((Integer)elementsByID.get(idValue))
                                                 .intValue());
 
-            	    buildKeyIndex(ID_INDEX_NAME, element, idValue);
-            	    hasIDValues = true;
+                    buildKeyIndex(ID_INDEX_NAME, element, idValue);
+                    hasIDValues = true;
                 }
 
                 if (hasIDValues) {
-            	    setKeyIndexDom(ID_INDEX_NAME, document);
+                    setKeyIndexDom(ID_INDEX_NAME, document);
                 }
             }
         }
@@ -341,56 +345,56 @@ public abstract class AbstractTranslet implements Translet {
 
     
     public void setIndexSize(int size) {
-	if (size > _indexSize) _indexSize = size;
+        if (size > _indexSize) _indexSize = size;
     }
 
     
     public KeyIndex createKeyIndex() {
-	return(new KeyIndex(_indexSize));
+        return(new KeyIndex(_indexSize));
     }
 
     
     public void buildKeyIndex(String name, int node, Object value) {
-	if (_keyIndexes == null) _keyIndexes = new Hashtable();
-	
-	KeyIndex index = (KeyIndex)_keyIndexes.get(name);
-	if (index == null) {
-	    _keyIndexes.put(name, index = new KeyIndex(_indexSize));
-	}
-	index.add(value, node, _currentRootForKeys);
+        if (_keyIndexes == null) _keyIndexes = new Hashtable();
+
+        KeyIndex index = (KeyIndex)_keyIndexes.get(name);
+        if (index == null) {
+            _keyIndexes.put(name, index = new KeyIndex(_indexSize));
+        }
+        index.add(value, node, _currentRootForKeys);
     }
 
     
     public void buildKeyIndex(String name, DOM dom) {
-	if (_keyIndexes == null) _keyIndexes = new Hashtable();
-	
-	KeyIndex index = (KeyIndex)_keyIndexes.get(name);
-	if (index == null) {
-	    _keyIndexes.put(name, index = new KeyIndex(_indexSize));
-	}
-	index.setDom(dom, dom.getDocument());
+        if (_keyIndexes == null) _keyIndexes = new Hashtable();
+
+        KeyIndex index = (KeyIndex)_keyIndexes.get(name);
+        if (index == null) {
+            _keyIndexes.put(name, index = new KeyIndex(_indexSize));
+        }
+        index.setDom(dom, dom.getDocument());
     }
 
     
     public KeyIndex getKeyIndex(String name) {
-	
-	if (_keyIndexes == null) {
-	    return (_emptyKeyIndex != null) 
-	        ? _emptyKeyIndex
-	        : (_emptyKeyIndex = new KeyIndex(1)); 
-	} 
+        
+        if (_keyIndexes == null) {
+            return (_emptyKeyIndex != null)
+                ? _emptyKeyIndex
+                : (_emptyKeyIndex = new KeyIndex(1));
+        }
 
-	
-	final KeyIndex index = (KeyIndex)_keyIndexes.get(name);
+        
+        final KeyIndex index = (KeyIndex)_keyIndexes.get(name);
 
-	
-	if (index == null) {
-	    return (_emptyKeyIndex != null) 
-	        ? _emptyKeyIndex
-	        : (_emptyKeyIndex = new KeyIndex(1)); 
-	}
+        
+        if (index == null) {
+            return (_emptyKeyIndex != null)
+                ? _emptyKeyIndex
+                : (_emptyKeyIndex = new KeyIndex(1));
+        }
 
-	return(index);
+        return(index);
     }
 
     private void setRootForKeys(int root) {
@@ -399,14 +403,14 @@ public abstract class AbstractTranslet implements Translet {
 
     
     public void buildKeys(DOM document, DTMAxisIterator iterator,
-			  SerializationHandler handler,
-			  int root) throws TransletException {
-			  	
+                          SerializationHandler handler,
+                          int root) throws TransletException {
+
     }
-    
+
     
     public void setKeyIndexDom(String name, DOM document) {
-    	getKeyIndex(name).setDom(document, document.getDocument());			  	
+        getKeyIndex(name).setDom(document, document.getDocument());
     }
 
     
@@ -416,22 +420,22 @@ public abstract class AbstractTranslet implements Translet {
 
     
     public void setDOMCache(DOMCache cache) {
-	_domCache = cache;
+        _domCache = cache;
     }
 
     
     public DOMCache getDOMCache() {
-	return(_domCache);
+        return(_domCache);
     }
 
     
 
-    public SerializationHandler openOutputHandler(String filename, boolean append) 
-	throws TransletException 
+    public SerializationHandler openOutputHandler(String filename, boolean append)
+        throws TransletException
     {
-	try {
-	    final TransletOutputHandlerFactory factory 
-		= TransletOutputHandlerFactory.newInstance();
+        try {
+            final TransletOutputHandlerFactory factory
+                = TransletOutputHandlerFactory.newInstance();
 
             String dirStr = new File(filename).getParent();
             if ((null != dirStr) && (dirStr.length() > 0)) {
@@ -439,60 +443,60 @@ public abstract class AbstractTranslet implements Translet {
                dir.mkdirs();
             }
 
-	    factory.setEncoding(_encoding);
-	    factory.setOutputMethod(_method);
-	    factory.setOutputStream(new BufferedOutputStream(new FileOutputStream(filename, append)));
-	    factory.setOutputType(TransletOutputHandlerFactory.STREAM);
+            factory.setEncoding(_encoding);
+            factory.setOutputMethod(_method);
+            factory.setOutputStream(new BufferedOutputStream(new FileOutputStream(filename, append)));
+            factory.setOutputType(TransletOutputHandlerFactory.STREAM);
 
-	    final SerializationHandler handler 
-		= factory.getSerializationHandler();
+            final SerializationHandler handler
+                = factory.getSerializationHandler();
 
-	    transferOutputSettings(handler);
-	    handler.startDocument();
-	    return handler;
-	}
-	catch (Exception e) {
-	    throw new TransletException(e);
-	}
+            transferOutputSettings(handler);
+            handler.startDocument();
+            return handler;
+        }
+        catch (Exception e) {
+            throw new TransletException(e);
+        }
     }
 
-    public SerializationHandler openOutputHandler(String filename) 
-       throws TransletException 
+    public SerializationHandler openOutputHandler(String filename)
+       throws TransletException
     {
        return openOutputHandler(filename, false);
     }
 
     public void closeOutputHandler(SerializationHandler handler) {
-	try {
-	    handler.endDocument();
-	    handler.close();
-	}
-	catch (Exception e) {
-	    
-	}
+        try {
+            handler.endDocument();
+            handler.close();
+        }
+        catch (Exception e) {
+            
+        }
     }
 
     
 
     
     public abstract void transform(DOM document, DTMAxisIterator iterator,
-				   SerializationHandler handler)
-	throws TransletException;
+                                   SerializationHandler handler)
+        throws TransletException;
 
     
-    public final void transform(DOM document, SerializationHandler handler) 
-	throws TransletException {
+    public final void transform(DOM document, SerializationHandler handler)
+        throws TransletException {
         try {
             transform(document, document.getIterator(), handler);
         } finally {
             _keyIndexes = null;
         }
     }
-	
+
     
     public final void characters(final String string,
-				 SerializationHandler handler) 
-	throws TransletException {
+                                 SerializationHandler handler)
+        throws TransletException {
         if (string != null) {
            
            try {
@@ -500,12 +504,12 @@ public abstract class AbstractTranslet implements Translet {
            } catch (Exception e) {
                throw new TransletException(e);
            }
-        }   
+        }
     }
 
     
     public void addCdataElement(String name) {
-	if (_cdata == null) {
+        if (_cdata == null) {
             _cdata = new Vector();
         }
 
@@ -514,112 +518,123 @@ public abstract class AbstractTranslet implements Translet {
         if (lastColon > 0) {
             String uri = name.substring(0, lastColon);
             String localName = name.substring(lastColon+1);
-	    _cdata.addElement(uri);
-	    _cdata.addElement(localName);
+            _cdata.addElement(uri);
+            _cdata.addElement(localName);
         } else {
-	    _cdata.addElement(null);
-	    _cdata.addElement(name);
+            _cdata.addElement(null);
+            _cdata.addElement(name);
         }
     }
 
     
     protected void transferOutputSettings(SerializationHandler handler) {
-	if (_method != null) {
-	    if (_method.equals("xml")) {
-	        if (_standalone != null) {
-		    handler.setStandalone(_standalone);
-		}
-		if (_omitHeader) {
-		    handler.setOmitXMLDeclaration(true);
-		}
-		handler.setCdataSectionElements(_cdata);
-		if (_version != null) {
-		    handler.setVersion(_version);
-		}
-		handler.setIndent(_indent);
-		handler.setIndentAmount(_indentamount);
-		if (_doctypeSystem != null) {
-		    handler.setDoctype(_doctypeSystem, _doctypePublic);
-		}
-	    }
-	    else if (_method.equals("html")) {
-		handler.setIndent(_indent);
-		handler.setDoctype(_doctypeSystem, _doctypePublic);
-		if (_mediaType != null) {
-		    handler.setMediaType(_mediaType);
-		}
-	    }
-	}
-	else {
-	    handler.setCdataSectionElements(_cdata);
-	    if (_version != null) {
-		handler.setVersion(_version);
-	    }
-	    if (_standalone != null) {
-		handler.setStandalone(_standalone);
-	    }
-	    if (_omitHeader) {
-		handler.setOmitXMLDeclaration(true);
-	    }
-	    handler.setIndent(_indent);
-	    handler.setDoctype(_doctypeSystem, _doctypePublic);
-	}
+        if (_method != null) {
+            if (_method.equals("xml")) {
+                if (_standalone != null) {
+                    handler.setStandalone(_standalone);
+                }
+                if (_omitHeader) {
+                    handler.setOmitXMLDeclaration(true);
+                }
+                handler.setCdataSectionElements(_cdata);
+                if (_version != null) {
+                    handler.setVersion(_version);
+                }
+                handler.setIndent(_indent);
+                handler.setIndentAmount(_indentamount);
+                if (_doctypeSystem != null) {
+                    handler.setDoctype(_doctypeSystem, _doctypePublic);
+                }
+                handler.setIsStandalone(_isStandalone);
+            }
+            else if (_method.equals("html")) {
+                handler.setIndent(_indent);
+                handler.setDoctype(_doctypeSystem, _doctypePublic);
+                if (_mediaType != null) {
+                    handler.setMediaType(_mediaType);
+                }
+            }
+        }
+        else {
+            handler.setCdataSectionElements(_cdata);
+            if (_version != null) {
+                handler.setVersion(_version);
+            }
+            if (_standalone != null) {
+                handler.setStandalone(_standalone);
+            }
+            if (_omitHeader) {
+                handler.setOmitXMLDeclaration(true);
+            }
+            handler.setIndent(_indent);
+            handler.setDoctype(_doctypeSystem, _doctypePublic);
+            handler.setIsStandalone(_isStandalone);
+        }
     }
 
     private Hashtable _auxClasses = null;
 
     public void addAuxiliaryClass(Class auxClass) {
-	if (_auxClasses == null) _auxClasses = new Hashtable();
-	_auxClasses.put(auxClass.getName(), auxClass);
+        if (_auxClasses == null) _auxClasses = new Hashtable();
+        _auxClasses.put(auxClass.getName(), auxClass);
     }
 
     public void setAuxiliaryClasses(Hashtable auxClasses) {
-    	_auxClasses = auxClasses;
+        _auxClasses = auxClasses;
     }
-    
+
     public Class getAuxiliaryClass(String className) {
-	if (_auxClasses == null) return null;
-	return((Class)_auxClasses.get(className));
+        if (_auxClasses == null) return null;
+        return((Class)_auxClasses.get(className));
     }
 
     
     public String[] getNamesArray() {
-	return namesArray;
+        return namesArray;
     }
-    
+
     public String[] getUrisArray() {
-    	return urisArray;
+        return urisArray;
     }
-    
+
     public int[] getTypesArray() {
-    	return typesArray;
+        return typesArray;
     }
-    
+
     public String[] getNamespaceArray() {
-	return namespaceArray;
+        return namespaceArray;
     }
-    
+
     public boolean hasIdCall() {
-    	return _hasIdCall;
+        return _hasIdCall;
     }
-    
+
     public Templates getTemplates() {
-    	return _templates;
+        return _templates;
+    }
+
+    public void setTemplates(Templates templates) {
+        _templates = templates;
     }
     
-    public void setTemplates(Templates templates) {
-    	_templates = templates;
-    }    
+    public boolean useServicesMechnism() {
+        return _useServicesMechanism;
+    }
+
     
+    public void setServicesMechnism(boolean flag) {
+        _useServicesMechanism = flag;
+    }
+
     
     protected DOMImplementation _domImplementation = null;
-    
-    public Document newDocument(String uri, String qname) 
-        throws ParserConfigurationException 
+
+    public Document newDocument(String uri, String qname)
+        throws ParserConfigurationException
     {
         if (_domImplementation == null) {
-            _domImplementation = DocumentBuilderFactory.newInstance()
-                .newDocumentBuilder().getDOMImplementation();
+            DocumentBuilderFactory dbf = FactoryImpl.getDOMFactory(_useServicesMechanism);
+            _domImplementation = dbf.newDocumentBuilder().getDOMImplementation();
         }
         return _domImplementation.createDocument(uri, qname, null);
     }

@@ -5,6 +5,7 @@
 
 package com.sun.org.apache.xml.internal.resolver.tools;
 
+import com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -202,7 +203,8 @@ public class CatalogResolver implements EntityResolver, URIResolver {
   private void setEntityResolver(SAXSource source) throws TransformerException {
     XMLReader reader = source.getXMLReader();
     if (reader == null) {
-      SAXParserFactory spFactory = SAXParserFactory.newInstance();
+      SAXParserFactory spFactory = catalogManager.useServicesMechanism() ?
+                    SAXParserFactory.newInstance() : new SAXParserFactoryImpl();
       spFactory.setNamespaceAware(true);
       try {
         reader = spFactory.newSAXParser().getXMLReader();

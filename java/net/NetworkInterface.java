@@ -17,10 +17,18 @@ public final class NetworkInterface {
     private NetworkInterface childs[];
     private NetworkInterface parent = null;
     private boolean virtual = false;
+    private static final NetworkInterface defaultInterface;
+    private static final int defaultIndex; 
 
     static {
         AccessController.doPrivileged(new LoadLibraryAction("net"));
         init();
+        defaultInterface = DefaultInterface.getDefault();
+        if (defaultInterface != null) {
+            defaultIndex = defaultInterface.getIndex();
+        } else {
+            defaultIndex = 0;
+        }
     }
 
     
@@ -327,4 +335,9 @@ public final class NetworkInterface {
     }
 
     private static native void init();
+
+    
+    static NetworkInterface getDefault() {
+        return defaultInterface;
+    }
 }

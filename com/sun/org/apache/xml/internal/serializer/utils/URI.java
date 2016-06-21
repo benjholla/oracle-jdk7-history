@@ -311,7 +311,7 @@ final class URI
 
       
       
-      String path = new String();
+      String path = "";
       String basePath = p_base.getPath();
 
       

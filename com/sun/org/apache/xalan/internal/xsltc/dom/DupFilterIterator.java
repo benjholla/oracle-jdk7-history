@@ -48,7 +48,9 @@ public final class DupFilterIterator extends DTMAxisIteratorBase {
         if (_isRestartable) {
             
             
-            if (_source instanceof KeyIndex
+            boolean sourceIsKeyIndex = _source instanceof KeyIndex;
+
+            if (sourceIsKeyIndex
                     && _startNode == DTMDefaultBase.ROOTNODE) {
                 return this;
             }
@@ -60,7 +62,12 @@ public final class DupFilterIterator extends DTMAxisIteratorBase {
                 while ((node = _source.next()) != END) {
                     _nodes.add(node);
                 }
-                _nodes.sort();
+
+                
+                
+                if (!sourceIsKeyIndex) {
+                    _nodes.sort();
+                }
                 _nodesSize = _nodes.cardinality();
                 _current = 0;
                 _lastNext = END;

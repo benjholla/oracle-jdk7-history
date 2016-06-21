@@ -41,6 +41,10 @@ public final class HttpCookie implements Cloneable {
 
     
     
+    private final String header;
+
+    
+    
     
     
     private long whenCreated = 0;
@@ -75,6 +79,10 @@ public final class HttpCookie implements Cloneable {
     
 
     public HttpCookie(String name, String value) {
+        this(name, value, null );
+    }
+
+    private HttpCookie(String name, String value, String header) {
         name = name.trim();
         if (name.length() == 0 || !isToken(name) || isReserved(name)) {
             throw new IllegalArgumentException("Illegal cookie name");
@@ -87,11 +95,21 @@ public final class HttpCookie implements Cloneable {
 
         whenCreated = System.currentTimeMillis();
         portlist = null;
+        this.header = header;
     }
 
 
     
     public static List<HttpCookie> parse(String header) {
+        return parse(header, false);
+    }
+
+    
+    
+    
+    
+    private static List<HttpCookie> parse(String header, boolean retainHeader) {
+
         int version = guessCookieVersion(header);
 
         
@@ -108,7 +126,7 @@ public final class HttpCookie implements Cloneable {
         
         if (version == 0) {
             
-            HttpCookie cookie = parseInternal(header);
+            HttpCookie cookie = parseInternal(header, retainHeader);
             cookie.setVersion(0);
             cookies.add(cookie);
         } else {
@@ -117,7 +135,7 @@ public final class HttpCookie implements Cloneable {
             
             List<String> cookieStrings = splitMultiCookies(header);
             for (String cookieStr : cookieStrings) {
-                HttpCookie cookie = parseInternal(cookieStr);
+                HttpCookie cookie = parseInternal(cookieStr, retainHeader);
                 cookie.setVersion(1);
                 cookies.add(cookie);
             }
@@ -484,7 +502,8 @@ public final class HttpCookie implements Cloneable {
 
 
     
-    private static HttpCookie parseInternal(String header)
+    private static HttpCookie parseInternal(String header,
+                                            boolean retainHeader)
     {
         HttpCookie cookie = null;
         String namevaluePair = null;
@@ -499,7 +518,13 @@ public final class HttpCookie implements Cloneable {
             if (index != -1) {
                 String name = namevaluePair.substring(0, index).trim();
                 String value = namevaluePair.substring(index + 1).trim();
-                cookie = new HttpCookie(name, stripOffSurroundingQuote(value));
+                if (retainHeader)
+                    cookie = new HttpCookie(name,
+                                            stripOffSurroundingQuote(value),
+                                            header);
+                else
+                    cookie = new HttpCookie(name,
+                                            stripOffSurroundingQuote(value));
             } else {
                 
                 throw new IllegalArgumentException("Invalid cookie name-value pair");
@@ -617,6 +642,25 @@ public final class HttpCookie implements Cloneable {
         } else {
             
         }
+    }
+
+    static {
+        sun.misc.SharedSecrets.setJavaNetHttpCookieAccess(
+            new sun.misc.JavaNetHttpCookieAccess() {
+                public List<HttpCookie> parse(String header) {
+                    return HttpCookie.parse(header, true);
+                }
+
+                public String header(HttpCookie cookie) {
+                    return cookie.header;
+                }
+            }
+        );
+    }
+
+    
+    private String header() {
+        return header;
     }
 
     

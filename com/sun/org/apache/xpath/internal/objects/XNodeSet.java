@@ -15,7 +15,7 @@ import org.w3c.dom.traversal.NodeIterator;
 
 
 public class XNodeSet extends NodeSequence
-{  
+{
     static final long serialVersionUID = 1916026368035639667L;
   
   protected XNodeSet()
@@ -25,9 +25,9 @@ public class XNodeSet extends NodeSequence
   
   public XNodeSet(DTMIterator val)
   {
-  	super();
-  	if(val instanceof XNodeSet)
-  	{
+        super();
+        if(val instanceof XNodeSet)
+        {
             final XNodeSet nodeSet = (XNodeSet) val;
             setIter(nodeSet.m_iter);
             m_dtmMgr = nodeSet.m_dtmMgr;
@@ -39,26 +39,26 @@ public class XNodeSet extends NodeSequence
 
             
             setObject(nodeSet.getIteratorCache());
-  	}
-  	else
-    	setIter(val);
+        }
+        else
+        setIter(val);
   }
-  
+
   
   public XNodeSet(XNodeSet val)
   {
-  	super();
+        super();
     setIter(val.m_iter);
     m_dtmMgr = val.m_dtmMgr;
     m_last = val.m_last;
     if(!val.hasCache())
-    	val.setShouldCacheNodes(true);
+        val.setShouldCacheNodes(true);
     setObject(val.m_obj);
   }
 
 
   
-  public XNodeSet(DTMManager dtmMgr) 
+  public XNodeSet(DTMManager dtmMgr)
   {
      this(DTM.NULL,dtmMgr);
   }
@@ -76,7 +76,7 @@ public class XNodeSet extends NodeSequence
       m_last = 1;
     }
     else
-    	m_last = 0;
+        m_last = 0;
   }
 
   
@@ -105,7 +105,7 @@ public class XNodeSet extends NodeSequence
     int node = item(0);
     return (node != DTM.NULL) ? getNumberFromNode(node) : Double.NaN;
   }
-  
+
   
   public double numWithSideEffects()
   {
@@ -120,14 +120,14 @@ public class XNodeSet extends NodeSequence
   {
     return (item(0) != DTM.NULL);
   }
-  
+
   
   public boolean boolWithSideEffects()
   {
     return (nextNode() != DTM.NULL);
   }
 
-  
+
   
   public XMLString getStringFromNode(int n)
   {
@@ -142,49 +142,49 @@ public class XNodeSet extends NodeSequence
       return com.sun.org.apache.xpath.internal.objects.XString.EMPTYSTRING;
     }
   }
-  
+
   
   public void dispatchCharactersEvents(org.xml.sax.ContentHandler ch)
           throws org.xml.sax.SAXException
   {
     int node = item(0);
-	
+
     if(node != DTM.NULL)
     {
       m_dtmMgr.getDTM(node).dispatchCharactersEvents(node, ch, false);
     }
-    
+
   }
-  
+
   
   public XMLString xstr()
   {
     int node = item(0);
     return (node != DTM.NULL) ? getStringFromNode(node) : XString.EMPTYSTRING;
   }
-  
+
   
   public void appendToFsb(com.sun.org.apache.xml.internal.utils.FastStringBuffer fsb)
   {
     XString xstring = (XString)xstr();
     xstring.appendToFsb(fsb);
   }
-  
+
 
   
   public String str()
   {
     int node = item(0);
-    return (node != DTM.NULL) ? getStringFromNode(node).toString() : "";   
+    return (node != DTM.NULL) ? getStringFromNode(node).toString() : "";
   }
-  
+
   
   public Object object()
   {
     if(null == m_obj)
-    	return this;
+        return this;
     else
-    	return m_obj;
+        return m_obj;
   }
 
   
@@ -220,7 +220,7 @@ public class XNodeSet extends NodeSequence
   {
     return new com.sun.org.apache.xml.internal.dtm.ref.DTMNodeIterator(iter());
   }
-  
+
   
   public NodeList nodelist() throws javax.xml.transform.TransformerException
   {
@@ -234,7 +234,7 @@ public class XNodeSet extends NodeSequence
     return nodelist;
   }
 
-  
+
 
 
 
@@ -251,36 +251,36 @@ public class XNodeSet extends NodeSequence
   {
     return this;
   }
-  
+
   public void release(DTMIterator iter)
   {
   }
-  
+
   
   public DTMIterator iter()
   {
     try
     {
-    	if(hasCache())
-      		return cloneWithReset();
-      	else
-      		return this; 
+        if(hasCache())
+                return cloneWithReset();
+        else
+                return this; 
     }
     catch (CloneNotSupportedException cnse)
     {
       throw new RuntimeException(cnse.getMessage());
     }
   }
-  
+
   
   public XObject getFresh()
   {
     try
     {
-    	if(hasCache())
-      		return (XObject)cloneWithReset();
-      	else
-      		return this; 
+        if(hasCache())
+                return (XObject)cloneWithReset();
+        else
+                return this; 
     }
     catch (CloneNotSupportedException cnse)
     {

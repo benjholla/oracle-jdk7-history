@@ -21,7 +21,7 @@ class FactoryFinder {
     static Properties cacheProps = new Properties();
 
     
-    static boolean firstTime = true;
+    static volatile boolean firstTime = true;
 
     
     static SecuritySupport ss = new SecuritySupport();

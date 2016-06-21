@@ -23,7 +23,7 @@ public final class ToXMLStream extends ToStream
 
 
     
-    private static CharInfo m_xmlcharInfo =
+    private CharInfo m_xmlcharInfo =
 
         CharInfo.getCharInfo(CharInfo.XML_ENTITIES_RESOURCE, Method.XML);
 
@@ -111,8 +111,23 @@ public final class ToXMLStream extends ToStream
                     writer.write('\"');
                     writer.write(standalone);
                     writer.write("?>");
-                    if (m_doIndent)
-                        writer.write(m_lineSep, 0, m_lineSepLen);
+                    if (m_doIndent) {
+                        if (m_standaloneWasSpecified
+                                || getDoctypePublic() != null
+                                || getDoctypeSystem() != null
+                                || m_isStandalone) {
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            writer.write(m_lineSep, 0, m_lineSepLen);
+                        }
+                    }
                 }
                 catch(IOException e)
                 {
@@ -230,11 +245,10 @@ public final class ToXMLStream extends ToStream
                 writer.write('>');
 
                 
-                
-                
-                if (m_elemContext.m_currentElemDepth <= 0)
+                if (m_elemContext.m_currentElemDepth <= 0 && m_isStandalone)
                     writer.write(m_lineSep, 0, m_lineSepLen);
 
+                
                 m_startNewLine = true;
             }
             catch(IOException e)

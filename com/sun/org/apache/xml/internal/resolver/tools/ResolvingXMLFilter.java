@@ -27,7 +27,7 @@ public class ResolvingXMLFilter extends XMLFilterImpl {
   public static boolean suppressExplanation = false;
 
   
-  private CatalogManager catalogManager = CatalogManager.getStaticManager();
+  CatalogManager catalogManager = CatalogManager.getStaticManager();
 
   
   private CatalogResolver catalogResolver = null;

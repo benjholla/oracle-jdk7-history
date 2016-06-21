@@ -295,13 +295,13 @@ public class ErrorMessages_es extends ListResourceBundle {
         
         {ErrorMsg.XSLTC_SOURCE_ERR,
         "Se ha llamado a XSLTCSource.build() sin haber definido la identificaci\u00F3n del sistema."},
-        
+
         { ErrorMsg.ER_RESULT_NULL,
             "El resultado no debe ser nulo"},
 
         
         {ErrorMsg.JAXP_INVALID_SET_PARAM_VALUE,
-        "El valor del par\u00E1metro {0} debe ser un objeto Java v\u00E1lido"},            
+        "El valor del par\u00E1metro {0} debe ser un objeto Java v\u00E1lido"},
 
 
         {ErrorMsg.COMPILE_STDIN_ERR,
@@ -377,7 +377,7 @@ public class ErrorMessages_es extends ListResourceBundle {
         
         {ErrorMsg.ERROR_MSG,
         "ERROR:  ''{0}''"},
-        
+
         
         {ErrorMsg.TRANSFORM_WITH_TRANSLET_STR,
         "Transformaci\u00F3n que utiliza el translet ''{0}'' "},
@@ -405,10 +405,10 @@ public class ErrorMessages_es extends ListResourceBundle {
         
         {ErrorMsg.RUNTIME_ERROR_KEY,
         "Errores del translet:"},
-        
+
         
         {ErrorMsg.INVALID_QNAME_ERR,
-        "Un atributo cuyo valor debe ser un QName o lista de QNames separados por espacios en blanco ten\u00EDa el valor ''{0}''"}, 
+        "Un atributo cuyo valor debe ser un QName o lista de QNames separados por espacios en blanco ten\u00EDa el valor ''{0}''"},
 
         
         {ErrorMsg.INVALID_NCNAME_ERR,
@@ -417,10 +417,10 @@ public class ErrorMessages_es extends ListResourceBundle {
         
         {ErrorMsg.INVALID_METHOD_IN_OUTPUT,
         "El atributo method de un elemento <xsl:output> ten\u00EDa el valor ''{0}''. El valor debe ser ''xml'', ''html'', ''text'' o qname-but-not-ncname"},
-        
+
         {ErrorMsg.JAXP_GET_FEATURE_NULL_NAME,
         "El nombre de funci\u00F3n no puede ser nulo en TransformerFactory.getFeature (nombre de cadena)."},
-        
+
         {ErrorMsg.JAXP_SET_FEATURE_NULL_NAME,
         "El nombre de funci\u00F3n no puede ser nulo en TransformerFactory.setFeature (nombre de cadena, valor booleano)."},
 

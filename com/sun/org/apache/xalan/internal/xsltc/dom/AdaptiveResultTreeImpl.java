@@ -26,7 +26,7 @@ import org.xml.sax.helpers.AttributesImpl;
 
 public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
 {
-    
+
     
     private static int _documentURIIndex = 0;
 
@@ -34,43 +34,43 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
 
     
     private SAXImpl _dom;
+
     
-    
-    
+
     
     private DTMWSFilter _wsfilter;
-    
+
     
     private int _initSize;
-    
+
     
     private boolean _buildIdIndex;
-    
+
     
     private final AttributesImpl _attributes = new AttributesImpl();
-    
+
     
     private String _openElementName;
-    
-    
+
+
     
     public AdaptiveResultTreeImpl(XSLTCDTMManager dtmManager, int documentID,
                                   DTMWSFilter wsfilter, int initSize,
                                   boolean buildIdIndex)
     {
         super(dtmManager, documentID);
-        
+
         _wsfilter = wsfilter;
         _initSize = initSize;
         _buildIdIndex = buildIdIndex;
     }
-    
+
     
     public DOM getNestedDOM()
     {
         return _dom;
     }
-        
+
     
     public int getDocument()
     {
@@ -92,7 +92,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getStringValue();
         }
     }
-    
+
     public DTMAxisIterator getIterator()
     {
         if (_dom != null) {
@@ -102,7 +102,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getIterator();
         }
     }
-	
+
     public DTMAxisIterator getChildren(final int node)
     {
         if (_dom != null) {
@@ -112,7 +112,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getChildren(node);
         }
     }
-    
+
     public DTMAxisIterator getTypedChildren(final int type)
     {
         if (_dom != null) {
@@ -122,7 +122,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getTypedChildren(type);
         }
     }
-    
+
     public DTMAxisIterator getAxisIterator(final int axis)
     {
         if (_dom != null) {
@@ -132,7 +132,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getAxisIterator(axis);
         }
     }
-    
+
     public DTMAxisIterator getTypedAxisIterator(final int axis, final int type)
     {
         if (_dom != null) {
@@ -140,9 +140,9 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
         }
         else {
             return super.getTypedAxisIterator(axis, type);
-        }        
+        }
     }
-    
+
     public DTMAxisIterator getNthDescendant(int node, int n, boolean includeself)
     {
         if (_dom != null) {
@@ -152,7 +152,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getNthDescendant(node, n, includeself);
         }
     }
-    
+
     public DTMAxisIterator getNamespaceAxisIterator(final int axis, final int ns)
     {
         if (_dom != null) {
@@ -162,9 +162,9 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getNamespaceAxisIterator(axis, ns);
         }
     }
-    
+
     public DTMAxisIterator getNodeValueIterator(DTMAxisIterator iter, int returnType,
-					     String value, boolean op)
+                                             String value, boolean op)
     {
         if (_dom != null) {
             return _dom.getNodeValueIterator(iter, returnType, value, op);
@@ -173,7 +173,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getNodeValueIterator(iter, returnType, value, op);
         }
     }
-    
+
     public DTMAxisIterator orderNodes(DTMAxisIterator source, int node)
     {
         if (_dom != null) {
@@ -183,7 +183,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.orderNodes(source, node);
         }
     }
-    
+
     public String getNodeName(final int node)
     {
         if (_dom != null) {
@@ -193,7 +193,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getNodeName(node);
         }
     }
-    
+
     public String getNodeNameX(final int node)
     {
         if (_dom != null) {
@@ -203,7 +203,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getNodeNameX(node);
         }
     }
-    
+
     public String getNamespaceName(final int node)
     {
         if (_dom != null) {
@@ -213,7 +213,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getNamespaceName(node);
         }
     }
-    
+
     
     public int getExpandedTypeID(final int nodeHandle)
     {
@@ -224,7 +224,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getExpandedTypeID(nodeHandle);
         }
     }
-    
+
     public int getNamespaceType(final int node)
     {
         if (_dom != null) {
@@ -234,7 +234,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getNamespaceType(node);
         }
     }
-    
+
     public int getParent(final int nodeHandle)
     {
         if (_dom != null) {
@@ -244,7 +244,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getParent(nodeHandle);
         }
     }
-    
+
     public int getAttributeNode(final int gType, final int element)
     {
         if (_dom != null) {
@@ -254,7 +254,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getAttributeNode(gType, element);
         }
     }
-    
+
     public String getStringValueX(final int nodeHandle)
     {
         if (_dom != null) {
@@ -264,9 +264,9 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getStringValueX(nodeHandle);
         }
     }
-    
+
     public void copy(final int node, SerializationHandler handler)
-	throws TransletException
+        throws TransletException
     {
         if (_dom != null) {
             _dom.copy(node, handler);
@@ -275,9 +275,9 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             super.copy(node, handler);
         }
     }
-    
+
     public void copy(DTMAxisIterator nodes, SerializationHandler handler)
-	throws TransletException
+        throws TransletException
     {
         if (_dom != null) {
             _dom.copy(nodes, handler);
@@ -286,9 +286,9 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             super.copy(nodes, handler);
         }
     }
-    
+
     public String shallowCopy(final int node, SerializationHandler handler)
-	throws TransletException
+        throws TransletException
     {
         if (_dom != null) {
             return _dom.shallowCopy(node, handler);
@@ -297,7 +297,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.shallowCopy(node, handler);
         }
     }
-    
+
     public boolean lessThan(final int node1, final int node2)
     {
         if (_dom != null) {
@@ -307,19 +307,19 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.lessThan(node1, node2);
         }
     }
-    
+
     
     public void characters(final int node, SerializationHandler handler)
-	throws TransletException
+        throws TransletException
     {
         if (_dom != null) {
             _dom.characters(node, handler);
         }
         else {
             super.characters(node, handler);
-        }        
+        }
     }
-    
+
     public Node makeNode(int index)
     {
         if (_dom != null) {
@@ -327,9 +327,9 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
         }
         else {
             return super.makeNode(index);
-        }        
+        }
     }
-    
+
     public Node makeNode(DTMAxisIterator iter)
     {
         if (_dom != null) {
@@ -337,9 +337,9 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
         }
         else {
             return super.makeNode(iter);
-        }        
+        }
     }
-    
+
     public NodeList makeNodeList(int index)
     {
         if (_dom != null) {
@@ -347,9 +347,9 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
         }
         else {
             return super.makeNodeList(index);
-        }        
+        }
     }
-    
+
     public NodeList makeNodeList(DTMAxisIterator iter)
     {
         if (_dom != null) {
@@ -357,9 +357,9 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
         }
         else {
             return super.makeNodeList(iter);
-        }        
+        }
     }
-    
+
     public String getLanguage(int node)
     {
         if (_dom != null) {
@@ -367,9 +367,9 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
         }
         else {
             return super.getLanguage(node);
-        }        
+        }
     }
-    
+
     public int getSize()
     {
         if (_dom != null) {
@@ -377,9 +377,9 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
         }
         else {
             return super.getSize();
-        }        
+        }
     }
-    
+
     public String getDocumentURI(int node)
     {
         if (_dom != null) {
@@ -387,9 +387,9 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
         }
         else {
             return "adaptive_rtf" + _documentURIIndex++;
-        }        
+        }
     }
-    
+
     public void setFilter(StripFilter filter)
     {
         if (_dom != null) {
@@ -397,9 +397,9 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
         }
         else {
             super.setFilter(filter);
-        }        
+        }
     }
-    
+
     public void setupMapping(String[] names, String[] uris, int[] types, String[] namespaces)
     {
         if (_dom != null) {
@@ -407,9 +407,9 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
         }
         else {
             super.setupMapping(names, uris, types, namespaces);
-        }        
+        }
     }
-    
+
     public boolean isElement(final int node)
     {
         if (_dom != null) {
@@ -417,9 +417,9 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
         }
         else {
             return super.isElement(node);
-        }        
+        }
     }
-    
+
     public boolean isAttribute(final int node)
     {
         if (_dom != null) {
@@ -427,20 +427,20 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
         }
         else {
             return super.isAttribute(node);
-        }        
+        }
     }
-    
+
     public String lookupNamespace(int node, String prefix)
-	throws TransletException
+        throws TransletException
     {
         if (_dom != null) {
             return _dom.lookupNamespace(node, prefix);
         }
         else {
             return super.lookupNamespace(node, prefix);
-        }        
+        }
     }
-    
+
     
     public final int getNodeIdent(final int nodehandle)
     {
@@ -449,9 +449,9 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
         }
         else {
             return super.getNodeIdent(nodehandle);
-        }        
+        }
     }
-    
+
     
     public final int getNodeHandle(final int nodeId)
     {
@@ -460,9 +460,9 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
         }
         else {
             return super.getNodeHandle(nodeId);
-        }        
+        }
     }
-    
+
     public DOM getResultTreeFrag(int initialSize, int rtfType)
     {
         if (_dom != null) {
@@ -470,14 +470,14 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
         }
         else {
             return super.getResultTreeFrag(initialSize, rtfType);
-        }        
+        }
     }
-    
+
     public SerializationHandler getOutputDomBuilder()
     {
         return this;
     }
-    
+
     public int getNSType(int node)
     {
         if (_dom != null) {
@@ -485,9 +485,9 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
         }
         else {
             return super.getNSType(node);
-        }        
+        }
     }
-    
+
     public String getUnparsedEntityURI(String name)
     {
         if (_dom != null) {
@@ -495,9 +495,9 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
         }
         else {
             return super.getUnparsedEntityURI(name);
-        }        
+        }
     }
-    
+
     public Hashtable getElementsWithIDs()
     {
         if (_dom != null) {
@@ -505,31 +505,31 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
         }
         else {
             return super.getElementsWithIDs();
-        }        
+        }
     }
 
     
-        
+
     
-    
+
     private void maybeEmitStartElement() throws SAXException
     {
         if (_openElementName != null) {
 
-	   int index;
-	   if ((index =_openElementName.indexOf(":")) < 0)
-	       _dom.startElement(null, _openElementName, _openElementName, _attributes);
-	   else {
-           	String uri =_dom.getNamespaceURI(_openElementName.substring(0,index));
-		_dom.startElement(uri, _openElementName.substring(index+1), _openElementName, _attributes);
+           int index;
+           if ((index =_openElementName.indexOf(":")) < 0)
+               _dom.startElement(null, _openElementName, _openElementName, _attributes);
+           else {
+                String uri =_dom.getNamespaceURI(_openElementName.substring(0,index));
+                _dom.startElement(uri, _openElementName.substring(index+1), _openElementName, _attributes);
            }
 
 
-	    _openElementName = null;
-	}
-        
+            _openElementName = null;
+        }
+
     }
-    
+
     
     private void prepareNewDOM() throws SAXException
     {
@@ -544,11 +544,11 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
         }
         _size = 0;
     }
-    
+
     public void startDocument() throws SAXException
-    {    
+    {
     }
-    
+
     public void endDocument() throws SAXException
     {
         if (_dom != null) {
@@ -568,19 +568,19 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             super.characters(str);
         }
     }
-    
+
     public void characters(char[] ch, int offset, int length)
-	throws SAXException
+        throws SAXException
     {
         if (_dom != null) {
-	    maybeEmitStartElement();
-	    _dom.characters(ch, offset, length);
+            maybeEmitStartElement();
+            _dom.characters(ch, offset, length);
         }
         else {
             super.characters(ch, offset, length);
         }
     }
-    
+
     public boolean setEscaping(boolean escape) throws SAXException
     {
         if (_dom != null) {
@@ -590,16 +590,16 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.setEscaping(escape);
         }
     }
-    
+
     public void startElement(String elementName) throws SAXException
     {
         if (_dom == null) {
             prepareNewDOM();
         }
-        	   	    
-	maybeEmitStartElement();
-	_openElementName = elementName;
-	_attributes.clear();
+
+        maybeEmitStartElement();
+        _openElementName = elementName;
+        _attributes.clear();
     }
 
     public void startElement(String uri, String localName, String qName)
@@ -613,11 +613,11 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
     {
         startElement(qName);
     }
-    
+
     public void endElement(String elementName) throws SAXException
-    {    
-	maybeEmitStartElement();
-	_dom.endElement(null, null, elementName);
+    {
+        maybeEmitStartElement();
+        _dom.endElement(null, null, elementName);
     }
 
     public void endElement(String uri, String localName, String qName)
@@ -651,73 +651,73 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
     public void addAttribute(String uri, String localName, String qname,
             String type, String value)
     {
-	if (_openElementName != null) {
-	    _attributes.addAttribute(uri, localName, qname, type, value);
-	}
-	else {
-	    BasisLibrary.runTimeError(BasisLibrary.STRAY_ATTRIBUTE_ERR, qname);
-	}
+        if (_openElementName != null) {
+            _attributes.addAttribute(uri, localName, qname, type, value);
+        }
+        else {
+            BasisLibrary.runTimeError(BasisLibrary.STRAY_ATTRIBUTE_ERR, qname);
+        }
     }
 
     public void namespaceAfterStartElement(String prefix, String uri)
         throws SAXException
-    {    
-	if (_dom == null) {
-	   prepareNewDOM(); 
-	}
-	
-	_dom.startPrefixMapping(prefix, uri);
+    {
+        if (_dom == null) {
+           prepareNewDOM();
+        }
+
+        _dom.startPrefixMapping(prefix, uri);
     }
-    
+
     public void comment(String comment) throws SAXException
-    {    
-	if (_dom == null) {
-	   prepareNewDOM(); 
-	}
-	
-	maybeEmitStartElement();
+    {
+        if (_dom == null) {
+           prepareNewDOM();
+        }
+
+        maybeEmitStartElement();
         char[] chars = comment.toCharArray();
         _dom.comment(chars, 0, chars.length);
     }
 
     public void comment(char[] chars, int offset, int length)
         throws SAXException
-    {    
-	if (_dom == null) {
-	   prepareNewDOM(); 
-	}
-	
-	maybeEmitStartElement();
+    {
+        if (_dom == null) {
+           prepareNewDOM();
+        }
+
+        maybeEmitStartElement();
         _dom.comment(chars, offset, length);
     }
-    
+
     public void processingInstruction(String target, String data)
-	throws SAXException
-    {    
-	if (_dom == null) {
-	   prepareNewDOM(); 
-	}
-	
-	maybeEmitStartElement();
-	_dom.processingInstruction(target, data);
+        throws SAXException
+    {
+        if (_dom == null) {
+           prepareNewDOM();
+        }
+
+        maybeEmitStartElement();
+        _dom.processingInstruction(target, data);
     }
+
     
-    
-         
+
     public void setFeature(String featureId, boolean state)
     {
         if (_dom != null) {
             _dom.setFeature(featureId, state);
         }
     }
-    
+
     public void setProperty(String property, Object value)
     {
         if (_dom != null) {
             _dom.setProperty(property, value);
         }
     }
-    
+
     public DTMAxisTraverser getAxisTraverser(final int axis)
     {
         if (_dom != null) {
@@ -727,7 +727,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getAxisTraverser(axis);
         }
     }
-    
+
     public boolean hasChildNodes(int nodeHandle)
     {
         if (_dom != null) {
@@ -737,7 +737,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.hasChildNodes(nodeHandle);
         }
     }
-    
+
     public int getFirstChild(int nodeHandle)
     {
         if (_dom != null) {
@@ -747,7 +747,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getFirstChild(nodeHandle);
         }
     }
-    
+
     public int getLastChild(int nodeHandle)
     {
         if (_dom != null) {
@@ -757,7 +757,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getLastChild(nodeHandle);
         }
     }
-    
+
     public int getAttributeNode(int elementHandle, String namespaceURI, String name)
     {
         if (_dom != null) {
@@ -767,7 +767,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getAttributeNode(elementHandle, namespaceURI, name);
         }
     }
-    
+
     public int getFirstAttribute(int nodeHandle)
     {
         if (_dom != null) {
@@ -777,7 +777,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getFirstAttribute(nodeHandle);
         }
     }
-    
+
     public int getFirstNamespaceNode(int nodeHandle, boolean inScope)
     {
         if (_dom != null) {
@@ -787,7 +787,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getFirstNamespaceNode(nodeHandle, inScope);
         }
     }
-    
+
     public int getNextSibling(int nodeHandle)
     {
         if (_dom != null) {
@@ -797,7 +797,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getNextSibling(nodeHandle);
         }
      }
-    
+
     public int getPreviousSibling(int nodeHandle)
     {
         if (_dom != null) {
@@ -807,7 +807,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getPreviousSibling(nodeHandle);
         }
      }
-    
+
     public int getNextAttribute(int nodeHandle)
     {
         if (_dom != null) {
@@ -817,7 +817,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getNextAttribute(nodeHandle);
         }
     }
-    
+
     public int getNextNamespaceNode(int baseHandle, int namespaceHandle,
                                   boolean inScope)
     {
@@ -828,7 +828,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getNextNamespaceNode(baseHandle, namespaceHandle, inScope);
         }
     }
-    
+
     public int getOwnerDocument(int nodeHandle)
     {
         if (_dom != null) {
@@ -838,7 +838,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getOwnerDocument(nodeHandle);
         }
     }
-    
+
     public int getDocumentRoot(int nodeHandle)
     {
         if (_dom != null) {
@@ -848,7 +848,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getDocumentRoot(nodeHandle);
         }
     }
-    
+
     public XMLString getStringValue(int nodeHandle)
     {
         if (_dom != null) {
@@ -858,7 +858,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getStringValue(nodeHandle);
         }
     }
-    
+
     public int getStringValueChunkCount(int nodeHandle)
     {
         if (_dom != null) {
@@ -868,7 +868,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getStringValueChunkCount(nodeHandle);
         }
     }
-    
+
     public char[] getStringValueChunk(int nodeHandle, int chunkIndex,
                                     int[] startAndLen)
     {
@@ -879,7 +879,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getStringValueChunk(nodeHandle, chunkIndex, startAndLen);
         }
     }
-    
+
     public int getExpandedTypeID(String namespace, String localName, int type)
     {
         if (_dom != null) {
@@ -889,7 +889,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getExpandedTypeID(namespace, localName, type);
         }
     }
-    
+
     public String getLocalNameFromExpandedNameID(int ExpandedNameID)
     {
         if (_dom != null) {
@@ -899,7 +899,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getLocalNameFromExpandedNameID(ExpandedNameID);
         }
     }
-    
+
     public String getNamespaceFromExpandedNameID(int ExpandedNameID)
     {
         if (_dom != null) {
@@ -909,7 +909,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getNamespaceFromExpandedNameID(ExpandedNameID);
         }
     }
-    
+
     public String getLocalName(int nodeHandle)
     {
         if (_dom != null) {
@@ -919,7 +919,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getLocalName(nodeHandle);
         }
     }
-    
+
     public String getPrefix(int nodeHandle)
     {
         if (_dom != null) {
@@ -929,7 +929,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getPrefix(nodeHandle);
         }
     }
-    
+
     public String getNamespaceURI(int nodeHandle)
     {
         if (_dom != null) {
@@ -939,7 +939,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getNamespaceURI(nodeHandle);
         }
     }
-    
+
     public String getNodeValue(int nodeHandle)
     {
         if (_dom != null) {
@@ -949,7 +949,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getNodeValue(nodeHandle);
         }
     }
-    
+
     public short getNodeType(int nodeHandle)
     {
         if (_dom != null) {
@@ -959,7 +959,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getNodeType(nodeHandle);
         }
     }
-    
+
     public short getLevel(int nodeHandle)
     {
         if (_dom != null) {
@@ -969,7 +969,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getLevel(nodeHandle);
         }
     }
-    
+
     public boolean isSupported(String feature, String version)
     {
         if (_dom != null) {
@@ -979,7 +979,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.isSupported(feature, version);
         }
     }
-    
+
     public String getDocumentBaseURI()
     {
         if (_dom != null) {
@@ -989,7 +989,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getDocumentBaseURI();
         }
     }
-    
+
     public void setDocumentBaseURI(String baseURI)
     {
         if (_dom != null) {
@@ -999,7 +999,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             super.setDocumentBaseURI(baseURI);
         }
     }
-    
+
     public String getDocumentSystemIdentifier(int nodeHandle)
     {
         if (_dom != null) {
@@ -1009,7 +1009,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getDocumentSystemIdentifier(nodeHandle);
         }
     }
-    
+
     public String getDocumentEncoding(int nodeHandle)
     {
         if (_dom != null) {
@@ -1019,7 +1019,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getDocumentEncoding(nodeHandle);
         }
     }
-    
+
     public String getDocumentStandalone(int nodeHandle)
     {
         if (_dom != null) {
@@ -1029,7 +1029,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getDocumentStandalone(nodeHandle);
         }
     }
-    
+
     public String getDocumentVersion(int documentHandle)
     {
         if (_dom != null) {
@@ -1039,7 +1039,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getDocumentVersion(documentHandle);
         }
     }
-    
+
     public boolean getDocumentAllDeclarationsProcessed()
     {
         if (_dom != null) {
@@ -1049,7 +1049,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getDocumentAllDeclarationsProcessed();
         }
     }
-    
+
     public String getDocumentTypeDeclarationSystemIdentifier()
     {
         if (_dom != null) {
@@ -1059,7 +1059,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getDocumentTypeDeclarationSystemIdentifier();
         }
     }
-    
+
     public String getDocumentTypeDeclarationPublicIdentifier()
     {
         if (_dom != null) {
@@ -1069,7 +1069,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getDocumentTypeDeclarationPublicIdentifier();
         }
     }
-    
+
     public int getElementById(String elementId)
     {
         if (_dom != null) {
@@ -1079,7 +1079,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getElementById(elementId);
         }
     }
-        
+
     public boolean supportsPreStripping()
     {
         if (_dom != null) {
@@ -1089,7 +1089,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.supportsPreStripping();
         }
     }
-    
+
     public boolean isNodeAfter(int firstNodeHandle, int secondNodeHandle)
     {
         if (_dom != null) {
@@ -1099,7 +1099,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.isNodeAfter(firstNodeHandle, secondNodeHandle);
         }
     }
-    
+
     public boolean isCharacterElementContentWhitespace(int nodeHandle)
     {
         if (_dom != null) {
@@ -1109,7 +1109,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.isCharacterElementContentWhitespace(nodeHandle);
         }
     }
-    
+
     public boolean isDocumentAllDeclarationsProcessed(int documentHandle)
     {
         if (_dom != null) {
@@ -1119,7 +1119,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.isDocumentAllDeclarationsProcessed(documentHandle);
         }
     }
-    
+
     public boolean isAttributeSpecified(int attributeHandle)
     {
         if (_dom != null) {
@@ -1129,7 +1129,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.isAttributeSpecified(attributeHandle);
         }
     }
-    
+
     public void dispatchCharactersEvents(int nodeHandle, org.xml.sax.ContentHandler ch,
                                          boolean normalize)
           throws org.xml.sax.SAXException
@@ -1141,7 +1141,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             super.dispatchCharactersEvents(nodeHandle, ch, normalize);
         }
     }
-    
+
     public void dispatchToEvents(int nodeHandle, org.xml.sax.ContentHandler ch)
       throws org.xml.sax.SAXException
     {
@@ -1152,7 +1152,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             super.dispatchToEvents(nodeHandle, ch);
         }
     }
-    
+
     public org.w3c.dom.Node getNode(int nodeHandle)
     {
         if (_dom != null) {
@@ -1162,7 +1162,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getNode(nodeHandle);
         }
     }
-    
+
     public boolean needsTwoThreads()
     {
         if (_dom != null) {
@@ -1172,7 +1172,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.needsTwoThreads();
         }
     }
-    
+
     public org.xml.sax.ContentHandler getContentHandler()
     {
         if (_dom != null) {
@@ -1182,7 +1182,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getContentHandler();
         }
     }
-    
+
     public org.xml.sax.ext.LexicalHandler getLexicalHandler()
     {
         if (_dom != null) {
@@ -1192,7 +1192,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getLexicalHandler();
         }
     }
-    
+
     public org.xml.sax.EntityResolver getEntityResolver()
     {
         if (_dom != null) {
@@ -1202,7 +1202,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getEntityResolver();
         }
     }
-    
+
     public org.xml.sax.DTDHandler getDTDHandler()
     {
         if (_dom != null) {
@@ -1212,7 +1212,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getDTDHandler();
         }
     }
-    
+
     public org.xml.sax.ErrorHandler getErrorHandler()
     {
         if (_dom != null) {
@@ -1222,7 +1222,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getErrorHandler();
         }
     }
-    
+
     public org.xml.sax.ext.DeclHandler getDeclHandler()
     {
         if (_dom != null) {
@@ -1232,7 +1232,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getDeclHandler();
         }
     }
-    
+
     public void appendChild(int newChild, boolean clone, boolean cloneDepth)
     {
         if (_dom != null) {
@@ -1242,7 +1242,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             super.appendChild(newChild, clone, cloneDepth);
         }
     }
-    
+
     public void appendTextChild(String str)
     {
         if (_dom != null) {
@@ -1252,7 +1252,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             super.appendTextChild(str);
         }
     }
-    
+
     public SourceLocator getSourceLocatorFor(int node)
     {
         if (_dom != null) {
@@ -1262,7 +1262,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             return super.getSourceLocatorFor(node);
         }
     }
-    
+
     public void documentRegistration()
     {
         if (_dom != null) {
@@ -1272,7 +1272,7 @@ public class AdaptiveResultTreeImpl extends SimpleResultTreeImpl
             super.documentRegistration();
         }
     }
-    
+
     public void documentRelease()
     {
         if (_dom != null) {

@@ -338,7 +338,7 @@ public class URI implements Serializable
 
       
       
-      String path = new String();
+      String path = "";
       String basePath = p_base.getPath();
 
       

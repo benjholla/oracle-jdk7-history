@@ -36,7 +36,7 @@ class XPathFactoryFinder  {
         private static Properties cacheProps = new Properties();
 
         
-        private static boolean firstTime = true;
+        private volatile static boolean firstTime = true;
 
     
     private static void debugPrintln(String msg) {
@@ -98,7 +98,7 @@ class XPathFactoryFinder  {
             String r = ss.getSystemProperty(propertyName);
             if(r!=null) {
                 debugPrintln("The value is '"+r+"'");
-                xpathFactory = createInstance(r);
+                xpathFactory = createInstance(r, true);
                 if(xpathFactory != null)    return xpathFactory;
             } else
                 debugPrintln("The property is undefined.");
@@ -133,7 +133,7 @@ class XPathFactoryFinder  {
             debugPrintln("found " + factoryClassName + " in $java.home/jaxp.properties");
 
             if (factoryClassName != null) {
-                xpathFactory = createInstance(factoryClassName);
+                xpathFactory = createInstance(factoryClassName, true);
                 if(xpathFactory != null){
                     return xpathFactory;
                 }
@@ -166,7 +166,7 @@ class XPathFactoryFinder  {
         
         if(uri.equals(XPathFactory.DEFAULT_OBJECT_MODEL_URI)) {
             debugPrintln("attempting to use the platform default W3C DOM XPath lib");
-            return createInstance("com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl");
+            return createInstance("com.sun.org.apache.xpath.internal.jaxp.XPathFactoryImpl", true);
         }
 
         debugPrintln("all things were tried, but none was found. bailing out.");
@@ -194,6 +194,9 @@ class XPathFactoryFinder  {
 
     
     XPathFactory createInstance( String className ) {
+        return createInstance( className, false );
+    }
+    XPathFactory createInstance( String className, boolean useServicesMechanism  ) {
         XPathFactory xPathFactory = null;
 
         debugPrintln("createInstance(" + className + ")");
@@ -208,7 +211,12 @@ class XPathFactoryFinder  {
 
         
         try {
+            if (!useServicesMechanism) {
+                xPathFactory = (XPathFactory) newInstanceNoServiceLoader(clazz);
+            }
+            if (xPathFactory == null) {
                 xPathFactory = (XPathFactory) clazz.newInstance();
+            }
         } catch (ClassCastException classCastException) {
                 debugPrintln("could not instantiate " + clazz.getName());
                 if (debug) {
@@ -230,6 +238,26 @@ class XPathFactoryFinder  {
         }
 
         return xPathFactory;
+    }
+    
+    private static Object newInstanceNoServiceLoader(
+         Class<?> providerClass
+    ) {
+        
+        if (System.getSecurityManager() == null) {
+            return null;
+        }
+        try {
+            Method creationMethod =
+                providerClass.getDeclaredMethod(
+                    "newXPathFactoryNoServiceLoader"
+                );
+                return creationMethod.invoke(null, null);
+            } catch (NoSuchMethodException exc) {
+                return null;
+            } catch (Exception exc) {
+                return null;
+        }
     }
 
     
@@ -337,7 +365,7 @@ class XPathFactoryFinder  {
         String factoryClassName = props.getProperty(keyName);
         if(factoryClassName != null){
             debugPrintln("found "+keyName+" = " + factoryClassName);
-            return createInstance(factoryClassName);
+            return createInstance(factoryClassName, true);
         } else {
             debugPrintln(keyName+" is not in the property file");
             return null;

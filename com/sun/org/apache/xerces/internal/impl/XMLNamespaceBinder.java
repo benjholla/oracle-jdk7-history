@@ -170,13 +170,13 @@ public class XMLNamespaceBinder
 
         
         if (propertyId.startsWith(Constants.XERCES_PROPERTY_PREFIX)) {
-        	final int suffixLength = propertyId.length() - Constants.XERCES_PROPERTY_PREFIX.length();
-        	
-            if (suffixLength == Constants.SYMBOL_TABLE_PROPERTY.length() && 
+                final int suffixLength = propertyId.length() - Constants.XERCES_PROPERTY_PREFIX.length();
+
+            if (suffixLength == Constants.SYMBOL_TABLE_PROPERTY.length() &&
                 propertyId.endsWith(Constants.SYMBOL_TABLE_PROPERTY)) {
                 fSymbolTable = (SymbolTable)value;
             }
-            else if (suffixLength == Constants.ERROR_REPORTER_PROPERTY.length() && 
+            else if (suffixLength == Constants.ERROR_REPORTER_PROPERTY.length() &&
                 propertyId.endsWith(Constants.ERROR_REPORTER_PROPERTY)) {
                 fErrorReporter = (XMLErrorReporter)value;
             }
@@ -238,7 +238,7 @@ public class XMLNamespaceBinder
     
     public void startGeneralEntity(String name,
                                    XMLResourceIdentifier identifier,
-                                   String encoding, Augmentations augs) 
+                                   String encoding, Augmentations augs)
         throws XNIException {
         if (fDocumentHandler != null && !fOnlyPassPrefixMappingEvents) {
             fDocumentHandler.startGeneralEntity(name, identifier, encoding, augs);
@@ -254,15 +254,15 @@ public class XMLNamespaceBinder
     } 
 
     
-	public void startDocument(XMLLocator locator, String encoding,
+        public void startDocument(XMLLocator locator, String encoding,
                                 NamespaceContext namespaceContext, Augmentations augs)
-		                      throws XNIException {
-		fNamespaceContext = namespaceContext;
+                                      throws XNIException {
+                fNamespaceContext = namespaceContext;
 
-		if (fDocumentHandler != null && !fOnlyPassPrefixMappingEvents) {
-			fDocumentHandler.startDocument(locator, encoding, namespaceContext, augs);
-		}
-	} 
+                if (fDocumentHandler != null && !fOnlyPassPrefixMappingEvents) {
+                        fDocumentHandler.startDocument(locator, encoding, namespaceContext, augs);
+                }
+        } 
 
     
     public void xmlDecl(String version, String encoding, String standalone, Augmentations augs)
@@ -397,7 +397,7 @@ public class XMLNamespaceBinder
                                        new Object[]{element.rawname},
                                        XMLErrorReporter.SEVERITY_FATAL_ERROR);
         }
-        
+
         
         int length = attributes.getLength();
         for (int i = 0; i < length; i++) {
@@ -418,7 +418,7 @@ public class XMLNamespaceBinder
                                                new Object[]{attributes.getQName(i)},
                                                XMLErrorReporter.SEVERITY_FATAL_ERROR);
                 }
-                
+
                 
                 if (uri == NamespaceContext.XMLNS_URI) {
                     fErrorReporter.reportError(XMLMessageFormatter.XMLNS_DOMAIN,
@@ -426,7 +426,7 @@ public class XMLNamespaceBinder
                                                new Object[]{attributes.getQName(i)},
                                                XMLErrorReporter.SEVERITY_FATAL_ERROR);
                 }
-                
+
                 
                 if (localpart == XMLSymbols.PREFIX_XML) {
                     if (uri != NamespaceContext.XML_URI) {
@@ -565,7 +565,7 @@ public class XMLNamespaceBinder
     
     
     protected boolean prefixBoundToNullURI(String uri, String localpart) {
-        return (uri == XMLSymbols.EMPTY_STRING && localpart != XMLSymbols.PREFIX_XMLNS); 
+        return (uri == XMLSymbols.EMPTY_STRING && localpart != XMLSymbols.PREFIX_XMLNS);
     } 
 
 } 

@@ -99,4 +99,3 @@ class XSDKeyrefTraverser extends XSDAbstractIDConstraintTraverser {
         fAttrChecker.returnAttrArray(attrValues, schemaDoc);
     } 
 } 
-

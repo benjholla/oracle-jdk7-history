@@ -1279,7 +1279,7 @@ public abstract class Calendar implements Serializable, Cloneable, Comparable<Ca
     }
 
     
-    private void writeObject(ObjectOutputStream stream)
+    private synchronized void writeObject(ObjectOutputStream stream)
          throws IOException
     {
         

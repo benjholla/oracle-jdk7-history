@@ -24,28 +24,28 @@ public class DocumentBuilderFactoryImpl extends DocumentBuilderFactory {
     private Hashtable features;
     private Schema grammar;
     private boolean isXIncludeAware;
-    
+
     
     private boolean fSecureProcess = true;
 
     
     public DocumentBuilder newDocumentBuilder()
-        throws ParserConfigurationException 
+        throws ParserConfigurationException
     {
         
         if (grammar != null && attributes != null) {
             if (attributes.containsKey(JAXPConstants.JAXP_SCHEMA_LANGUAGE)) {
                 throw new ParserConfigurationException(
-                        SAXMessageFormatter.formatMessage(null, 
+                        SAXMessageFormatter.formatMessage(null,
                         "schema-already-specified", new Object[] {JAXPConstants.JAXP_SCHEMA_LANGUAGE}));
             }
             else if (attributes.containsKey(JAXPConstants.JAXP_SCHEMA_SOURCE)) {
                 throw new ParserConfigurationException(
-                        SAXMessageFormatter.formatMessage(null, 
-                        "schema-already-specified", new Object[] {JAXPConstants.JAXP_SCHEMA_SOURCE}));                
+                        SAXMessageFormatter.formatMessage(null,
+                        "schema-already-specified", new Object[] {JAXPConstants.JAXP_SCHEMA_SOURCE}));
             }
         }
-        
+
         try {
             return new DocumentBuilderImpl(this, attributes, features, fSecureProcess);
         } catch (SAXException se) {
@@ -66,7 +66,7 @@ public class DocumentBuilderFactoryImpl extends DocumentBuilderFactory {
             
             return;
         }
-        
+
         
         
 
@@ -117,24 +117,24 @@ public class DocumentBuilderFactoryImpl extends DocumentBuilderFactory {
             }
         }
     }
-    
+
     public Schema getSchema() {
         return grammar;
     }
-    
+
     public void setSchema(Schema grammar) {
         this.grammar = grammar;
     }
-    
+
     public boolean isXIncludeAware() {
         return this.isXIncludeAware;
     }
-    
+
     public void setXIncludeAware(boolean state) {
         this.isXIncludeAware = state;
     }
-    
-    public boolean getFeature(String name) 
+
+    public boolean getFeature(String name)
         throws ParserConfigurationException {
         if (name.equals(XMLConstants.FEATURE_SECURE_PROCESSING)) {
             return fSecureProcess;
@@ -154,14 +154,14 @@ public class DocumentBuilderFactoryImpl extends DocumentBuilderFactory {
             throw new ParserConfigurationException(e.getMessage());
         }
     }
-    
-    public void setFeature(String name, boolean value) 
+
+    public void setFeature(String name, boolean value)
         throws ParserConfigurationException {
         
         if (name.equals(XMLConstants.FEATURE_SECURE_PROCESSING)) {
             if (System.getSecurityManager() != null && (!value)) {
                 throw new ParserConfigurationException(
-                        SAXMessageFormatter.formatMessage(null, 
+                        SAXMessageFormatter.formatMessage(null,
                         "jaxp-secureprocessing-feature", null));
             }
             fSecureProcess = value;
@@ -174,11 +174,11 @@ public class DocumentBuilderFactoryImpl extends DocumentBuilderFactory {
         
         try {
             new DocumentBuilderImpl(this, attributes, features);
-        } 
+        }
         catch (SAXNotSupportedException e) {
             features.remove(name);
             throw new ParserConfigurationException(e.getMessage());
-        } 
+        }
         catch (SAXNotRecognizedException e) {
             features.remove(name);
             throw new ParserConfigurationException(e.getMessage());

@@ -54,11 +54,6 @@ class VariableBase extends TopLevelElement {
     }
 
     
-    public void removeReference(VariableRefBase vref) {
-        _refs.remove(vref);
-    }
-
-    
     public void copyReferences(VariableBase var) {
         final int size = _refs.size();
         for (int i = 0; i < size; i++) {
@@ -78,7 +73,7 @@ class VariableBase extends TopLevelElement {
 
     
     public void unmapRegister(MethodGenerator methodGen) {
-        if (_refs.isEmpty() && (_local != null)) {
+        if (_local != null) {
             _local.setEnd(methodGen.getInstructionList().getEnd());
             methodGen.removeLocalVariable(_local);
             _refs = null;

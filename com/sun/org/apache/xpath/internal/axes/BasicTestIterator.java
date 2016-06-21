@@ -8,6 +8,7 @@ import com.sun.org.apache.xml.internal.dtm.DTMFilter;
 import com.sun.org.apache.xml.internal.dtm.DTMIterator;
 import com.sun.org.apache.xml.internal.utils.PrefixResolver;
 import com.sun.org.apache.xpath.internal.compiler.Compiler;
+import com.sun.org.apache.xpath.internal.compiler.OpMap;
 
 
 public abstract class BasicTestIterator extends LocPathIterator
@@ -32,7 +33,7 @@ public abstract class BasicTestIterator extends LocPathIterator
   {
     super(compiler, opPos, analysis, false);
 
-    int firstStepPos = compiler.getFirstChildPos(opPos);
+    int firstStepPos = OpMap.getFirstChildPos(opPos);
     int whatToShow = compiler.getWhatToShow(firstStepPos);
 
     if ((0 == (whatToShow

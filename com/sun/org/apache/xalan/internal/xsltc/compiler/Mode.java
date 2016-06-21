@@ -425,11 +425,7 @@ final class Mode implements Constants {
         il.append(template.compile(classGen, methodGen));
         il.append(RETURN);
 
-        methodGen.stripAttributes(true);
-        methodGen.setMaxLocals();
-        methodGen.setMaxStack();
-        methodGen.removeNOPs();
-        classGen.addMethod(methodGen.getMethod());
+        classGen.addMethod(methodGen);
     }
 
     private void compileTemplates(ClassGenerator classGen,
@@ -629,12 +625,16 @@ final class Mode implements Constants {
                                 getClassName(), mainIL,
                                 classGen.getConstantPool());
         methodGen.addException("com.sun.org.apache.xalan.internal.xsltc.TransletException");
+        
+        
+        mainIL.append(NOP);
+
 
         
         final LocalVariableGen current;
         current = methodGen.addLocalVariable2("current",
                                               com.sun.org.apache.bcel.internal.generic.Type.INT,
-                                              mainIL.getEnd());
+                                              null);
         _currentIndex = current.getIndex();
 
         
@@ -656,6 +656,11 @@ final class Mode implements Constants {
         final BranchHandle loop = ilLoop.append(new GOTO_W(null));
         ifeq.setTarget(ilLoop.append(RETURN));  
         final InstructionHandle ihLoop = ilLoop.getStart();
+
+        current.setStart(mainIL.append(new GOTO_W(ihLoop)));
+
+        
+        current.setEnd(loop);
 
         
         InstructionList ilRecurse =
@@ -893,18 +898,12 @@ final class Mode implements Constants {
         body.append(ilText);
 
         
-        mainIL.append(new GOTO_W(ihLoop));
         mainIL.append(body);
         
         mainIL.append(ilLoop);
 
         peepHoleOptimization(methodGen);
-        methodGen.stripAttributes(true);
-
-        methodGen.setMaxLocals();
-        methodGen.setMaxStack();
-        methodGen.removeNOPs();
-        classGen.addMethod(methodGen.getMethod());
+        classGen.addMethod(methodGen);
 
         
         if (_importLevels != null) {
@@ -995,11 +994,11 @@ final class Mode implements Constants {
         final LocalVariableGen current;
         current = methodGen.addLocalVariable2("current",
                                               com.sun.org.apache.bcel.internal.generic.Type.INT,
-                                              mainIL.getEnd());
+                                              null);
         _currentIndex = current.getIndex();
 
-    mainIL.append(new ILOAD(methodGen.getLocalIndex(NODE_PNAME)));
-    mainIL.append(new ISTORE(_currentIndex));
+        mainIL.append(new ILOAD(methodGen.getLocalIndex(NODE_PNAME)));
+        current.setStart(mainIL.append(new ISTORE(_currentIndex)));
 
         
         
@@ -1009,7 +1008,7 @@ final class Mode implements Constants {
         
         
         final InstructionList ilLoop = new InstructionList();
-    ilLoop.append(RETURN);
+        ilLoop.append(RETURN);
         final InstructionHandle ihLoop = ilLoop.getStart();
 
         
@@ -1249,16 +1248,15 @@ final class Mode implements Constants {
 
         
         mainIL.append(body);
+
+        
+        current.setEnd(body.getEnd());
+
         
         mainIL.append(ilLoop);
 
         peepHoleOptimization(methodGen);
-        methodGen.stripAttributes(true);
-
-        methodGen.setMaxLocals();
-        methodGen.setMaxStack();
-        methodGen.removeNOPs();
-        classGen.addMethod(methodGen.getMethod());
+        classGen.addMethod(methodGen);
 
         
         _templates = oldTemplates;

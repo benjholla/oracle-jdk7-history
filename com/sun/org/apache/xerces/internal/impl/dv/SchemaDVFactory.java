@@ -5,6 +5,7 @@ package com.sun.org.apache.xerces.internal.impl.dv;
 
 import com.sun.org.apache.xerces.internal.util.SymbolHash;
 import com.sun.org.apache.xerces.internal.xs.XSObjectList;
+import com.sun.org.apache.xerces.internal.utils.ObjectFactory;
 
 
 public abstract class SchemaDVFactory {
@@ -22,8 +23,7 @@ public abstract class SchemaDVFactory {
 
         try {
             
-            return (SchemaDVFactory)(ObjectFactory.newInstance(
-                factoryClass, ObjectFactory.findClassLoader(), true));
+            return (SchemaDVFactory)(ObjectFactory.newInstance(factoryClass, true));
         } catch (ClassCastException e4) {
             throw new DVFactoryException("Schema factory class " + factoryClass + " does not extend from SchemaDVFactory.");
         }

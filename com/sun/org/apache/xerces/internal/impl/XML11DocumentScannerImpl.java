@@ -16,7 +16,7 @@ import com.sun.org.apache.xerces.internal.xni.XNIException;
 public class XML11DocumentScannerImpl
     extends XMLDocumentScannerImpl {
 
-    
+
     
     private final XMLStringBuffer fStringBuffer = new XMLStringBuffer();
     private final XMLStringBuffer fStringBuffer2 = new XMLStringBuffer();
@@ -37,11 +37,11 @@ public class XML11DocumentScannerImpl
 
     
     protected int scanContent(XMLStringBuffer content) throws IOException, XNIException {
-        
+
         fTempString.length = 0;
         int c = fEntityScanner.scanContent(fTempString);
         content.append(fTempString);
-        
+
         if (c == '\r' || c == 0x85 || c == 0x2028) {
             
             
@@ -63,9 +63,9 @@ public class XML11DocumentScannerImpl
             
             
             if (fEntityScanner.skipChar(']')) {
-                content.append(']'); 
+                content.append(']');
                 while (fEntityScanner.skipChar(']')) {
-                    content.append(']'); 
+                    content.append(']');
                 }
                 if (fEntityScanner.skipChar('>')) {
                     reportFatalError("CDEndInContent", null);
@@ -80,7 +80,7 @@ public class XML11DocumentScannerImpl
     } 
 
     
-    protected boolean scanAttributeValue(XMLString value, 
+    protected boolean scanAttributeValue(XMLString value,
                                       XMLString nonNormalizedValue,
                                       String atName,
                                       boolean checkEntities,String eleName)
@@ -100,7 +100,7 @@ public class XML11DocumentScannerImpl
             System.out.println("** scanLiteral -> \""
                                + value.toString() + "\"");
         }
-        
+
         int fromIndex = 0;
         if (c == quote && (fromIndex = isUnchangedByNormalization(value)) == -1) {
             
@@ -355,18 +355,18 @@ public class XML11DocumentScannerImpl
         }
         return dataok;
    }
-   
+
     
     protected void normalizeWhitespace(XMLString value) {
         int end = value.offset + value.length;
-	    for (int i = value.offset; i < end; ++i) {
+            for (int i = value.offset; i < end; ++i) {
            int c = value.ch[i];
            if (XMLChar.isSpace(c)) {
                value.ch[i] = ' ';
            }
        }
     }
-    
+
     
     protected void normalizeWhitespace(XMLString value, int fromIndex) {
         int end = value.offset + value.length;
@@ -377,7 +377,7 @@ public class XML11DocumentScannerImpl
             }
         }
     }
-    
+
     
     protected int isUnchangedByNormalization(XMLString value) {
         int end = value.offset + value.length;
@@ -394,49 +394,49 @@ public class XML11DocumentScannerImpl
     
     
     protected boolean isInvalid(int value) {
-        return (XML11Char.isXML11Invalid(value)); 
+        return (XML11Char.isXML11Invalid(value));
     } 
 
     
     
     
     protected boolean isInvalidLiteral(int value) {
-        return (!XML11Char.isXML11ValidLiteral(value)); 
+        return (!XML11Char.isXML11ValidLiteral(value));
     } 
 
     
     
     
     protected boolean isValidNameChar(int value) {
-        return (XML11Char.isXML11Name(value)); 
+        return (XML11Char.isXML11Name(value));
     } 
 
     
     
     
     protected boolean isValidNameStartChar(int value) {
-        return (XML11Char.isXML11NameStart(value)); 
+        return (XML11Char.isXML11NameStart(value));
     } 
-    
+
     
     
     
     protected boolean isValidNCName(int value) {
         return (XML11Char.isXML11NCName(value));
     } 
-    
+
     
     
     
     
     protected boolean isValidNameStartHighSurrogate(int value) {
-        return XML11Char.isXML11NameHighSurrogate(value); 
+        return XML11Char.isXML11NameHighSurrogate(value);
     } 
 
     protected boolean versionSupported(String version) {
         return (version.equals("1.1") || version.equals("1.0"));
     } 
-    
+
     
     
     

@@ -294,7 +294,7 @@ public class DFAContentModel
         
         
 
-	
+        
 
         fQName.setValues(null, fEOCString, fEOCString, null);
         CMLeaf nodeEOC = new CMLeaf(fQName);
@@ -384,21 +384,21 @@ public class DFAContentModel
         
         
 
-	int[] fLeafSorter = new int[fLeafCount + fElemMapSize];
-	int fSortCount = 0;
+        int[] fLeafSorter = new int[fLeafCount + fElemMapSize];
+        int fSortCount = 0;
 
-	for (int elemIndex = 0; elemIndex < fElemMapSize; elemIndex++) {
-	    for (int leafIndex = 0; leafIndex < fLeafCount; leafIndex++) {
-		    final QName leaf = fLeafList[leafIndex].getElement();
-		    final QName element = fElemMap[elemIndex];
-		    if (leaf.rawname == element.rawname) {
-			    fLeafSorter[fSortCount++] = leafIndex;
-		    }
-	    }
-	    fLeafSorter[fSortCount++] = -1;
-	}
+        for (int elemIndex = 0; elemIndex < fElemMapSize; elemIndex++) {
+            for (int leafIndex = 0; leafIndex < fLeafCount; leafIndex++) {
+                    final QName leaf = fLeafList[leafIndex].getElement();
+                    final QName element = fElemMap[elemIndex];
+                    if (leaf.rawname == element.rawname) {
+                            fLeafSorter[fSortCount++] = leafIndex;
+                    }
+            }
+            fLeafSorter[fSortCount++] = -1;
+        }
 
-	
+        
 
         
         
@@ -444,11 +444,11 @@ public class DFAContentModel
         statesToDo[curState] = setT;
         curState++;
 
-	    
+            
 
         HashMap stateTable = new HashMap();
 
-	    
+            
 
         
         
@@ -472,9 +472,9 @@ public class DFAContentModel
 
             
             CMStateSet newSet = null;
-	    
+            
             int sorterIndex = 0;
-	    
+            
             for (int elemIndex = 0; elemIndex < fElemMapSize; elemIndex++)
             {
                 
@@ -488,11 +488,11 @@ public class DFAContentModel
                 else
                     newSet.zeroBits();
 
-	    
+            
                 int leafIndex = fLeafSorter[sorterIndex++];
 
                 while (leafIndex != -1) {
-	        
+                
                     if (setT.getBit(leafIndex))
                     {
                         
@@ -504,8 +504,8 @@ public class DFAContentModel
                             }
 
                    leafIndex = fLeafSorter[sorterIndex++];
-	}
-	    
+        }
+            
 
                 
                 
@@ -518,10 +518,10 @@ public class DFAContentModel
                     
                     
 
-	    
-	    Integer stateObj = (Integer)stateTable.get(newSet);
-	    int stateIndex = (stateObj == null ? curState : stateObj.intValue());
-	    
+            
+            Integer stateObj = (Integer)stateTable.get(newSet);
+            int stateIndex = (stateObj == null ? curState : stateObj.intValue());
+            
 
                     
                     if (stateIndex == curState)
@@ -534,9 +534,9 @@ public class DFAContentModel
                         statesToDo[curState] = newSet;
                         fTransTable[curState] = makeDefStateList();
 
-	    
+            
                         stateTable.put(newSet, new Integer(curState));
-	    
+            
 
                         
                         curState++;
@@ -637,7 +637,7 @@ public class DFAContentModel
         }
          
          else if (nodeCur.type() == XMLContentSpec.CONTENTSPECNODE_ZERO_OR_MORE
-	    || nodeCur.type() == XMLContentSpec.CONTENTSPECNODE_ONE_OR_MORE)
+            || nodeCur.type() == XMLContentSpec.CONTENTSPECNODE_ONE_OR_MORE)
         {
             
             calcFollowList(((CMUniOp)nodeCur).getChild());
@@ -768,8 +768,8 @@ public class DFAContentModel
             curIndex = postTreeBuildInit(((CMBinOp)nodeCur).getRight(), curIndex);
         }
          else if (nodeCur.type() == XMLContentSpec.CONTENTSPECNODE_ZERO_OR_MORE
-	     || nodeCur.type() == XMLContentSpec.CONTENTSPECNODE_ONE_OR_MORE
-	     || nodeCur.type() == XMLContentSpec.CONTENTSPECNODE_ZERO_OR_ONE)
+             || nodeCur.type() == XMLContentSpec.CONTENTSPECNODE_ONE_OR_MORE
+             || nodeCur.type() == XMLContentSpec.CONTENTSPECNODE_ZERO_OR_ONE)
         {
             curIndex = postTreeBuildInit(((CMUniOp)nodeCur).getChild(), curIndex);
         }

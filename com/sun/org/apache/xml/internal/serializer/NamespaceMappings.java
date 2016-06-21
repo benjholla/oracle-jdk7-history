@@ -34,7 +34,7 @@ public class NamespaceMappings
     
     private void initNamespaces()
     {
- 
+
 
         
         Stack stack;
@@ -53,13 +53,13 @@ public class NamespaceMappings
     public String lookupNamespace(String prefix)
     {
         final Stack stack = (Stack) m_namespaces.get(prefix);
-        return stack != null && !stack.isEmpty() ? 
+        return stack != null && !stack.isEmpty() ?
             ((MappingRecord) stack.peek()).m_uri : null;
     }
-    
+
     MappingRecord getMappingFromPrefix(String prefix) {
         final Stack stack = (Stack) m_namespaces.get(prefix);
-        return stack != null && !stack.isEmpty() ? 
+        return stack != null && !stack.isEmpty() ?
             ((MappingRecord) stack.peek()) : null;
     }
 
@@ -79,7 +79,7 @@ public class NamespaceMappings
         }
         return foundPrefix;
     }
-    
+
     MappingRecord getMappingFromURI(String uri)
     {
         MappingRecord foundMap = null;
@@ -155,7 +155,7 @@ public class NamespaceMappings
             
 
             map = (MappingRecord) m_nodeStack.pop();
-            final String prefix = map.m_prefix; 
+            final String prefix = map.m_prefix;
             popNamespace(prefix);
             if (saxHandler != null)
             {
@@ -168,7 +168,7 @@ public class NamespaceMappings
                     
                 }
             }
-               
+
         }
     }
 
@@ -178,7 +178,7 @@ public class NamespaceMappings
         return "ns" + (count++);
     }
 
- 
+
     
     public Object clone() throws CloneNotSupportedException {
         NamespaceMappings clone = new NamespaceMappings();
@@ -186,17 +186,17 @@ public class NamespaceMappings
         clone.m_namespaces = (HashMap) m_namespaces.clone();
         clone.count = count;
         return clone;
-        
+
     }
-    
+
     final void reset()
     {
         this.count = 0;
         this.m_namespaces.clear();
-        this.m_nodeStack.clear();        
+        this.m_nodeStack.clear();
         initNamespaces();
     }
-    
+
     class MappingRecord {
         final String m_prefix;  
         final String m_uri;     
@@ -206,7 +206,7 @@ public class NamespaceMappings
             m_prefix = prefix;
             m_uri = uri;
             m_declarationDepth = depth;
-            
+
         }
     }
 

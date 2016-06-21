@@ -3,6 +3,8 @@
 
 package com.sun.org.apache.xalan.internal.xslt;
 
+import com.sun.org.apache.xalan.internal.utils.ObjectFactory;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
@@ -131,7 +133,7 @@ public class EnvironmentCheck
       "#---- BEGIN writeEnvironmentReport($Revision: 1.10 $): Useful stuff found: ----");
 
     
-    for (Enumeration keys = h.keys(); 
+    for (Enumeration keys = h.keys();
          keys.hasMoreElements();
         
         )
@@ -200,10 +202,10 @@ public class EnvironmentCheck
     "serializer.jar",   
     "xerces.jar",       
     "xercesImpl.jar",   
-    "testxsl.jar", 
-    "crimson.jar", 
-    "lotusxsl.jar", 
-    "jaxp.jar", "parser.jar", "dom.jar", "sax.jar", "xml.jar", 
+    "testxsl.jar",
+    "crimson.jar",
+    "lotusxsl.jar",
+    "jaxp.jar", "parser.jar", "dom.jar", "sax.jar", "xml.jar",
     "xml-apis.jar",
     "xsltc.jar"
   };
@@ -223,7 +225,7 @@ public class EnvironmentCheck
     {
       Hashtable subhash = (Hashtable) v.elementAt(i);
 
-      for (Enumeration keys = subhash.keys(); 
+      for (Enumeration keys = subhash.keys();
            keys.hasMoreElements();
            
           )
@@ -259,7 +261,7 @@ public class EnvironmentCheck
     {
       return;
     }
-  
+
     try
     {
       Element envCheckNode = factory.createElement("EnvironmentCheck");
@@ -279,8 +281,8 @@ public class EnvironmentCheck
 
       Element hashNode = factory.createElement("environment");
       envCheckNode.appendChild(hashNode);
-      
-      for (Enumeration keys = h.keys(); 
+
+      for (Enumeration keys = h.keys();
            keys.hasMoreElements();
           
           )
@@ -297,7 +299,7 @@ public class EnvironmentCheck
             errors |= appendFoundJars(hashNode, factory, v, keyStr);
           }
           
-          else 
+          else
           {
             
             
@@ -332,10 +334,10 @@ public class EnvironmentCheck
       System.err.println("appendEnvironmentReport threw: " + e2.toString());
       e2.printStackTrace();
     }
-  }    
+  }
 
   
-  protected boolean appendFoundJars(Node container, Document factory, 
+  protected boolean appendFoundJars(Node container, Document factory,
         Vector v, String desc)
   {
 
@@ -348,7 +350,7 @@ public class EnvironmentCheck
     {
       Hashtable subhash = (Hashtable) v.elementAt(i);
 
-      for (Enumeration keys = subhash.keys(); 
+      for (Enumeration keys = subhash.keys();
            keys.hasMoreElements();
            
           )
@@ -490,13 +492,13 @@ public class EnvironmentCheck
               Hashtable h = new Hashtable(2);
               
               h.put(jars[i] + "-path", f.getAbsolutePath());
-             
+
               
               
               
               
               
-              if (!("xalan.jar".equalsIgnoreCase(jars[i]))) {              
+              if (!("xalan.jar".equalsIgnoreCase(jars[i]))) {
                 h.put(jars[i] + "-apparent.version",
                     getApparentVersion(jars[i], f.length()));
               }
@@ -512,7 +514,7 @@ public class EnvironmentCheck
           {
             Hashtable h = new Hashtable(2);
             
-            h.put(jars[i] + "-path", WARNING + " Classpath entry: " 
+            h.put(jars[i] + "-path", WARNING + " Classpath entry: "
                   + filename + " does not exist");
             h.put(jars[i] + "-apparent.version", CLASS_NOTPRESENT);
             v.addElement(h);
@@ -570,8 +572,7 @@ public class EnvironmentCheck
     {
       final String JAXP1_CLASS = "javax.xml.stream.XMLStreamConstants";
 
-      clazz = ObjectFactory.findProviderClass(
-        JAXP1_CLASS, ObjectFactory.findClassLoader(), true);
+      clazz = ObjectFactory.findProviderClass(JAXP1_CLASS, true);
 
       
       h.put(VERSION + "JAXP", "1.4");
@@ -595,8 +596,7 @@ public class EnvironmentCheck
       final String XALAN1_VERSION_CLASS =
         "com.sun.org.apache.xalan.internal.xslt.XSLProcessorVersion";
 
-      Class clazz = ObjectFactory.findProviderClass(
-        XALAN1_VERSION_CLASS, ObjectFactory.findClassLoader(), true);
+      Class clazz = ObjectFactory.findProviderClass(XALAN1_VERSION_CLASS, true);
 
       
       StringBuffer buf = new StringBuffer();
@@ -628,8 +628,7 @@ public class EnvironmentCheck
       final String XALAN2_VERSION_CLASS =
         "com.sun.org.apache.xalan.internal.processor.XSLProcessorVersion";
 
-      Class clazz = ObjectFactory.findProviderClass(
-        XALAN2_VERSION_CLASS, ObjectFactory.findClassLoader(), true);
+      Class clazz = ObjectFactory.findProviderClass(XALAN2_VERSION_CLASS, true);
 
       
       StringBuffer buf = new StringBuffer();
@@ -650,8 +649,7 @@ public class EnvironmentCheck
       final String XALAN2_2_VERSION_METHOD = "getVersion";
       final Class noArgs[] = new Class[0];
 
-      Class clazz = ObjectFactory.findProviderClass(
-        XALAN2_2_VERSION_CLASS, ObjectFactory.findClassLoader(), true);
+      Class clazz = ObjectFactory.findProviderClass(XALAN2_2_VERSION_CLASS, true);
 
       Method method = clazz.getMethod(XALAN2_2_VERSION_METHOD, noArgs);
       Object returnValue = method.invoke(null, new Object[0]);
@@ -675,8 +673,7 @@ public class EnvironmentCheck
     {
       final String XERCES1_VERSION_CLASS = "com.sun.org.apache.xerces.internal.framework.Version";
 
-      Class clazz = ObjectFactory.findProviderClass(
-        XERCES1_VERSION_CLASS, ObjectFactory.findClassLoader(), true);
+      Class clazz = ObjectFactory.findProviderClass(XERCES1_VERSION_CLASS, true);
 
       
       Field f = clazz.getField("fVersion");
@@ -694,8 +691,7 @@ public class EnvironmentCheck
     {
       final String XERCES2_VERSION_CLASS = "com.sun.org.apache.xerces.internal.impl.Version";
 
-      Class clazz = ObjectFactory.findProviderClass(
-        XERCES2_VERSION_CLASS, ObjectFactory.findClassLoader(), true);
+      Class clazz = ObjectFactory.findProviderClass(XERCES2_VERSION_CLASS, true);
 
       
       Field f = clazz.getField("fVersion");
@@ -712,8 +708,7 @@ public class EnvironmentCheck
     {
       final String CRIMSON_CLASS = "org.apache.crimson.parser.Parser2";
 
-      Class clazz = ObjectFactory.findProviderClass(
-        CRIMSON_CLASS, ObjectFactory.findClassLoader(), true);
+      Class clazz = ObjectFactory.findProviderClass(CRIMSON_CLASS, true);
 
       
       h.put(VERSION + "crimson", CLASS_PRESENT);
@@ -737,8 +732,7 @@ public class EnvironmentCheck
       final String ANT_VERSION_METHOD = "getAntVersion"; 
       final Class noArgs[] = new Class[0];
 
-      Class clazz = ObjectFactory.findProviderClass(
-        ANT_VERSION_CLASS, ObjectFactory.findClassLoader(), true);
+      Class clazz = ObjectFactory.findProviderClass(ANT_VERSION_CLASS, true);
 
       Method method = clazz.getMethod(ANT_VERSION_METHOD, noArgs);
       Object returnValue = method.invoke(null, new Object[0]);
@@ -763,8 +757,7 @@ public class EnvironmentCheck
 
     try
     {
-      Class clazz = ObjectFactory.findProviderClass(
-        DOM_CLASS, ObjectFactory.findClassLoader(), true);
+      Class clazz = ObjectFactory.findProviderClass(DOM_CLASS, true);
 
       Method method = clazz.getMethod(DOM_LEVEL3_METHOD, null);
 
@@ -798,8 +791,7 @@ public class EnvironmentCheck
 
     try
     {
-      Class clazz = ObjectFactory.findProviderClass(
-        DOM_LEVEL2_CLASS, ObjectFactory.findClassLoader(), true);
+      Class clazz = ObjectFactory.findProviderClass(DOM_LEVEL2_CLASS, true);
 
       Method method = clazz.getMethod(DOM_LEVEL2_METHOD, twoStringArgs);
 
@@ -811,8 +803,7 @@ public class EnvironmentCheck
       {
         
         
-        clazz = ObjectFactory.findProviderClass(
-          DOM_LEVEL2WD_CLASS, ObjectFactory.findClassLoader(), true);
+        clazz = ObjectFactory.findProviderClass(DOM_LEVEL2WD_CLASS, true);
 
         method = clazz.getMethod(DOM_LEVEL2WD_METHOD, twoStringArgs);
 
@@ -824,8 +815,7 @@ public class EnvironmentCheck
         try
         {
           
-          clazz = ObjectFactory.findProviderClass(
-            DOM_LEVEL2FD_CLASS, ObjectFactory.findClassLoader(), true);
+          clazz = ObjectFactory.findProviderClass(DOM_LEVEL2FD_CLASS, true);
 
           method = clazz.getMethod(DOM_LEVEL2FD_METHOD, twoStringArgs);
 
@@ -872,8 +862,7 @@ public class EnvironmentCheck
     {
       
       
-      Class clazz = ObjectFactory.findProviderClass(
-        SAX_VERSION2BETA_CLASSNF, ObjectFactory.findClassLoader(), true);
+      Class clazz = ObjectFactory.findProviderClass(SAX_VERSION2BETA_CLASSNF, true);
 
       Method method = clazz.getMethod(SAX_VERSION2BETA_METHODNF, attributesArg);
 
@@ -887,11 +876,10 @@ public class EnvironmentCheck
       h.put(ERROR + VERSION + "SAX",
             "ERROR attempting to load SAX version 2 class: " + e.toString());
       h.put(ERROR, ERROR_FOUND);
-            
+
       try
       {
-        Class clazz = ObjectFactory.findProviderClass(
-          SAX_VERSION2_CLASS, ObjectFactory.findClassLoader(), true);
+        Class clazz = ObjectFactory.findProviderClass(SAX_VERSION2_CLASS, true);
 
         Method method = clazz.getMethod(SAX_VERSION2_METHOD, oneStringArg);
 
@@ -906,11 +894,10 @@ public class EnvironmentCheck
         h.put(ERROR + VERSION + "SAX",
               "ERROR attempting to load SAX version 2 class: " + e.toString());
         h.put(ERROR, ERROR_FOUND);
-          
+
         try
         {
-          Class clazz = ObjectFactory.findProviderClass(
-            SAX_VERSION1_CLASS, ObjectFactory.findClassLoader(), true);
+          Class clazz = ObjectFactory.findProviderClass(SAX_VERSION1_CLASS, true);
 
           Method method = clazz.getMethod(SAX_VERSION1_METHOD, oneStringArg);
 
@@ -925,7 +912,7 @@ public class EnvironmentCheck
           
           h.put(ERROR + VERSION + "SAX-backlevel",
                 "ERROR attempting to load SAX version 1 class: " + e3.toString());
-            
+
         }
       }
     }
@@ -935,7 +922,7 @@ public class EnvironmentCheck
   private static Hashtable jarVersions = new Hashtable();
 
   
-  static 
+  static
   {
     
     jarVersions.put(new Long(857192), "xalan.jar from xalan-j_1_1");
@@ -951,19 +938,19 @@ public class EnvironmentCheck
     jarVersions.put(new Long(905872), "xalan.jar from xalan-j_2_3_D1");
     jarVersions.put(new Long(906122), "xalan.jar from xalan-j_2_3_0");
     jarVersions.put(new Long(906248), "xalan.jar from xalan-j_2_3_1");
-    jarVersions.put(new Long(983377), "xalan.jar from xalan-j_2_4_D1");    
+    jarVersions.put(new Long(983377), "xalan.jar from xalan-j_2_4_D1");
     jarVersions.put(new Long(997276), "xalan.jar from xalan-j_2_4_0");
-    jarVersions.put(new Long(1031036), "xalan.jar from xalan-j_2_4_1");    
+    jarVersions.put(new Long(1031036), "xalan.jar from xalan-j_2_4_1");
     
 
     jarVersions.put(new Long(596540), "xsltc.jar from xalan-j_2_2_0");
     jarVersions.put(new Long(590247), "xsltc.jar from xalan-j_2_3_D1");
     jarVersions.put(new Long(589914), "xsltc.jar from xalan-j_2_3_0");
     jarVersions.put(new Long(589915), "xsltc.jar from xalan-j_2_3_1");
-    jarVersions.put(new Long(1306667), "xsltc.jar from xalan-j_2_4_D1");     
+    jarVersions.put(new Long(1306667), "xsltc.jar from xalan-j_2_4_D1");
     jarVersions.put(new Long(1328227), "xsltc.jar from xalan-j_2_4_0");
     jarVersions.put(new Long(1344009), "xsltc.jar from xalan-j_2_4_1");
-    jarVersions.put(new Long(1348361), "xsltc.jar from xalan-j_2_5_D1");    
+    jarVersions.put(new Long(1348361), "xsltc.jar from xalan-j_2_5_D1");
     
 
     jarVersions.put(new Long(1268634), "xsltc.jar-bundled from xalan-j_2_3_0");
@@ -994,23 +981,23 @@ public class EnvironmentCheck
     jarVersions.put(new Long(1812019), "xerces.jar from xalan-j_2_2_0");
     jarVersions.put(new Long(1720292), "xercesImpl.jar from xalan-j_2_3_D1");
     jarVersions.put(new Long(1730053), "xercesImpl.jar from xalan-j_2_3_0 or xalan-j_2_3_1 from xerces-2_0_0");
-    jarVersions.put(new Long(1728861), "xercesImpl.jar from xalan-j_2_4_D1 from xerces-2_0_1");    
+    jarVersions.put(new Long(1728861), "xercesImpl.jar from xalan-j_2_4_D1 from xerces-2_0_1");
     jarVersions.put(new Long(972027), "xercesImpl.jar from xalan-j_2_4_0 from xerces-2_1");
-    jarVersions.put(new Long(831587), "xercesImpl.jar from xalan-j_2_4_1 from xerces-2_2"); 
-    jarVersions.put(new Long(891817), "xercesImpl.jar from xalan-j_2_5_D1 from xerces-2_3");  
+    jarVersions.put(new Long(831587), "xercesImpl.jar from xalan-j_2_4_1 from xerces-2_2");
+    jarVersions.put(new Long(891817), "xercesImpl.jar from xalan-j_2_5_D1 from xerces-2_3");
     jarVersions.put(new Long(895924), "xercesImpl.jar from xerces-2_4");
-    jarVersions.put(new Long(1010806), "xercesImpl.jar from Xerces-J-bin.2.6.2"); 
-    jarVersions.put(new Long(1203860), "xercesImpl.jar from Xerces-J-bin.2.7.1");                           
+    jarVersions.put(new Long(1010806), "xercesImpl.jar from Xerces-J-bin.2.6.2");
+    jarVersions.put(new Long(1203860), "xercesImpl.jar from Xerces-J-bin.2.7.1");
 
     jarVersions.put(new Long(37485), "xalanj1compat.jar from xalan-j_2_0_0");
     jarVersions.put(new Long(38100), "xalanj1compat.jar from xalan-j_2_0_1");
 
     jarVersions.put(new Long(18779), "xalanservlet.jar from xalan-j_2_0_0");
     jarVersions.put(new Long(21453), "xalanservlet.jar from xalan-j_2_0_1");
-    jarVersions.put(new Long(24826), "xalanservlet.jar from xalan-j_2_3_1 or xalan-j_2_4_1");    
+    jarVersions.put(new Long(24826), "xalanservlet.jar from xalan-j_2_3_1 or xalan-j_2_4_1");
     jarVersions.put(new Long(24831), "xalanservlet.jar from xalan-j_2_4_1");
     
-    
+
     
     jarVersions.put(new Long(5618), "jaxp.jar from jaxp1.0.1");
     jarVersions.put(new Long(136133), "parser.jar from jaxp1.0.1");

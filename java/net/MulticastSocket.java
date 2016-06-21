@@ -9,6 +9,10 @@ import java.util.Enumeration;
 
 public
 class MulticastSocket extends DatagramSocket {
+
+    
+    private boolean interfaceSet;
+
     
     public MulticastSocket() throws IOException {
         this(new InetSocketAddress(0));
@@ -88,6 +92,13 @@ class MulticastSocket extends DatagramSocket {
 
         if (!mcastaddr.isMulticastAddress()) {
             throw new SocketException("Not a multicast address");
+        }
+
+        
+        NetworkInterface defaultInterface = NetworkInterface.getDefault();
+
+        if (!interfaceSet && defaultInterface != null) {
+            setNetworkInterface(defaultInterface);
         }
 
         getImpl().join(mcastaddr);
@@ -171,6 +182,7 @@ class MulticastSocket extends DatagramSocket {
         synchronized (infLock) {
             getImpl().setOption(SocketOptions.IP_MULTICAST_IF, inf);
             infAddress = inf;
+            interfaceSet = true;
         }
     }
 
@@ -220,6 +232,7 @@ class MulticastSocket extends DatagramSocket {
         synchronized (infLock) {
             getImpl().setOption(SocketOptions.IP_MULTICAST_IF2, netIf);
             infAddress = null;
+            interfaceSet = true;
         }
     }
 

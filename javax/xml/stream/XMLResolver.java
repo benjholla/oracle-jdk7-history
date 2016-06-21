@@ -14,4 +14,3 @@ public interface XMLResolver {
                               String namespace)
     throws XMLStreamException;
 }
-

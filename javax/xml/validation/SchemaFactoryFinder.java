@@ -27,7 +27,7 @@ class SchemaFactoryFinder  {
         private static Properties cacheProps = new Properties();
 
         
-        private static boolean firstTime = true;
+        private static volatile boolean firstTime = true;
 
     static {
         
@@ -98,7 +98,7 @@ class SchemaFactoryFinder  {
             String r = ss.getSystemProperty(propertyName);
             if(r!=null) {
                 debugPrintln("The value is '"+r+"'");
-                sf = createInstance(r);
+                sf = createInstance(r, true);
                 if(sf!=null)    return sf;
             } else
                 debugPrintln("The property is undefined.");
@@ -133,7 +133,7 @@ class SchemaFactoryFinder  {
             debugPrintln("found " + factoryClassName + " in $java.home/jaxp.properties");
 
             if (factoryClassName != null) {
-                sf = createInstance(factoryClassName);
+                sf = createInstance(factoryClassName, true);
                 if(sf != null){
                     return sf;
                 }
@@ -166,7 +166,7 @@ class SchemaFactoryFinder  {
         
         if(schemaLanguage.equals("http://www.w3.org/2001/XMLSchema")) {
             debugPrintln("attempting to use the platform default XML Schema validator");
-            return createInstance("com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory");
+            return createInstance("com.sun.org.apache.xerces.internal.jaxp.validation.XMLSchemaFactory", true);
         }
 
         debugPrintln("all things were tried, but none was found. bailing out.");
@@ -194,6 +194,10 @@ class SchemaFactoryFinder  {
 
     
     SchemaFactory createInstance( String className ) {
+        return createInstance( className, false );
+    }
+
+    SchemaFactory createInstance( String className, boolean useServicesMechanism ) {
         SchemaFactory schemaFactory = null;
 
         debugPrintln("createInstance(" + className + ")");
@@ -208,7 +212,12 @@ class SchemaFactoryFinder  {
 
         
         try {
-                schemaFactory = (SchemaFactory) clazz.newInstance();
+            if (!useServicesMechanism) {
+                schemaFactory = (SchemaFactory) newInstanceNoServiceLoader(clazz);
+            }
+                if (schemaFactory == null) {
+                    schemaFactory = (SchemaFactory) clazz.newInstance();
+                }
         } catch (ClassCastException classCastException) {
                 debugPrintln("could not instantiate " + clazz.getName());
                 if (debug) {
@@ -230,6 +239,26 @@ class SchemaFactoryFinder  {
         }
 
         return schemaFactory;
+    }
+    
+    private static Object newInstanceNoServiceLoader(
+         Class<?> providerClass
+    ) {
+        
+        if (System.getSecurityManager() == null) {
+            return null;
+        }
+        try {
+            Method creationMethod =
+                providerClass.getDeclaredMethod(
+                    "newXMLSchemaFactoryNoServiceLoader"
+                );
+                return creationMethod.invoke(null, null);
+            } catch (NoSuchMethodException exc) {
+                return null;
+            } catch (Exception exc) {
+                return null;
+        }
     }
 
     

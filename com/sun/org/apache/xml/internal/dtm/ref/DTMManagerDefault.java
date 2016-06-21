@@ -3,6 +3,7 @@
 
 package com.sun.org.apache.xml.internal.dtm.ref;
 
+import com.sun.org.apache.xalan.internal.utils.FactoryImpl;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Source;
@@ -453,7 +454,7 @@ public class DTMManagerDefault extends DTMManager
       
       if (null == reader) {
         if (m_readerManager == null) {
-            m_readerManager = XMLReaderManager.getInstance();
+            m_readerManager = XMLReaderManager.getInstance(super.useServicesMechnism());
         }
 
         reader = m_readerManager.getXMLReader();
@@ -569,8 +570,7 @@ public class DTMManagerDefault extends DTMManager
 
     try
     {
-      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-
+      DocumentBuilderFactory dbf = FactoryImpl.getDOMFactory(super.useServicesMechnism());
       dbf.setNamespaceAware(true);
 
       DocumentBuilder db = dbf.newDocumentBuilder();

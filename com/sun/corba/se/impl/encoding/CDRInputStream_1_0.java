@@ -2344,7 +2344,6 @@ public class CDRInputStream_1_0 extends CDRInputStreamBase
 
         if (bbwi != null && getByteBuffer() != null)
         {
-            int bbHash = System.identityHashCode(bbwi.byteBuffer);
             MessageMediator messageMediator = parent.getMessageMediator();
             if (messageMediator != null)
             {
@@ -2352,19 +2351,12 @@ public class CDRInputStream_1_0 extends CDRInputStreamBase
                              (CDROutputObject)messageMediator.getOutputObject();
                 if (outputObj != null)
                 {
-                    ByteBuffer outputBb = outputObj.getByteBuffer();
-
-                    int oBbHash = 0;
-                    if (outputBb != null)
+                    if (outputObj.isSharing(getByteBuffer()))
                     {
-                        oBbHash = System.identityHashCode(outputBb);
-                        if (bbHash == oBbHash)  
-                        {
-                            
-                            
-                            outputObj.setByteBuffer(null);
-                            outputObj.setByteBufferWithInfo(null);
-                        }
+                        
+                        
+                        outputObj.setByteBuffer(null);
+                        outputObj.setByteBufferWithInfo(null);
                     }
                 }
             }

@@ -393,6 +393,11 @@ public abstract class CDRInputStream
         impl.setByteBufferWithInfo(bbwi);
     }
 
+    
+    protected final boolean isSharing(ByteBuffer bb) {
+        return (getByteBuffer() ==  bb);
+    }
+
     public final int getBufferLength() {
         return impl.getBufferLength();
     }

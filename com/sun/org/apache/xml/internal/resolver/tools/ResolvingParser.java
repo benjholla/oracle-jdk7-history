@@ -24,6 +24,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.parsers.SAXParser;
 
+import com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl;
 import com.sun.org.apache.xml.internal.resolver.Catalog;
 import com.sun.org.apache.xml.internal.resolver.CatalogManager;
 import com.sun.org.apache.xml.internal.resolver.helpers.FileURL;
@@ -84,8 +85,8 @@ public class ResolvingParser
   
   private void initParser() {
     catalogResolver = new CatalogResolver(catalogManager);
-
-    SAXParserFactory spf = SAXParserFactory.newInstance();
+    SAXParserFactory spf = catalogManager.useServicesMechanism() ?
+                    SAXParserFactory.newInstance() : new SAXParserFactoryImpl();
     spf.setNamespaceAware(namespaceAware);
     spf.setValidating(validating);
 

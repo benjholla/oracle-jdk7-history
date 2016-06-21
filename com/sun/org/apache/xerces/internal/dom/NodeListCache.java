@@ -30,4 +30,3 @@ class NodeListCache implements Serializable {
         fOwner = owner;
     }
 }
-

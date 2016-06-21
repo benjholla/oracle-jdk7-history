@@ -1342,7 +1342,7 @@ public class DOM2DTM extends DTMDefaultBaseIterators
     try
     {
       Node node = getNode(nodeHandle);
-      treeWalker.traverse(node);
+      treeWalker.traverseFragment(node);
     }
     finally
     {

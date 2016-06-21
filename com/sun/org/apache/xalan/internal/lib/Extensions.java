@@ -16,6 +16,7 @@ import com.sun.org.apache.xpath.internal.NodeSet;
 import com.sun.org.apache.xpath.internal.objects.XBoolean;
 import com.sun.org.apache.xpath.internal.objects.XNumber;
 import com.sun.org.apache.xpath.internal.objects.XObject;
+import com.sun.org.apache.xalan.internal.utils.ObjectFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
@@ -209,8 +210,7 @@ public class Extensions
     try
     {
       
-      Class clazz = ObjectFactory.findProviderClass(
-        WHICH_CLASSNAME, ObjectFactory.findClassLoader(), true);
+      Class clazz = ObjectFactory.findProviderClass(WHICH_CLASSNAME, true);
       if (null == clazz)
         return null;
 

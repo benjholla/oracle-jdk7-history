@@ -133,7 +133,7 @@ public final class ResultTreeType extends Type {
                 methodGen.addLocalVariable("rt_to_string_handler",
                                            Util.getJCRefType(STRING_VALUE_HANDLER_SIG),
                                            null, null);
-            il.append(new ASTORE(handler.getIndex()));
+            handler.setStart(il.append(new ASTORE(handler.getIndex())));
 
             
             index = cpg.addMethodref(className, _methodName,
@@ -141,7 +141,7 @@ public final class ResultTreeType extends Type {
             il.append(new INVOKEVIRTUAL(index));
 
             
-            il.append(new ALOAD(handler.getIndex()));
+            handler.setEnd(il.append(new ALOAD(handler.getIndex())));
             index = cpg.addMethodref(STRING_VALUE_HANDLER,
                                      "getValue",
                                      "()" + STRING_SIG);
@@ -192,7 +192,7 @@ public final class ResultTreeType extends Type {
                                                 Util.getJCRefType(DOM_INTF_SIG),
                                                 null, null);
             il.append(new CHECKCAST(cpg.addClass(DOM_INTF_SIG)));
-            il.append(new ASTORE(newDom.getIndex()));
+            newDom.setStart(il.append(new ASTORE(newDom.getIndex())));
 
             
             index = cpg.addInterfaceMethodref(DOM_INTF,
@@ -212,7 +212,7 @@ public final class ResultTreeType extends Type {
                 methodGen.addLocalVariable("rt_to_reference_handler",
                                            Util.getJCRefType(TRANSLET_OUTPUT_SIG),
                                            null, null);
-            il.append(new ASTORE(domBuilder.getIndex()));
+            domBuilder.setStart(il.append(new ASTORE(domBuilder.getIndex())));
 
             
             index = cpg.addInterfaceMethodref(TRANSLET_OUTPUT_INTERFACE,
@@ -229,13 +229,13 @@ public final class ResultTreeType extends Type {
             il.append(new INVOKEVIRTUAL(index));
 
             
-            il.append(new ALOAD(domBuilder.getIndex()));
+            domBuilder.setEnd(il.append(new ALOAD(domBuilder.getIndex())));
             index = cpg.addInterfaceMethodref(TRANSLET_OUTPUT_INTERFACE,
                                               "endDocument", "()V");
             il.append(new INVOKEINTERFACE(index, 1));
 
             
-            il.append(new ALOAD(newDom.getIndex()));
+            newDom.setEnd(il.append(new ALOAD(newDom.getIndex())));
         }
     }
 

@@ -38,6 +38,7 @@ import com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver;
 import com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
 import com.sun.org.apache.xerces.internal.xni.parser.XMLParseException;
 import com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration;
+import com.sun.org.apache.xerces.internal.parsers.XIncludeAwareParserConfiguration;
 import org.w3c.dom.DOMConfiguration;
 import org.w3c.dom.DOMError;
 import org.w3c.dom.DOMErrorHandler;
@@ -74,10 +75,10 @@ extends AbstractDOMParser implements LSParser, DOMConfiguration {
     
     protected static final String XMLSCHEMA =
     Constants.XERCES_FEATURE_PREFIX + Constants.SCHEMA_VALIDATION_FEATURE;
-    
+
     
     protected static final String XMLSCHEMA_FULL_CHECKING =
-    Constants.XERCES_FEATURE_PREFIX + Constants.SCHEMA_FULL_CHECKING;    
+    Constants.XERCES_FEATURE_PREFIX + Constants.SCHEMA_FULL_CHECKING;
 
     
     protected static final String DYNAMIC_VALIDATION =
@@ -113,23 +114,23 @@ extends AbstractDOMParser implements LSParser, DOMConfiguration {
 
     
     protected boolean fNamespaceDeclarations = true;
-    
+
     
     
     protected String fSchemaType = null;
 
     protected boolean fBusy = false;
-    
+
     private boolean abortNow = false;
-    
+
     private Thread currentThread;
 
     protected final static boolean DEBUG = false;
 
     private Vector fSchemaLocations = new Vector ();
     private String fSchemaLocation = null;
-	private DOMStringList fRecognizedParameters;
-    
+        private DOMStringList fRecognizedParameters;
+
     private AbortHandler abortHandler = null;
 
     
@@ -137,11 +138,8 @@ extends AbstractDOMParser implements LSParser, DOMConfiguration {
     
 
     
-    public DOMParserImpl (String configuration, String schemaType) {
-        this (
-        (XMLParserConfiguration) ObjectFactory.createObject (
-        "com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration",
-        configuration));
+    public DOMParserImpl (XMLParserConfiguration config, String schemaType) {
+        this (config);
         if (schemaType != null) {
             if (schemaType.equals (Constants.NS_DTD)) {
                 
@@ -201,7 +199,7 @@ extends AbstractDOMParser implements LSParser, DOMConfiguration {
         fConfiguration.setFeature(INCLUDE_COMMENTS_FEATURE, true);
         fConfiguration.setFeature(INCLUDE_IGNORABLE_WHITESPACE, true);
         fConfiguration.setFeature(NAMESPACES, true);
-		
+
         fConfiguration.setFeature(DYNAMIC_VALIDATION, false);
         fConfiguration.setFeature(CREATE_ENTITY_REF_NODES, false);
         fConfiguration.setFeature(CREATE_CDATA_NODES_FEATURE, false);
@@ -224,15 +222,12 @@ extends AbstractDOMParser implements LSParser, DOMConfiguration {
             fConfiguration.setFeature ( NORMALIZE_DATA, false );
         }
         catch (XMLConfigurationException exc) {}
-    
+
     } 
 
     
     public DOMParserImpl (SymbolTable symbolTable) {
-        this (
-        (XMLParserConfiguration) ObjectFactory.createObject (
-        "com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration",
-        "com.sun.org.apache.xerces.internal.parsers.XIncludeAwareParserConfiguration"));
+        this (new XIncludeAwareParserConfiguration());
         fConfiguration.setProperty (
         Constants.XERCES_PROPERTY_PREFIX + Constants.SYMBOL_TABLE_PROPERTY,
         symbolTable);
@@ -241,10 +236,7 @@ extends AbstractDOMParser implements LSParser, DOMConfiguration {
 
     
     public DOMParserImpl (SymbolTable symbolTable, XMLGrammarPool grammarPool) {
-        this (
-        (XMLParserConfiguration) ObjectFactory.createObject (
-        "com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration",
-        "com.sun.org.apache.xerces.internal.parsers.XIncludeAwareParserConfiguration"));
+        this (new XIncludeAwareParserConfiguration());
         fConfiguration.setProperty (
         Constants.XERCES_PROPERTY_PREFIX + Constants.SYMBOL_TABLE_PROPERTY,
         symbolTable);
@@ -257,11 +249,11 @@ extends AbstractDOMParser implements LSParser, DOMConfiguration {
     
     public void reset () {
         super.reset ();
+
         
-        
-        fNamespaceDeclarations = 
+        fNamespaceDeclarations =
             fConfiguration.getFeature(Constants.DOM_NAMESPACE_DECLARATIONS);
-                
+
         
         if (fSkippedElemStack!=null) {
             fSkippedElemStack.removeAllElements ();
@@ -298,7 +290,7 @@ extends AbstractDOMParser implements LSParser, DOMConfiguration {
     
     public void setParameter (String name, Object value) throws DOMException {
         
-    	
+
         if(value instanceof Boolean){
             boolean state = ((Boolean)value).booleanValue ();
             try {
@@ -719,10 +711,10 @@ extends AbstractDOMParser implements LSParser, DOMConfiguration {
     }
 
     public boolean canSetParameter (String name, Object value) {
-    	if (value == null){
-    		return true;
-    	}
-    	
+        if (value == null){
+                return true;
+        }
+
         if(value instanceof Boolean){
             boolean state = ((Boolean)value).booleanValue ();
             if ( name.equalsIgnoreCase (Constants.DOM_SUPPORTED_MEDIATYPES_ONLY)
@@ -809,40 +801,40 @@ extends AbstractDOMParser implements LSParser, DOMConfiguration {
     public DOMStringList getParameterNames () {
         if (fRecognizedParameters == null){
             Vector parameters = new Vector();
-            
+
             
             parameters.add(Constants.DOM_NAMESPACES);
             parameters.add(Constants.DOM_CDATA_SECTIONS);
             parameters.add(Constants.DOM_CANONICAL_FORM);
             parameters.add(Constants.DOM_NAMESPACE_DECLARATIONS);
             parameters.add(Constants.DOM_SPLIT_CDATA);
-            
+
             parameters.add(Constants.DOM_ENTITIES);
             parameters.add(Constants.DOM_VALIDATE_IF_SCHEMA);
             parameters.add(Constants.DOM_VALIDATE);
             parameters.add(Constants.DOM_DATATYPE_NORMALIZATION);
-            
+
             parameters.add(Constants.DOM_CHARSET_OVERRIDES_XML_ENCODING);
             parameters.add(Constants.DOM_CHECK_CHAR_NORMALIZATION);
             parameters.add(Constants.DOM_SUPPORTED_MEDIATYPES_ONLY);
             parameters.add(Constants.DOM_IGNORE_UNKNOWN_CHARACTER_DENORMALIZATIONS);
-            
+
             parameters.add(Constants.DOM_NORMALIZE_CHARACTERS);
             parameters.add(Constants.DOM_WELLFORMED);
             parameters.add(Constants.DOM_INFOSET);
             parameters.add(Constants.DOM_DISALLOW_DOCTYPE);
             parameters.add(Constants.DOM_ELEMENT_CONTENT_WHITESPACE);
             parameters.add(Constants.DOM_COMMENTS);
-            
+
             parameters.add(Constants.DOM_ERROR_HANDLER);
             parameters.add(Constants.DOM_RESOURCE_RESOLVER);
             parameters.add(Constants.DOM_SCHEMA_LOCATION);
             parameters.add(Constants.DOM_SCHEMA_TYPE);
-            
+
             fRecognizedParameters = new DOMStringListImpl(parameters);
-            
+
         }
-        
+
         return fRecognizedParameters;
     }
 
@@ -861,7 +853,7 @@ extends AbstractDOMParser implements LSParser, DOMConfiguration {
         XMLInputSource source = new XMLInputSource (null, uri, null);
         try {
             currentThread = Thread.currentThread();
-			fBusy = true;
+                        fBusy = true;
             parse (source);
             fBusy = false;
             if (abortNow && currentThread.isInterrupted()) {
@@ -914,9 +906,9 @@ extends AbstractDOMParser implements LSParser, DOMConfiguration {
 
         try {
             currentThread = Thread.currentThread();
-			fBusy = true;
+                        fBusy = true;
             parse (xmlInputSource);
-            fBusy = false;   
+            fBusy = false;
             if (abortNow && currentThread.isInterrupted()) {
                 
                 abortNow = false;
@@ -993,12 +985,12 @@ extends AbstractDOMParser implements LSParser, DOMConfiguration {
             "UTF-16");
         }
         
-        else if ((is.getSystemId() != null && is.getSystemId().length() > 0) || 
+        else if ((is.getSystemId() != null && is.getSystemId().length() > 0) ||
             (is.getPublicId() != null && is.getPublicId().length() > 0)) {
             xis = new XMLInputSource (is.getPublicId (), is.getSystemId (),
             is.getBaseURI ());
         }
-        else { 
+        else {
             
             if (fErrorHandler != null) {
                 DOMErrorImpl error = new DOMErrorImpl();
@@ -1035,12 +1027,12 @@ extends AbstractDOMParser implements LSParser, DOMConfiguration {
                 fConfiguration.setDocumentHandler(abortHandler);
                 fConfiguration.setDTDHandler(abortHandler);
                 fConfiguration.setDTDContentModelHandler(abortHandler);
-                
+
                 if(currentThread == Thread.currentThread())
                     throw Abort.INSTANCE;
-                
+
                 currentThread.interrupt();
-            }               
+            }
         }
         return; 
     }
@@ -1059,7 +1051,7 @@ extends AbstractDOMParser implements LSParser, DOMConfiguration {
         }
         super.startElement(element, attributes, augs);
     }
-    
+
     private class AbortHandler implements XMLDocumentHandler, XMLDTDHandler, XMLDTDContentModelHandler  {
 
         private XMLDocumentSource documentSource;
@@ -1261,7 +1253,7 @@ extends AbstractDOMParser implements LSParser, DOMConfiguration {
         public XMLDTDContentModelSource getDTDContentModelSource() {
             return dtdContentSource;
         }
-        
+
     }
 
     private static DOMException newFeatureNotFoundError(String name) {
@@ -1281,5 +1273,5 @@ extends AbstractDOMParser implements LSParser, DOMConfiguration {
                     new Object[] { name });
         return new DOMException (DOMException.TYPE_MISMATCH_ERR, msg);
     }
-	
+
 } 

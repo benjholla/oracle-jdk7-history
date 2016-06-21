@@ -34,7 +34,7 @@ import com.sun.org.apache.xerces.internal.xni.parser.XMLPullParserConfiguration;
 
 
 public class DTDConfiguration
-    extends BasicParserConfiguration 
+    extends BasicParserConfiguration
     implements XMLPullParserConfiguration {
 
     
@@ -50,17 +50,17 @@ public class DTDConfiguration
     
     protected static final String WARN_ON_DUPLICATE_ENTITYDEF =
         Constants.XERCES_FEATURE_PREFIX + Constants.WARN_ON_DUPLICATE_ENTITYDEF_FEATURE;
-    
+
     
     protected static final String WARN_ON_UNDECLARED_ELEMDEF =
         Constants.XERCES_FEATURE_PREFIX + Constants.WARN_ON_UNDECLARED_ELEMDEF_FEATURE;
+
     
-    
-    protected static final String ALLOW_JAVA_ENCODINGS = 
+    protected static final String ALLOW_JAVA_ENCODINGS =
         Constants.XERCES_FEATURE_PREFIX + Constants.ALLOW_JAVA_ENCODINGS_FEATURE;
+
     
-    
-    protected static final String CONTINUE_AFTER_FATAL_ERROR = 
+    protected static final String CONTINUE_AFTER_FATAL_ERROR =
         Constants.XERCES_FEATURE_PREFIX + Constants.CONTINUE_AFTER_FATAL_ERROR_FEATURE;
 
     
@@ -70,40 +70,40 @@ public class DTDConfiguration
     
     protected static final String NOTIFY_BUILTIN_REFS =
         Constants.XERCES_FEATURE_PREFIX + Constants.NOTIFY_BUILTIN_REFS_FEATURE;
-    
+
     
     protected static final String NOTIFY_CHAR_REFS =
         Constants.XERCES_FEATURE_PREFIX + Constants.NOTIFY_CHAR_REFS_FEATURE;
-    
+
 
     
 
     
-    protected static final String ERROR_REPORTER = 
+    protected static final String ERROR_REPORTER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.ERROR_REPORTER_PROPERTY;
 
     
-    protected static final String ENTITY_MANAGER = 
+    protected static final String ENTITY_MANAGER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.ENTITY_MANAGER_PROPERTY;
+
     
-    
-    protected static final String DOCUMENT_SCANNER = 
+    protected static final String DOCUMENT_SCANNER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.DOCUMENT_SCANNER_PROPERTY;
 
     
-    protected static final String DTD_SCANNER = 
+    protected static final String DTD_SCANNER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.DTD_SCANNER_PROPERTY;
 
     
-    protected static final String XMLGRAMMAR_POOL = 
+    protected static final String XMLGRAMMAR_POOL =
         Constants.XERCES_PROPERTY_PREFIX + Constants.XMLGRAMMAR_POOL_PROPERTY;
+
     
-    
-    protected static final String DTD_PROCESSOR = 
+    protected static final String DTD_PROCESSOR =
         Constants.XERCES_PROPERTY_PREFIX + Constants.DTD_PROCESSOR_PROPERTY;
 
     
-    protected static final String DTD_VALIDATOR = 
+    protected static final String DTD_VALIDATOR =
         Constants.XERCES_PROPERTY_PREFIX + Constants.DTD_VALIDATOR_PROPERTY;
 
     
@@ -111,12 +111,12 @@ public class DTDConfiguration
         Constants.XERCES_PROPERTY_PREFIX + Constants.NAMESPACE_BINDER_PROPERTY;
 
     
-    protected static final String DATATYPE_VALIDATOR_FACTORY = 
+    protected static final String DATATYPE_VALIDATOR_FACTORY =
         Constants.XERCES_PROPERTY_PREFIX + Constants.DATATYPE_VALIDATOR_FACTORY_PROPERTY;
 
     protected static final String VALIDATION_MANAGER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.VALIDATION_MANAGER_PROPERTY;
-    
+
     
     protected static final String JAXP_SCHEMA_LANGUAGE =
         Constants.JAXP_PROPERTY_PREFIX + Constants.SCHEMA_LANGUAGE;
@@ -232,14 +232,14 @@ public class DTDConfiguration
 
         
         final String[] recognizedProperties = {
-            ERROR_REPORTER,             
-            ENTITY_MANAGER, 
+            ERROR_REPORTER,
+            ENTITY_MANAGER,
             DOCUMENT_SCANNER,
             DTD_SCANNER,
             DTD_PROCESSOR,
             DTD_VALIDATOR,
             NAMESPACE_BINDER,
-            XMLGRAMMAR_POOL,   
+            XMLGRAMMAR_POOL,
             DATATYPE_VALIDATOR_FACTORY,
             VALIDATION_MANAGER,
             JAXP_SCHEMA_SOURCE,
@@ -295,7 +295,7 @@ public class DTDConfiguration
             setProperty(NAMESPACE_BINDER, fNamespaceBinder);
             addComponent(fNamespaceBinder);
         }
-        
+
         fDatatypeValidatorFactory = createDatatypeValidatorFactory();
         if (fDatatypeValidatorFactory != null) {
             setProperty(DATATYPE_VALIDATOR_FACTORY,
@@ -359,14 +359,14 @@ public class DTDConfiguration
     
     public void setInputSource(XMLInputSource inputSource)
         throws XMLConfigurationException, IOException {
-        
+
         
         
         
         
 
         fInputSource = inputSource;
-        
+
     } 
 
     
@@ -379,17 +379,17 @@ public class DTDConfiguration
                 reset();
                 fScanner.setInputSource(fInputSource);
                 fInputSource = null;
-            } 
+            }
             catch (XNIException ex) {
                 if (PRINT_EXCEPTION_STACK_TRACE)
                     ex.printStackTrace();
                 throw ex;
-            } 
+            }
             catch (IOException ex) {
                 if (PRINT_EXCEPTION_STACK_TRACE)
                     ex.printStackTrace();
                 throw ex;
-            } 
+            }
             catch (RuntimeException ex) {
                 if (PRINT_EXCEPTION_STACK_TRACE)
                     ex.printStackTrace();
@@ -404,17 +404,17 @@ public class DTDConfiguration
 
         try {
             return fScanner.scanDocument(complete);
-        } 
+        }
         catch (XNIException ex) {
             if (PRINT_EXCEPTION_STACK_TRACE)
                 ex.printStackTrace();
             throw ex;
-        } 
+        }
         catch (IOException ex) {
             if (PRINT_EXCEPTION_STACK_TRACE)
                 ex.printStackTrace();
             throw ex;
-        } 
+        }
         catch (RuntimeException ex) {
             if (PRINT_EXCEPTION_STACK_TRACE)
                 ex.printStackTrace();
@@ -432,7 +432,7 @@ public class DTDConfiguration
     public void cleanup() {
         fEntityManager.closeReaders();
     }
-    
+
     
     
     
@@ -449,12 +449,12 @@ public class DTDConfiguration
         try {
             setInputSource(source);
             parse(true);
-        } 
+        }
         catch (XNIException ex) {
             if (PRINT_EXCEPTION_STACK_TRACE)
                 ex.printStackTrace();
             throw ex;
-        } 
+        }
         catch (IOException ex) {
             if (PRINT_EXCEPTION_STACK_TRACE)
                 ex.printStackTrace();
@@ -464,7 +464,7 @@ public class DTDConfiguration
             if (PRINT_EXCEPTION_STACK_TRACE)
                 ex.printStackTrace();
             throw ex;
-        }              
+        }
         catch (Exception ex) {
             if (PRINT_EXCEPTION_STACK_TRACE)
                 ex.printStackTrace();
@@ -481,7 +481,7 @@ public class DTDConfiguration
     
     
     
-    
+
     
     protected void reset() throws XNIException {
 
@@ -493,54 +493,54 @@ public class DTDConfiguration
     } 
 
     
-	protected void configurePipeline() {
+        protected void configurePipeline() {
 
-		
-		
-		
-		
-		
-		
+                
+                
+                
+                
+                
+                
 
-		
-		if (fDTDValidator != null) {
-			fScanner.setDocumentHandler(fDTDValidator);
-			if (fFeatures.get(NAMESPACES) == Boolean.TRUE) {
+                
+                if (fDTDValidator != null) {
+                        fScanner.setDocumentHandler(fDTDValidator);
+                        if (fFeatures.get(NAMESPACES) == Boolean.TRUE) {
 
-				
-				fDTDValidator.setDocumentHandler(fNamespaceBinder);
-				fDTDValidator.setDocumentSource(fScanner);
-				fNamespaceBinder.setDocumentHandler(fDocumentHandler);
-				fNamespaceBinder.setDocumentSource(fDTDValidator);
-				fLastComponent = fNamespaceBinder;
-			}
-			else {
-				fDTDValidator.setDocumentHandler(fDocumentHandler);
-				fDTDValidator.setDocumentSource(fScanner);
-				fLastComponent = fDTDValidator;
-			}
-		}
-		else {
-			if (fFeatures.get(NAMESPACES) == Boolean.TRUE) {
-				fScanner.setDocumentHandler(fNamespaceBinder);
-				fNamespaceBinder.setDocumentHandler(fDocumentHandler);
-				fNamespaceBinder.setDocumentSource(fScanner);
-				fLastComponent = fNamespaceBinder;
-			}
-			else {
-				fScanner.setDocumentHandler(fDocumentHandler);
-				fLastComponent = fScanner;
-			}
-		}
-        
+                                
+                                fDTDValidator.setDocumentHandler(fNamespaceBinder);
+                                fDTDValidator.setDocumentSource(fScanner);
+                                fNamespaceBinder.setDocumentHandler(fDocumentHandler);
+                                fNamespaceBinder.setDocumentSource(fDTDValidator);
+                                fLastComponent = fNamespaceBinder;
+                        }
+                        else {
+                                fDTDValidator.setDocumentHandler(fDocumentHandler);
+                                fDTDValidator.setDocumentSource(fScanner);
+                                fLastComponent = fDTDValidator;
+                        }
+                }
+                else {
+                        if (fFeatures.get(NAMESPACES) == Boolean.TRUE) {
+                                fScanner.setDocumentHandler(fNamespaceBinder);
+                                fNamespaceBinder.setDocumentHandler(fDocumentHandler);
+                                fNamespaceBinder.setDocumentSource(fScanner);
+                                fLastComponent = fNamespaceBinder;
+                        }
+                        else {
+                                fScanner.setDocumentHandler(fDocumentHandler);
+                                fLastComponent = fScanner;
+                        }
+                }
+
         configureDTDPipeline();
-	} 
-    
+        } 
+
     protected void configureDTDPipeline (){
-        
+
         
         if (fDTDScanner != null) {
-            fProperties.put(DTD_SCANNER, fDTDScanner);          
+            fProperties.put(DTD_SCANNER, fDTDScanner);
             if (fDTDProcessor != null) {
                 fProperties.put(DTD_PROCESSOR, fDTDProcessor);
                 fDTDScanner.setDTDHandler(fDTDProcessor);
@@ -584,14 +584,14 @@ public class DTDConfiguration
 
         if (featureId.startsWith(Constants.XERCES_FEATURE_PREFIX)) {
             final int suffixLength = featureId.length() - Constants.XERCES_FEATURE_PREFIX.length();
-        	
+
             
             
             
             
             
             
-            if (suffixLength == Constants.DYNAMIC_VALIDATION_FEATURE.length() && 
+            if (suffixLength == Constants.DYNAMIC_VALIDATION_FEATURE.length() &&
                 featureId.endsWith(Constants.DYNAMIC_VALIDATION_FEATURE)) {
                 return FeatureState.RECOGNIZED;
             }
@@ -607,7 +607,7 @@ public class DTDConfiguration
             
             
             
-            if (suffixLength == Constants.VALIDATE_CONTENT_MODELS_FEATURE.length() && 
+            if (suffixLength == Constants.VALIDATE_CONTENT_MODELS_FEATURE.length() &&
                 featureId.endsWith(Constants.VALIDATE_CONTENT_MODELS_FEATURE)) {
                 
                 return FeatureState.NOT_SUPPORTED;
@@ -615,14 +615,14 @@ public class DTDConfiguration
             
             
             
-            if (suffixLength == Constants.LOAD_DTD_GRAMMAR_FEATURE.length() && 
+            if (suffixLength == Constants.LOAD_DTD_GRAMMAR_FEATURE.length() &&
                 featureId.endsWith(Constants.LOAD_DTD_GRAMMAR_FEATURE)) {
                 return FeatureState.RECOGNIZED;
             }
             
             
             
-            if (suffixLength == Constants.LOAD_EXTERNAL_DTD_FEATURE.length() && 
+            if (suffixLength == Constants.LOAD_EXTERNAL_DTD_FEATURE.length() &&
                 featureId.endsWith(Constants.LOAD_EXTERNAL_DTD_FEATURE)) {
                 return FeatureState.RECOGNIZED;
             }
@@ -630,7 +630,7 @@ public class DTDConfiguration
             
             
             
-            if (suffixLength == Constants.VALIDATE_DATATYPES_FEATURE.length() && 
+            if (suffixLength == Constants.VALIDATE_DATATYPES_FEATURE.length() &&
                 featureId.endsWith(Constants.VALIDATE_DATATYPES_FEATURE)) {
                 return FeatureState.NOT_SUPPORTED;
             }
@@ -655,7 +655,7 @@ public class DTDConfiguration
         if (propertyId.startsWith(Constants.XERCES_PROPERTY_PREFIX)) {
             final int suffixLength = propertyId.length() - Constants.XERCES_PROPERTY_PREFIX.length();
 
-            if (suffixLength == Constants.DTD_SCANNER_PROPERTY.length() && 
+            if (suffixLength == Constants.DTD_SCANNER_PROPERTY.length() &&
                 propertyId.endsWith(Constants.DTD_SCANNER_PROPERTY)) {
                 return PropertyState.RECOGNIZED;
             }

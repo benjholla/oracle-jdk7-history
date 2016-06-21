@@ -183,13 +183,14 @@ final class XslElement extends Instruction {
         if (!_ignore) {
 
             
-            LocalVariableGen nameValue = methodGen.addLocalVariable2("nameValue",
-                    Util.getJCRefType(STRING_SIG),
-                    il.getEnd());
+            LocalVariableGen nameValue =
+                    methodGen.addLocalVariable2("nameValue",
+                                                Util.getJCRefType(STRING_SIG),
+                                                null);
 
             
             _name.translate(classGen, methodGen);
-            il.append(new ASTORE(nameValue.getIndex()));
+            nameValue.setStart(il.append(new ASTORE(nameValue.getIndex())));
             il.append(new ALOAD(nameValue.getIndex()));
 
             
@@ -203,7 +204,7 @@ final class XslElement extends Instruction {
             il.append(methodGen.loadHandler());
 
             
-            il.append(new ALOAD(nameValue.getIndex()));
+            nameValue.setEnd(il.append(new ALOAD(nameValue.getIndex())));
 
             if (_namespace != null) {
                 _namespace.translate(classGen, methodGen);

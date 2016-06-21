@@ -4,9 +4,7 @@ package javax.swing;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.VolatileImage;
 import java.awt.peer.ComponentPeer;
-import java.applet.Applet;
 import java.beans.Transient;
 import javax.swing.plaf.ViewportUI;
 
@@ -100,6 +98,9 @@ public class JViewport extends JComponent implements Accessible
 
     
     private boolean hasHadValidView;
+
+    
+    private boolean viewChanged;
 
     
     public JViewport() {
@@ -518,7 +519,9 @@ public class JViewport extends JComponent implements Accessible
             backingStoreImage = null;
         }
         super.reshape(x, y, w, h);
-        if (sizeChanged) {
+        if (sizeChanged || viewChanged) {
+            viewChanged = false;
+
             fireStateChanged();
         }
     }
@@ -588,6 +591,8 @@ public class JViewport extends JComponent implements Accessible
         else if (view != null) {
             hasHadValidView = true;
         }
+
+        viewChanged = true;
 
         revalidate();
         repaint();

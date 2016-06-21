@@ -68,45 +68,45 @@ import org.xml.sax.InputSource;
 public class XMLSchemaLoader implements XMLGrammarLoader, XMLComponent,
 
 XSLoader, DOMConfiguration {
+
     
-    
-    
+
     
     protected static final String SCHEMA_FULL_CHECKING =
         Constants.XERCES_FEATURE_PREFIX + Constants.SCHEMA_FULL_CHECKING;
-    
+
     
     protected static final String CONTINUE_AFTER_FATAL_ERROR =
         Constants.XERCES_FEATURE_PREFIX + Constants.CONTINUE_AFTER_FATAL_ERROR_FEATURE;
-    
+
     
     protected static final String ALLOW_JAVA_ENCODINGS =
         Constants.XERCES_FEATURE_PREFIX + Constants.ALLOW_JAVA_ENCODINGS_FEATURE;
-    
+
     
     protected static final String STANDARD_URI_CONFORMANT_FEATURE =
         Constants.XERCES_FEATURE_PREFIX + Constants.STANDARD_URI_CONFORMANT_FEATURE;
-    
+
     
     protected static final String VALIDATE_ANNOTATIONS =
         Constants.XERCES_FEATURE_PREFIX + Constants.VALIDATE_ANNOTATIONS_FEATURE;
-        
+
     
-    protected static final String DISALLOW_DOCTYPE = 
+    protected static final String DISALLOW_DOCTYPE =
         Constants.XERCES_FEATURE_PREFIX + Constants.DISALLOW_DOCTYPE_DECL_FEATURE;
+
     
-    
-    protected static final String GENERATE_SYNTHETIC_ANNOTATIONS = 
+    protected static final String GENERATE_SYNTHETIC_ANNOTATIONS =
         Constants.XERCES_FEATURE_PREFIX + Constants.GENERATE_SYNTHETIC_ANNOTATIONS_FEATURE;
+
     
-    
-    protected static final String HONOUR_ALL_SCHEMALOCATIONS = 
+    protected static final String HONOUR_ALL_SCHEMALOCATIONS =
         Constants.XERCES_FEATURE_PREFIX + Constants.HONOUR_ALL_SCHEMALOCATIONS_FEATURE;
-    
-    protected static final String AUGMENT_PSVI = 
+
+    protected static final String AUGMENT_PSVI =
         Constants.XERCES_FEATURE_PREFIX + Constants.SCHEMA_AUGMENT_PSVI;
-    
-    protected static final String PARSER_SETTINGS = 
+
+    protected static final String PARSER_SETTINGS =
         Constants.XERCES_FEATURE_PREFIX + Constants.PARSER_SETTINGS;
 
     
@@ -121,65 +121,68 @@ XSLoader, DOMConfiguration {
     protected static final String SCHEMA_DV_FACTORY =
         Constants.XERCES_PROPERTY_PREFIX + Constants.SCHEMA_DV_FACTORY_PROPERTY;
 
+    protected static final String USE_SERVICE_MECHANISM = Constants.ORACLE_FEATURE_SERVICE_MECHANISM;
+
     
     private static final String[] RECOGNIZED_FEATURES = {
         SCHEMA_FULL_CHECKING,
         AUGMENT_PSVI,
         CONTINUE_AFTER_FATAL_ERROR,
         ALLOW_JAVA_ENCODINGS,
-        STANDARD_URI_CONFORMANT_FEATURE, 
+        STANDARD_URI_CONFORMANT_FEATURE,
         DISALLOW_DOCTYPE,
         GENERATE_SYNTHETIC_ANNOTATIONS,
         VALIDATE_ANNOTATIONS,
         HONOUR_ALL_SCHEMALOCATIONS,
         NAMESPACE_GROWTH,
-        TOLERATE_DUPLICATES
+        TOLERATE_DUPLICATES,
+        USE_SERVICE_MECHANISM
     };
+
     
-    
-    
+
     
     public static final String SYMBOL_TABLE =
         Constants.XERCES_PROPERTY_PREFIX + Constants.SYMBOL_TABLE_PROPERTY;
-    
+
     
     public static final String ERROR_REPORTER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.ERROR_REPORTER_PROPERTY;
-    
+
     
     protected static final String ERROR_HANDLER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.ERROR_HANDLER_PROPERTY;
-    
+
     
     public static final String ENTITY_RESOLVER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.ENTITY_RESOLVER_PROPERTY;
-    
+
     
     public static final String XMLGRAMMAR_POOL =
         Constants.XERCES_PROPERTY_PREFIX + Constants.XMLGRAMMAR_POOL_PROPERTY;
-    
+
     
     protected static final String SCHEMA_LOCATION =
         Constants.XERCES_PROPERTY_PREFIX + Constants.SCHEMA_LOCATION;
-    
+
     
     protected static final String SCHEMA_NONS_LOCATION =
         Constants.XERCES_PROPERTY_PREFIX + Constants.SCHEMA_NONS_LOCATION;
-    
+
     
     protected static final String JAXP_SCHEMA_SOURCE =
         Constants.JAXP_PROPERTY_PREFIX + Constants.SCHEMA_SOURCE;
-    
+
     protected static final String SECURITY_MANAGER =
-        Constants.XERCES_PROPERTY_PREFIX + Constants.SECURITY_MANAGER_PROPERTY;  
+        Constants.XERCES_PROPERTY_PREFIX + Constants.SECURITY_MANAGER_PROPERTY;
 
     
     protected static final String LOCALE =
         Constants.XERCES_PROPERTY_PREFIX + Constants.LOCALE_PROPERTY;
-    
+
     protected static final String ENTITY_MANAGER =
-        Constants.XERCES_PROPERTY_PREFIX + Constants.ENTITY_MANAGER_PROPERTY;   
-    
+        Constants.XERCES_PROPERTY_PREFIX + Constants.ENTITY_MANAGER_PROPERTY;
+
     
     private static final String [] RECOGNIZED_PROPERTIES = {
         ENTITY_MANAGER,
@@ -195,9 +198,9 @@ XSLoader, DOMConfiguration {
         LOCALE,
         SCHEMA_DV_FACTORY
     };
+
     
-    
-    
+
     
     private ParserConfigurationSettings fLoaderConfig = new ParserConfigurationSettings();
     private SymbolTable fSymbolTable = null;
@@ -215,7 +218,7 @@ XSLoader, DOMConfiguration {
     private boolean fJAXPProcessed = false;
     
     private boolean fSettingsChanged = true;
-    
+
     
     private XSDHandler fSchemaHandler;
     private XSGrammarBucket fGrammarBucket;
@@ -224,54 +227,54 @@ XSLoader, DOMConfiguration {
     private final CMNodeFactory fNodeFactory = new CMNodeFactory(); 
     private CMBuilder fCMBuilder;
     private XSDDescription fXSDDescription = new XSDDescription();
-    
+
     private Map fJAXPCache;
     private Locale fLocale = Locale.getDefault();
-    
+
     
     private DOMStringList fRecognizedParameters = null;
-    
+
     
     private DOMErrorHandlerWrapper fErrorHandler = null;
-    
+
     
     private DOMEntityResolverWrapper fResourceResolver = null;
-    
+
     
     public XMLSchemaLoader() {
         this( new SymbolTable(), null, new XMLEntityManager(), null, null, null);
     }
-    
+
     public XMLSchemaLoader(SymbolTable symbolTable) {
         this( symbolTable, null, new XMLEntityManager(), null, null, null);
     }
-    
+
     
     XMLSchemaLoader(XMLErrorReporter errorReporter,
             XSGrammarBucket grammarBucket,
             SubstitutionGroupHandler sHandler, CMBuilder builder) {
         this(null, errorReporter, null, grammarBucket, sHandler, builder);
     }
-    
+
     XMLSchemaLoader(SymbolTable symbolTable,
             XMLErrorReporter errorReporter,
             XMLEntityManager entityResolver,
             XSGrammarBucket grammarBucket,
             SubstitutionGroupHandler sHandler,
             CMBuilder builder) {
-        
+
         
         fLoaderConfig.addRecognizedFeatures(RECOGNIZED_FEATURES);
-        fLoaderConfig.addRecognizedProperties(RECOGNIZED_PROPERTIES); 
-        if (symbolTable != null){ 
-            fLoaderConfig.setProperty(SYMBOL_TABLE, symbolTable);       
+        fLoaderConfig.addRecognizedProperties(RECOGNIZED_PROPERTIES);
+        if (symbolTable != null){
+            fLoaderConfig.setProperty(SYMBOL_TABLE, symbolTable);
         }
-        
+
         if(errorReporter == null) {
             errorReporter = new XMLErrorReporter ();
             errorReporter.setLocale(fLocale);
             errorReporter.setProperty(ERROR_HANDLER, new DefaultErrorHandler());
-            
+
         }
         fErrorReporter = errorReporter;
         
@@ -279,15 +282,15 @@ XSLoader, DOMConfiguration {
             fErrorReporter.putMessageFormatter(XSMessageFormatter.SCHEMA_DOMAIN, new XSMessageFormatter());
         }
         fLoaderConfig.setProperty(ERROR_REPORTER, fErrorReporter);
-        fEntityManager = entityResolver;   
+        fEntityManager = entityResolver;
         
-        if (fEntityManager != null){   
+        if (fEntityManager != null){
             fLoaderConfig.setProperty(ENTITY_MANAGER, fEntityManager);
         }
-        
+
         
         fLoaderConfig.setFeature(AUGMENT_PSVI, true);
-        
+
         if(grammarBucket == null ) {
             grammarBucket = new XSGrammarBucket();
         }
@@ -296,7 +299,7 @@ XSLoader, DOMConfiguration {
             sHandler = new SubstitutionGroupHandler(fGrammarBucket);
         }
         fSubGroupHandler = sHandler;
-                
+
         if(builder == null) {
             builder = new CMBuilder(fNodeFactory);
         }
@@ -306,57 +309,57 @@ XSLoader, DOMConfiguration {
             fDeclPool.reset();
         }
         fJAXPCache = new HashMap();
-        
+
         fSettingsChanged = true;
     }
-    
+
     
     public String[] getRecognizedFeatures() {
         return (String[])(RECOGNIZED_FEATURES.clone());
     } 
-    
+
     
     public boolean getFeature(String featureId)
-    throws XMLConfigurationException {                
-        return fLoaderConfig.getFeature(featureId);        
+    throws XMLConfigurationException {
+        return fLoaderConfig.getFeature(featureId);
     } 
-    
+
     
     public void setFeature(String featureId,
             boolean state) throws XMLConfigurationException {
-        fSettingsChanged = true; 
+        fSettingsChanged = true;
         if(featureId.equals(CONTINUE_AFTER_FATAL_ERROR)) {
             fErrorReporter.setFeature(CONTINUE_AFTER_FATAL_ERROR, state);
-        } 
+        }
         else if(featureId.equals(GENERATE_SYNTHETIC_ANNOTATIONS)) {
             fSchemaHandler.setGenerateSyntheticAnnotations(state);
         }
         fLoaderConfig.setFeature(featureId, state);
     } 
-    
+
     
     public String[] getRecognizedProperties() {
         return (String[])(RECOGNIZED_PROPERTIES.clone());
     } 
-    
+
     
     public Object getProperty(String propertyId)
     throws XMLConfigurationException {
         return fLoaderConfig.getProperty(propertyId);
     } 
-    
+
     
     public void setProperty(String propertyId,
-            Object state) throws XMLConfigurationException {                   
+            Object state) throws XMLConfigurationException {
         fSettingsChanged = true;
-        fLoaderConfig.setProperty(propertyId, state);    
+        fLoaderConfig.setProperty(propertyId, state);
         if (propertyId.equals(JAXP_SCHEMA_SOURCE)) {
             fJAXPSource = state;
             fJAXPProcessed = false;
-        }  
+        }
         else if (propertyId.equals(XMLGRAMMAR_POOL)) {
             fGrammarPool = (XMLGrammarPool)state;
-        } 
+        }
         else if (propertyId.equals(SCHEMA_LOCATION)) {
             fExternalSchemas = (String)state;
         }
@@ -376,57 +379,57 @@ XSLoader, DOMConfiguration {
             }
         }
     } 
-    
+
     
     public void setLocale(Locale locale) {
         fLocale = locale;
         fErrorReporter.setLocale(locale);
     } 
-    
+
     
     public Locale getLocale() {
         return fLocale;
     } 
-    
+
     
     public void setErrorHandler(XMLErrorHandler errorHandler) {
         fErrorReporter.setProperty(ERROR_HANDLER, errorHandler);
     } 
-    
+
     
     public XMLErrorHandler getErrorHandler() {
         return fErrorReporter.getErrorHandler();
     } 
-    
+
     
     public void setEntityResolver(XMLEntityResolver entityResolver) {
         fUserEntityResolver = entityResolver;
         fLoaderConfig.setProperty(ENTITY_RESOLVER, entityResolver);
         fEntityManager.setProperty(ENTITY_RESOLVER, entityResolver);
     } 
-    
+
     
     public XMLEntityResolver getEntityResolver() {
         return fUserEntityResolver;
     } 
+
     
-    
-    public void loadGrammar(XMLInputSource source[]) 
+    public void loadGrammar(XMLInputSource source[])
     throws IOException, XNIException {
         int numSource = source.length;
         for (int i = 0; i < numSource; ++i) {
             loadGrammar(source[i]);
-        }   
+        }
     }
-    
+
     
     public Grammar loadGrammar(XMLInputSource source)
     throws IOException, XNIException {
+
         
         
         
-        
-        
+
         reset(fLoaderConfig);
         fSettingsChanged = false;
         XSDDescription desc = new XSDDescription();
@@ -441,7 +444,7 @@ XSLoader, DOMConfiguration {
         processExternalHints(fExternalSchemas, fExternalNoNSSchema,
                 locationPairs, fErrorReporter);
         SchemaGrammar grammar = loadSchema(desc, source, locationPairs);
-        
+
         if(grammar != null && fGrammarPool != null) {
             fGrammarPool.cacheGrammars(XMLGrammarDescription.XML_SCHEMA, fGrammarBucket.getGrammars());
             
@@ -452,22 +455,22 @@ XSLoader, DOMConfiguration {
         }
         return grammar;
     } 
-    
+
     
     SchemaGrammar loadSchema(XSDDescription desc,
             XMLInputSource source,
             Map locationPairs) throws IOException, XNIException {
-        
+
         
         
         if(!fJAXPProcessed) {
             processJAXPSchemaSource(locationPairs);
         }
         SchemaGrammar grammar = fSchemaHandler.parseSchema(source, desc, locationPairs);
-        
+
         return grammar;
     } 
-    
+
     
     public static XMLInputSource resolveDocument(XSDDescription desc, Map locationPairs,
             XMLEntityResolver entityResolver) throws IOException {
@@ -483,7 +486,7 @@ XSLoader, DOMConfiguration {
             if(tempLA != null)
                 loc = tempLA.getFirstLocation();
         }
-        
+
         
         
         if (loc == null) {
@@ -491,13 +494,13 @@ XSLoader, DOMConfiguration {
             if (hints != null && hints.length > 0)
                 loc = hints[0];
         }
-        
+
         String expandedLoc = XMLEntityManager.expandSystemId(loc, desc.getBaseSystemId(), false);
         desc.setLiteralSystemId(loc);
         desc.setExpandedSystemId(expandedLoc);
         return entityResolver.resolveEntity(desc);
     }
-    
+
     
     public static void processExternalHints(String sl, String nsl,
             Map locations,
@@ -525,7 +528,7 @@ XSLoader, DOMConfiguration {
                         XMLErrorReporter.SEVERITY_WARNING);
             }
         }
-        
+
         if (nsl != null) {
             try {
                 
@@ -573,14 +576,14 @@ XSLoader, DOMConfiguration {
         }
         return true;
     } 
-    
+
     
     private void processJAXPSchemaSource(Map locationPairs) throws IOException {
         fJAXPProcessed = true;
         if (fJAXPSource == null) {
             return;
         }
-        
+
         Class componentType = fJAXPSource.getClass().getComponentType();
         XMLInputSource xis = null;
         String sid = null;
@@ -630,7 +633,7 @@ XSLoader, DOMConfiguration {
                     "}. Possible types of the array supported are Object, String, File, "+
             "InputStream, InputSource.");
         }
-        
+
         
         
         Object[] objArr = (Object[]) fJAXPSource;
@@ -658,10 +661,10 @@ XSLoader, DOMConfiguration {
             String targetNamespace = null ;
             
             SchemaGrammar grammar = fSchemaHandler.parseSchema(xis,fXSDDescription, locationPairs);
-            
+
             if(fIsCheckedFully) {
                 XSConstraints.fullSchemaChecking(fGrammarBucket, fSubGroupHandler, fCMBuilder, fErrorReporter);
-            }                                   
+            }
             if(grammar != null){
                 targetNamespace = grammar.getTargetNamespace() ;
                 if(jaxpSchemaSourceNamespaces.contains(targetNamespace)){
@@ -684,14 +687,14 @@ XSLoader, DOMConfiguration {
             }
         }
     }
-    
+
     private XMLInputSource xsdToXMLInputSource(
             Object val)
     {
         if (val instanceof String) {
             
             
-            String loc = (String) val;          
+            String loc = (String) val;
             fXSDDescription.reset();
             fXSDDescription.setValues(null, loc, null, null);
             XMLInputSource xis = null;
@@ -731,65 +734,65 @@ XSLoader, DOMConfiguration {
                 "}. Possible types of the value supported are String, File, InputStream, "+
         "InputSource OR an array of these types.");
     }
+
+
     
-    
-    
-    
+
     private static XMLInputSource saxToXMLInputSource(InputSource sis) {
         String publicId = sis.getPublicId();
         String systemId = sis.getSystemId();
-        
+
         Reader charStream = sis.getCharacterStream();
         if (charStream != null) {
             return new XMLInputSource(publicId, systemId, null, charStream,
                     null);
         }
-        
+
         InputStream byteStream = sis.getByteStream();
         if (byteStream != null) {
             return new XMLInputSource(publicId, systemId, null, byteStream,
                     sis.getEncoding());
         }
-        
+
         return new XMLInputSource(publicId, systemId, null);
     }
-    
+
     static class LocationArray{
-        
+
         int length ;
         String [] locations = new String[2];
-        
+
         public void resize(int oldLength , int newLength){
             String [] temp = new String[newLength] ;
             System.arraycopy(locations, 0, temp, 0, Math.min(oldLength, newLength));
             locations = temp ;
             length = Math.min(oldLength, newLength);
         }
-        
+
         public void addLocation(String location){
             if(length >= locations.length ){
                 resize(length, Math.max(1, length*2));
             }
             locations[length++] = location;
         }
-        
+
         public String [] getLocationArray(){
             if(length < locations.length ){
                 resize(locations.length, length);
             }
             return locations;
         }
-        
+
         public String getFirstLocation(){
             return length > 0 ? locations[0] : null;
         }
-        
+
         public int getLength(){
             return length ;
         }
-        
+
     } 
-    
+
     
     public Boolean getFeatureDefault(String featureId) {
         if (featureId.equals(AUGMENT_PSVI)){
@@ -797,20 +800,20 @@ XSLoader, DOMConfiguration {
         }
         return null;
     }
-    
+
     
     public Object getPropertyDefault(String propertyId) {
         
         return null;
     }
-    
+
     
     public void reset(XMLComponentManager componentManager) throws XMLConfigurationException {
-        
+
         fGrammarBucket.reset();
-        
-        fSubGroupHandler.reset();		
-        
+
+        fSubGroupHandler.reset();
+
         boolean parser_settings = componentManager.getFeature(PARSER_SETTINGS, true);
 
         if (!parser_settings || !fSettingsChanged){
@@ -818,8 +821,8 @@ XSLoader, DOMConfiguration {
             fJAXPProcessed = false;
             
             initGrammarBucket();
-            return;           
-        } 
+            return;
+        }
 
         
         fNodeFactory.reset(componentManager);
@@ -827,8 +830,8 @@ XSLoader, DOMConfiguration {
         
         
         
-        fEntityManager = (XMLEntityManager)componentManager.getProperty(ENTITY_MANAGER);      
-        
+        fEntityManager = (XMLEntityManager)componentManager.getProperty(ENTITY_MANAGER);
+
         
         fErrorReporter = (XMLErrorReporter)componentManager.getProperty(ERROR_REPORTER);
 
@@ -839,7 +842,7 @@ XSLoader, DOMConfiguration {
             dvFactory = SchemaDVFactory.getInstance();
             fSchemaHandler.setDVFactory(dvFactory);
         }
-        
+
         boolean psvi = componentManager.getFeature(AUGMENT_PSVI, false);
 
         if (!psvi) {
@@ -859,7 +862,7 @@ XSLoader, DOMConfiguration {
             fCMBuilder.setDeclPool(null);
             fSchemaHandler.setDeclPool(null);
         }
-        
+
         
         try {
             fExternalSchemas = (String) componentManager.getProperty(SCHEMA_LOCATION);
@@ -872,7 +875,7 @@ XSLoader, DOMConfiguration {
         
         fJAXPSource = componentManager.getProperty(JAXP_SCHEMA_SOURCE, null);
         fJAXPProcessed = false;
-        
+
         
         fGrammarPool = (XMLGrammarPool) componentManager.getProperty(XMLGRAMMAR_POOL, null);
         initGrammarBucket();
@@ -886,12 +889,12 @@ XSLoader, DOMConfiguration {
         }
         
         fIsCheckedFully = componentManager.getFeature(SCHEMA_FULL_CHECKING, false);
-        
+
         
         fSchemaHandler.setGenerateSyntheticAnnotations(componentManager.getFeature(GENERATE_SYNTHETIC_ANNOTATIONS, false));
         fSchemaHandler.reset(componentManager);
     }
-    
+
     private void initGrammarBucket(){
         if(fGrammarPool != null) {
             Grammar [] initialGrammars = fGrammarPool.retrieveInitialGrammarSet(XMLGrammarDescription.XML_SCHEMA);
@@ -908,13 +911,13 @@ XSLoader, DOMConfiguration {
             }
         }
     }
-    
-    
+
+
     
     public DOMConfiguration getConfig() {
         return this;
     }
-    
+
     
     public XSModel load(LSInput is) {
         try {
@@ -925,7 +928,7 @@ XSLoader, DOMConfiguration {
             return null;
         }
     }
-    
+
     
     public XSModel loadInputList(LSInputList is) {
         int length = is.getLength();
@@ -940,7 +943,7 @@ XSLoader, DOMConfiguration {
         }
         return new XSModelImpl(gs);
     }
-    
+
     
     public XSModel loadURI(String uri) {
         try {
@@ -952,7 +955,7 @@ XSLoader, DOMConfiguration {
             return null;
         }
     }
-    
+
     
     public XSModel loadURIList(StringList uriList) {
         int length = uriList.getLength();
@@ -968,7 +971,7 @@ XSLoader, DOMConfiguration {
         }
         return new XSModelImpl(gs);
     }
-    
+
     void reportDOMFatalError(Exception e) {
                 if (fErrorHandler != null) {
                     DOMErrorImpl error = new DOMErrorImpl();
@@ -978,7 +981,7 @@ XSLoader, DOMConfiguration {
                     fErrorHandler.getErrorHandler().handleError(error);
                 }
             }
-    
+
     
     public boolean canSetParameter(String name, Object value) {
         if(value instanceof Boolean){
@@ -991,11 +994,12 @@ XSLoader, DOMConfiguration {
                 name.equals(GENERATE_SYNTHETIC_ANNOTATIONS) ||
                 name.equals(HONOUR_ALL_SCHEMALOCATIONS) ||
                 name.equals(NAMESPACE_GROWTH) ||
-                name.equals(TOLERATE_DUPLICATES)) {
+                name.equals(TOLERATE_DUPLICATES) ||
+                name.equals(USE_SERVICE_MECHANISM)) {
                 return true;
-                
+
             }
-            return false;			
+            return false;
         }
         if (name.equals(Constants.DOM_ERROR_HANDLER) ||
             name.equals(Constants.DOM_RESOURCE_RESOLVER) ||
@@ -1012,17 +1016,17 @@ XSLoader, DOMConfiguration {
         }
         return false;
     }
-    
+
     
     public Object getParameter(String name) throws DOMException {
-        
+
         if (name.equals(Constants.DOM_ERROR_HANDLER)){
             return (fErrorHandler != null) ? fErrorHandler.getErrorHandler() : null;
         }
         else if (name.equals(Constants.DOM_RESOURCE_RESOLVER)) {
             return (fResourceResolver != null) ? fResourceResolver.getEntityResolver() : null;
         }
-        
+
         try {
             boolean feature = getFeature(name);
             return (feature) ? Boolean.TRUE : Boolean.FALSE;
@@ -1041,7 +1045,7 @@ XSLoader, DOMConfiguration {
             }
         }
     }
-    
+
     
     public DOMStringList getParameterNames() {
         if (fRecognizedParameters == null){
@@ -1066,11 +1070,12 @@ XSLoader, DOMConfiguration {
             v.add(HONOUR_ALL_SCHEMALOCATIONS);
             v.add(NAMESPACE_GROWTH);
             v.add(TOLERATE_DUPLICATES);
-            fRecognizedParameters = new DOMStringListImpl(v);      	
+            v.add(USE_SERVICE_MECHANISM);
+            fRecognizedParameters = new DOMStringListImpl(v);
         }
         return fRecognizedParameters;
     }
-    
+
     
     public void setParameter(String name, Object value) throws DOMException {
         if (value instanceof Boolean) {
@@ -1107,14 +1112,14 @@ XSLoader, DOMConfiguration {
                 throw new DOMException(DOMException.NOT_SUPPORTED_ERR, msg);
             }
             return;
-            
+
         }
         if (name.equals(Constants.DOM_RESOURCE_RESOLVER)) {
             if (value instanceof LSResourceResolver) {
                 try {
                     fResourceResolver = new DOMEntityResolverWrapper((LSResourceResolver) value);
                     setEntityResolver(fResourceResolver);
-                } 
+                }
                 catch (XMLConfigurationException e) {}
             } else {
                 
@@ -1127,28 +1132,28 @@ XSLoader, DOMConfiguration {
             }
             return;
         }
-        
+
         try {
             setProperty(name, value);
         } catch (Exception ex) {
-            
+
             String msg =
                 DOMMessageFormatter.formatMessage(
                         DOMMessageFormatter.DOM_DOMAIN,
                         "FEATURE_NOT_SUPPORTED",
                         new Object[] { name });
             throw new DOMException(DOMException.NOT_SUPPORTED_ERR, msg);
-            
+
         }
-        
+
     }
-    
-	XMLInputSource dom2xmlInputSource(LSInput is) {
+
+        XMLInputSource dom2xmlInputSource(LSInput is) {
         
         XMLInputSource xis = null;
+
         
-        
-        
+
         
         
         if (is.getCharacterStream() != null) {
@@ -1174,9 +1179,8 @@ XSLoader, DOMConfiguration {
             xis = new XMLInputSource(is.getPublicId(), is.getSystemId(),
                     is.getBaseURI());
         }
-        
+
         return xis;
     }
-    
-} 
 
+} 

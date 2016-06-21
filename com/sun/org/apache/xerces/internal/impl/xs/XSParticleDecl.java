@@ -175,10 +175,10 @@ public class XSParticleDecl implements XSParticle {
         return fValue;
     }
 
-	
-	public XSNamespaceItem getNamespaceItem() {
-		return null;
-	}
+        
+        public XSNamespaceItem getNamespaceItem() {
+                return null;
+        }
 
     
     public XSObjectList getAnnotations() {

@@ -172,13 +172,14 @@ final class XslAttribute extends Instruction {
 
         if (!_isLiteral) {
             
-            LocalVariableGen nameValue = methodGen.addLocalVariable2("nameValue",
+            LocalVariableGen nameValue =
+                    methodGen.addLocalVariable2("nameValue",
                     Util.getJCRefType(STRING_SIG),
-                    il.getEnd());
+                                                null);
 
             
             _name.translate(classGen, methodGen);
-            il.append(new ASTORE(nameValue.getIndex()));
+            nameValue.setStart(il.append(new ASTORE(nameValue.getIndex())));
             il.append(new ALOAD(nameValue.getIndex()));
 
             
@@ -193,7 +194,7 @@ final class XslAttribute extends Instruction {
             il.append(DUP);     
 
             
-            il.append(new ALOAD(nameValue.getIndex()));
+            nameValue.setEnd(il.append(new ALOAD(nameValue.getIndex())));
         } else {
             
             il.append(methodGen.loadHandler());

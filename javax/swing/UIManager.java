@@ -50,6 +50,7 @@ public class UIManager implements Serializable
         private UIDefaults[] tables = new UIDefaults[2];
 
         boolean initialized = false;
+        boolean focusPolicyInitialized = false;
         MultiUIDefaults multiUIDefaults = new MultiUIDefaults(tables);
         LookAndFeel lookAndFeel;
         LookAndFeel multiLookAndFeel = null;
@@ -177,6 +178,9 @@ public class UIManager implements Serializable
                  "com.sun.java.swing.plaf.windows.WindowsClassicLookAndFeel"));
             }
         }
+        else if (osType == OSInfo.OSType.MACOSX) {
+            iLAFs.add(new LookAndFeelInfo("Mac OS X", "com.apple.laf.AquaLookAndFeel"));
+        }
         else {
             
             iLAFs.add(new LookAndFeelInfo("GTK+",
@@ -302,6 +306,12 @@ public class UIManager implements Serializable
                     ((SunToolkit) toolkit).isNativeGTKAvailable()) {
                 
                 return "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";
+            }
+            if (osType == OSInfo.OSType.MACOSX) {
+                if (toolkit.getClass() .getName()
+                                       .equals("sun.lwawt.macosx.LWCToolkit")) {
+                    return "com.apple.laf.AquaLookAndFeel";
+                }
             }
             if (osType == OSInfo.OSType.SOLARIS) {
                 return "com.sun.java.swing.plaf.motif.MotifLookAndFeel";
@@ -442,6 +452,7 @@ public class UIManager implements Serializable
     
     public static ComponentUI getUI(JComponent target) {
         maybeInitialize();
+        maybeInitializeFocusPolicy(target);
         ComponentUI ui = null;
         LookAndFeel multiLAF = getLAFState().multiLookAndFeel;
         if (multiLAF != null) {
@@ -586,6 +597,11 @@ public class UIManager implements Serializable
             java.security.AccessController.doPrivileged(
                 new java.security.PrivilegedAction<Object>() {
                 public Object run() {
+                    OSInfo.OSType osType = AccessController.doPrivileged(OSInfo.getOSTypeAction());
+                    if (osType == OSInfo.OSType.MACOSX) {
+                        props.put(defaultLAFKey, getSystemLookAndFeelClassName());
+                    }
+
                     try {
                         File file = new File(makeSwingPropertiesFilename());
 
@@ -751,6 +767,25 @@ public class UIManager implements Serializable
         }
     }
 
+    
+    private static void maybeInitializeFocusPolicy(JComponent comp) {
+        
+        
+        
+        if (comp instanceof JRootPane) {
+            synchronized (classLock) {
+                if (!getLAFState().focusPolicyInitialized) {
+                    getLAFState().focusPolicyInitialized = true;
+
+                    if (FocusManager.isFocusManagerEnabled()) {
+                        KeyboardFocusManager.getCurrentKeyboardFocusManager().
+                            setDefaultFocusTraversalPolicy(
+                                new LayoutFocusTraversalPolicy());
+                    }
+                }
+            }
+        }
+    }
 
     
     private static void initialize() {
@@ -759,17 +794,6 @@ public class UIManager implements Serializable
         initializeDefaultLAF(swingProps);
         initializeAuxiliaryLAFs(swingProps);
         initializeInstalledLAFs(swingProps);
-
-        
-        String toolkitName = Toolkit.getDefaultToolkit().getClass().getName();
-        
-        if (!"sun.awt.X11.XToolkit".equals(toolkitName)) {
-            if (FocusManager.isFocusManagerEnabled()) {
-                KeyboardFocusManager.getCurrentKeyboardFocusManager().
-                    setDefaultFocusTraversalPolicy(
-                        new LayoutFocusTraversalPolicy());
-            }
-        }
 
         
         if (RepaintManager.HANDLE_TOP_LEVEL_PAINT) {

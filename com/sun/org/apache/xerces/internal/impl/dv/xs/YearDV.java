@@ -82,5 +82,3 @@ public class YearDV extends AbstractDateTimeDV {
                 date.hasTimeZone() ? date.timezoneHr * 60 + date.timezoneMin : DatatypeConstants.FIELD_UNDEFINED);
     }
 }
-
-

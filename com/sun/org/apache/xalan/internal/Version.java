@@ -12,8 +12,8 @@ public class Version
   {
      return getProduct()+" "+getImplementationLanguage()+" "
            +getMajorVersionNum()+"."+getReleaseVersionNum()+"."
-           +( (getDevelopmentVersionNum() > 0) ? 
-               ("D"+getDevelopmentVersionNum()) : (""+getMaintenanceVersionNum()));  
+           +( (getDevelopmentVersionNum() > 0) ?
+               ("D"+getDevelopmentVersionNum()) : (""+getMaintenanceVersionNum()));
   }
 
   
@@ -21,7 +21,7 @@ public class Version
   {
     System.out.println(getVersion());
   }
-  
+
   
   public static String getProduct()
   {
@@ -33,21 +33,21 @@ public class Version
   {
     return "Java";
   }
-  
-  
+
+
   
   public static int getMajorVersionNum()
   {
     return 2;
-    
-  }  
+
+  }
 
   
   public static int getReleaseVersionNum()
   {
     return 7;
   }
-  
+
   
   public static int getMaintenanceVersionNum()
   {
@@ -56,14 +56,14 @@ public class Version
 
   
   public static int getDevelopmentVersionNum()
-  { 
-    try {   
+  {
+    try {
         if ((new String("")).length() == 0)
           return 0;
-        else  
+        else
           return Integer.parseInt("");
     } catch (NumberFormatException nfe) {
            return 0;
-    }    
-  }      
+    }
+  }
 }

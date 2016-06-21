@@ -70,8 +70,8 @@ public class XMLDTDValidator
     protected static final String WARN_ON_DUPLICATE_ATTDEF =
         Constants.XERCES_FEATURE_PREFIX + Constants.WARN_ON_DUPLICATE_ATTDEF_FEATURE;
 
-	protected static final String PARSER_SETTINGS =
-		Constants.XERCES_FEATURE_PREFIX + Constants.PARSER_SETTINGS;
+        protected static final String PARSER_SETTINGS =
+                Constants.XERCES_FEATURE_PREFIX + Constants.PARSER_SETTINGS;
 
 
 
@@ -351,18 +351,18 @@ public class XMLDTDValidator
 
         fRootElement.clear();
 
-		fValidationState.resetIDTables();
+                fValidationState.resetIDTables();
 
-		fGrammarBucket.clear();
-		fElementDepth = -1;
-		fElementChildrenLength = 0;
+                fGrammarBucket.clear();
+                fElementDepth = -1;
+                fElementChildrenLength = 0;
 
         boolean parser_settings = componentManager.getFeature(PARSER_SETTINGS, true);
 
         if (!parser_settings){
-        	
-			fValidationManager.addValidationState(fValidationState);
-        	return;
+                
+                        fValidationManager.addValidationState(fValidationState);
+                return;
         }
 
         
@@ -388,7 +388,7 @@ public class XMLDTDValidator
         fGrammarPool= (XMLGrammarPool)componentManager.getProperty(GRAMMAR_POOL, null);
 
         fDatatypeValidatorFactory = (DTDDVFactory)componentManager.getProperty(Constants.XERCES_PROPERTY_PREFIX + Constants.DATATYPE_VALIDATOR_FACTORY_PROPERTY);
-		init();
+                init();
 
     } 
 

@@ -18,6 +18,8 @@ import javax.swing.plaf.PopupMenuUI;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicComboPopup;
 import javax.swing.event.*;
+
+import sun.awt.SunToolkit;
 import sun.security.util.SecurityConstants;
 
 import java.applet.Applet;
@@ -190,6 +192,7 @@ public class JPopupMenu extends JComponent implements Accessible,MenuElement {
         long popupBottomY = (long)popupLocation.y + (long)popupSize.height;
         int scrWidth = scrBounds.width;
         int scrHeight = scrBounds.height;
+
         if (!canPopupOverlapTaskBar()) {
             
             Insets scrInsets = toolkit.getScreenInsets(gc);
@@ -245,19 +248,14 @@ public class JPopupMenu extends JComponent implements Accessible,MenuElement {
     
     static boolean canPopupOverlapTaskBar() {
         boolean result = true;
-        try {
-            SecurityManager sm = System.getSecurityManager();
-            if (sm != null) {
-                sm.checkPermission(
-                    SecurityConstants.AWT.SET_WINDOW_ALWAYS_ON_TOP_PERMISSION);
-            }
-        } catch (SecurityException se) {
-            
-            result = false;
+
+        Toolkit tk = Toolkit.getDefaultToolkit();
+        if (tk instanceof SunToolkit) {
+            result = ((SunToolkit)tk).canPopupOverlapTaskBar();
         }
+
         return result;
     }
-
 
     
     protected JMenuItem createActionComponent(Action a) {

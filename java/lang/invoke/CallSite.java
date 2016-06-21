@@ -119,7 +119,7 @@ public class CallSite {
 
     
     void setTargetNormal(MethodHandle newTarget) {
-        target = newTarget;
+        MethodHandleNatives.setCallSiteTargetNormal(this, newTarget);
     }
     
     MethodHandle getTargetVolatile() {
@@ -127,7 +127,7 @@ public class CallSite {
     }
     
     void setTargetVolatile(MethodHandle newTarget) {
-        unsafe.putObjectVolatile(this, TARGET_OFFSET, newTarget);
+        MethodHandleNatives.setCallSiteTargetVolatile(this, newTarget);
     }
 
     

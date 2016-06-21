@@ -89,7 +89,7 @@ public class XSAllCM implements XSCMValidator {
 
         
         currentState[0] = STATE_CHILD;
-        
+
         Object matchingDecl = null;
 
         for (int i = 0; i < fNumElements; i++) {
@@ -168,4 +168,3 @@ public class XSAllCM implements XSCMValidator {
     }
 
 } 
-

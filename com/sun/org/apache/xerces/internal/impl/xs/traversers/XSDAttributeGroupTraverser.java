@@ -31,7 +31,7 @@ class XSDAttributeGroupTraverser extends XSDAbstractTraverser {
         Object[] attrValues = fAttrChecker.checkAttributes(elmNode, false, schemaDoc);
 
         
-        QName   refAttr	= (QName)   attrValues[XSAttributeChecker.ATTIDX_REF];
+        QName   refAttr = (QName)   attrValues[XSAttributeChecker.ATTIDX_REF];
 
         XSAttributeGroupDecl attrGrp = null;
 

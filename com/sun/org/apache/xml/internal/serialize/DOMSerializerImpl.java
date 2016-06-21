@@ -54,17 +54,17 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
     
     
     
-	
+
     
     
     private XMLSerializer serializer;
 
     
     private XML11Serializer xml11Serializer;
-    
+
     
     private DOMStringList fRecognizedParameters;
-    
+
     
     protected short features = 0;
 
@@ -82,7 +82,7 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
     protected final static short FORMAT_PRETTY_PRINT = 0x1<<11;
 
     
-    private DOMErrorHandler fErrorHandler = null;    
+    private DOMErrorHandler fErrorHandler = null;
     private final DOMErrorImpl fError = new DOMErrorImpl();
     private final DOMLocatorImpl fLocator = new DOMLocatorImpl();
     private static final RuntimeException abort = new RuntimeException();
@@ -100,7 +100,7 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
         features |= DOM_ELEMENT_CONTENT_WHITESPACE;
         features |= DISCARDDEFAULT;
         features |= XMLDECL;
-             
+
         serializer = new XMLSerializer();
         initSerializer(serializer);
     }
@@ -126,12 +126,12 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
                     features |= NAMESPACES;
                     features |= NSDECL;
                     features |= WELLFORMED;
-                    features |= COMMENTS;                 
+                    features |= COMMENTS;
                 }
                 
             } else if (name.equalsIgnoreCase(Constants.DOM_XMLDECL)) {
                 features =
-                    (short) (state ? features | XMLDECL : features & ~XMLDECL);                
+                    (short) (state ? features | XMLDECL : features & ~XMLDECL);
             } else if (name.equalsIgnoreCase(Constants.DOM_NAMESPACES)) {
                 features =
                     (short) (state
@@ -193,13 +193,13 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
                     throw new DOMException(DOMException.NOT_SUPPORTED_ERR, msg);
                 }
             }else if (
-			name.equalsIgnoreCase(Constants.DOM_NAMESPACE_DECLARATIONS)) {
-				
-				features =
-					(short) (state
-						? features | NSDECL
-						: features & ~NSDECL);
-				serializer.fNamespacePrefixes = state;							
+                        name.equalsIgnoreCase(Constants.DOM_NAMESPACE_DECLARATIONS)) {
+                                
+                                features =
+                                        (short) (state
+                                                ? features | NSDECL
+                                                : features & ~NSDECL);
+                                serializer.fNamespacePrefixes = state;
             } else if (name.equalsIgnoreCase(Constants.DOM_ELEMENT_CONTENT_WHITESPACE)
                     || name.equalsIgnoreCase(Constants.DOM_IGNORE_UNKNOWN_CHARACTER_DENORMALIZATIONS)) {
                 
@@ -234,7 +234,7 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
             name.equalsIgnoreCase(Constants.DOM_RESOURCE_RESOLVER)
                 || name.equalsIgnoreCase(Constants.DOM_SCHEMA_LOCATION)
                 || name.equalsIgnoreCase(Constants.DOM_SCHEMA_TYPE)
-                || name.equalsIgnoreCase(Constants.DOM_NORMALIZE_CHARACTERS) 
+                || name.equalsIgnoreCase(Constants.DOM_NORMALIZE_CHARACTERS)
                 && value != null) {
             String msg =
                 DOMMessageFormatter.formatMessage(
@@ -254,14 +254,14 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
 
     
     public boolean canSetParameter(String name, Object state) {
-        
+
         if (state == null) {
             return true;
         }
-        
+
         if (state instanceof Boolean) {
             boolean value = ((Boolean) state).booleanValue();
-            
+
             if (name.equalsIgnoreCase(Constants.DOM_NAMESPACES)
                 || name.equalsIgnoreCase(Constants.DOM_SPLIT_CDATA)
                 || name.equalsIgnoreCase(Constants.DOM_DISCARD_DEFAULT_CONTENT)
@@ -292,54 +292,54 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
             state == null || state instanceof DOMErrorHandler) {
             return true;
         }
-        
+
         return false;
     }
 
     
     public DOMStringList getParameterNames() {
-    	
-     	if (fRecognizedParameters == null){
-			Vector parameters = new Vector();
 
-			
-			
-			
-			parameters.add(Constants.DOM_NAMESPACES);
-			parameters.add(Constants.DOM_SPLIT_CDATA);
-			parameters.add(Constants.DOM_DISCARD_DEFAULT_CONTENT);
-			parameters.add(Constants.DOM_XMLDECL);
-			parameters.add(Constants.DOM_CANONICAL_FORM);
-			parameters.add(Constants.DOM_VALIDATE_IF_SCHEMA);
-			parameters.add(Constants.DOM_VALIDATE);
-			parameters.add(Constants.DOM_CHECK_CHAR_NORMALIZATION); 
-			parameters.add(Constants.DOM_DATATYPE_NORMALIZATION);
-			parameters.add(Constants.DOM_FORMAT_PRETTY_PRINT);
-			
-			parameters.add(Constants.DOM_WELLFORMED);
-			parameters.add(Constants.DOM_INFOSET);
-			parameters.add(Constants.DOM_NAMESPACE_DECLARATIONS);
-			parameters.add(Constants.DOM_ELEMENT_CONTENT_WHITESPACE);
-			parameters.add(Constants.DOM_ENTITIES);
-			parameters.add(Constants.DOM_CDATA_SECTIONS);
-			parameters.add(Constants.DOM_COMMENTS);
-			parameters.add(Constants.DOM_IGNORE_UNKNOWN_CHARACTER_DENORMALIZATIONS);
-			parameters.add(Constants.DOM_ERROR_HANDLER);
-			
-			
-			
-			
-			
-			fRecognizedParameters = new DOMStringListImpl(parameters);		
-    		
-    	}
+        if (fRecognizedParameters == null){
+                        Vector parameters = new Vector();
 
-    	return fRecognizedParameters; 	
-    }	
-    
+                        
+                        
+                        
+                        parameters.add(Constants.DOM_NAMESPACES);
+                        parameters.add(Constants.DOM_SPLIT_CDATA);
+                        parameters.add(Constants.DOM_DISCARD_DEFAULT_CONTENT);
+                        parameters.add(Constants.DOM_XMLDECL);
+                        parameters.add(Constants.DOM_CANONICAL_FORM);
+                        parameters.add(Constants.DOM_VALIDATE_IF_SCHEMA);
+                        parameters.add(Constants.DOM_VALIDATE);
+                        parameters.add(Constants.DOM_CHECK_CHAR_NORMALIZATION);
+                        parameters.add(Constants.DOM_DATATYPE_NORMALIZATION);
+                        parameters.add(Constants.DOM_FORMAT_PRETTY_PRINT);
+                        
+                        parameters.add(Constants.DOM_WELLFORMED);
+                        parameters.add(Constants.DOM_INFOSET);
+                        parameters.add(Constants.DOM_NAMESPACE_DECLARATIONS);
+                        parameters.add(Constants.DOM_ELEMENT_CONTENT_WHITESPACE);
+                        parameters.add(Constants.DOM_ENTITIES);
+                        parameters.add(Constants.DOM_CDATA_SECTIONS);
+                        parameters.add(Constants.DOM_COMMENTS);
+                        parameters.add(Constants.DOM_IGNORE_UNKNOWN_CHARACTER_DENORMALIZATIONS);
+                        parameters.add(Constants.DOM_ERROR_HANDLER);
+                        
+                        
+
+                        
+
+                        fRecognizedParameters = new DOMStringListImpl(parameters);
+
+        }
+
+        return fRecognizedParameters;
+    }
+
     
     public Object getParameter(String name) throws DOMException {
-        
+
         if(name.equalsIgnoreCase(Constants.DOM_NORMALIZE_CHARACTERS)){
                       return null;
         } else if (name.equalsIgnoreCase(Constants.DOM_COMMENTS)) {
@@ -357,9 +357,9 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
         } else if (name.equalsIgnoreCase(Constants.DOM_WELLFORMED)) {
             return (features & WELLFORMED) != 0 ? Boolean.TRUE : Boolean.FALSE;
         } else if (name.equalsIgnoreCase(Constants.DOM_NAMESPACE_DECLARATIONS)) {
-            return (features & NSDECL) != 0 ? Boolean.TRUE : Boolean.FALSE;            
+            return (features & NSDECL) != 0 ? Boolean.TRUE : Boolean.FALSE;
         } else if (name.equalsIgnoreCase(Constants.DOM_FORMAT_PRETTY_PRINT)) {
-            return (features & FORMAT_PRETTY_PRINT) != 0 ? Boolean.TRUE : Boolean.FALSE;            
+            return (features & FORMAT_PRETTY_PRINT) != 0 ? Boolean.TRUE : Boolean.FALSE;
         } else if (name.equalsIgnoreCase(Constants.DOM_ELEMENT_CONTENT_WHITESPACE) ||
                    name.equalsIgnoreCase(Constants.DOM_IGNORE_UNKNOWN_CHARACTER_DENORMALIZATIONS)) {
             return Boolean.TRUE;
@@ -373,8 +373,8 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
                  (features & WELLFORMED) != 0 &&
                  (features & COMMENTS) != 0) {
                      return Boolean.TRUE;
-                 }                 
-                 return Boolean.FALSE; 
+                 }
+                 return Boolean.FALSE;
         } else if (name.equalsIgnoreCase(Constants.DOM_CANONICAL_FORM)
                 || name.equalsIgnoreCase(Constants.DOM_VALIDATE_IF_SCHEMA)
                 || name.equalsIgnoreCase(Constants.DOM_CHECK_CHAR_NORMALIZATION)
@@ -448,7 +448,7 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
             else if (wnode.getNodeType() == Node.ELEMENT_NODE) {
                 ser.serialize((Element)wnode);
             }
-            else if (wnode.getNodeType() == Node.TEXT_NODE || 
+            else if (wnode.getNodeType() == Node.TEXT_NODE ||
                     wnode.getNodeType() == Node.COMMENT_NODE ||
                     wnode.getNodeType() == Node.ENTITY_REFERENCE_NODE ||
                     wnode.getNodeType() == Node.CDATA_SECTION_NODE ||
@@ -457,7 +457,7 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
             }
             else {
                 String msg = DOMMessageFormatter.formatMessage(
-                    DOMMessageFormatter.SERIALIZER_DOMAIN, 
+                    DOMMessageFormatter.SERIALIZER_DOMAIN,
                     "unable-to-serialize-node", null);
                 if (ser.fDOMErrorHandler != null) {
                     DOMErrorImpl error = new DOMErrorImpl();
@@ -487,7 +487,7 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
                 new Object[] { ioe.getMessage()});
             throw (DOMException) new DOMException(DOMException.DOMSTRING_SIZE_ERR, msg).initCause(ioe);
         }
-        
+
         return destination.toString();
     }
 
@@ -516,7 +516,7 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
     private void initSerializer(XMLSerializer ser) {
         ser.fNSBinder = new NamespaceSupport();
         ser.fLocalNSBinder = new NamespaceSupport();
-        ser.fSymbolTable = new SymbolTable();	
+        ser.fSymbolTable = new SymbolTable();
     }
 
     
@@ -536,7 +536,7 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
 
         if (node == null)
             return false;
-            
+
         Method getVersion = null;
         XMLSerializer ser = null;
         String ver = null;
@@ -602,7 +602,7 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
                 if (outputStream == null) {
                     if (uri == null) {
                         String msg = DOMMessageFormatter.formatMessage(
-                            DOMMessageFormatter.SERIALIZER_DOMAIN, 
+                            DOMMessageFormatter.SERIALIZER_DOMAIN,
                             "no-output-specified", null);
                         if (ser.fDOMErrorHandler != null) {
                             DOMErrorImpl error = new DOMErrorImpl();
@@ -621,7 +621,7 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
                         String protocol = url.getProtocol();
                         String host = url.getHost();
                         
-                        if (protocol.equals("file") 
+                        if (protocol.equals("file")
                             && (host == null || host.length() == 0 || host.equals("localhost"))) {
                             out = new FileOutputStream(getPathWithoutEscapes(url.getFile()));
                         }
@@ -650,7 +650,7 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
             }
             else {
                 
-                ser.setOutputCharStream(writer); 
+                ser.setOutputCharStream(writer);
             }
 
             if (node.getNodeType() == Node.DOCUMENT_NODE)
@@ -659,7 +659,7 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
                 ser.serialize((DocumentFragment) node);
             else if (node.getNodeType() == Node.ELEMENT_NODE)
                 ser.serialize((Element) node);
-            else if (node.getNodeType() == Node.TEXT_NODE || 
+            else if (node.getNodeType() == Node.TEXT_NODE ||
                     node.getNodeType() == Node.COMMENT_NODE ||
                     node.getNodeType() == Node.ENTITY_REFERENCE_NODE ||
                     node.getNodeType() == Node.CDATA_SECTION_NODE ||
@@ -672,16 +672,16 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
             if (ser.fDOMErrorHandler != null) {
                 DOMErrorImpl error = new DOMErrorImpl();
                 error.fException = ue;
-				error.fType = "unsupported-encoding";
+                                error.fType = "unsupported-encoding";
                 error.fMessage = ue.getMessage();
-				error.fSeverity = DOMError.SEVERITY_FATAL_ERROR;
+                                error.fSeverity = DOMError.SEVERITY_FATAL_ERROR;
                 ser.fDOMErrorHandler.handleError(error);
-			}
-            throw new LSException(LSException.SERIALIZE_ERR, 
+                        }
+            throw new LSException(LSException.SERIALIZE_ERR,
                 DOMMessageFormatter.formatMessage(
-                    DOMMessageFormatter.SERIALIZER_DOMAIN, 
-                    "unsupported-encoding", null));			
-			
+                    DOMMessageFormatter.SERIALIZER_DOMAIN,
+                    "unsupported-encoding", null));
+                        
         } catch (LSException lse) {
             
             throw lse;
@@ -699,8 +699,8 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
                 error.fSeverity = DOMError.SEVERITY_ERROR;
                 ser.fDOMErrorHandler.handleError(error);
 
-            }   
-            e.printStackTrace();       
+            }
+            e.printStackTrace();
             throw (LSException) DOMUtil.createLSException(LSException.SERIALIZE_ERR, e).fillInStackTrace();
         }
         return true;
@@ -742,7 +742,7 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
             ser = xml11Serializer;
         } else {
             ser = serializer;
-        }        
+        }
 
         try {
             Method getEncoding =
@@ -771,7 +771,7 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
         try {
             prepareForSerialization(ser, node);
             ser._format.setEncoding(encoding);
-            
+
             
             String expanded = XMLEntityManager.expandSystemId(URI, null, true);
             URL url = new URL(expanded != null ? expanded : URI);
@@ -779,9 +779,9 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
             String protocol = url.getProtocol();
             String host = url.getHost();
             
-            if (protocol.equals("file") 
+            if (protocol.equals("file")
                 && (host == null || host.length() == 0 || host.equals("localhost"))) {
-                out = new FileOutputStream(getPathWithoutEscapes(url.getFile()));            
+                out = new FileOutputStream(getPathWithoutEscapes(url.getFile()));
             }
             
             
@@ -806,7 +806,7 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
                 ser.serialize((DocumentFragment) node);
             else if (node.getNodeType() == Node.ELEMENT_NODE)
                 ser.serialize((Element) node);
-            else if (node.getNodeType() == Node.TEXT_NODE || 
+            else if (node.getNodeType() == Node.TEXT_NODE ||
                     node.getNodeType() == Node.COMMENT_NODE ||
                     node.getNodeType() == Node.ENTITY_REFERENCE_NODE ||
                     node.getNodeType() == Node.CDATA_SECTION_NODE ||
@@ -836,8 +836,8 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
         }
         return true;
     } 
-    
-    
+
+
     
     
     
@@ -849,7 +849,7 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
         ser.fNamespaces = (features & NAMESPACES) != 0;
         ser.fNamespacePrefixes = (features & NSDECL) != 0;
         ser._format.setOmitComments((features & COMMENTS)==0);
-        ser._format.setOmitXMLDeclaration((features & XMLDECL) == 0);   
+        ser._format.setOmitXMLDeclaration((features & XMLDECL) == 0);
         ser._format.setIndenting((features & FORMAT_PRETTY_PRINT) != 0);
 
         if ((features & WELLFORMED) != 0) {
@@ -884,7 +884,7 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
                           node = node.getParentNode();
                           if (root == node){
                               next = null;
-                              break;                   
+                              break;
                           }
                           next = node.getNextSibling();
                       }
@@ -897,21 +897,21 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
             }
         }
     }
-    
-    
+
+
     private void verify (Node node, boolean verifyNames, boolean xml11Version){
 
         int type = node.getNodeType();
         fLocator.fRelatedNode = node;
         boolean wellformed;
-        switch (type) { 
+        switch (type) {
             case Node.DOCUMENT_NODE:{
                 break;
             }
             case Node.DOCUMENT_TYPE_NODE:{
                 break;
             }
-            case Node.ELEMENT_NODE:{               
+            case Node.ELEMENT_NODE:{
                 if (verifyNames){
                     if((features & NAMESPACES) != 0){
                         wellformed = CoreDocumentImpl.isValidQName(node.getPrefix() , node.getLocalName(), xml11Version) ;
@@ -923,23 +923,23 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
                             if (!wellformed){
                                 if (fErrorHandler != null) {
                                     String msg = DOMMessageFormatter.formatMessage(
-                                        DOMMessageFormatter.DOM_DOMAIN, 
-                                        "wf-invalid-character-in-node-name", 
+                                        DOMMessageFormatter.DOM_DOMAIN,
+                                        "wf-invalid-character-in-node-name",
                                         new Object[]{"Element", node.getNodeName()});
-                                        DOMNormalizer.reportDOMError(fErrorHandler, fError, fLocator, msg, DOMError.SEVERITY_FATAL_ERROR, 
+                                        DOMNormalizer.reportDOMError(fErrorHandler, fError, fLocator, msg, DOMError.SEVERITY_FATAL_ERROR,
                                         "wf-invalid-character-in-node-name");
                                 }
-                        
-                            }                       
+
+                            }
                     }
                 }
-                
-                NamedNodeMap attributes = (node.hasAttributes()) ? node.getAttributes() : null; 
+
+                NamedNodeMap attributes = (node.hasAttributes()) ? node.getAttributes() : null;
                 if (attributes != null) {
                     for (int i = 0; i < attributes.getLength(); ++i) {
                         Attr attr = (Attr) attributes.item(i);
                         fLocator.fRelatedNode = attr;
-                        DOMNormalizer.isAttrValueWF( fErrorHandler, fError, fLocator, 
+                        DOMNormalizer.isAttrValueWF( fErrorHandler, fError, fLocator,
                                       attributes, attr, attr.getValue(), xml11Version);
                         if (verifyNames) {
                             wellformed = CoreDocumentImpl.isXMLName( attr.getNodeName(), xml11Version);
@@ -956,10 +956,10 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
                     }
 
                 }
-                
+
                 break;
             }
-        
+
         case Node.COMMENT_NODE: {
             
             if ((features & COMMENTS) != 0)
@@ -972,7 +972,7 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
                 CoreDocumentImpl.isXMLName(node.getNodeName() , xml11Version);
             }
             break;
-            
+
         }
         case Node.CDATA_SECTION_NODE: {
             
@@ -1008,14 +1008,14 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
                         DOMError.SEVERITY_FATAL_ERROR,
                         "wf-invalid-character-in-node-name");
                 }
-            }              
+            }
             DOMNormalizer.isXMLCharWF(fErrorHandler, fError, fLocator, pinode.getData(), xml11Version);
             break;
-        }        
         }
-               
+        }
+
     }
-    
+
     private String getPathWithoutEscapes(String origPath) {
         if (origPath != null && origPath.length() != 0 && origPath.indexOf('%') != -1) {
             
@@ -1035,7 +1035,3 @@ public class DOMSerializerImpl implements LSSerializer, DOMConfiguration {
     }
 
 }
-
-
-
-

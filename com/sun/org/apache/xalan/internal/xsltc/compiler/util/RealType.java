@@ -121,8 +121,8 @@ public final class RealType extends NumberType {
         il.append(DUP2);
         local = methodGen.addLocalVariable("real_to_boolean_tmp",
                                            com.sun.org.apache.bcel.internal.generic.Type.DOUBLE,
-                                           il.getEnd(), null);
-        il.append(new DSTORE(local.getIndex()));
+                                           null, null);
+        local.setStart(il.append(new DSTORE(local.getIndex())));
 
         
         il.append(DCONST_0);
@@ -132,7 +132,7 @@ public final class RealType extends NumberType {
         
         
         il.append(new DLOAD(local.getIndex()));
-        il.append(new DLOAD(local.getIndex()));
+        local.setEnd(il.append(new DLOAD(local.getIndex())));
         il.append(DCMPG);
         flowlist.add(il.append(new IFNE(null)));        
         return flowlist;

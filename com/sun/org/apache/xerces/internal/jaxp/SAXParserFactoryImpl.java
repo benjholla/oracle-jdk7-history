@@ -20,23 +20,23 @@ import com.sun.org.apache.xerces.internal.util.SAXMessageFormatter;
 
 
 public class SAXParserFactoryImpl extends SAXParserFactory {
-    
+
     
     private static final String VALIDATION_FEATURE =
         Constants.SAX_FEATURE_PREFIX + Constants.VALIDATION_FEATURE;
-    
+
     
     private static final String NAMESPACES_FEATURE =
         Constants.SAX_FEATURE_PREFIX + Constants.NAMESPACES_FEATURE;
+
     
-    
-    private static final String XINCLUDE_FEATURE = 
+    private static final String XINCLUDE_FEATURE =
         Constants.XERCES_FEATURE_PREFIX + Constants.XINCLUDE_FEATURE;
-    
+
     private Hashtable features;
     private Schema grammar;
     private boolean isXIncludeAware;
-    
+
     
     private boolean fSecureProcess = true;
 
@@ -51,12 +51,12 @@ public class SAXParserFactoryImpl extends SAXParserFactory {
             
             throw new ParserConfigurationException(se.getMessage());
         }
-	return saxParserImpl;
+        return saxParserImpl;
     }
 
     
     private SAXParserImpl newSAXParserImpl()
-        throws ParserConfigurationException, SAXNotRecognizedException, 
+        throws ParserConfigurationException, SAXNotRecognizedException,
         SAXNotSupportedException
     {
         SAXParserImpl saxParserImpl;
@@ -74,8 +74,8 @@ public class SAXParserFactoryImpl extends SAXParserFactory {
 
     
     public void setFeature(String name, boolean value)
-        throws ParserConfigurationException, SAXNotRecognizedException, 
-		SAXNotSupportedException {
+        throws ParserConfigurationException, SAXNotRecognizedException,
+                SAXNotSupportedException {
         if (name == null) {
             throw new NullPointerException();
         }
@@ -83,13 +83,13 @@ public class SAXParserFactoryImpl extends SAXParserFactory {
         if (name.equals(XMLConstants.FEATURE_SECURE_PROCESSING)) {
             if (System.getSecurityManager() != null && (!value)) {
                 throw new ParserConfigurationException(
-                        SAXMessageFormatter.formatMessage(null, 
+                        SAXMessageFormatter.formatMessage(null,
                         "jaxp-secureprocessing-feature", null));
             }
             fSecureProcess = value;
             return;
         }
-        
+
         
         
         putInFeatures(name, value);
@@ -108,7 +108,7 @@ public class SAXParserFactoryImpl extends SAXParserFactory {
     
     public boolean getFeature(String name)
         throws ParserConfigurationException, SAXNotRecognizedException,
-		SAXNotSupportedException {
+                SAXNotSupportedException {
         if (name == null) {
             throw new NullPointerException();
         }
@@ -119,7 +119,7 @@ public class SAXParserFactoryImpl extends SAXParserFactory {
         
         return newSAXParserImpl().getXMLReader().getFeature(name);
     }
-    
+
     public Schema getSchema() {
         return grammar;
     }
@@ -135,23 +135,23 @@ public class SAXParserFactoryImpl extends SAXParserFactory {
     public void setXIncludeAware(boolean state) {
         putInFeatures(XINCLUDE_FEATURE, state);
     }
-    
-    
+
+
     public void setValidating(boolean validating) {
         putInFeatures(VALIDATION_FEATURE, validating);
     }
-    
+
     public boolean isValidating() {
          return getFromFeatures(VALIDATION_FEATURE);
     }
-     
+
     private void putInFeatures(String name, boolean value){
          if (features == null) {
             features = new Hashtable();
         }
         features.put(name, value ? Boolean.TRUE : Boolean.FALSE);
     }
-     
+
     private boolean getFromFeatures(String name){
          if (features == null){
             return false;
@@ -161,11 +161,11 @@ public class SAXParserFactoryImpl extends SAXParserFactory {
              return (value == null) ? false : Boolean.valueOf(value.toString()).booleanValue();
          }
     }
-   
+
     public boolean isNamespaceAware() {
         return getFromFeatures(NAMESPACES_FEATURE);
     }
-     
+
     public void setNamespaceAware(boolean awareness) {
        putInFeatures(NAMESPACES_FEATURE, awareness);
     }

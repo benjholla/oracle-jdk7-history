@@ -95,32 +95,34 @@ public class CatalogManager {
 
   
   private String catalogClassName = null;
+    
+    private boolean useServicesMechanism;
 
   
   public Debug debug = null;
 
   
   public CatalogManager() {
-    debug = new Debug();
-    
-    
-    
-    
-    
+    init();
   }
 
   
   public CatalogManager(String propertyFile) {
     this.propertyFile = propertyFile;
+    init();
+  }
 
+  private void init() {
     debug = new Debug();
     
     
     
     
     
+    if (System.getSecurityManager() == null) {
+        useServicesMechanism = true;
+    }
   }
-
   
   public void setBootstrapResolver(BootstrapResolver resolver) {
     bResolver = resolver;
@@ -524,6 +526,9 @@ public class CatalogManager {
     return oasisXMLCatalogPI.booleanValue();
   }
 
+  public boolean useServicesMechanism() {
+      return useServicesMechanism;
+  }
   
   public void setAllowOasisXMLCatalogPI(boolean allowPI) {
     oasisXMLCatalogPI = new Boolean(allowPI);

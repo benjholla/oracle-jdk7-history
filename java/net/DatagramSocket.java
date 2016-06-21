@@ -60,7 +60,8 @@ class DatagramSocket implements java.io.Closeable {
           bind(new InetSocketAddress(0));
 
         
-        if (oldImpl) {
+        if (oldImpl || (impl instanceof AbstractPlainDatagramSocketImpl &&
+             ((AbstractPlainDatagramSocketImpl)impl).nativeConnectDisabled())) {
             connectState = ST_CONNECTED_NO_IMPL;
         } else {
             try {
@@ -371,9 +372,19 @@ class DatagramSocket implements java.io.Closeable {
                 
                 boolean stop = false;
                 while (!stop) {
+                    InetAddress peekAddress = null;
+                    int peekPort = -1;
                     
-                    InetAddress peekAddress = new InetAddress();
-                    int peekPort = getImpl().peek(peekAddress);
+                    if (!oldImpl) {
+                        
+                        DatagramPacket peekPacket = new DatagramPacket(new byte[1], 1);
+                        peekPort = getImpl().peekData(peekPacket);
+                        peekAddress = peekPacket.getAddress();
+                    } else {
+                        
+                        peekAddress = new InetAddress();
+                        peekPort = getImpl().peek(peekAddress);
+                    }
                     if ((!connectedAddress.equals(peekAddress)) ||
                         (connectedPort != peekPort)) {
                         

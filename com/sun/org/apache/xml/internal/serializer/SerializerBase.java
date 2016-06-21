@@ -84,6 +84,9 @@ public abstract class SerializerBase
     protected boolean m_standaloneWasSpecified = false;
 
     
+    protected boolean m_isStandalone = false;
+
+    
     protected boolean m_doIndent = false;
     
     protected int m_indentAmount = 0;
@@ -440,6 +443,12 @@ public abstract class SerializerBase
     public void setIndent(boolean doIndent)
     {
         m_doIndent = doIndent;
+    }
+
+    
+    public void setIsStandalone(boolean isStandalone)
+    {
+       m_isStandalone = isStandalone;
     }
 
     

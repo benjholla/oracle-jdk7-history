@@ -812,9 +812,9 @@ public class DTDGrammar
         return getElementDeclIndex(elementDeclQName.rawname);
     } 
 
-		
+                
 
-		public short getContentSpecType(int elementIndex){
+                public short getContentSpecType(int elementIndex){
         if (elementIndex < 0 || elementIndex >= fElementDeclCount) {
             return -1 ;
         }
@@ -824,12 +824,12 @@ public class DTDGrammar
 
         if(fElementDeclType[chunk][index] == -1){
             return -1 ;
-			    }
+                            }
         else{
-				       return (short) (fElementDeclType[chunk][index] & LIST_MASK);
-			    }
+                                       return (short) (fElementDeclType[chunk][index] & LIST_MASK);
+                            }
 
-		}
+                }
 
     
     public boolean getElementDecl(int elementDeclIndex,

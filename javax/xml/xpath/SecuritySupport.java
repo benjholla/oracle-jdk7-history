@@ -11,22 +11,22 @@ import java.util.*;
 
 class SecuritySupport  {
 
-    
+
     ClassLoader getContextClassLoader() {
-	return (ClassLoader)
-		AccessController.doPrivileged(new PrivilegedAction() {
-	    public Object run() {
-		ClassLoader cl = null;
-		try {
-		    cl = Thread.currentThread().getContextClassLoader();
-		} catch (SecurityException ex) { }
-		return cl;
-	    }
-	});
+        return (ClassLoader)
+                AccessController.doPrivileged(new PrivilegedAction() {
+            public Object run() {
+                ClassLoader cl = null;
+                try {
+                    cl = Thread.currentThread().getContextClassLoader();
+                } catch (SecurityException ex) { }
+                return cl;
+            }
+        });
     }
 
     String getSystemProperty(final String propName) {
-	return (String)
+        return (String)
             AccessController.doPrivileged(new PrivilegedAction() {
                 public Object run() {
                     return System.getProperty(propName);
@@ -37,31 +37,31 @@ class SecuritySupport  {
     FileInputStream getFileInputStream(final File file)
         throws FileNotFoundException
     {
-	try {
+        try {
             return (FileInputStream)
                 AccessController.doPrivileged(new PrivilegedExceptionAction() {
                     public Object run() throws FileNotFoundException {
                         return new FileInputStream(file);
                     }
                 });
-	} catch (PrivilegedActionException e) {
-	    throw (FileNotFoundException)e.getException();
-	}
+        } catch (PrivilegedActionException e) {
+            throw (FileNotFoundException)e.getException();
+        }
     }
 
     InputStream getURLInputStream(final URL url)
         throws IOException
     {
-	try {
+        try {
             return (InputStream)
                 AccessController.doPrivileged(new PrivilegedExceptionAction() {
                     public Object run() throws IOException {
                         return url.openStream();
                     }
                 });
-	} catch (PrivilegedActionException e) {
-	    throw (IOException)e.getException();
-	}
+        } catch (PrivilegedActionException e) {
+            throw (IOException)e.getException();
+        }
     }
 
     URL getResourceAsURL(final ClassLoader cl,
@@ -101,7 +101,7 @@ class SecuritySupport  {
             throw (IOException)e.getException();
         }
     }
-    
+
     InputStream getResourceAsStream(final ClassLoader cl,
                                            final String name)
     {

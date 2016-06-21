@@ -23,11 +23,11 @@ public abstract class XMLParser {
     
 
     
-    protected static final String ENTITY_RESOLVER = 
+    protected static final String ENTITY_RESOLVER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.ENTITY_RESOLVER_PROPERTY;
 
     
-    protected static final String ERROR_HANDLER = 
+    protected static final String ERROR_HANDLER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.ERROR_HANDLER_PROPERTY;
 
     
@@ -48,12 +48,12 @@ public abstract class XMLParser {
     
 
     
-    public boolean getFeature(String featureId) 
+    public boolean getFeature(String featureId)
             throws SAXNotSupportedException, SAXNotRecognizedException {
         return fConfiguration.getFeature(featureId);
 
     }
-    
+
     
     protected XMLParser(XMLParserConfiguration config) {
 
@@ -70,7 +70,7 @@ public abstract class XMLParser {
     
 
     
-    public void parse(XMLInputSource inputSource) 
+    public void parse(XMLInputSource inputSource)
         throws XNIException, IOException {
 
         reset();

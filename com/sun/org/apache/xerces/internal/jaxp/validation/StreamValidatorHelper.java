@@ -13,7 +13,7 @@ import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 
 import com.sun.org.apache.xerces.internal.impl.Constants;
@@ -28,82 +28,85 @@ import org.xml.sax.SAXException;
 
 
 final class StreamValidatorHelper implements ValidatorHelper {
+
     
+
     
+    private static final String PARSER_SETTINGS =
+        Constants.XERCES_FEATURE_PREFIX + Constants.PARSER_SETTINGS;
+
     
-    
-    private static final String PARSER_SETTINGS = 
-        Constants.XERCES_FEATURE_PREFIX + Constants.PARSER_SETTINGS;    
-    
-    
-    
+
     
     private static final String ENTITY_RESOLVER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.ENTITY_RESOLVER_PROPERTY;
+
     
-    
-    private static final String ERROR_HANDLER = 
+    private static final String ERROR_HANDLER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.ERROR_HANDLER_PROPERTY;
-    
+
     
     private static final String ERROR_REPORTER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.ERROR_REPORTER_PROPERTY;
-    
+
     
     private static final String SCHEMA_VALIDATOR =
         Constants.XERCES_PROPERTY_PREFIX + Constants.SCHEMA_VALIDATOR_PROPERTY;
-    
+
     
     private static final String SYMBOL_TABLE =
         Constants.XERCES_PROPERTY_PREFIX + Constants.SYMBOL_TABLE_PROPERTY;
-    
+
     
     private static final String VALIDATION_MANAGER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.VALIDATION_MANAGER_PROPERTY;
+
+    private static final String DEFAULT_TRANSFORMER_IMPL = "com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl";
     
     
     
-    
-    
+
     
     private SoftReference fConfiguration = new SoftReference(null);
-    
+
     
     private com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaValidator fSchemaValidator;
-    
+
     
     private XMLSchemaValidatorComponentManager fComponentManager;
-    
+
     private ValidatorHandlerImpl handler = null;
-    
+
     public StreamValidatorHelper(XMLSchemaValidatorComponentManager componentManager) {
         fComponentManager = componentManager;
         fSchemaValidator = (com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaValidator) fComponentManager.getProperty(SCHEMA_VALIDATOR);
     }
 
-    public void validate(Source source, Result result) 
+    public void validate(Source source, Result result)
         throws SAXException, IOException {
         if (result == null || result instanceof StreamResult) {
             final StreamSource streamSource = (StreamSource) source;
             TransformerHandler identityTransformerHandler ;
-            
+
             if( result!=null ) {
                 try {
-                    SAXTransformerFactory tf = (SAXTransformerFactory)SAXTransformerFactory.newInstance();
+                    SAXTransformerFactory tf = fComponentManager.getFeature(Constants.ORACLE_FEATURE_SERVICE_MECHANISM) ?
+                                    (SAXTransformerFactory)SAXTransformerFactory.newInstance()
+                                    : (SAXTransformerFactory) TransformerFactory.newInstance(DEFAULT_TRANSFORMER_IMPL, StreamValidatorHelper.class.getClassLoader());
                     identityTransformerHandler = tf.newTransformerHandler();
                 } catch (TransformerConfigurationException e) {
                     throw new TransformerFactoryConfigurationError(e);
                 }
-                
+
                 handler = new ValidatorHandlerImpl(fComponentManager);
                 handler.setContentHandler(identityTransformerHandler);
                 identityTransformerHandler.setResult(result);
             }
-            
+
             XMLInputSource input = new XMLInputSource(streamSource.getPublicId(), streamSource.getSystemId(), null);
             input.setByteStream(streamSource.getInputStream());
             input.setCharacterStream(streamSource.getReader());
-            
+
             
             
             XMLParserConfiguration config = (XMLParserConfiguration) fConfiguration.get();
@@ -115,11 +118,11 @@ final class StreamValidatorHelper implements ValidatorHelper {
                 config.setProperty(ENTITY_RESOLVER, fComponentManager.getProperty(ENTITY_RESOLVER));
                 config.setProperty(ERROR_HANDLER, fComponentManager.getProperty(ERROR_HANDLER));
             }
-            
+
             
             fComponentManager.reset();
             fSchemaValidator.setDocumentHandler(handler);
-                                    
+
             try {
                 config.parse(input);
             }
@@ -132,10 +135,10 @@ final class StreamValidatorHelper implements ValidatorHelper {
             return;
         }
         throw new IllegalArgumentException(JAXPValidationMessageFormatter.formatMessage(fComponentManager.getLocale(),
-                "SourceResultMismatch", 
+                "SourceResultMismatch",
                 new Object [] {source.getClass().getName(), result.getClass().getName()}));
     }
-    
+
     private XMLParserConfiguration initialize() {
         XML11Configuration config = new XML11Configuration();
         config.setProperty(ENTITY_RESOLVER, fComponentManager.getProperty(ENTITY_RESOLVER));

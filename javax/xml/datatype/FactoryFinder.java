@@ -14,16 +14,16 @@ import java.net.URL;
 
 
 class FactoryFinder {
-    
+
     
     private static boolean debug = false;
-    
+
     
     static Properties cacheProps = new Properties();
+
     
-    
-    static boolean firstTime = true;
-    
+    static volatile boolean firstTime = true;
+
     
     static SecuritySupport ss = new SecuritySupport();
 
@@ -35,21 +35,21 @@ class FactoryFinder {
             String val = ss.getSystemProperty("jaxp.debug");
             
             debug = val != null && !"false".equals(val);
-        } 
+        }
         catch (SecurityException se) {
             debug = false;
         }
     }
-    
+
     private static void dPrint(String msg) {
         if (debug) {
             System.err.println("JAXP: " + msg);
         }
     }
-    
+
     
     static private Class getProviderClass(String className, ClassLoader cl,
-            boolean doFallback) throws ClassNotFoundException 
+            boolean doFallback) throws ClassNotFoundException
     {
         try {
             if (cl == null) {
@@ -60,7 +60,7 @@ class FactoryFinder {
                 else {
                     return cl.loadClass(className);
                 }
-            } 
+            }
             else {
                 return cl.loadClass(className);
             }
@@ -69,51 +69,51 @@ class FactoryFinder {
             if (doFallback) {
                 
                 return Class.forName(className, true, FactoryFinder.class.getClassLoader());
-            } 
+            }
             else {
                 throw e1;
             }
-        }    
+        }
     }
+
     
-        
     static Object newInstance(String className, ClassLoader cl, boolean doFallback)
         throws ConfigurationError
     {
         try {
-            Class providerClass = getProviderClass(className, cl, doFallback);                        
+            Class providerClass = getProviderClass(className, cl, doFallback);
             Object instance = providerClass.newInstance();
             if (debug) {    
                 dPrint("created new instance of " + providerClass +
                        " using ClassLoader: " + cl);
             }
             return instance;
-        } 
+        }
         catch (ClassNotFoundException x) {
             throw new ConfigurationError(
                 "Provider " + className + " not found", x);
-        } 
+        }
         catch (Exception x) {
             throw new ConfigurationError(
                 "Provider " + className + " could not be instantiated: " + x,
                 x);
         }
     }
-    
+
     
     static Object find(String factoryId, String fallbackClassName)
         throws ConfigurationError
-    {        
+    {
         dPrint("find factoryId =" + factoryId);
-        
+
         
         try {
             String systemProp = ss.getSystemProperty(factoryId);
-            if (systemProp != null) {                
+            if (systemProp != null) {
                 dPrint("found system property, value=" + systemProp);
                 return newInstance(systemProp, null, true);
             }
-        } 
+        }
         catch (SecurityException se) {
             if (debug) se.printStackTrace();
         }
@@ -135,13 +135,13 @@ class FactoryFinder {
                     }
                 }
             }
-            factoryClassName = cacheProps.getProperty(factoryId);            
+            factoryClassName = cacheProps.getProperty(factoryId);
 
             if (factoryClassName != null) {
                 dPrint("found in $java.home/jaxp.properties, value=" + factoryClassName);
                 return newInstance(factoryClassName, null, true);
             }
-        } 
+        }
         catch (Exception ex) {
             if (debug) ex.printStackTrace();
         }
@@ -159,22 +159,22 @@ class FactoryFinder {
         dPrint("loaded from fallback value: " + fallbackClassName);
         return newInstance(fallbackClassName, null, true);
     }
-    
+
     
     private static Object findJarServiceProvider(String factoryId)
-        throws ConfigurationError 
+        throws ConfigurationError
     {
         String serviceId = "META-INF/services/" + factoryId;
         InputStream is = null;
-        
+
         
         ClassLoader cl = ss.getContextClassLoader();
         if (cl != null) {
             is = ss.getResourceAsStream(cl, serviceId);
-            
+
             
             if (is == null) {
-                cl = FactoryFinder.class.getClassLoader();                
+                cl = FactoryFinder.class.getClassLoader();
                 is = ss.getResourceAsStream(cl, serviceId);
             }
         } else {
@@ -182,24 +182,24 @@ class FactoryFinder {
             cl = FactoryFinder.class.getClassLoader();
             is = ss.getResourceAsStream(cl, serviceId);
         }
-        
+
         if (is == null) {
             
             return null;
         }
-        
+
         if (debug) {    
             dPrint("found jar resource=" + serviceId + " using ClassLoader: " + cl);
         }
-        
+
         BufferedReader rd;
         try {
             rd = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-        } 
+        }
         catch (java.io.UnsupportedEncodingException e) {
             rd = new BufferedReader(new InputStreamReader(is));
         }
-        
+
         String factoryClassName = null;
         try {
             
@@ -210,30 +210,30 @@ class FactoryFinder {
             
             return null;
         }
-        
+
         if (factoryClassName != null && !"".equals(factoryClassName)) {
             dPrint("found in resource, value=" + factoryClassName);
-            
+
             
             
             
             
             return newInstance(factoryClassName, cl, false);
         }
-        
+
         
         return null;
     }
-    
+
     static class ConfigurationError extends Error {
         private Exception exception;
-        
+
         
         ConfigurationError(String msg, Exception x) {
             super(msg);
             this.exception = x;
         }
-        
+
         Exception getException() {
             return exception;
         }
@@ -243,5 +243,5 @@ class FactoryFinder {
             return exception;
         }
     }
-    
+
 }

@@ -10,6 +10,7 @@ import com.sun.org.apache.xpath.internal.ExpressionOwner;
 import com.sun.org.apache.xpath.internal.VariableStack;
 import com.sun.org.apache.xpath.internal.XPathVisitor;
 import com.sun.org.apache.xpath.internal.compiler.Compiler;
+import com.sun.org.apache.xpath.internal.compiler.OpMap;
 
 
 
@@ -23,7 +24,7 @@ public class WalkingIterator extends LocPathIterator implements ExpressionOwner
   {
     super(compiler, opPos, analysis, shouldLoadWalkers);
 
-    int firstStepPos = compiler.getFirstChildPos(opPos);
+    int firstStepPos = OpMap.getFirstChildPos(opPos);
 
     if (shouldLoadWalkers)
     {

@@ -285,4 +285,3 @@ public class XML11Char {
     } 
 
 } 
-

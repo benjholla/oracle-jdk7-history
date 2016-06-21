@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import com.sun.org.apache.xalan.internal.utils.SecuritySupport;
 
 
 
@@ -30,7 +31,7 @@ public final class Encodings extends Object
     
     private static final String ENCODINGS_PROP = "com.sun.org.apache.xalan.internal.serialize.encodings";
 
-    
+
     
     static Writer getWriter(OutputStream output, String encoding)
         throws UnsupportedEncodingException
@@ -67,16 +68,16 @@ public final class Encodings extends Object
             throw new UnsupportedEncodingException(encoding);
         }
     }
-    
+
 
     
     public static int getLastPrintable()
     {
         return m_defaultLastPrintable;
     }
-    
-    
-    
+
+
+
     
     static EncodingInfo getEncodingInfo(String encoding)
     {
@@ -93,33 +94,33 @@ public final class Encodings extends Object
 
         return ei;
     }
- 
+
     
     static private String toUpperCaseFast(final String s) {
 
-    	boolean different = false;
-    	final int mx = s.length();
-		char[] chars = new char[mx];
-    	for (int i=0; i < mx; i++) {
-    		char ch = s.charAt(i);
+        boolean different = false;
+        final int mx = s.length();
+                char[] chars = new char[mx];
+        for (int i=0; i < mx; i++) {
+                char ch = s.charAt(i);
             
-    		if ('a' <= ch && ch <= 'z') {
+                if ('a' <= ch && ch <= 'z') {
                 
-    			ch = (char) (ch + ('A' - 'a'));
-    			different = true; 
-    		}
-    		chars[i] = ch;
-    	}
-    	
-    	
-    	
-    	final String upper;
-    	if (different) 
-    		upper = String.valueOf(chars);
-    	else
-    		upper = s;
-    		
-    	return upper;
+                        ch = (char) (ch + ('A' - 'a'));
+                        different = true; 
+                }
+                chars[i] = ch;
+        }
+
+        
+        
+        final String upper;
+        if (different)
+                upper = String.valueOf(chars);
+        else
+                upper = s;
+
+        return upper;
     }
 
     
@@ -219,9 +220,7 @@ public final class Encodings extends Object
             }
 
             if (is == null) {
-                SecuritySupport ss = SecuritySupport.getInstance();
-                is = ss.getResourceAsStream(ObjectFactory.findClassLoader(),
-                                            ENCODINGS_FILE);
+                is = SecuritySupport.getResourceAsStream(ENCODINGS_FILE);
             }
 
             Properties props = new Properties();

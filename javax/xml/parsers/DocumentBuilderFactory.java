@@ -7,7 +7,7 @@ import javax.xml.validation.Schema;
 
 
 public abstract class DocumentBuilderFactory {
-        
+
     
     private static final String DEFAULT_PROPERTY_NAME = "javax.xml.parsers.DocumentBuilderFactory";
 
@@ -17,9 +17,9 @@ public abstract class DocumentBuilderFactory {
     private boolean expandEntityRef = true;
     private boolean ignoreComments = false;
     private boolean coalescing = false;
-    
+
     private boolean canonicalState = false;
-    
+
     
     protected DocumentBuilderFactory () {
     }
@@ -47,23 +47,23 @@ public abstract class DocumentBuilderFactory {
         } catch (FactoryFinder.ConfigurationError e) {
             throw new FactoryConfigurationError(e.getException(),
                                                 e.getMessage());
-        }        
+        }
     }
 
     
-    
+
     public abstract DocumentBuilder newDocumentBuilder()
         throws ParserConfigurationException;
+
+
     
-    
-    
-    
+
     public void setNamespaceAware(boolean awareness) {
         this.namespaceAware = awareness;
     }
 
     
-    
+
     public void setValidating(boolean validating) {
         this.validating = validating;
     }
@@ -75,55 +75,55 @@ public abstract class DocumentBuilderFactory {
     }
 
     
-    
+
     public void setExpandEntityReferences(boolean expandEntityRef) {
         this.expandEntityRef = expandEntityRef;
     }
 
     
-    
+
     public void setIgnoringComments(boolean ignoreComments) {
         this.ignoreComments = ignoreComments;
     }
 
     
-    
+
     public void setCoalescing(boolean coalescing) {
         this.coalescing = coalescing;
     }
 
     
-    
+
     public boolean isNamespaceAware() {
         return namespaceAware;
     }
 
     
-    
+
     public boolean isValidating() {
         return validating;
     }
 
     
-    
+
     public boolean isIgnoringElementContentWhitespace() {
         return whitespace;
     }
 
     
-    
+
     public boolean isExpandEntityReferences() {
         return expandEntityRef;
     }
 
     
-    
+
     public boolean isIgnoringComments() {
         return ignoreComments;
     }
 
     
-    
+
     public boolean isCoalescing() {
         return coalescing;
     }
@@ -135,20 +135,20 @@ public abstract class DocumentBuilderFactory {
     
     public abstract Object getAttribute(String name)
                 throws IllegalArgumentException;
-                
-	
-	public abstract void setFeature(String name, boolean value)
-		throws ParserConfigurationException;
 
-	
-	public abstract boolean getFeature(String name)
-		throws ParserConfigurationException;
-                
+        
+        public abstract void setFeature(String name, boolean value)
+                throws ParserConfigurationException;
+
+        
+        public abstract boolean getFeature(String name)
+                throws ParserConfigurationException;
+
+
     
     
-    
-    
-    
+
+
     
     public Schema getSchema() {
         throw new UnsupportedOperationException(
@@ -160,10 +160,10 @@ public abstract class DocumentBuilderFactory {
             );
 
     }
+
     
     
-    
-    
+
     
     public void setSchema(Schema schema) {
         throw new UnsupportedOperationException(
@@ -174,9 +174,9 @@ public abstract class DocumentBuilderFactory {
             + "\""
             );
     }
-    
 
-    
+
+
     
     public void setXIncludeAware(final boolean state) {
         if (state) {

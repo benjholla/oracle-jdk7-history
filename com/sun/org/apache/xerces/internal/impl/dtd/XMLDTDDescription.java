@@ -77,9 +77,9 @@ public class XMLDTDDescription extends XMLResourceIdentifierImpl
     
     public boolean equals(Object desc) {
         if (!(desc instanceof XMLGrammarDescription)) return false;
-    	if (!getGrammarType().equals(((XMLGrammarDescription)desc).getGrammarType())) {
-    	    return false;
-    	}
+        if (!getGrammarType().equals(((XMLGrammarDescription)desc).getGrammarType())) {
+            return false;
+        }
         
         XMLDTDDescription dtdDesc = (XMLDTDDescription)desc;
         if (fRootName != null) {
@@ -128,7 +128,7 @@ public class XMLDTDDescription extends XMLResourceIdentifierImpl
         else if (dtdDesc.fPublicId != null) {
             return false;
         }
-    	return true;
+        return true;
     }
 
     
@@ -143,4 +143,3 @@ public class XMLDTDDescription extends XMLResourceIdentifierImpl
         return 0;
     }
 } 
-

@@ -6,43 +6,43 @@ package com.sun.org.apache.xerces.internal.xni;
 
 public class QName
 implements Cloneable {
-    
-        
+
+
     
     public String prefix;
-    
+
     
     public String localpart;
-    
+
     
     public String rawname;
-    
+
     
     public String uri;
+
     
     
     
-    
-    
+
     
     public QName() {
         clear();
     } 
-    
+
     
     public QName(String prefix, String localpart, String rawname, String uri) {
         setValues(prefix, localpart, rawname, uri);
     } 
-    
+
     
     public QName(QName qname) {
         setValues(qname);
     } 
+
     
     
     
-    
-    
+
     
     public void setValues(QName qname) {
         prefix = qname.prefix;
@@ -50,7 +50,7 @@ implements Cloneable {
         rawname = qname.rawname;
         uri = qname.uri;
     } 
-    
+
     
     public void setValues(String prefix, String localpart, String rawname,
     String uri) {
@@ -59,7 +59,7 @@ implements Cloneable {
         this.rawname = rawname;
         this.uri = uri;
     } 
-    
+
     
     public void clear() {
         prefix = null;
@@ -84,7 +84,7 @@ implements Cloneable {
     
     public int hashCode() {
         if (uri != null) {
-            return uri.hashCode() + 
+            return uri.hashCode() +
                 ((localpart != null) ? localpart.hashCode() : 0);
         }
         return (rawname != null) ? rawname.hashCode() : 0;

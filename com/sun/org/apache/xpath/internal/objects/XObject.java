@@ -469,21 +469,21 @@ public class XObject extends Expression implements Serializable, Cloneable
   
   public void callVisitors(ExpressionOwner owner, XPathVisitor visitor)
   {
-  	assertion(false, "callVisitors should not be called for this object!!!");
+        assertion(false, "callVisitors should not be called for this object!!!");
   }
   
   public boolean deepEquals(Expression expr)
   {
-  	if(!isSameClass(expr))
-  		return false;
+        if(!isSameClass(expr))
+                return false;
 
-  	
-  	
-  	
-  	if(!this.equals((XObject)expr))
-  		return false;
+        
+        
+        
+        if(!this.equals((XObject)expr))
+                return false;
 
-  	return true;
+        return true;
   }
 
 }

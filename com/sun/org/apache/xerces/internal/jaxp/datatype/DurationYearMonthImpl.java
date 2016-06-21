@@ -9,21 +9,21 @@ import javax.xml.datatype.DatatypeConstants;
 
 
 class DurationYearMonthImpl
-	extends DurationImpl {
+        extends DurationImpl {
 
 
     
     public DurationYearMonthImpl(
-	boolean isPositive,
-	BigInteger years,
-	BigInteger months) {
+        boolean isPositive,
+        BigInteger years,
+        BigInteger months) {
 
-	super(isPositive, years, months, null, null, null, null);
-	convertToCanonicalYearMonth();
+        super(isPositive, years, months, null, null, null, null);
+        convertToCanonicalYearMonth();
     }
-	
+        
     protected DurationYearMonthImpl(
-	final boolean isPositive,
+        final boolean isPositive,
         final int years,
         final int months) {
 
@@ -35,7 +35,7 @@ class DurationYearMonthImpl
     }
 
 
-	
+        
     protected DurationYearMonthImpl(long durationInMilliseconds) {
 
         super(durationInMilliseconds);
@@ -49,7 +49,7 @@ class DurationYearMonthImpl
     }
 
 
-	
+        
     protected DurationYearMonthImpl(String lexicalRepresentation) {
         super(lexicalRepresentation);
         if (getDays() > 0 || getHours() > 0
@@ -64,7 +64,7 @@ class DurationYearMonthImpl
 
     
     public int getValue() {
-	return getYears() * 12 + getMonths();
+        return getYears() * 12 + getMonths();
     }
 
     private void convertToCanonicalYearMonth() {
@@ -75,4 +75,3 @@ class DurationYearMonthImpl
         }
     }
 }
-

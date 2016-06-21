@@ -1057,6 +1057,7 @@ public class BasicOptionPaneUI extends OptionPaneUI {
                 int       index = list.locationToIndex(e.getPoint());
 
                 optionPane.setInputValue(list.getModel().getElementAt(index));
+                optionPane.setValue(JOptionPane.OK_OPTION);
             }
         }
 

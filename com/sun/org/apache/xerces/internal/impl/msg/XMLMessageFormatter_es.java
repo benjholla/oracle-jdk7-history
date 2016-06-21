@@ -19,15 +19,15 @@ public class XMLMessageFormatter_es implements MessageFormatter {
     
     private Locale fLocale = null;
     private ResourceBundle fResourceBundle = null;
-    
+
     
     
     
 
     
-    public String formatMessage(Locale locale, String key, Object[] arguments) 
+    public String formatMessage(Locale locale, String key, Object[] arguments)
         throws MissingResourceException {
-        
+
         if (fResourceBundle == null || locale != fLocale) {
             if (locale != null) {
                 fResourceBundle = PropertyResourceBundle.getBundle("com.sun.org.apache.xerces.internal.impl.msg.XMLMessages", locale);
@@ -37,7 +37,7 @@ public class XMLMessageFormatter_es implements MessageFormatter {
             if (fResourceBundle == null)
                 fResourceBundle = PropertyResourceBundle.getBundle("com.sun.org.apache.xerces.internal.impl.msg.XMLMessages");
         }
-        
+
         
         String msg;
         try {
@@ -45,12 +45,12 @@ public class XMLMessageFormatter_es implements MessageFormatter {
             if (arguments != null) {
                 try {
                     msg = java.text.MessageFormat.format(msg, arguments);
-                } 
+                }
                 catch (Exception e) {
                     msg = fResourceBundle.getString("FormatFailed");
                     msg += " " + fResourceBundle.getString(key);
                 }
-            } 
+            }
         }
 
         

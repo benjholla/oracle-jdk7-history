@@ -127,8 +127,7 @@ final class Whitespace extends TopLevelElement {
             if (col != -1) {
                 namespace = lookupNamespace(token.substring(0,col));
                 if (namespace != null) {
-                    elements.append(namespace+":"+
-                                    token.substring(col+1,token.length()));
+                    elements.append(namespace).append(':').append(token.substring(col + 1));
                 } else {
                     elements.append(token);
                 }
@@ -371,12 +370,7 @@ final class Whitespace extends TopLevelElement {
             compileStripSpace(strip, sCount, il);
         }
 
-        stripSpace.stripAttributes(true);
-        stripSpace.setMaxLocals();
-        stripSpace.setMaxStack();
-        stripSpace.removeNOPs();
-
-        classGen.addMethod(stripSpace.getMethod());
+        classGen.addMethod(stripSpace);
     }
 
     
@@ -406,12 +400,7 @@ final class Whitespace extends TopLevelElement {
             il.append(ICONST_0);
         il.append(IRETURN);
 
-        stripSpace.stripAttributes(true);
-        stripSpace.setMaxLocals();
-        stripSpace.setMaxStack();
-        stripSpace.removeNOPs();
-
-        classGen.addMethod(stripSpace.getMethod());
+        classGen.addMethod(stripSpace);
     }
 
 

@@ -17,7 +17,7 @@ public abstract class XMLOutputFactory {
   protected XMLOutputFactory(){}
 
   
-  public static XMLOutputFactory newInstance() 
+  public static XMLOutputFactory newInstance()
     throws FactoryConfigurationError
   {
     return (XMLOutputFactory) FactoryFinder.find("javax.xml.stream.XMLOutputFactory",
@@ -88,8 +88,8 @@ public abstract class XMLOutputFactory {
   public abstract XMLEventWriter createXMLEventWriter(java.io.Writer stream) throws XMLStreamException;
 
   
-  public abstract void setProperty(java.lang.String name, 
-                                    Object value) 
+  public abstract void setProperty(java.lang.String name,
+                                    Object value)
     throws IllegalArgumentException;
 
   
@@ -99,11 +99,3 @@ public abstract class XMLOutputFactory {
   
   public abstract boolean isPropertySupported(String name);
 }
-
-
-
-
-
-
-
-

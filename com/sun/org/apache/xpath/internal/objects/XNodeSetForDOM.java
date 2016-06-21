@@ -25,15 +25,15 @@ public class XNodeSetForDOM extends XNodeSet
     setObject(new NodeSetDTM(dtmMgr));
     ((NodeSetDTM) m_obj).addNode(dtmHandle);
   }
-  
+
   
   public XNodeSetForDOM(XNodeSet val)
   {
-  	super(val);
-  	if(val instanceof XNodeSetForDOM)
-    	m_origObj = ((XNodeSetForDOM)val).m_origObj;
+        super(val);
+        if(val instanceof XNodeSetForDOM)
+        m_origObj = ((XNodeSetForDOM)val).m_origObj;
   }
-  
+
   public XNodeSetForDOM(NodeList nodeList, XPathContext xctxt)
   {
     m_dtmMgr = xctxt.getDTMManager();
@@ -61,25 +61,25 @@ public class XNodeSetForDOM extends XNodeSet
     m_last=nsdtm.getLength();
     setObject(nsdtm);
   }
-  
+
   
   public Object object()
   {
     return m_origObj;
   }
-  
+
   
   public NodeIterator nodeset() throws javax.xml.transform.TransformerException
   {
-    return (m_origObj instanceof NodeIterator) 
-                   ? (NodeIterator)m_origObj : super.nodeset();      
+    return (m_origObj instanceof NodeIterator)
+                   ? (NodeIterator)m_origObj : super.nodeset();
   }
-  
+
   
   public NodeList nodelist() throws javax.xml.transform.TransformerException
   {
-    return (m_origObj instanceof NodeList) 
-                   ? (NodeList)m_origObj : super.nodelist();      
+    return (m_origObj instanceof NodeList)
+                   ? (NodeList)m_origObj : super.nodelist();
   }
 
 

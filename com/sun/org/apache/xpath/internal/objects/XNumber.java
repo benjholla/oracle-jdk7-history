@@ -22,7 +22,7 @@ public class XNumber extends XObject
 
     m_val = d;
   }
-  
+
   
   public XNumber(Number num)
   {
@@ -50,9 +50,9 @@ public class XNumber extends XObject
   {
     return m_val;
   }
+
   
-  
-  public double num(XPathContext xctxt) 
+  public double num(XPathContext xctxt)
     throws javax.xml.transform.TransformerException
   {
 
@@ -277,7 +277,7 @@ public class XNumber extends XObject
     
     while (s.charAt(e-1) == '0')
       e--;
-         
+
     if (exp > 0)
       return sign + s.substring(0, 1) + s.substring(2, 2 + exp) + "."
              + s.substring(2 + exp, e);
@@ -321,29 +321,29 @@ public class XNumber extends XObject
     int t = obj2.getType();
     try
     {
-	    if (t == XObject.CLASS_NODESET)
-	      return obj2.equals(this);
-	    else if(t == XObject.CLASS_BOOLEAN)
-	      return obj2.bool() == bool();
-		else
-	       return m_val == obj2.num();
+            if (t == XObject.CLASS_NODESET)
+              return obj2.equals(this);
+            else if(t == XObject.CLASS_BOOLEAN)
+              return obj2.bool() == bool();
+                else
+               return m_val == obj2.num();
     }
     catch(javax.xml.transform.TransformerException te)
     {
       throw new com.sun.org.apache.xml.internal.utils.WrappedRuntimeException(te);
     }
   }
-  
+
   
   public boolean isStableNumber()
   {
     return true;
   }
-  
+
   
   public void callVisitors(ExpressionOwner owner, XPathVisitor visitor)
   {
-  	visitor.visitNumberLiteral(owner, this);
+        visitor.visitNumberLiteral(owner, this);
   }
 
 

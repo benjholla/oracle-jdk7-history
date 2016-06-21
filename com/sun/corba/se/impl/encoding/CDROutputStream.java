@@ -332,6 +332,11 @@ public abstract class CDROutputStream
         impl.setByteBuffer(byteBuffer);
     }
 
+    
+    protected final boolean isSharing(ByteBuffer bb) {
+        return (getByteBuffer() ==  bb);
+    }
+
     public final boolean isLittleEndian() {
         return impl.isLittleEndian();
     }

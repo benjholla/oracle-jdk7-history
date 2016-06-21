@@ -24,6 +24,7 @@ import sun.awt.AWTAccessor;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import java.security.AccessControlContext;
 import java.security.ProtectionDomain;
@@ -33,12 +34,7 @@ import sun.misc.JavaSecurityAccess;
 
 
 public class EventQueue {
-
-    
-    private static int threadInitNumber;
-    private static synchronized int nextThreadNum() {
-        return threadInitNumber++;
-    }
+    private static final AtomicInteger threadInitNumber = new AtomicInteger(0);
 
     private static final int LOW_PRIORITY = 0;
     private static final int NORM_PRIORITY = 1;
@@ -80,9 +76,9 @@ public class EventQueue {
     private WeakReference currentEvent;
 
     
-    private int waitForID;
+    private volatile int waitForID;
 
-    private final String name = "AWT-EventQueue-" + nextThreadNum();
+    private final String name = "AWT-EventQueue-" + threadInitNumber.getAndIncrement();
 
     private static final PlatformLogger eventLog = PlatformLogger.getLogger("java.awt.event.EventQueue");
 
@@ -734,13 +730,13 @@ public class EventQueue {
         }
     }
 
-    final boolean detachDispatchThread(EventDispatchThread edt) {
+    final boolean detachDispatchThread(EventDispatchThread edt, boolean forceDetach) {
         
         pushPopLock.lock();
         try {
             if (edt == dispatchThread) {
                 
-                if ((peekEvent() != null) || !SunToolkit.isPostEventQueueEmpty()) {
+                if (!forceDetach && (peekEvent() != null) || !SunToolkit.isPostEventQueueEmpty()) {
                     return false;
                 }
                 dispatchThread = null;

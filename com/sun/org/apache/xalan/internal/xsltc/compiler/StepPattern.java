@@ -305,8 +305,8 @@ class StepPattern extends RelativePathPattern {
         LocalVariableGen match;
         match = methodGen.addLocalVariable("step_pattern_tmp1",
                                            Util.getJCRefType(NODE_SIG),
-                                           il.getEnd(), null);
-        il.append(new ISTORE(match.getIndex()));
+                                           null, null);
+        match.setStart(il.append(new ISTORE(match.getIndex())));
 
         
         if (!_isEpsilon) {
@@ -335,13 +335,15 @@ class StepPattern extends RelativePathPattern {
         LocalVariableGen stepIteratorTemp =
                 methodGen.addLocalVariable("step_pattern_tmp2",
                                            Util.getJCRefType(NODE_ITERATOR_SIG),
-                                           il.getEnd(), null);
-        il.append(new ASTORE(stepIteratorTemp.getIndex()));
+                                           null, null);
+        stepIteratorTemp.setStart(
+                il.append(new ASTORE(stepIteratorTemp.getIndex())));
 
         il.append(new NEW(cpg.addClass(MATCHING_ITERATOR)));
         il.append(DUP);
         il.append(new ILOAD(match.getIndex()));
-        il.append(new ALOAD(stepIteratorTemp.getIndex()));
+        stepIteratorTemp.setEnd(
+                il.append(new ALOAD(stepIteratorTemp.getIndex())));
         il.append(new INVOKESPECIAL(index));
 
         
@@ -355,7 +357,7 @@ class StepPattern extends RelativePathPattern {
 
         
         il.append(methodGen.storeIterator());
-        il.append(new ILOAD(match.getIndex()));
+        match.setEnd(il.append(new ILOAD(match.getIndex())));
         il.append(methodGen.storeCurrentNode());
 
         
@@ -392,13 +394,13 @@ class StepPattern extends RelativePathPattern {
         
         node = methodGen.addLocalVariable("step_pattern_tmp1",
                                           Util.getJCRefType(NODE_SIG),
-                                          il.getEnd(), null);
-        il.append(new ISTORE(node.getIndex()));
+                                          null, null);
+        node.setStart(il.append(new ISTORE(node.getIndex())));
 
         
         iter = methodGen.addLocalVariable("step_pattern_tmp2",
                                           Util.getJCRefType(NODE_ITERATOR_SIG),
-                                          il.getEnd(), null);
+                                          null, null);
 
         
         if (!classGen.isExternal()) {
@@ -415,20 +417,24 @@ class StepPattern extends RelativePathPattern {
             il.append(classGen.loadTranslet());
             il.append(new GETFIELD(iteratorIndex));
             il.append(DUP);
-            il.append(new ASTORE(iter.getIndex()));
+            iter.setStart(il.append(new ASTORE(iter.getIndex())));
             ifBlock = il.append(new IFNONNULL(null));
             il.append(classGen.loadTranslet());
         }
 
         
         _step.translate(classGen, methodGen);
-        il.append(new ASTORE(iter.getIndex()));
+        InstructionHandle iterStore = il.append(new ASTORE(iter.getIndex()));
 
         
         if (!classGen.isExternal()) {
             il.append(new ALOAD(iter.getIndex()));
             il.append(new PUTFIELD(iteratorIndex));
             ifBlock.setTarget(il.append(NOP));
+        } else {
+            
+            
+            iter.setStart(iterStore);
         }
 
         
@@ -448,10 +454,11 @@ class StepPattern extends RelativePathPattern {
         InstructionHandle begin, next;
         node2 = methodGen.addLocalVariable("step_pattern_tmp3",
                                            Util.getJCRefType(NODE_SIG),
-                                           il.getEnd(), null);
+                                           null, null);
 
         skipNext = il.append(new GOTO(null));
         next = il.append(new ALOAD(iter.getIndex()));
+        node2.setStart(next);
         begin = il.append(methodGen.nextNode());
         il.append(DUP);
         il.append(new ISTORE(node2.getIndex()));
@@ -459,10 +466,10 @@ class StepPattern extends RelativePathPattern {
 
         il.append(new ILOAD(node2.getIndex()));
         il.append(new ILOAD(node.getIndex()));
-        il.append(new IF_ICMPLT(next));
+        iter.setEnd(il.append(new IF_ICMPLT(next)));
 
-        il.append(new ILOAD(node2.getIndex()));
-        il.append(new ILOAD(node.getIndex()));
+        node2.setEnd(il.append(new ILOAD(node2.getIndex())));
+        node.setEnd(il.append(new ILOAD(node.getIndex())));
         _falseList.add(il.append(new IF_ICMPNE(null)));
 
         skipNext.setTarget(begin);

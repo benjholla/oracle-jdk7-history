@@ -603,7 +603,7 @@ public class XStringForFSB extends XString
       return Double.NaN;
 
     try {
-      return new Double(valueString).doubleValue();
+      return Double.parseDouble(valueString);
     } catch (NumberFormatException nfe) {
       
       return Double.NaN;

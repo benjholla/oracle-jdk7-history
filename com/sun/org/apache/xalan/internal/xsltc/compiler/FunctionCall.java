@@ -34,6 +34,7 @@ import com.sun.org.apache.xalan.internal.xsltc.compiler.util.ObjectType;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.ReferenceType;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.TypeCheckError;
+import com.sun.org.apache.xalan.internal.utils.ObjectFactory;
 
 
 class FunctionCall extends Expression {
@@ -316,8 +317,7 @@ class FunctionCall extends Expression {
                 else {
                     if (_className != null && _className.length() > 0) {
                         try {
-                            _clazz = ObjectFactory.findProviderClass(
-                                _className, ObjectFactory.findClassLoader(), true);
+                            _clazz = ObjectFactory.findProviderClass(_className, true);
                             _namespace_format = NAMESPACE_FORMAT_CLASS;
                         }
                         catch (ClassNotFoundException e) {
@@ -713,8 +713,10 @@ class FunctionCall extends Expression {
                 paramTemp[i] =
                     methodGen.addLocalVariable("function_call_tmp"+i,
                                                expType.toJCType(),
-                                               il.getEnd(), null);
-                il.append(expType.STORE(paramTemp[i].getIndex()));
+                                               null, null);
+                paramTemp[i].setStart(
+                        il.append(expType.STORE(paramTemp[i].getIndex())));
+
             }
 
             il.append(new NEW(cpg.addClass(_className)));
@@ -722,7 +724,8 @@ class FunctionCall extends Expression {
 
             for (int i = 0; i < n; i++) {
                 final Expression arg = argument(i);
-                il.append(arg.getType().LOAD(paramTemp[i].getIndex()));
+                paramTemp[i].setEnd(
+                        il.append(arg.getType().LOAD(paramTemp[i].getIndex())));
             }
 
             final StringBuffer buffer = new StringBuffer();
@@ -816,8 +819,7 @@ class FunctionCall extends Expression {
             final int nArgs = _arguments.size();
             try {
               if (_clazz == null) {
-                _clazz = ObjectFactory.findProviderClass(
-                  _className, ObjectFactory.findClassLoader(), true);
+                _clazz = ObjectFactory.findProviderClass(_className, true);
 
                 if (_clazz == null) {
                   final ErrorMsg msg =
@@ -859,8 +861,7 @@ class FunctionCall extends Expression {
         final int nArgs = _arguments.size();
         try {
           if (_clazz == null) {
-            _clazz = ObjectFactory.findProviderClass(
-              _className, ObjectFactory.findClassLoader(), true);
+            _clazz = ObjectFactory.findProviderClass(_className, true);
 
             if (_clazz == null) {
               final ErrorMsg msg = new ErrorMsg(ErrorMsg.CLASS_NOT_FOUND_ERR, _className);

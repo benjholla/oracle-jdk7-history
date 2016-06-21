@@ -1202,12 +1202,4 @@ import static java.lang.invoke.MethodHandles.Lookup.IMPL_LOOKUP;
         return THROW_EXCEPTION;
     }
     static <T extends Throwable> Empty throwException(T t) throws T { throw t; }
-
-    
-    static void registerBootstrap(Class<?> callerClass, MethodHandle bootstrapMethod) {
-        MethodHandleNatives.registerBootstrap(callerClass, bootstrapMethod);
-    }
-    static MethodHandle getBootstrap(Class<?> callerClass) {
-        return MethodHandleNatives.getBootstrap(callerClass);
-    }
 }

@@ -4,7 +4,7 @@ package javax.xml.transform;
 
 
 public abstract class TransformerFactory {
-    
+
     
     protected TransformerFactory() { }
 
@@ -36,7 +36,7 @@ public abstract class TransformerFactory {
             throw new TransformerFactoryConfigurationError(
                 e.getException(),
                 e.getMessage());
-        }        
+        }
     }
     
     public abstract Transformer newTransformer(Source source)
@@ -66,9 +66,9 @@ public abstract class TransformerFactory {
 
     
 
-	
-	public abstract void setFeature(String name, boolean value)
-		throws TransformerConfigurationException;
+        
+        public abstract void setFeature(String name, boolean value)
+                throws TransformerConfigurationException;
 
     
     public abstract boolean getFeature(String name);
@@ -86,4 +86,3 @@ public abstract class TransformerFactory {
     public abstract ErrorListener getErrorListener();
 
 }
-

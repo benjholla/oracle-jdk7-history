@@ -106,6 +106,8 @@ public abstract class AccessibleContext {
     private AccessibleRelationSet relationSet
         = new AccessibleRelationSet();
 
+    private Object nativeAXResource;
+
     
     public String getAccessibleName() {
         return accessibleName;

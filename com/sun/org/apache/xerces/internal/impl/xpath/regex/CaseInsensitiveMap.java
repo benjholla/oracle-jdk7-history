@@ -151,4 +151,3 @@ public class CaseInsensitiveMap {
         return newMap;
     }
 }
-

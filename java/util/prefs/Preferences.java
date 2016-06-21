@@ -90,10 +90,15 @@ public abstract class Preferences {
         }
 
         
-        String platformFactory =
-            System.getProperty("os.name").startsWith("Windows")
-            ? "java.util.prefs.WindowsPreferencesFactory"
-            : "java.util.prefs.FileSystemPreferencesFactory";
+        String osName = System.getProperty("os.name");
+        String platformFactory;
+        if (osName.startsWith("Windows")) {
+            platformFactory = "java.util.prefs.WindowsPreferencesFactory";
+        } else if (osName.contains("OS X")) {
+            platformFactory = "java.util.prefs.MacOSXPreferencesFactory";
+        } else {
+            platformFactory = "java.util.prefs.FileSystemPreferencesFactory";
+        }
         try {
             return (PreferencesFactory)
                 Class.forName(platformFactory, false, null).newInstance();

@@ -2,6 +2,9 @@
 
 package java.util.zip;
 
+import java.nio.ByteBuffer;
+import sun.nio.ch.DirectBuffer;
+
 
 public
 class Adler32 implements Checksum {
@@ -33,6 +36,26 @@ class Adler32 implements Checksum {
     }
 
     
+    private void update(ByteBuffer buffer) {
+        int pos = buffer.position();
+        int limit = buffer.limit();
+        assert (pos <= limit);
+        int rem = limit - pos;
+        if (rem <= 0)
+            return;
+        if (buffer instanceof DirectBuffer) {
+            adler = updateByteBuffer(adler, ((DirectBuffer)buffer).address(), pos, rem);
+        } else if (buffer.hasArray()) {
+            adler = updateBytes(adler, buffer.array(), pos + buffer.arrayOffset(), rem);
+        } else {
+            byte[] b = new byte[rem];
+            buffer.get(b);
+            adler = updateBytes(adler, b, 0, b.length);
+        }
+        buffer.position(limit);
+    }
+
+    
     public void reset() {
         adler = 1;
     }
@@ -42,7 +65,18 @@ class Adler32 implements Checksum {
         return (long)adler & 0xffffffffL;
     }
 
+    
+    static {
+       sun.misc.SharedSecrets.setJavaUtilZipAccess(new sun.misc.JavaUtilZipAccess() {
+           public void update(Adler32 adler32, ByteBuffer buf) {
+               adler32.update(buf);
+           }
+        });
+    }
+
     private native static int update(int adler, int b);
     private native static int updateBytes(int adler, byte[] b, int off,
                                           int len);
+    private native static int updateByteBuffer(int adler, long addr,
+                                               int off, int len);
 }

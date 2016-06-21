@@ -11,6 +11,7 @@ import com.sun.org.apache.xpath.internal.ExpressionOwner;
 import com.sun.org.apache.xpath.internal.XPathVisitor;
 import com.sun.org.apache.xpath.internal.compiler.Compiler;
 import com.sun.org.apache.xpath.internal.compiler.OpCodes;
+import com.sun.org.apache.xpath.internal.compiler.OpMap;
 
 
 public class UnionPathIterator extends LocPathIterator
@@ -105,7 +106,7 @@ public class UnionPathIterator extends LocPathIterator
 
     super();
 
-    opPos = compiler.getFirstChildPos(opPos);
+    opPos = OpMap.getFirstChildPos(opPos);
 
     loadLocationPaths(compiler, opPos, 0);
   }

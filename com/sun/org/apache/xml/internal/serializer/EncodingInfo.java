@@ -17,31 +17,31 @@ public final class EncodingInfo extends Object
 
     
     private InEncoding m_encoding;
-    
+
     
     public boolean isInEncoding(char ch) {
         if (m_encoding == null) {
             m_encoding = new EncodingImpl();
-            
+
             
             
             
             
         }
-        return m_encoding.isInEncoding(ch); 
+        return m_encoding.isInEncoding(ch);
     }
-    
+
     
     public boolean isInEncoding(char high, char low) {
         if (m_encoding == null) {
             m_encoding = new EncodingImpl();
-            
+
             
             
             
             
         }
-        return m_encoding.isInEncoding(high, low); 
+        return m_encoding.isInEncoding(high, low);
     }
 
     
@@ -51,9 +51,9 @@ public final class EncodingInfo extends Object
         this.name = name;
         this.javaName = javaName;
     }
-    
-    
-    
+
+
+
     
     private interface InEncoding {
         
@@ -64,7 +64,7 @@ public final class EncodingInfo extends Object
 
     
     private class EncodingImpl implements InEncoding {
-        
+
 
 
         public boolean isInEncoding(char ch1) {
@@ -73,7 +73,7 @@ public final class EncodingInfo extends Object
             if (codePoint < m_explFirst) {
                 
                 
-                
+
                 
                 if (m_before == null)
                     m_before =
@@ -86,7 +86,7 @@ public final class EncodingInfo extends Object
             } else if (m_explLast < codePoint) {
                 
                 
-                
+
                 
                 if (m_after == null)
                     m_after =
@@ -99,7 +99,7 @@ public final class EncodingInfo extends Object
             } else {
                 
                 final int idx = codePoint - m_explFirst;
-                
+
                 
                 if (m_alreadyKnown[idx])
                     ret = m_isInEncoding[idx];
@@ -120,7 +120,7 @@ public final class EncodingInfo extends Object
             if (codePoint < m_explFirst) {
                 
                 
-                
+
                 
                 if (m_before == null)
                     m_before =
@@ -133,7 +133,7 @@ public final class EncodingInfo extends Object
             } else if (m_explLast < codePoint) {
                 
                 
-                
+
                 
                 if (m_after == null)
                     m_after =
@@ -146,7 +146,7 @@ public final class EncodingInfo extends Object
             } else {
                 
                 final int idx = codePoint - m_explFirst;
-                
+
                 
                 if (m_alreadyKnown[idx])
                     ret = m_isInEncoding[idx];
@@ -165,7 +165,7 @@ public final class EncodingInfo extends Object
         final private String m_encoding;
         
         final private int m_first;
-        
+
         
         final private int m_explFirst;
         final private int m_explLast;
@@ -175,7 +175,7 @@ public final class EncodingInfo extends Object
         private InEncoding m_before;
         
         private InEncoding m_after;
-        
+
         
         private static final int RANGE = 128;
 
@@ -183,7 +183,7 @@ public final class EncodingInfo extends Object
         final private boolean m_alreadyKnown[] = new boolean[RANGE];
         
         final private boolean m_isInEncoding[] = new boolean[RANGE];
-        
+
         private EncodingImpl() {
             
             
@@ -194,17 +194,17 @@ public final class EncodingInfo extends Object
             
             
             m_first = first;
-            m_last = last;  
-                      
+            m_last = last;
+
             
             
             
             
             m_explFirst = codePoint / RANGE * RANGE;
             m_explLast = m_explFirst + (RANGE-1);
-            
+
             m_encoding = encoding;
-            
+
             if (javaName != null)
             {
                 
@@ -218,7 +218,7 @@ public final class EncodingInfo extends Object
                         || "Unicode".equals(javaName)
                         || "UNICODE".equals(javaName)
                         || javaName.startsWith("ISO8859")) {
-                        
+
                         
                         
                         
@@ -266,17 +266,17 @@ public final class EncodingInfo extends Object
 
         } catch (Exception e) {
             isInEncoding = false;
-            
+
             
             
             
             if (encoding == null)
-            	isInEncoding = true;
+                isInEncoding = true;
         }
         return isInEncoding;
     }
+
     
-     
     private static boolean inEncoding(char high, char low, String encoding) {
         boolean isInEncoding;
         try {
@@ -292,10 +292,10 @@ public final class EncodingInfo extends Object
         } catch (Exception e) {
             isInEncoding = false;
         }
-        
+
         return isInEncoding;
-    } 
-    
+    }
+
     
     private static boolean inEncoding(char ch, byte[] data) {
         final boolean isInEncoding;
@@ -311,11 +311,11 @@ public final class EncodingInfo extends Object
                 isInEncoding = false;
             else if (data[0] == '?' && ch != '?')
                 isInEncoding = false;
-             
-                
+            
+
             else {
                 
-                isInEncoding = true; 
+                isInEncoding = true;
             }
         }
         return isInEncoding;

@@ -53,15 +53,15 @@ public class ElementNSImpl
         setName(namespaceURI, qualifiedName);
     }
 
-	private void setName(String namespaceURI, String qname) {
+        private void setName(String namespaceURI, String qname) {
 
-		String prefix;
-		
-		this.namespaceURI = namespaceURI;
-		if (namespaceURI != null) {
+                String prefix;
+                
+                this.namespaceURI = namespaceURI;
+                if (namespaceURI != null) {
             
-			this.namespaceURI =	(namespaceURI.length() == 0) ? null : namespaceURI;
-		}
+                        this.namespaceURI =     (namespaceURI.length() == 0) ? null : namespaceURI;
+                }
 
         int colon1, colon2 ;
 
@@ -70,63 +70,63 @@ public class ElementNSImpl
         
         
         if(qname == null){
-				String msg =
-					DOMMessageFormatter.formatMessage(
-						DOMMessageFormatter.DOM_DOMAIN,
-						"NAMESPACE_ERR",
-						null);
-				throw new DOMException(DOMException.NAMESPACE_ERR, msg);
+                                String msg =
+                                        DOMMessageFormatter.formatMessage(
+                                                DOMMessageFormatter.DOM_DOMAIN,
+                                                "NAMESPACE_ERR",
+                                                null);
+                                throw new DOMException(DOMException.NAMESPACE_ERR, msg);
         }
         else{
-		    colon1 = qname.indexOf(':');
-		    colon2 = qname.lastIndexOf(':');
+                    colon1 = qname.indexOf(':');
+                    colon2 = qname.lastIndexOf(':');
         }
 
-		ownerDocument.checkNamespaceWF(qname, colon1, colon2);
-		if (colon1 < 0) {
-			
-			localName = qname;
-			if (ownerDocument.errorChecking) {
-			    ownerDocument.checkQName(null, localName);
-			    if (qname.equals("xmlns")
-			        && (namespaceURI == null
-			        || !namespaceURI.equals(NamespaceContext.XMLNS_URI))
-			        || (namespaceURI!=null && namespaceURI.equals(NamespaceContext.XMLNS_URI)
-			        && !qname.equals("xmlns"))) {
-			        String msg =
-			            DOMMessageFormatter.formatMessage(
-			                    DOMMessageFormatter.DOM_DOMAIN,
-			                    "NAMESPACE_ERR",
-			                    null);
-			        throw new DOMException(DOMException.NAMESPACE_ERR, msg);
-			    }
-			}
-		}
-		else {
-		    prefix = qname.substring(0, colon1);
-		    localName = qname.substring(colon2 + 1);
-		    
-		    
-		    
-		    
-		    
-		    
-		    
-		    if (ownerDocument.errorChecking) {
-		        if( namespaceURI == null || ( prefix.equals("xml") && !namespaceURI.equals(NamespaceContext.XML_URI) )){
-		            String msg =
-		                DOMMessageFormatter.formatMessage(
-		                        DOMMessageFormatter.DOM_DOMAIN,
-		                        "NAMESPACE_ERR",
-		                        null);
-		            throw new DOMException(DOMException.NAMESPACE_ERR, msg);
-		        }
-		        
-		        ownerDocument.checkQName(prefix, localName);
-		        ownerDocument.checkDOMNSErr(prefix, namespaceURI);
-		    }
-		}
-	}
+                ownerDocument.checkNamespaceWF(qname, colon1, colon2);
+                if (colon1 < 0) {
+                        
+                        localName = qname;
+                        if (ownerDocument.errorChecking) {
+                            ownerDocument.checkQName(null, localName);
+                            if (qname.equals("xmlns")
+                                && (namespaceURI == null
+                                || !namespaceURI.equals(NamespaceContext.XMLNS_URI))
+                                || (namespaceURI!=null && namespaceURI.equals(NamespaceContext.XMLNS_URI)
+                                && !qname.equals("xmlns"))) {
+                                String msg =
+                                    DOMMessageFormatter.formatMessage(
+                                            DOMMessageFormatter.DOM_DOMAIN,
+                                            "NAMESPACE_ERR",
+                                            null);
+                                throw new DOMException(DOMException.NAMESPACE_ERR, msg);
+                            }
+                        }
+                }
+                else {
+                    prefix = qname.substring(0, colon1);
+                    localName = qname.substring(colon2 + 1);
+
+                    
+                    
+
+                    
+                    
+
+                    if (ownerDocument.errorChecking) {
+                        if( namespaceURI == null || ( prefix.equals("xml") && !namespaceURI.equals(NamespaceContext.XML_URI) )){
+                            String msg =
+                                DOMMessageFormatter.formatMessage(
+                                        DOMMessageFormatter.DOM_DOMAIN,
+                                        "NAMESPACE_ERR",
+                                        null);
+                            throw new DOMException(DOMException.NAMESPACE_ERR, msg);
+                        }
+
+                        ownerDocument.checkQName(prefix, localName);
+                        ownerDocument.checkDOMNSErr(prefix, namespaceURI);
+                    }
+                }
+        }
 
     
     protected ElementNSImpl(CoreDocumentImpl ownerDocument,
@@ -154,7 +154,7 @@ public class ElementNSImpl
         if (needsSyncData()) {
             synchronizeData();
         }
-		this.name = qualifiedName;
+                this.name = qualifiedName;
         setName(namespaceURI, qualifiedName);
         reconcileDefaultAttributes();
     }
@@ -283,13 +283,13 @@ public class ElementNSImpl
                     }
                     catch (com.sun.org.apache.xerces.internal.util.URI.MalformedURIException e) {
                         
-                        
+
                         
                         NodeImpl parentOrOwner = (parentNode() != null) ? parentNode() : ownerNode;
-                        
+
                         
                         String parentBaseURI = (parentOrOwner != null) ? parentOrOwner.getBaseURI() : null;
-                        
+
                         if (parentBaseURI != null) {
                             try {
                                 uri = new URI(new URI(parentBaseURI), uri).toString();
@@ -299,7 +299,7 @@ public class ElementNSImpl
                                 return null;
                             }
                             return uri;
-                        }                       
+                        }
                         
                         return null;
                     }
@@ -363,7 +363,7 @@ public class ElementNSImpl
     }
 
     
-    public boolean isDerivedFrom(String typeNamespaceArg, String typeNameArg, 
+    public boolean isDerivedFrom(String typeNamespaceArg, String typeNameArg,
             int derivationMethod) {
         if(needsSyncData()) {
             synchronizeData();
@@ -378,7 +378,7 @@ public class ElementNSImpl
             }
         }
         return false;
-    }    
+    }
 
     
     public void setType(XSTypeDefinition type) {

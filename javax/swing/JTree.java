@@ -917,7 +917,9 @@ public class JTree extends JComponent implements Scrollable, Accessible
 
     
     public TreePath[] getSelectionPaths() {
-        return getSelectionModel().getSelectionPaths();
+        TreePath[] selectionPaths = getSelectionModel().getSelectionPaths();
+
+        return (selectionPaths != null && selectionPaths.length > 0) ? selectionPaths : null;
     }
 
     

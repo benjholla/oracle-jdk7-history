@@ -147,7 +147,7 @@ public class CMBuilder {
             boolean twoChildren = false;
             for (int i = 0; i < group.fParticleCount; i++) {
                 
-                temp = buildSyntaxTree(group.fParticles[i], 
+                temp = buildSyntaxTree(group.fParticles[i],
                         optimize &&
                         minOccurs == 1 && maxOccurs == 1 &&
                         (group.fCompositor == XSModelGroupImpl.MODELGROUP_SEQUENCE ||
@@ -204,13 +204,13 @@ public class CMBuilder {
             
             nodeRet = fNodeFactory.getCMUniOpNode(XSParticleDecl.PARTICLE_ONE_OR_MORE, node);
         }
-        else if (optimize && node.type() == XSParticleDecl.PARTICLE_ELEMENT ||        
+        else if (optimize && node.type() == XSParticleDecl.PARTICLE_ELEMENT ||
                  node.type() == XSParticleDecl.PARTICLE_WILDCARD) {
             
             
             
             
-            
+
             
             nodeRet = fNodeFactory.getCMUniOpNode(
                     minOccurs == 0 ? XSParticleDecl.PARTICLE_ZERO_OR_MORE

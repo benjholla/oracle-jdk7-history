@@ -99,9 +99,11 @@ public final class XSLTC {
     
     private boolean _isSecureProcessing = false;
 
+    private boolean _useServicesMechanism = true;
+
     
-    public XSLTC() {
-        _parser = new Parser(this);
+    public XSLTC(boolean useServicesMechanism) {
+        _parser = new Parser(this, useServicesMechanism);
     }
 
     
@@ -112,6 +114,15 @@ public final class XSLTC {
     
     public boolean isSecureProcessing() {
         return _isSecureProcessing;
+    }
+    
+    public boolean useServicesMechnism() {
+        return _useServicesMechanism;
+    }
+
+    
+    public void setServicesMechnism(boolean flag) {
+        _useServicesMechanism = flag;
     }
 
     
@@ -172,6 +183,10 @@ public final class XSLTC {
     
     public void setTemplateInlining(boolean templateInlining) {
         _templateInlining = templateInlining;
+    }
+     
+    public boolean getTemplateInlining() {
+        return _templateInlining;
     }
 
     

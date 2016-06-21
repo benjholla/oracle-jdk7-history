@@ -1138,7 +1138,7 @@ public class XSAttributeChecker {
 
                         
                         attrValues[ATTIDX_MAXOCCURS] = fXIntPool.getXInt(maxOccurNodeLimit);
-						
+                                                
                         max = maxOccurNodeLimit;
                     }
                 }

@@ -651,7 +651,7 @@ class Token implements java.io.Serializable {
          "Specials",
          "Halfwidth and Fullwidth Forms",
          
-         "Old Italic",		
+         "Old Italic",         
          "Gothic",
          "Deseret",
          "Byzantine Musical Symbols",

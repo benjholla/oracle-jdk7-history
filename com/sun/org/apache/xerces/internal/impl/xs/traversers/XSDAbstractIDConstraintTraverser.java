@@ -167,4 +167,3 @@ class XSDAbstractIDConstraintTraverser extends XSDAbstractTraverser {
         return ic.getFieldCount() > 0;
     } 
 } 
-

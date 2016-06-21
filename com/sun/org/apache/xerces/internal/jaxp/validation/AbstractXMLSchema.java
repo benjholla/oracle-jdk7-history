@@ -31,7 +31,7 @@ abstract class AbstractXMLSchema extends Schema implements
     public final ValidatorHandler newValidatorHandler() {
         return new ValidatorHandlerImpl(this);
     }
-    
+
     
 
     
@@ -44,5 +44,5 @@ abstract class AbstractXMLSchema extends Schema implements
     final void setFeature(String featureId, boolean state) {
         fFeatures.put(featureId, state ? Boolean.TRUE : Boolean.FALSE);
     }
-    
+
 } 

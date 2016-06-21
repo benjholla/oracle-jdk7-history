@@ -15,9 +15,9 @@ import com.sun.org.apache.xerces.internal.impl.dv.ValidationContext;
 
 public class DurationDV extends AbstractDateTimeDV {
 
-	public static final int DURATION_TYPE = 0;
-	public static final int YEARMONTHDURATION_TYPE = 1;
-	public static final int DAYTIMEDURATION_TYPE = 2;
+        public static final int DURATION_TYPE = 0;
+        public static final int YEARMONTHDURATION_TYPE = 1;
+        public static final int DAYTIMEDURATION_TYPE = 2;
     
     
     

@@ -51,23 +51,23 @@ public abstract class ParentNode
 
     
     public Node cloneNode(boolean deep) {
-    	
+
         if (needsSyncChildren()) {
             synchronizeChildren();
         }
-    	ParentNode newnode = (ParentNode) super.cloneNode(deep);
+        ParentNode newnode = (ParentNode) super.cloneNode(deep);
 
         
         newnode.ownerDocument = ownerDocument;
 
-    	
-    	newnode.firstChild      = null;
+        
+        newnode.firstChild      = null;
 
         
         newnode.fNodeListCache = null;
 
         
-    	if (deep) {
+        if (deep) {
             for (ChildNode child = firstChild;
                  child != null;
                  child = child.nextSibling) {
@@ -75,7 +75,7 @@ public abstract class ParentNode
             }
         }
 
-    	return newnode;
+        return newnode;
 
     } 
 
@@ -95,9 +95,9 @@ public abstract class ParentNode
             synchronizeChildren();
         }
        for (ChildNode child = firstChild;
-	     child != null; child = child.nextSibling) {
+             child != null; child = child.nextSibling) {
              child.setOwnerDocument(doc);
-	}
+        }
         
         super.setOwnerDocument(doc);
         ownerDocument = doc;
@@ -127,7 +127,7 @@ public abstract class ParentNode
         if (needsSyncChildren()) {
             synchronizeChildren();
         }
-    	return firstChild;
+        return firstChild;
 
     }   
 
@@ -154,14 +154,14 @@ public abstract class ParentNode
     }
 
     
-    public Node insertBefore(Node newChild, Node refChild) 
+    public Node insertBefore(Node newChild, Node refChild)
         throws DOMException {
         
         return internalInsertBefore(newChild, refChild, false);
     } 
-     
+
     
-    Node internalInsertBefore(Node newChild, Node refChild, boolean replace) 
+    Node internalInsertBefore(Node newChild, Node refChild, boolean replace)
         throws DOMException {
 
         boolean errorChecking = ownerDocument.errorChecking;
@@ -190,7 +190,7 @@ public abstract class ParentNode
 
                     if (!ownerDocument.isKidOK(this, kid)) {
                         throw new DOMException(
-                              DOMException.HIERARCHY_REQUEST_ERR, 
+                              DOMException.HIERARCHY_REQUEST_ERR,
                               DOMMessageFormatter.formatMessage(DOMMessageFormatter.DOM_DOMAIN, "HIERARCHY_REQUEST_ERR", null));
                     }
                 }
@@ -217,15 +217,15 @@ public abstract class ParentNode
         if (errorChecking) {
             if (isReadOnly()) {
                 throw new DOMException(
-                              DOMException.NO_MODIFICATION_ALLOWED_ERR, 
+                              DOMException.NO_MODIFICATION_ALLOWED_ERR,
                               DOMMessageFormatter.formatMessage(DOMMessageFormatter.DOM_DOMAIN, "NO_MODIFICATION_ALLOWED_ERR", null));
             }
             if (newChild.getOwnerDocument() != ownerDocument && newChild != ownerDocument) {
-                throw new DOMException(DOMException.WRONG_DOCUMENT_ERR, 
+                throw new DOMException(DOMException.WRONG_DOCUMENT_ERR,
                             DOMMessageFormatter.formatMessage(DOMMessageFormatter.DOM_DOMAIN, "WRONG_DOCUMENT_ERR", null));
             }
             if (!ownerDocument.isKidOK(this, newChild)) {
-                throw new DOMException(DOMException.HIERARCHY_REQUEST_ERR, 
+                throw new DOMException(DOMException.HIERARCHY_REQUEST_ERR,
                             DOMMessageFormatter.formatMessage(DOMMessageFormatter.DOM_DOMAIN, "HIERARCHY_REQUEST_ERR", null));
             }
             
@@ -244,7 +244,7 @@ public abstract class ParentNode
                     treeSafe = newChild != a;
                 }
                 if(!treeSafe) {
-                    throw new DOMException(DOMException.HIERARCHY_REQUEST_ERR, 
+                    throw new DOMException(DOMException.HIERARCHY_REQUEST_ERR,
                                 DOMMessageFormatter.formatMessage(DOMMessageFormatter.DOM_DOMAIN, "HIERARCHY_REQUEST_ERR", null));
                 }
             }
@@ -335,12 +335,12 @@ public abstract class ParentNode
     } 
 
     
-    public Node removeChild(Node oldChild) 
+    public Node removeChild(Node oldChild)
         throws DOMException {
         
         return internalRemoveChild(oldChild, false);
     } 
-     
+
     
     Node internalRemoveChild(Node oldChild, boolean replace)
         throws DOMException {
@@ -349,11 +349,11 @@ public abstract class ParentNode
         if (ownerDocument.errorChecking) {
             if (isReadOnly()) {
                 throw new DOMException(
-                            DOMException.NO_MODIFICATION_ALLOWED_ERR, 
+                            DOMException.NO_MODIFICATION_ALLOWED_ERR,
                             DOMMessageFormatter.formatMessage(DOMMessageFormatter.DOM_DOMAIN, "NO_MODIFICATION_ALLOWED_ERR", null));
             }
             if (oldChild != null && oldChild.getParentNode() != this) {
-                throw new DOMException(DOMException.NOT_FOUND_ERR, 
+                throw new DOMException(DOMException.NOT_FOUND_ERR,
                             DOMMessageFormatter.formatMessage(DOMMessageFormatter.DOM_DOMAIN, "NOT_FOUND_ERR", null));
             }
         }
@@ -621,7 +621,7 @@ public abstract class ParentNode
                 public int getLength() {
                     return nodeListGetLength();
                 } 
-                
+
                 
                 public Node item(int index) {
                     return nodeListItem(index);
@@ -778,7 +778,7 @@ public abstract class ParentNode
     class UserDataRecord implements Serializable {
         
         private static final long serialVersionUID = 3258126977134310455L;
-        
+
         Object fData;
         UserDataHandler fHandler;
         UserDataRecord(Object data, UserDataHandler handler) {

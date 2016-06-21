@@ -40,5 +40,5 @@ public interface XSCMValidator {
 
     
     public ArrayList checkMinMaxBounds();
-    
+
 } 

@@ -65,7 +65,7 @@ public class SubstitutionGroupHandler {
         
         if (element == exemplar)
             return true;
-        
+
         
         
         if ((blockingConstraint & XSConstants.DERIVATION_SUBSTITUTION) != 0)
@@ -186,12 +186,12 @@ public class SubstitutionGroupHandler {
         Object subGroup = fSubGroups.get(element);
         if (subGroup != null)
             return (XSElementDecl[])subGroup;
-        
+
         if ((element.fBlock & XSConstants.DERIVATION_SUBSTITUTION) != 0) {
             fSubGroups.put(element, EMPTY_GROUP);
             return EMPTY_GROUP;
         }
-        
+
         
         
         OneSubGroup[] groupB = getSubGroupB(element, new OneSubGroup());
@@ -224,11 +224,11 @@ public class SubstitutionGroupHandler {
             fSubGroupsB.put(element, EMPTY_VECTOR);
             return EMPTY_VECTOR;
         }
-        
+
         
         if (subGroup instanceof OneSubGroup[])
             return (OneSubGroup[])subGroup;
-        
+
         
         Vector group = (Vector)subGroup, newGroup = new Vector();
         OneSubGroup[] group1;
@@ -264,7 +264,7 @@ public class SubstitutionGroupHandler {
         }
         
         fSubGroupsB.put(element, ret);
-        
+
         return ret;
     }
 
@@ -287,7 +287,7 @@ public class SubstitutionGroupHandler {
         
         if (typed != typeb || (dMethod & bMethod) != 0)
             return false;
-        
+
         
         methods.dMethod = dMethod;
         methods.bMethod = bMethod;

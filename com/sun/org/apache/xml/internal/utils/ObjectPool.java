@@ -3,10 +3,11 @@
 
 package com.sun.org.apache.xml.internal.utils;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 import com.sun.org.apache.xml.internal.res.XMLErrorResources;
 import com.sun.org.apache.xml.internal.res.XMLMessages;
+import com.sun.org.apache.xalan.internal.utils.ObjectFactory;
 
 
 
@@ -18,13 +19,13 @@ public class ObjectPool implements java.io.Serializable
   private final Class objectType;
 
   
-  private final Vector freeStack;
+  private final ArrayList freeStack;
 
   
   public ObjectPool(Class type)
   {
     objectType = type;
-    freeStack = new Vector();
+    freeStack = new ArrayList();
   }
 
   
@@ -32,14 +33,13 @@ public class ObjectPool implements java.io.Serializable
   {
     try
     {
-      objectType = ObjectFactory.findProviderClass(
-        className, ObjectFactory.findClassLoader(), true);
+      objectType = ObjectFactory.findProviderClass(className, true);
     }
     catch(ClassNotFoundException cnfe)
     {
       throw new WrappedRuntimeException(cnfe);
     }
-    freeStack = new Vector();
+    freeStack = new ArrayList();
   }
 
 
@@ -47,14 +47,14 @@ public class ObjectPool implements java.io.Serializable
   public ObjectPool(Class type, int size)
   {
     objectType = type;
-    freeStack = new Vector(size);
+    freeStack = new ArrayList(size);
   }
 
   
   public ObjectPool()
   {
     objectType = null;
-    freeStack = new Vector();
+    freeStack = new ArrayList();
   }
 
   
@@ -66,10 +66,7 @@ public class ObjectPool implements java.io.Serializable
     {
 
       
-      Object result = freeStack.lastElement();
-
-      freeStack.setSize(freeStack.size() - 1);
-
+      Object result = freeStack.remove(freeStack.size() - 1);
       return result;
     }
 
@@ -99,10 +96,7 @@ public class ObjectPool implements java.io.Serializable
     {
 
       
-      Object result = freeStack.lastElement();
-
-      freeStack.setSize(freeStack.size() - 1);
-
+      Object result = freeStack.remove(freeStack.size() - 1);
       return result;
     }
   }
@@ -115,7 +109,7 @@ public class ObjectPool implements java.io.Serializable
     
     
     
-    freeStack.addElement(obj);
+    freeStack.add(obj);
     
     
     

@@ -46,7 +46,7 @@ class XSDocumentInfo {
 
     
     Vector fImportedNS = new Vector();
-    
+
     protected ValidationState fValidationContext = new ValidationState();
 
     SymbolTable fSymbolTable = null;
@@ -58,7 +58,7 @@ class XSDocumentInfo {
     
     
     protected Object [] fSchemaAttrs;
-    
+
     
     
     protected XSAnnotationInfo fAnnotations = null;
@@ -113,14 +113,14 @@ class XSDocumentInfo {
     private void initNamespaceSupport(Element schemaRoot) {
         fNamespaceSupport = new SchemaNamespaceSupport();
         fNamespaceSupport.reset();
-        
+
         Node parent = schemaRoot.getParentNode();
         while (parent != null && parent.getNodeType() == Node.ELEMENT_NODE
-                && !parent.getNodeName().equals("DOCUMENT_NODE")) 
+                && !parent.getNodeName().equals("DOCUMENT_NODE"))
         {
             Element eparent = (Element) parent;
             NamedNodeMap map = eparent.getAttributes();
-            int length = (map != null) ? map.getLength() : 0;                
+            int length = (map != null) ? map.getLength() : 0;
             for (int i = 0; i < length; i++) {
                 Attr attr = (Attr) map.item(i);
                 String uri = attr.getNamespaceURI();
@@ -131,7 +131,7 @@ class XSDocumentInfo {
                     if (prefix == "xmlns") prefix = "";
                     
                     if (fNamespaceSupport.getURI(prefix) == null) {
-                        fNamespaceSupport.declarePrefix(prefix, 
+                        fNamespaceSupport.declarePrefix(prefix,
                                 attr.getValue().intern());
                     }
                 }
@@ -164,11 +164,11 @@ class XSDocumentInfo {
     public void addAllowedNS(String namespace) {
         fImportedNS.addElement(namespace == null ? "" : namespace);
     }
-    
+
     public boolean isAllowedNS(String namespace) {
         return fImportedNS.contains(namespace == null ? "" : namespace);
     }
-    
+
     
     
     private Vector fReportedTNS = null;
@@ -195,22 +195,22 @@ class XSDocumentInfo {
         fAttrChecker.returnAttrArray (fSchemaAttrs, null);
         fSchemaAttrs = null;
     }
-    
+
     
     void addAnnotation(XSAnnotationInfo info) {
         info.next = fAnnotations;
         fAnnotations = info;
     }
-    
+
     
     
     XSAnnotationInfo getAnnotations() {
         return fAnnotations;
     }
-    
+
     
     void removeAnnotations() {
         fAnnotations = null;
     }
-    
+
 } 

@@ -219,12 +219,12 @@ final class Sort extends Instruction implements Closure {
         LocalVariableGen nodesTemp =
             methodGen.addLocalVariable("sort_tmp1",
                                        Util.getJCRefType(NODE_ITERATOR_SIG),
-                                       il.getEnd(), null);
+                                       null, null);
 
         LocalVariableGen sortRecordFactoryTemp =
             methodGen.addLocalVariable("sort_tmp2",
                                       Util.getJCRefType(NODE_SORT_FACTORY_SIG),
-                                      il.getEnd(), null);
+                                      null, null);
 
         
         if (nodeSet == null) {  
@@ -240,17 +240,19 @@ final class Sort extends Instruction implements Closure {
             nodeSet.translate(classGen, methodGen);
         }
 
-        il.append(new ASTORE(nodesTemp.getIndex()));
+        nodesTemp.setStart(il.append(new ASTORE(nodesTemp.getIndex())));
 
         
         
         compileSortRecordFactory(sortObjects, classGen, methodGen);
-        il.append(new ASTORE(sortRecordFactoryTemp.getIndex()));
+        sortRecordFactoryTemp.setStart(
+                il.append(new ASTORE(sortRecordFactoryTemp.getIndex())));
 
         il.append(new NEW(cpg.addClass(SORT_ITERATOR)));
         il.append(DUP);
-        il.append(new ALOAD(nodesTemp.getIndex()));
-        il.append(new ALOAD(sortRecordFactoryTemp.getIndex()));
+        nodesTemp.setEnd(il.append(new ALOAD(nodesTemp.getIndex())));
+        sortRecordFactoryTemp.setEnd(
+                il.append(new ALOAD(sortRecordFactoryTemp.getIndex())));
         il.append(new INVOKESPECIAL(init));
     }
 
@@ -292,7 +294,7 @@ final class Sort extends Instruction implements Closure {
         LocalVariableGen sortOrderTemp
                  = methodGen.addLocalVariable("sort_order_tmp",
                                       Util.getJCRefType("[" + STRING_SIG),
-                                      il.getEnd(), null);
+                                      null, null);
         il.append(new PUSH(cpg, nsorts));
         il.append(new ANEWARRAY(cpg.addClass(STRING)));
         for (int level = 0; level < nsorts; level++) {
@@ -302,12 +304,12 @@ final class Sort extends Instruction implements Closure {
             sort.translateSortOrder(classGen, methodGen);
             il.append(AASTORE);
         }
-        il.append(new ASTORE(sortOrderTemp.getIndex()));
+        sortOrderTemp.setStart(il.append(new ASTORE(sortOrderTemp.getIndex())));
 
         LocalVariableGen sortTypeTemp
                  = methodGen.addLocalVariable("sort_type_tmp",
                                       Util.getJCRefType("[" + STRING_SIG),
-                                      il.getEnd(), null);
+                                      null, null);
         il.append(new PUSH(cpg, nsorts));
         il.append(new ANEWARRAY(cpg.addClass(STRING)));
         for (int level = 0; level < nsorts; level++) {
@@ -317,12 +319,12 @@ final class Sort extends Instruction implements Closure {
             sort.translateSortType(classGen, methodGen);
             il.append(AASTORE);
         }
-        il.append(new ASTORE(sortTypeTemp.getIndex()));
+        sortTypeTemp.setStart(il.append(new ASTORE(sortTypeTemp.getIndex())));
 
         LocalVariableGen sortLangTemp
                  = methodGen.addLocalVariable("sort_lang_tmp",
                                       Util.getJCRefType("[" + STRING_SIG),
-                                      il.getEnd(), null);
+                                      null, null);
         il.append(new PUSH(cpg, nsorts));
         il.append(new ANEWARRAY(cpg.addClass(STRING)));
         for (int level = 0; level < nsorts; level++) {
@@ -332,12 +334,12 @@ final class Sort extends Instruction implements Closure {
               sort.translateLang(classGen, methodGen);
               il.append(AASTORE);
         }
-        il.append(new ASTORE(sortLangTemp.getIndex()));
+        sortLangTemp.setStart(il.append(new ASTORE(sortLangTemp.getIndex())));
 
         LocalVariableGen sortCaseOrderTemp
                  = methodGen.addLocalVariable("sort_case_order_tmp",
                                       Util.getJCRefType("[" + STRING_SIG),
-                                      il.getEnd(), null);
+                                      null, null);
         il.append(new PUSH(cpg, nsorts));
         il.append(new ANEWARRAY(cpg.addClass(STRING)));
         for (int level = 0; level < nsorts; level++) {
@@ -347,7 +349,8 @@ final class Sort extends Instruction implements Closure {
             sort.translateCaseOrder(classGen, methodGen);
             il.append(AASTORE);
         }
-        il.append(new ASTORE(sortCaseOrderTemp.getIndex()));
+        sortCaseOrderTemp.setStart(
+                il.append(new ASTORE(sortCaseOrderTemp.getIndex())));
 
         il.append(new NEW(cpg.addClass(sortRecordFactoryClass)));
         il.append(DUP);
@@ -355,10 +358,11 @@ final class Sort extends Instruction implements Closure {
         il.append(new PUSH(cpg, sortRecordClass));
         il.append(classGen.loadTranslet());
 
-        il.append(new ALOAD(sortOrderTemp.getIndex()));
-        il.append(new ALOAD(sortTypeTemp.getIndex()));
-        il.append(new ALOAD(sortLangTemp.getIndex()));
-        il.append(new ALOAD(sortCaseOrderTemp.getIndex()));
+        sortOrderTemp.setEnd(il.append(new ALOAD(sortOrderTemp.getIndex())));
+        sortTypeTemp.setEnd(il.append(new ALOAD(sortTypeTemp.getIndex())));
+        sortLangTemp.setEnd(il.append(new ALOAD(sortLangTemp.getIndex())));
+        sortCaseOrderTemp.setEnd(
+                il.append(new ALOAD(sortCaseOrderTemp.getIndex())));
 
         il.append(new INVOKESPECIAL(
             cpg.addMethodref(sortRecordFactoryClass, "<init>",
@@ -530,10 +534,10 @@ final class Sort extends Instruction implements Closure {
 
         constructor.setMaxLocals();
         constructor.setMaxStack();
-        sortRecordFactory.addMethod(constructor.getMethod());
+        sortRecordFactory.addMethod(constructor);
         makeNodeSortRecord.setMaxLocals();
         makeNodeSortRecord.setMaxStack();
-        sortRecordFactory.addMethod(makeNodeSortRecord.getMethod());
+        sortRecordFactory.addMethod(makeNodeSortRecord);
         xsltc.dumpClass(sortRecordFactory.getJavaClass());
 
         return className;
@@ -584,9 +588,9 @@ final class Sort extends Instruction implements Closure {
             }
         }
 
-        Method init = compileInit(sortObjects, sortRecord,
+        MethodGenerator init = compileInit(sortObjects, sortRecord,
                                          cpg, className);
-        Method extract = compileExtract(sortObjects, sortRecord,
+        MethodGenerator extract = compileExtract(sortObjects, sortRecord,
                                         cpg, className);
         sortRecord.addMethod(init);
         sortRecord.addMethod(extract);
@@ -596,7 +600,7 @@ final class Sort extends Instruction implements Closure {
     }
 
     
-    private static Method compileInit(Vector sortObjects,
+    private static MethodGenerator compileInit(Vector sortObjects,
                                            NodeSortRecordGenerator sortRecord,
                                            ConstantPoolGen cpg,
                                            String className)
@@ -617,16 +621,12 @@ final class Sort extends Instruction implements Closure {
 
         il.append(RETURN);
 
-        init.stripAttributes(true);
-        init.setMaxLocals();
-        init.setMaxStack();
-
-        return init.getMethod();
+        return init;
     }
 
 
     
-    private static Method compileExtract(Vector sortObjects,
+    private static MethodGenerator compileExtract(Vector sortObjects,
                                          NodeSortRecordGenerator sortRecord,
                                          ConstantPoolGen cpg,
                                          String className) {
@@ -683,11 +683,6 @@ final class Sort extends Instruction implements Closure {
             il.append(ARETURN);
         }
 
-        extractMethod.stripAttributes(true);
-        extractMethod.setMaxLocals();
-        extractMethod.setMaxStack();
-        extractMethod.removeNOPs();
-
-        return extractMethod.getMethod();
+        return extractMethod;
     }
 }

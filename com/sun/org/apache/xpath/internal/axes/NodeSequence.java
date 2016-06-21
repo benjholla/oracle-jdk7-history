@@ -42,7 +42,7 @@ public class NodeSequence extends XObject
   
   protected void SetVector(NodeVector v)
   {
-  	setObject(v);
+        setObject(v);
   }
 
 
@@ -50,7 +50,7 @@ public class NodeSequence extends XObject
   public boolean hasCache()
   {
     final NodeVector nv = getVector();
-  	return (nv != null);
+        return (nv != null);
   }
 
   
@@ -79,13 +79,13 @@ public class NodeSequence extends XObject
   
   public final void setIter(DTMIterator iter)
   {
-  	m_iter = iter;
+        m_iter = iter;
   }
 
   
   public final DTMIterator getContainedIter()
   {
-  	return m_iter;
+        return m_iter;
   }
 
   
@@ -96,29 +96,29 @@ public class NodeSequence extends XObject
   
   private NodeSequence(DTMIterator iter, int context, XPathContext xctxt, boolean shouldCacheNodes)
   {
-  	setIter(iter);
-  	setRoot(context, xctxt);
-  	setShouldCacheNodes(shouldCacheNodes);
+        setIter(iter);
+        setRoot(context, xctxt);
+        setShouldCacheNodes(shouldCacheNodes);
   }
 
   
   public NodeSequence(Object nodeVector)
   {
-  	super(nodeVector);
+        super(nodeVector);
     if (nodeVector instanceof NodeVector) {
         SetVector((NodeVector) nodeVector);
     }
-  	if(null != nodeVector)
-  	{
-  		assertion(nodeVector instanceof NodeVector,
-  			"Must have a NodeVector as the object for NodeSequence!");
-  		if(nodeVector instanceof DTMIterator)
-  		{
-  			setIter((DTMIterator)nodeVector);
-  			m_last = ((DTMIterator)nodeVector).getLength();
-  		}
+        if(null != nodeVector)
+        {
+                assertion(nodeVector instanceof NodeVector,
+                        "Must have a NodeVector as the object for NodeSequence!");
+                if(nodeVector instanceof DTMIterator)
+                {
+                        setIter((DTMIterator)nodeVector);
+                        m_last = ((DTMIterator)nodeVector).getLength();
+                }
 
-  	}
+        }
   }
 
   
@@ -140,13 +140,13 @@ public class NodeSequence extends XObject
   
   public DTM getDTM(int nodeHandle)
   {
-  	DTMManager mgr = getDTMManager();
-  	if(null != mgr)
-    	return getDTMManager().getDTM(nodeHandle);
+        DTMManager mgr = getDTMManager();
+        if(null != mgr)
+        return getDTMManager().getDTM(nodeHandle);
     else
     {
-    	assertion(false, "Can not get a DTM Unless a DTMManager has been set!");
-    	return null;
+        assertion(false, "Can not get a DTM Unless a DTMManager has been set!");
+        return null;
     }
   }
 
@@ -159,15 +159,15 @@ public class NodeSequence extends XObject
   
   public int getRoot()
   {
-  	if(null != m_iter)
-    	return m_iter.getRoot();
-  	else
-  	{
-  		
-  		
-  		
-  		return DTM.NULL;
-  	}
+        if(null != m_iter)
+        return m_iter.getRoot();
+        else
+        {
+                
+                
+                
+                return DTM.NULL;
+        }
   }
 
   
@@ -179,45 +179,45 @@ public class NodeSequence extends XObject
             throw new RuntimeException("Unable to evaluate expression using " +
                     "this context");
         }
-        
-  	if(null != m_iter)
-  	{
-  		XPathContext xctxt = (XPathContext)environment;
-  		m_dtmMgr = xctxt.getDTMManager();
-  		m_iter.setRoot(nodeHandle, environment);
-  		if(!m_iter.isDocOrdered())
-  		{
-  			if(!hasCache())
-  				setShouldCacheNodes(true);
-  			runTo(-1);
-  			m_next=0;
-  		}
-  	}
-  	else
-  		assertion(false, "Can not setRoot on a non-iterated NodeSequence!");
+
+        if(null != m_iter)
+        {
+                XPathContext xctxt = (XPathContext)environment;
+                m_dtmMgr = xctxt.getDTMManager();
+                m_iter.setRoot(nodeHandle, environment);
+                if(!m_iter.isDocOrdered())
+                {
+                        if(!hasCache())
+                                setShouldCacheNodes(true);
+                        runTo(-1);
+                        m_next=0;
+                }
+        }
+        else
+                assertion(false, "Can not setRoot on a non-iterated NodeSequence!");
   }
 
   
   public void reset()
   {
-  	m_next = 0;
-  	
+        m_next = 0;
+        
   }
 
   
   public int getWhatToShow()
   {
     return hasCache() ? (DTMFilter.SHOW_ALL & ~DTMFilter.SHOW_ENTITY_REFERENCE)
-    	: m_iter.getWhatToShow();
+        : m_iter.getWhatToShow();
   }
 
   
   public boolean getExpandEntityReferences()
   {
-  	if(null != m_iter)
-  		return m_iter.getExpandEntityReferences();
-  	else
-    	return true;
+        if(null != m_iter)
+                return m_iter.getExpandEntityReferences();
+        else
+        return true;
   }
 
   
@@ -229,42 +229,42 @@ public class NodeSequence extends XObject
     if (null != vec)
     {
         
-    	if(m_next < vec.size())
-    	{
+        if(m_next < vec.size())
+        {
             
-			int next = vec.elementAt(m_next);
-	    	m_next++;
-	    	return next;
-    	}
-    	else if(cacheComplete() || (-1 != m_last) || (null == m_iter))
-    	{
-    		m_next++;
-    		return DTM.NULL;
-    	}
+                        int next = vec.elementAt(m_next);
+                m_next++;
+                return next;
+        }
+        else if(cacheComplete() || (-1 != m_last) || (null == m_iter))
+        {
+                m_next++;
+                return DTM.NULL;
+        }
     }
 
   if (null == m_iter)
     return DTM.NULL;
 
- 	int next = m_iter.nextNode();
+        int next = m_iter.nextNode();
     if(DTM.NULL != next)
     {
-    	if(hasCache())
-    	{
-    		if(m_iter.isDocOrdered())
-    	    {
-    			getVector().addElement(next);
-    			m_next++;
-    		}
-    		else
-    		{
-    			int insertIndex = addNodeInDocOrder(next);
-    			if(insertIndex >= 0)
-    				m_next++;
-    		}
-    	}
-    	else
-    		m_next++;
+        if(hasCache())
+        {
+                if(m_iter.isDocOrdered())
+            {
+                        getVector().addElement(next);
+                        m_next++;
+                }
+                else
+                {
+                        int insertIndex = addNodeInDocOrder(next);
+                        if(insertIndex >= 0)
+                                m_next++;
+                }
+        }
+        else
+                m_next++;
     }
     else
     {
@@ -273,8 +273,8 @@ public class NodeSequence extends XObject
         
         markCacheComplete();
 
-    	m_last = m_next;
-    	m_next++;
+        m_last = m_next;
+        m_next++;
     }
 
     return next;
@@ -283,64 +283,64 @@ public class NodeSequence extends XObject
   
   public int previousNode()
   {
-  	if(hasCache())
-  	{
-  		if(m_next <= 0)
-  			return DTM.NULL;
-  		else
-  		{
-  			m_next--;
-  			return item(m_next);
-  		}
-  	}
-  	else
-  	{
-	    int n = m_iter.previousNode();
-	    m_next = m_iter.getCurrentPos();
-	    return m_next;
-  	}
+        if(hasCache())
+        {
+                if(m_next <= 0)
+                        return DTM.NULL;
+                else
+                {
+                        m_next--;
+                        return item(m_next);
+                }
+        }
+        else
+        {
+            int n = m_iter.previousNode();
+            m_next = m_iter.getCurrentPos();
+            return m_next;
+        }
   }
 
   
   public void detach()
   {
-  	if(null != m_iter)
-  		m_iter.detach();
-  	super.detach();
+        if(null != m_iter)
+                m_iter.detach();
+        super.detach();
   }
 
   
   public void allowDetachToRelease(boolean allowRelease)
   {
-  	if((false == allowRelease) && !hasCache())
-  	{
-  		setShouldCacheNodes(true);
-  	}
+        if((false == allowRelease) && !hasCache())
+        {
+                setShouldCacheNodes(true);
+        }
 
-  	if(null != m_iter)
-  		m_iter.allowDetachToRelease(allowRelease);
-  	super.allowDetachToRelease(allowRelease);
+        if(null != m_iter)
+                m_iter.allowDetachToRelease(allowRelease);
+        super.allowDetachToRelease(allowRelease);
   }
 
   
   public int getCurrentNode()
   {
-  	if(hasCache())
-  	{
-  		int currentIndex = m_next-1;
-  		NodeVector vec = getVector();
-  		if((currentIndex >= 0) && (currentIndex < vec.size()))
-  			return vec.elementAt(currentIndex);
-  		else
-  			return DTM.NULL;
-  	}
+        if(hasCache())
+        {
+                int currentIndex = m_next-1;
+                NodeVector vec = getVector();
+                if((currentIndex >= 0) && (currentIndex < vec.size()))
+                        return vec.elementAt(currentIndex);
+                else
+                        return DTM.NULL;
+        }
 
-  	if(null != m_iter)
-  	{
-    	return m_iter.getCurrentNode();
-  	}
-  	else
-  		return DTM.NULL;
+        if(null != m_iter)
+        {
+        return m_iter.getCurrentNode();
+        }
+        else
+                return DTM.NULL;
   }
 
   
@@ -410,24 +410,24 @@ public class NodeSequence extends XObject
   
   public void setCurrentPos(int i)
   {
-  	runTo(i);
+        runTo(i);
   }
 
   
   public int item(int index)
   {
-  	setCurrentPos(index);
-  	int n = nextNode();
-  	m_next = index;
-  	return n;
+        setCurrentPos(index);
+        int n = nextNode();
+        m_next = index;
+        return n;
   }
 
   
   public void setItem(int node, int index)
   {
-  	NodeVector vec = getVector();
-  	if(null != vec)
-  	{
+        NodeVector vec = getVector();
+        if(null != vec)
+        {
         int oldNode = vec.elementAt(index);
         if (oldNode != node && m_cache.useCount() > 1) {
             
@@ -451,11 +451,11 @@ public class NodeSequence extends XObject
 
             
         }
-  		vec.setElementAt(node, index);
-  		m_last = vec.size();
-  	}
-  	else
-  		m_iter.setItem(node, index);
+                vec.setElementAt(node, index);
+                m_last = vec.size();
+        }
+        else
+                m_iter.setItem(node, index);
   }
 
   
@@ -463,8 +463,8 @@ public class NodeSequence extends XObject
   {
     IteratorCache cache = getCache();
 
-  	if(cache != null)
-  	{
+        if(cache != null)
+        {
         
         if (cache.isComplete()) {
             
@@ -481,24 +481,24 @@ public class NodeSequence extends XObject
             return m_iter.getLength();
         }
 
-	  	if(-1 == m_last)
-	  	{
-	  		int pos = m_next;
-	  		runTo(-1);
-	  		m_next = pos;
-	  	}
-	    return m_last;
-  	}
-  	else
-  	{
-  		return (-1 == m_last) ? (m_last = m_iter.getLength()) : m_last;
-  	}
+                if(-1 == m_last)
+                {
+                        int pos = m_next;
+                        runTo(-1);
+                        m_next = pos;
+                }
+            return m_last;
+        }
+        else
+        {
+                return (-1 == m_last) ? (m_last = m_iter.getLength()) : m_last;
+        }
   }
 
   
   public DTMIterator cloneWithReset() throws CloneNotSupportedException
   {
-  	NodeSequence seq = (NodeSequence)super.clone();
+        NodeSequence seq = (NodeSequence)super.clone();
     seq.m_next = 0;
     if (m_cache != null) {
         
@@ -533,37 +533,37 @@ public class NodeSequence extends XObject
   
   public boolean isDocOrdered()
   {
-  	if(null != m_iter)
-  		return m_iter.isDocOrdered();
-  	else
-    	return true; 
+        if(null != m_iter)
+                return m_iter.isDocOrdered();
+        else
+        return true; 
   }
 
   
   public int getAxis()
   {
-  	if(null != m_iter)
-    	return m_iter.getAxis();
+        if(null != m_iter)
+        return m_iter.getAxis();
     else
     {
-    	assertion(false, "Can not getAxis from a non-iterated node sequence!");
-    	return 0;
+        assertion(false, "Can not getAxis from a non-iterated node sequence!");
+        return 0;
     }
   }
 
   
   public int getAnalysisBits()
   {
-  	if((null != m_iter) && (m_iter instanceof PathComponent))
-    	return ((PathComponent)m_iter).getAnalysisBits();
+        if((null != m_iter) && (m_iter instanceof PathComponent))
+        return ((PathComponent)m_iter).getAnalysisBits();
     else
-    	return 0;
+        return 0;
   }
 
   
   public void fixupVariables(Vector vars, int globalsSize)
   {
-  	super.fixupVariables(vars, globalsSize);
+        super.fixupVariables(vars, globalsSize);
   }
 
   
@@ -694,4 +694,3 @@ public class NodeSequence extends XObject
         return m_cache;
     }
 }
-

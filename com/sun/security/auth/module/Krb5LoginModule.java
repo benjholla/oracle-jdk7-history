@@ -326,7 +326,7 @@ public class Krb5LoginModule implements LoginModule {
                         cred = builder.action().getCreds();
                     }
                     if (storeKey) {
-                        encKeys = builder.getKeys();
+                        encKeys = builder.getKeys(isInitiator);
                         
                         
                     }

@@ -179,14 +179,22 @@ public class XString extends XObject implements XMLString
     return xstr().equals(obj2.xstr());
   }
 
+   
+  public boolean equals(String obj2) {
+    return str().equals(obj2);
+  }
+
   
   public boolean equals(XMLString obj2)
   {
-
-    if (!obj2.hasString())
-      return obj2.equals(this);
-    else
-      return str().equals(obj2.toString());
+    if (obj2 != null) {
+      if (!obj2.hasString()) {
+        return obj2.equals(str());
+      } else {
+        return str().equals(obj2.toString());
+      }
+    }
+    return false;
   }
 
   

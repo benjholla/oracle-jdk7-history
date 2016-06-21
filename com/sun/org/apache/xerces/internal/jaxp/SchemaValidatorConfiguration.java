@@ -16,56 +16,56 @@ import com.sun.org.apache.xerces.internal.xni.parser.XMLConfigurationException;
 
 
 final class SchemaValidatorConfiguration implements XMLComponentManager {
+
     
-    
-    
+
     
     private static final String SCHEMA_VALIDATION =
         Constants.XERCES_FEATURE_PREFIX + Constants.SCHEMA_VALIDATION_FEATURE;
-    
+
     
     private static final String VALIDATION =
         Constants.SAX_FEATURE_PREFIX + Constants.VALIDATION_FEATURE;
-    
+
     
     private static final String USE_GRAMMAR_POOL_ONLY =
         Constants.XERCES_FEATURE_PREFIX + Constants.USE_GRAMMAR_POOL_ONLY_FEATURE;
+
     
-    
-    private static final String PARSER_SETTINGS = 
+    private static final String PARSER_SETTINGS =
         Constants.XERCES_FEATURE_PREFIX + Constants.PARSER_SETTINGS;
+
     
-    
-    
+
     
     private static final String ERROR_REPORTER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.ERROR_REPORTER_PROPERTY;
-    
+
     
     private static final String VALIDATION_MANAGER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.VALIDATION_MANAGER_PROPERTY;
-    
+
     
     private static final String XMLGRAMMAR_POOL =
         Constants.XERCES_PROPERTY_PREFIX + Constants.XMLGRAMMAR_POOL_PROPERTY;
+
     
     
     
-    
-    
+
     
     private final XMLComponentManager fParentComponentManager;
-    
+
     
     private final XMLGrammarPool fGrammarPool;
 
     
     private final boolean fUseGrammarPoolOnly;
-    
+
     
     private final ValidationManager fValidationManager;
-    
-    public SchemaValidatorConfiguration(XMLComponentManager parentManager, 
+
+    public SchemaValidatorConfiguration(XMLComponentManager parentManager,
             XSGrammarPoolContainer grammarContainer, ValidationManager validationManager) {
         fParentComponentManager = parentManager;
         fGrammarPool = grammarContainer.getGrammarPool();
@@ -81,7 +81,7 @@ final class SchemaValidatorConfiguration implements XMLComponentManager {
         
         catch (XMLConfigurationException exc) {}
     }
-    
+
     
     public boolean getFeature(String featureId)
             throws XMLConfigurationException {

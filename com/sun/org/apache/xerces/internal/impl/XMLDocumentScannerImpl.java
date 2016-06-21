@@ -34,54 +34,54 @@ import com.sun.org.apache.xerces.internal.xni.parser.XMLDocumentScanner;
 
 public class XMLDocumentScannerImpl
         extends XMLDocumentFragmentScannerImpl{
+
     
     
     
+
     
-    
-    
-    
+
     
     protected static final int SCANNER_STATE_XML_DECL = 42;
-    
+
     
     protected static final int SCANNER_STATE_PROLOG = 43;
-    
+
     
     protected static final int SCANNER_STATE_TRAILING_MISC = 44;
-    
+
     
     protected static final int SCANNER_STATE_DTD_INTERNAL_DECLS = 45;
-    
+
     
     protected static final int SCANNER_STATE_DTD_EXTERNAL = 46;
-    
+
     
     protected static final int SCANNER_STATE_DTD_EXTERNAL_DECLS = 47;
-    
+
     
     protected static final int SCANNER_STATE_NO_SUCH_ELEMENT_EXCEPTION = 48;
+
     
-    
-    
+
     
     protected static final String DOCUMENT_SCANNER =
             Constants.XERCES_PROPERTY_PREFIX + Constants.DOCUMENT_SCANNER_PROPERTY;
-    
+
     
     protected static final String LOAD_EXTERNAL_DTD =
             Constants.XERCES_FEATURE_PREFIX + Constants.LOAD_EXTERNAL_DTD_FEATURE;
-    
+
     
     protected static final String DISALLOW_DOCTYPE_DECL_FEATURE =
             Constants.XERCES_FEATURE_PREFIX + Constants.DISALLOW_DOCTYPE_DECL_FEATURE;
+
     
-    
-    
+
     
     protected static final String DTD_SCANNER =
             Constants.XERCES_PROPERTY_PREFIX + Constants.DTD_SCANNER_PROPERTY;
-    
+
     
     protected static final String VALIDATION_MANAGER =
             Constants.XERCES_PROPERTY_PREFIX + Constants.VALIDATION_MANAGER_PROPERTY;
@@ -89,126 +89,126 @@ public class XMLDocumentScannerImpl
     
     protected static final String NAMESPACE_CONTEXT =
         Constants.XERCES_PROPERTY_PREFIX + Constants.NAMESPACE_CONTEXT_PROPERTY;
+
     
-    
-    
+
     
     private static final String[] RECOGNIZED_FEATURES = {
         LOAD_EXTERNAL_DTD,
                 DISALLOW_DOCTYPE_DECL_FEATURE,
     };
-    
+
     
     private static final Boolean[] FEATURE_DEFAULTS = {
         Boolean.TRUE,
                 Boolean.FALSE,
     };
-    
+
     
     private static final String[] RECOGNIZED_PROPERTIES = {
         DTD_SCANNER,
                 VALIDATION_MANAGER
     };
-    
+
     
     private static final Object[] PROPERTY_DEFAULTS = {
         null,
                 null
     };
+
     
     
     
+
     
-    
-    
-    
+
     
     protected XMLDTDScanner fDTDScanner = null;
-        
+
     
     
     protected ValidationManager fValidationManager;
-    
+
     protected XMLStringBuffer fDTDDecl = null;
     protected boolean fReadingDTD = false;
     protected boolean fAddedListener = false;
+
     
+
     
-    
-    
-    
+
     
     protected String fDoctypeName;
-    
+
     
     protected String fDoctypePublicId;
-    
+
     
     protected String fDoctypeSystemId;
-    
+
     
     protected NamespaceContext fNamespaceContext = new NamespaceSupport();
+
     
-    
-    
+
     
     protected boolean fLoadExternalDTD = true;
+
     
-    
-    
+
     
     protected boolean fSeenDoctypeDecl;
-        
+
     protected boolean fScanEndElement;
+
     
+
     
-    
-    
-    
+
     
     protected Driver fXMLDeclDriver = new XMLDeclDriver();
-    
+
     
     protected Driver fPrologDriver = new PrologDriver();
-    
+
     
     protected Driver fDTDDriver = null ;
-    
+
     
     protected Driver fTrailingMiscDriver = new TrailingMiscDriver();
     protected int fStartPos = 0;
     protected int fEndPos = 0;
     protected boolean fSeenInternalSubset= false;
     
-    
+
     
     private String[] fStrings = new String[3];
-    
+
     
     private XMLInputSource fExternalSubsetSource = null;
-    
+
     
     private final XMLDTDDescription fDTDDescription = new XMLDTDDescription(null, null, null, null, null);
 
     
     private XMLString fString = new XMLString();
-    
+
     private static final char [] DOCTYPE = {'D','O','C','T','Y','P','E'};
     private static final char [] COMMENTSTRING = {'-','-'};
-        
+
     
     
     
-    
+
     
     public XMLDocumentScannerImpl() {} 
+
+
     
     
     
-    
-    
-    
-    
+
+
     
     public void setInputSource(XMLInputSource inputSource) throws IOException {
         fEntityManager.setEntityHandler(this);
@@ -217,17 +217,17 @@ public class XMLDocumentScannerImpl
         
         setScannerState(XMLEvent.START_DOCUMENT);
     } 
-    
-    
-    
+
+
+
     
     public int getScannetState(){
         return fScannerState ;
     }
-    
-    
-    
-    
+
+
+
+
     public void reset(PropertyManager propertyManager) {
         super.reset(propertyManager);
         
@@ -237,7 +237,7 @@ public class XMLDocumentScannerImpl
         fSeenDoctypeDecl = false;
         fNamespaceContext.reset();
         fDisallowDoctype = !((Boolean)propertyManager.getProperty(XMLInputFactory.SUPPORT_DTD)).booleanValue();
-        
+
         
         fLoadExternalDTD = !((Boolean)propertyManager.getProperty(Constants.ZEPHYR_PROPERTY_PREFIX + Constants.IGNORE_EXTERNAL_DTD)).booleanValue();
         setScannerState(XMLEvent.START_DOCUMENT);
@@ -251,22 +251,22 @@ public class XMLDocumentScannerImpl
         if(fDTDDecl != null){
             fDTDDecl.clear();
         }
-                
+
     }
-    
+
     
     public void reset(XMLComponentManager componentManager)
     throws XMLConfigurationException {
-        
+
         super.reset(componentManager);
-        
+
         
         fDoctypeName = null;
         fDoctypePublicId = null;
         fDoctypeSystemId = null;
         fSeenDoctypeDecl = false;
         fExternalSubsetSource = null;
-        
+
         
         fLoadExternalDTD = componentManager.getFeature(LOAD_EXTERNAL_DTD, true);
         fDisallowDoctype = componentManager.getFeature(DISALLOW_DOCTYPE_DECL_FEATURE, false);
@@ -275,8 +275,8 @@ public class XMLDocumentScannerImpl
 
         fSeenInternalSubset = false;
         
-        fDTDScanner = (XMLDTDScanner)componentManager.getProperty(DTD_SCANNER);        
-        
+        fDTDScanner = (XMLDTDScanner)componentManager.getProperty(DTD_SCANNER);
+
         fValidationManager = (ValidationManager)componentManager.getProperty(VALIDATION_MANAGER, null);
 
         try {
@@ -287,22 +287,22 @@ public class XMLDocumentScannerImpl
             fNamespaceContext = new NamespaceSupport();
         }
         fNamespaceContext.reset();
-        
+
         fEndPos = 0;
         fStartPos = 0;
         if(fDTDDecl != null)
             fDTDDecl.clear();
-            
+
 
         
-        
+
         
         setScannerState(SCANNER_STATE_XML_DECL);
         setDriver(fXMLDeclDriver);
-        
+
     } 
-    
-    
+
+
     
     public String[] getRecognizedFeatures() {
         String[] featureIds = super.getRecognizedFeatures();
@@ -314,31 +314,31 @@ public class XMLDocumentScannerImpl
         System.arraycopy(RECOGNIZED_FEATURES, 0, combinedFeatureIds, length, RECOGNIZED_FEATURES.length);
         return combinedFeatureIds;
     } 
-    
+
     
     public void setFeature(String featureId, boolean state)
     throws XMLConfigurationException {
-        
+
         super.setFeature(featureId, state);
-        
+
         
         if (featureId.startsWith(Constants.XERCES_FEATURE_PREFIX)) {
             final int suffixLength = featureId.length() - Constants.XERCES_FEATURE_PREFIX.length();
-        	
-            if (suffixLength == Constants.LOAD_EXTERNAL_DTD_FEATURE.length() && 
+
+            if (suffixLength == Constants.LOAD_EXTERNAL_DTD_FEATURE.length() &&
                 featureId.endsWith(Constants.LOAD_EXTERNAL_DTD_FEATURE)) {
                 fLoadExternalDTD = state;
                 return;
             }
-            else if (suffixLength == Constants.DISALLOW_DOCTYPE_DECL_FEATURE.length() && 
+            else if (suffixLength == Constants.DISALLOW_DOCTYPE_DECL_FEATURE.length() &&
                 featureId.endsWith(Constants.DISALLOW_DOCTYPE_DECL_FEATURE)) {
                 fDisallowDoctype = state;
                 return;
             }
         }
-                
+
     } 
-    
+
     
     public String[] getRecognizedProperties() {
         String[] propertyIds = super.getRecognizedProperties();
@@ -350,22 +350,22 @@ public class XMLDocumentScannerImpl
         System.arraycopy(RECOGNIZED_PROPERTIES, 0, combinedPropertyIds, length, RECOGNIZED_PROPERTIES.length);
         return combinedPropertyIds;
     } 
-    
+
     
     public void setProperty(String propertyId, Object value)
     throws XMLConfigurationException {
-        
+
         super.setProperty(propertyId, value);
-        
+
         
         if (propertyId.startsWith(Constants.XERCES_PROPERTY_PREFIX)) {
             final int suffixLength = propertyId.length() - Constants.XERCES_PROPERTY_PREFIX.length();
-            
-            if (suffixLength == Constants.DTD_SCANNER_PROPERTY.length() && 
+
+            if (suffixLength == Constants.DTD_SCANNER_PROPERTY.length() &&
                 propertyId.endsWith(Constants.DTD_SCANNER_PROPERTY)) {
                 fDTDScanner = (XMLDTDScanner)value;
             }
-            if (suffixLength == Constants.NAMESPACE_CONTEXT_PROPERTY.length() && 
+            if (suffixLength == Constants.NAMESPACE_CONTEXT_PROPERTY.length() &&
                 propertyId.endsWith(Constants.NAMESPACE_CONTEXT_PROPERTY)) {
                 if (value != null) {
                     fNamespaceContext = (NamespaceContext)value;
@@ -373,13 +373,13 @@ public class XMLDocumentScannerImpl
             }
 
             return;
-        }        
-        
+        }
+
     } 
-    
+
     
     public Boolean getFeatureDefault(String featureId) {
-        
+
         for (int i = 0; i < RECOGNIZED_FEATURES.length; i++) {
             if (RECOGNIZED_FEATURES[i].equals(featureId)) {
                 return FEATURE_DEFAULTS[i];
@@ -387,7 +387,7 @@ public class XMLDocumentScannerImpl
         }
         return super.getFeatureDefault(featureId);
     } 
-    
+
     
     public Object getPropertyDefault(String propertyId) {
         for (int i = 0; i < RECOGNIZED_PROPERTIES.length; i++) {
@@ -397,21 +397,21 @@ public class XMLDocumentScannerImpl
         }
         return super.getPropertyDefault(propertyId);
     } 
+
     
     
     
-    
-    
+
     
     public void startEntity(String name,
             XMLResourceIdentifier identifier,
             String encoding, Augmentations augs) throws XNIException {
-        
+
         super.startEntity(name, identifier, encoding,augs);
-        
+
         
         fEntityScanner.registerListener(this);
-        
+
         
         if (!name.equals("[xml]") && fEntityScanner.isExternal()) {
             
@@ -419,21 +419,21 @@ public class XMLDocumentScannerImpl
                 setScannerState(SCANNER_STATE_TEXT_DECL);
             }
         }
-        
+
         
         
         if (fDocumentHandler != null && name.equals("[xml]")) {
             fDocumentHandler.startDocument(fEntityScanner, encoding, fNamespaceContext, null);
         }
-        
+
     } 
-    
-    
+
+
     
     public void endEntity(String name, Augmentations augs) throws IOException, XNIException {
-        
+
         super.endEntity(name, augs);
-        
+
         if(name.equals("[xml]")){
             
             
@@ -447,16 +447,16 @@ public class XMLDocumentScannerImpl
                 
                 throw new java.io.EOFException();
             }
+
             
-            
-            
+
             
                 
             
         }
     } 
-    
-        
+
+
     public XMLStringBuffer getDTDDecl(){
         Entity entity = fEntityScanner.getCurrentEntity();
         fDTDDecl.append(((Entity.ScannedEntity)entity).ch,fStartPos , fEndPos-fStartPos);
@@ -464,52 +464,52 @@ public class XMLDocumentScannerImpl
             fDTDDecl.append("]>");
         return fDTDDecl;
     }
-    
+
     public String getCharacterEncodingScheme(){
         return fDeclaredEncoding;
     }
+
     
-    
-    
+
     public int next() throws IOException, XNIException {
         return fDriver.next();
     }
-    
+
     
     public NamespaceContext getNamespaceContext(){
         return fNamespaceContext ;
     }
 
 
+
     
     
     
+
     
-    
-    
-    
+
     
     protected Driver createContentDriver() {
         return new ContentDriver();
     } 
+
     
-    
-    
+
     
     protected boolean scanDoctypeDecl(boolean ignore) throws IOException, XNIException {
-        
+
         
         if (!fEntityScanner.skipSpaces()) {
             reportFatalError("MSG_SPACE_REQUIRED_BEFORE_ROOT_ELEMENT_TYPE_IN_DOCTYPEDECL",
                     null);
         }
-        
+
         
         fDoctypeName = fEntityScanner.scanName();
         if (fDoctypeName == null) {
             reportFatalError("MSG_ROOT_ELEMENT_TYPE_REQUIRED", null);
         }
-        
+
         
         if (fEntityScanner.skipSpaces()) {
             scanExternalID(fStrings, false);
@@ -517,9 +517,9 @@ public class XMLDocumentScannerImpl
             fDoctypePublicId = fStrings[1];
             fEntityScanner.skipSpaces();
         }
-        
+
         fHasExternalDTD = fDoctypeSystemId != null;
-        
+
         
         if (!ignore && !fHasExternalDTD && fExternalSubsetResolver != null) {
             fDTDDescription.setValues(null, null, fEntityManager.getCurrentResourceIdentifier().getExpandedSystemId(), null);
@@ -527,7 +527,7 @@ public class XMLDocumentScannerImpl
             fExternalSubsetSource = fExternalSubsetResolver.getExternalSubset(fDTDDescription);
             fHasExternalDTD = fExternalSubsetSource != null;
         }
-        
+
         
         if (!ignore && fDocumentHandler != null) {
             
@@ -540,9 +540,9 @@ public class XMLDocumentScannerImpl
             }
             else {
                 fDocumentHandler.doctypeDecl(fDoctypeName, fExternalSubsetSource.getPublicId(), fExternalSubsetSource.getSystemId(), null);
-            }            
+            }
         }
-        
+
         
         boolean internalSubset = true;
         if (!fEntityScanner.skipChar('[')) {
@@ -554,9 +554,9 @@ public class XMLDocumentScannerImpl
             fMarkupDepth--;
         }
         return internalSubset;
-        
+
     } 
-    
+
     
     
     
@@ -564,13 +564,13 @@ public class XMLDocumentScannerImpl
     protected void setEndDTDScanState() {
         setScannerState(SCANNER_STATE_PROLOG);
         setDriver(fPrologDriver);
-        fEntityManager.setEntityHandler(XMLDocumentScannerImpl.this);  
+        fEntityManager.setEntityHandler(XMLDocumentScannerImpl.this);
         fReadingDTD=false;
     }
-    
+
     
     protected String getScannerStateName(int state) {
-        
+
         switch (state) {
             case SCANNER_STATE_XML_DECL: return "SCANNER_STATE_XML_DECL";
             case SCANNER_STATE_PROLOG: return "SCANNER_STATE_PROLOG";
@@ -580,32 +580,32 @@ public class XMLDocumentScannerImpl
             case SCANNER_STATE_DTD_EXTERNAL_DECLS: return "SCANNER_STATE_DTD_EXTERNAL_DECLS";
         }
         return super.getScannerStateName(state);
-        
+
     } 
+
     
     
     
-    
-    
+
     
     protected final class XMLDeclDriver
             implements Driver {
+
         
         
         
-        
-        
-        
+
+
         public int next() throws IOException, XNIException {
             if(DEBUG_NEXT){
                 System.out.println("NOW IN XMLDeclDriver");
             }
-            
+
             
             
             setScannerState(SCANNER_STATE_PROLOG);
             setDriver(fPrologDriver);
-            
+
             
             
             try {
@@ -642,32 +642,32 @@ public class XMLDocumentScannerImpl
                     
                     return XMLEvent.START_DOCUMENT;
                 }
+
+
                 
-                
-                
-                
-                
+
+
             }
-            
+
             
             catch (EOFException e) {
                 reportFatalError("PrematureEOF", null);
                 return -1;
                 
             }
-            
+
         }
     } 
-    
+
     
     protected final class PrologDriver
             implements Driver {
+
         
-        
-        
+
         public int next() throws IOException, XNIException {
             
-            
+
             if(DEBUG_NEXT){
                 System.out.println("NOW IN PrologDriver");
             }
@@ -685,10 +685,10 @@ public class XMLDocumentScannerImpl
                             }
                             break;
                         }
-                        
+
                         case SCANNER_STATE_START_OF_MARKUP: {
                             fMarkupDepth++;
-                            
+
                             if (fEntityScanner.skipChar('?')) {
                                 setScannerState(SCANNER_STATE_PI);
                             } else if (fEntityScanner.skipChar('!')) {
@@ -708,7 +708,7 @@ public class XMLDocumentScannerImpl
                                     if(fDTDDecl == null)
                                         fDTDDecl = new XMLStringBuffer();
                                     fDTDDecl.append("<!DOCTYPE");
-                                    
+
                                 } else {
                                     reportFatalError("MarkupNotRecognizedInProlog",
                                             null);
@@ -718,7 +718,7 @@ public class XMLDocumentScannerImpl
                                 setDriver(fContentDriver);
                                 
                                 return fContentDriver.next();
-                                
+
                             } else {
                                 reportFatalError("MarkupNotRecognizedInProlog",
                                         null);
@@ -727,7 +727,7 @@ public class XMLDocumentScannerImpl
                         }
                     }
                 } while (fScannerState == SCANNER_STATE_PROLOG || fScannerState == SCANNER_STATE_START_OF_MARKUP );
-                
+
                 switch(fScannerState){
                     
                     case SCANNER_STATE_COMMENT: {
@@ -746,12 +746,12 @@ public class XMLDocumentScannerImpl
                     }
 
                     case SCANNER_STATE_DOCTYPE: {
-                        
+
                         if (fSeenDoctypeDecl) {
                             reportFatalError("AlreadySeenDoctype", null);
                         }
                         fSeenDoctypeDecl = true;
-                        
+
                         
                         
                         if (scanDoctypeDecl(fDisallowDoctype)) {
@@ -767,7 +767,7 @@ public class XMLDocumentScannerImpl
                             
                             
                         }
-                        
+
                         if(fSeenDoctypeDecl){
                             Entity entity = fEntityScanner.getCurrentEntity();
                             if(entity instanceof Entity.ScannedEntity){
@@ -778,7 +778,7 @@ public class XMLDocumentScannerImpl
 
                         
                         if (fDoctypeSystemId != null) {
-                            if (((fValidation || fLoadExternalDTD) 
+                            if (((fValidation || fLoadExternalDTD)
                                 && (fValidationManager == null || !fValidationManager.isCachedDTD()))) {
                             if (!fDisallowDoctype)
                                 setScannerState(SCANNER_STATE_DTD_EXTERNAL);
@@ -788,11 +788,11 @@ public class XMLDocumentScannerImpl
                             if(fDTDDriver == null)
                                 fDTDDriver = new DTDDriver();
                             return fDTDDriver.next();
-                                
+
                             }
                         }
                         else if (fExternalSubsetSource != null) {
-                            if (((fValidation || fLoadExternalDTD) 
+                            if (((fValidation || fLoadExternalDTD)
                                 && (fValidationManager == null || !fValidationManager.isCachedDTD()))) {
                                 
                                 fDTDScanner.setInputSource(fExternalSubsetSource);
@@ -805,7 +805,7 @@ public class XMLDocumentScannerImpl
                             if(fDTDDriver == null)
                                 fDTDDriver = new DTDDriver();
                             return fDTDDriver.next();
-                            }                       	
+                            }
                         }
 
                         
@@ -821,7 +821,7 @@ public class XMLDocumentScannerImpl
                         setScannerState(SCANNER_STATE_PROLOG);
                         return XMLEvent.DTD;
                     }
-                    
+
                     case SCANNER_STATE_CONTENT: {
                         reportFatalError("ContentIllegalInProlog", null);
                         fEntityScanner.scanChar();
@@ -829,7 +829,7 @@ public class XMLDocumentScannerImpl
                     case SCANNER_STATE_REFERENCE: {
                         reportFatalError("ReferenceIllegalInProlog", null);
                     }
-                    
+
                     
                 }
             }
@@ -842,41 +842,41 @@ public class XMLDocumentScannerImpl
             }
             
             return -1;
-            
+
         }
-        
-        
+
+
     } 
-    
+
     
     protected final class DTDDriver
             implements Driver {
+
         
         
         
-        
-        
+
         public int next() throws IOException, XNIException{
             
             if(DEBUG_NEXT){
                 System.out.println("Now in DTD Driver");
             }
-            
+
             dispatch(true);
-            
+
             if(DEBUG_NEXT){
                 System.out.println("After calling dispatch(true) -- At this point whole DTD is read.");
             }
-            
+
             
             
             if(fPropertyManager != null){
                 dtdGrammarUtil =  new DTDGrammarUtil(((XMLDTDScannerImpl)fDTDScanner).getGrammar(),fSymbolTable, fNamespaceContext);
             }
-            
+
             return XMLEvent.DTD ;
         }
-        
+
         
         public boolean dispatch(boolean complete)
         throws IOException, XNIException {
@@ -885,13 +885,13 @@ public class XMLDocumentScannerImpl
                 boolean again;
                 XMLResourceIdentifierImpl resourceIdentifier = new XMLResourceIdentifierImpl();
                 if( fDTDScanner == null){
-                    
+
                     if (fEntityManager.getEntityScanner() instanceof XML11EntityScanner){
                         fDTDScanner = new XML11DTDScannerImpl();
                     } else
-                    
+
                     fDTDScanner = new XMLDTDScannerImpl();
-                    
+
                     ((XMLDTDScannerImpl)fDTDScanner).reset(fPropertyManager);
                 }
                 do {
@@ -901,7 +901,7 @@ public class XMLDocumentScannerImpl
                             
                             
                             boolean completeDTD = true;
-                            
+
                             boolean moreToScan = fDTDScanner.scanDTDInternalSubset(completeDTD, fStandalone, fHasExternalDTD && fLoadExternalDTD);
                             Entity entity = fEntityScanner.getCurrentEntity();
                             if(entity instanceof Entity.ScannedEntity){
@@ -919,7 +919,7 @@ public class XMLDocumentScannerImpl
                                     reportFatalError("DoctypedeclUnterminated", new Object[]{fDoctypeName});
                                 }
                                 fMarkupDepth--;
-                                
+
                                 if (fDisallowDoctype) {
                                     
                                     
@@ -930,18 +930,18 @@ public class XMLDocumentScannerImpl
                                     if (fDoctypeSystemId != null && (fValidation || fLoadExternalDTD)) {
                                         setScannerState(SCANNER_STATE_DTD_EXTERNAL);
                                         break;
-                                    }                                    
+                                    }
                                 }
 
                                 setEndDTDScanState();
                                 return true;
-                            
+
                             }
                             break;
                         }
                         case SCANNER_STATE_DTD_EXTERNAL: {
                             
-                            
+
                             resourceIdentifier.setValues(fDoctypePublicId, fDoctypeSystemId, null, null);
                             XMLInputSource xmlInputSource = null ;
                             StaxXMLInputSource staxInputSource =  fEntityManager.resolveEntityAsPerStax(resourceIdentifier);
@@ -973,7 +973,7 @@ public class XMLDocumentScannerImpl
                     }
                 } while (complete || again);
             }
-            
+
             
             catch (EOFException e) {
                 e.printStackTrace();
@@ -981,86 +981,86 @@ public class XMLDocumentScannerImpl
                 return false;
                 
             }
-            
+
             
             finally {
                 fEntityManager.setEntityHandler(XMLDocumentScannerImpl.this);
             }
-            
+
             return true;
-            
+
         }
+
         
-        
-        
+
     } 
-    
+
     
     protected class ContentDriver
             extends FragmentContentDriver {
+
         
         
         
+
+        
+
         
         
-        
-        
-        
-        
-        
+
         
         protected boolean scanForDoctypeHook()
         throws IOException, XNIException {
-            
+
             if (fEntityScanner.skipString(DOCTYPE)) {
                 setScannerState(SCANNER_STATE_DOCTYPE);
                 
                 return true;
             }
             return false;
-            
+
         } 
-        
+
         
         protected boolean elementDepthIsZeroHook()
         throws IOException, XNIException {
-            
+
             setScannerState(SCANNER_STATE_TRAILING_MISC);
             setDriver(fTrailingMiscDriver);
             return true;
-            
+
         } 
-        
+
         
         protected boolean scanRootElementHook()
         throws IOException, XNIException {
-            
+
             if (scanStartElement()) {
                 setScannerState(SCANNER_STATE_TRAILING_MISC);
                 setDriver(fTrailingMiscDriver);
                 return true;
             }
             return false;
-            
+
         } 
-        
+
         
         protected void endOfFileHook(EOFException e)
         throws IOException, XNIException {
-            
+
             reportFatalError("PrematureEOF", null);
             
             
-            
+
         } 
-        
+
         protected void resolveExternalSubsetAndRead()
         throws IOException, XNIException {
-            
+
             fDTDDescription.setValues(null, null, fEntityManager.getCurrentResourceIdentifier().getExpandedSystemId(), null);
-            fDTDDescription.setRootName(fElementQName.rawname);            
+            fDTDDescription.setRootName(fElementQName.rawname);
             XMLInputSource src = fExternalSubsetResolver.getExternalSubset(fDTDDescription);
-            
+
             if (src != null) {
                 fDoctypeName = fElementQName.rawname;
                 fDoctypePublicId = src.getPublicId();
@@ -1079,15 +1079,15 @@ public class XMLDocumentScannerImpl
                 }
             }
         } 
-        
-        
-        
+
+
+
     } 
-    
+
     
     protected final class TrailingMiscDriver
             implements Driver {
-        
+
         
         
         
@@ -1098,14 +1098,14 @@ public class XMLDocumentScannerImpl
                 fEmptyElement = false;
                 return XMLEvent.END_ELEMENT;
             }
-            
+
             try {
                 if(fScannerState == SCANNER_STATE_TERMINATED){
                     return XMLEvent.END_DOCUMENT ;}
                 do {
                     switch (fScannerState) {
                         case SCANNER_STATE_TRAILING_MISC: {
-                            
+
                             fEntityScanner.skipSpaces();
                             
                             
@@ -1171,7 +1171,7 @@ public class XMLDocumentScannerImpl
                             setScannerState(SCANNER_STATE_TRAILING_MISC);
                             return XMLEvent.CHARACTERS;
                         }
-                        
+
                     }
                     case SCANNER_STATE_REFERENCE: {
                         reportFatalError("ReferenceIllegalInTrailingMisc",
@@ -1191,7 +1191,7 @@ public class XMLDocumentScannerImpl
                     }
                     default: throw new XNIException("Scanner State " + fScannerState + " not Recognized ");
                 }
-                
+
             } catch (EOFException e) {
                 
                 
@@ -1204,15 +1204,15 @@ public class XMLDocumentScannerImpl
                 
                 setScannerState(SCANNER_STATE_TERMINATED);
             }
-            
+
             return XMLEvent.END_DOCUMENT;
-            
+
         }
-        
+
     } 
+
     
-    
-    
+
 
     
     public void refresh(int refreshPosition){
@@ -1226,5 +1226,5 @@ public class XMLDocumentScannerImpl
             fStartPos = refreshPosition;
         }
     }
-    
+
 } 

@@ -35,6 +35,8 @@ public interface XMLString
   
   public abstract boolean equals(XMLString anObject);
 
+  
+  public abstract boolean equals(String anotherString);
 
   
   public abstract boolean equals(Object anObject);

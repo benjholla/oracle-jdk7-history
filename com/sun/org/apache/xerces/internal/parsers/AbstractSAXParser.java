@@ -77,7 +77,7 @@ public abstract class AbstractSAXParser
     
     protected static final String STRING_INTERNING =
         Constants.SAX_FEATURE_PREFIX + Constants.STRING_INTERNING_FEATURE;
-    
+
     
     
     
@@ -94,7 +94,7 @@ public abstract class AbstractSAXParser
     
 
     
-    protected static final String LEXICAL_HANDLER = 
+    protected static final String LEXICAL_HANDLER =
         Constants.SAX_PROPERTY_PREFIX + Constants.LEXICAL_HANDLER_PROPERTY;
 
     
@@ -102,7 +102,7 @@ public abstract class AbstractSAXParser
         Constants.SAX_PROPERTY_PREFIX + Constants.DECLARATION_HANDLER_PROPERTY;
 
     
-    protected static final String DOM_NODE = 
+    protected static final String DOM_NODE =
         Constants.SAX_PROPERTY_PREFIX + Constants.DOM_NODE_PROPERTY;
 
     
@@ -123,19 +123,19 @@ public abstract class AbstractSAXParser
 
     
     protected boolean fNamespacePrefixes = false;
-    
+
     
     protected boolean fLexicalHandlerParameterEntities = true;
-    
+
     
     protected boolean fStandalone;
-    
+
     
     protected boolean fResolveDTDURIs = true;
-    
+
     
     protected boolean fUseEntityResolver2 = true;
-    
+
     
     protected boolean fXMLNSURIs = false;
 
@@ -146,7 +146,7 @@ public abstract class AbstractSAXParser
 
     
     protected DocumentHandler fDocumentHandler;
-    
+
     
     protected NamespaceContext fNamespaceContext;
 
@@ -208,10 +208,10 @@ public abstract class AbstractSAXParser
     
 
     
-    public void startDocument(XMLLocator locator, String encoding, 
+    public void startDocument(XMLLocator locator, String encoding,
                               NamespaceContext namespaceContext, Augmentations augs)
         throws XNIException {
-        
+
         fNamespaceContext = namespaceContext;
 
         try {
@@ -270,10 +270,10 @@ public abstract class AbstractSAXParser
     } 
 
         
-    public void startGeneralEntity(String name, XMLResourceIdentifier identifier, 
+    public void startGeneralEntity(String name, XMLResourceIdentifier identifier,
                                    String encoding, Augmentations augs)
         throws XNIException {
-        
+
         try {
             
             if (augs != null && Boolean.TRUE.equals(augs.getItem(Constants.ENTITY_SKIPPED))) {
@@ -327,8 +327,8 @@ public abstract class AbstractSAXParser
             }
 
             
-            if (fContentHandler != null) {                
-                
+            if (fContentHandler != null) {
+
                 if (fNamespaces) {
                     
                     startNamespaceMapping();
@@ -342,8 +342,8 @@ public abstract class AbstractSAXParser
                     int len = attributes.getLength();
                     if (!fNamespacePrefixes) {
                         for (int i = len - 1; i >= 0; --i) {
-                            attributes.getName(i, fQName);    
-                            if ((fQName.prefix == XMLSymbols.PREFIX_XMLNS) || 
+                            attributes.getName(i, fQName);
+                            if ((fQName.prefix == XMLSymbols.PREFIX_XMLNS) ||
                                (fQName.rawname == XMLSymbols.PREFIX_XMLNS)) {
                                 
                                 attributes.removeAttributeAt(i);
@@ -352,8 +352,8 @@ public abstract class AbstractSAXParser
                     }
                     else if (!fXMLNSURIs) {
                         for (int i = len - 1; i >= 0; --i) {
-                            attributes.getName(i, fQName);    
-                            if ((fQName.prefix == XMLSymbols.PREFIX_XMLNS) || 
+                            attributes.getName(i, fQName);
+                            if ((fQName.prefix == XMLSymbols.PREFIX_XMLNS) ||
                                (fQName.rawname == XMLSymbols.PREFIX_XMLNS)) {
                                 
                                 
@@ -365,9 +365,9 @@ public abstract class AbstractSAXParser
                         }
                     }
                 }
-                
+
                 fAugmentations = augs;
-                
+
                 String uri = element.uri != null ? element.uri : "";
                 String localpart = fNamespaces ? element.localpart : "";
                 fAttributesProxy.setAttributes(attributes);
@@ -383,7 +383,7 @@ public abstract class AbstractSAXParser
 
     
     public void characters(XMLString text, Augmentations augs) throws XNIException {
-        
+
         
         
         if (text.length == 0) {
@@ -432,7 +432,7 @@ public abstract class AbstractSAXParser
 
     
     public void endElement(QName element, Augmentations augs) throws XNIException {
-        
+
 
         try {
             
@@ -449,7 +449,7 @@ public abstract class AbstractSAXParser
                                            element.rawname);
                 if (fNamespaces) {
                     endNamespaceMapping();
-                } 
+                }
             }
         }
         catch (SAXException e) {
@@ -557,7 +557,7 @@ public abstract class AbstractSAXParser
     
 
     
-    public void startExternalSubset(XMLResourceIdentifier identifier, 
+    public void startExternalSubset(XMLResourceIdentifier identifier,
                                     Augmentations augs) throws XNIException {
         startParameterEntity("[dtd]", null, null, augs);
     }
@@ -568,7 +568,7 @@ public abstract class AbstractSAXParser
     }
 
     
-    public void startParameterEntity(String name, 
+    public void startParameterEntity(String name,
                                      XMLResourceIdentifier identifier,
                                      String encoding, Augmentations augs)
         throws XNIException {
@@ -644,7 +644,7 @@ public abstract class AbstractSAXParser
                     return;
                 }
                 fDeclaredAttrs.put(elemAttr, Boolean.TRUE);
-                if (type.equals("NOTATION") || 
+                if (type.equals("NOTATION") ||
                     type.equals("ENUMERATION")) {
 
                     StringBuffer str = new StringBuffer();
@@ -699,7 +699,7 @@ public abstract class AbstractSAXParser
             
             if (fDeclHandler != null) {
                 String publicId = identifier.getPublicId();
-                String systemId = fResolveDTDURIs ? 
+                String systemId = fResolveDTDURIs ?
                     identifier.getExpandedSystemId() : identifier.getLiteralSystemId();
                 fDeclHandler.externalEntityDecl(name, publicId, systemId);
             }
@@ -711,14 +711,14 @@ public abstract class AbstractSAXParser
     } 
 
     
-    public void unparsedEntityDecl(String name, XMLResourceIdentifier identifier, 
+    public void unparsedEntityDecl(String name, XMLResourceIdentifier identifier,
                                    String notation,
                                    Augmentations augs) throws XNIException {
         try {
             
             if (fDTDHandler != null) {
                 String publicId = identifier.getPublicId();
-                String systemId = fResolveDTDURIs ? 
+                String systemId = fResolveDTDURIs ?
                     identifier.getExpandedSystemId() : identifier.getLiteralSystemId();
                 fDTDHandler.unparsedEntityDecl(name, publicId, systemId, notation);
             }
@@ -736,7 +736,7 @@ public abstract class AbstractSAXParser
             
             if (fDTDHandler != null) {
                 String publicId = identifier.getPublicId();
-                String systemId = fResolveDTDURIs ? 
+                String systemId = fResolveDTDURIs ?
                     identifier.getExpandedSystemId() : identifier.getLiteralSystemId();
                 fDTDHandler.notationDecl(name, publicId, systemId);
             }
@@ -941,7 +941,7 @@ public abstract class AbstractSAXParser
                         ((EntityResolverWrapper) xmlEntityResolver).getEntityResolver();
                 }
                 else if (xmlEntityResolver instanceof EntityResolver2Wrapper) {
-                    entityResolver = 
+                    entityResolver =
                         ((EntityResolver2Wrapper) xmlEntityResolver).getEntityResolver();
                 }
             }
@@ -1046,40 +1046,40 @@ public abstract class AbstractSAXParser
                 final int suffixLength = featureId.length() - Constants.SAX_FEATURE_PREFIX.length();
 
                 
-                if (suffixLength == Constants.NAMESPACES_FEATURE.length() && 
+                if (suffixLength == Constants.NAMESPACES_FEATURE.length() &&
                     featureId.endsWith(Constants.NAMESPACES_FEATURE)) {
                     fConfiguration.setFeature(featureId, state);
                     fNamespaces = state;
                     return;
                 }
+
                 
                 
                 
                 
                 
                 
-                
-                if (suffixLength == Constants.NAMESPACE_PREFIXES_FEATURE.length() && 
+                if (suffixLength == Constants.NAMESPACE_PREFIXES_FEATURE.length() &&
                     featureId.endsWith(Constants.NAMESPACE_PREFIXES_FEATURE)) {
                     fConfiguration.setFeature(featureId, state);
                     fNamespacePrefixes = state;
                     return;
                 }
+
                 
                 
                 
                 
-                
-                if (suffixLength == Constants.STRING_INTERNING_FEATURE.length() && 
+                if (suffixLength == Constants.STRING_INTERNING_FEATURE.length() &&
                     featureId.endsWith(Constants.STRING_INTERNING_FEATURE)) {
                     if (!state) {
                         throw new SAXNotSupportedException(
-                            SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                            SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                             "false-not-supported", new Object [] {featureId}));
                     }
                     return;
                 }
-                
+
                 
                 
                 
@@ -1089,17 +1089,17 @@ public abstract class AbstractSAXParser
                     fLexicalHandlerParameterEntities = state;
                     return;
                 }
+
                 
                 
                 
                 
-                
-                if (suffixLength == Constants.RESOLVE_DTD_URIS_FEATURE.length() && 
+                if (suffixLength == Constants.RESOLVE_DTD_URIS_FEATURE.length() &&
                     featureId.endsWith(Constants.RESOLVE_DTD_URIS_FEATURE)) {
                     fResolveDTDURIs = state;
                     return;
                 }
-                
+
                 
                 
                 
@@ -1110,12 +1110,12 @@ public abstract class AbstractSAXParser
                     
                     if (state) {
                         throw new SAXNotSupportedException(
-                            SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
-                            "true-not-supported", new Object [] {featureId}));  
+                            SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
+                            "true-not-supported", new Object [] {featureId}));
                     }
                     return;
                 }
-                
+
                 
                 
                 
@@ -1125,7 +1125,7 @@ public abstract class AbstractSAXParser
                     fXMLNSURIs = state;
                     return;
                 }
-                
+
                 
                 
                 
@@ -1139,11 +1139,11 @@ public abstract class AbstractSAXParser
                     }
                     return;
                 }
+
                 
                 
                 
-                
-                
+
                 
                 
                 
@@ -1163,10 +1163,10 @@ public abstract class AbstractSAXParser
                     (suffixLength == Constants.XML_11_FEATURE.length() &&
                     featureId.endsWith(Constants.XML_11_FEATURE))) {
                     throw new SAXNotSupportedException(
-                        SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                        SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                         "feature-read-only", new Object [] {featureId}));
                 }
-                
+
 
                 
                 
@@ -1189,12 +1189,12 @@ public abstract class AbstractSAXParser
             String identifier = e.getIdentifier();
             if (e.getType() == Status.NOT_RECOGNIZED) {
                 throw new SAXNotRecognizedException(
-                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                     "feature-not-recognized", new Object [] {identifier}));
             }
             else {
                 throw new SAXNotSupportedException(
-                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                     "feature-not-supported", new Object [] {identifier}));
             }
         }
@@ -1219,7 +1219,7 @@ public abstract class AbstractSAXParser
                 
                 
                 
-                if (suffixLength == Constants.NAMESPACE_PREFIXES_FEATURE.length() && 
+                if (suffixLength == Constants.NAMESPACE_PREFIXES_FEATURE.length() &&
                     featureId.endsWith(Constants.NAMESPACE_PREFIXES_FEATURE)) {
                     boolean state = fConfiguration.getFeature(featureId);
                     return state;
@@ -1228,11 +1228,11 @@ public abstract class AbstractSAXParser
                 
                 
                 
-                if (suffixLength == Constants.STRING_INTERNING_FEATURE.length() && 
+                if (suffixLength == Constants.STRING_INTERNING_FEATURE.length() &&
                     featureId.endsWith(Constants.STRING_INTERNING_FEATURE)) {
                     return true;
                 }
-                
+
                 
                 
                 
@@ -1240,7 +1240,7 @@ public abstract class AbstractSAXParser
                     featureId.endsWith(Constants.IS_STANDALONE_FEATURE)) {
                     return fStandalone;
                 }
-                
+
                 
                 
                 
@@ -1248,7 +1248,7 @@ public abstract class AbstractSAXParser
                     featureId.endsWith(Constants.XML_11_FEATURE)) {
                     return (fConfiguration instanceof XML11Configurable);
                 }
-                
+
                 
                 
                 
@@ -1257,15 +1257,15 @@ public abstract class AbstractSAXParser
                     featureId.endsWith(Constants.LEXICAL_HANDLER_PARAMETER_ENTITIES_FEATURE)) {
                     return fLexicalHandlerParameterEntities;
                 }
+
                 
                 
                 
-                
-                if (suffixLength == Constants.RESOLVE_DTD_URIS_FEATURE.length() && 
+                if (suffixLength == Constants.RESOLVE_DTD_URIS_FEATURE.length() &&
                     featureId.endsWith(Constants.RESOLVE_DTD_URIS_FEATURE)) {
                     return fResolveDTDURIs;
                 }
-                
+
                 
                 
                 
@@ -1274,7 +1274,7 @@ public abstract class AbstractSAXParser
                     featureId.endsWith(Constants.XMLNS_URIS_FEATURE)) {
                     return fXMLNSURIs;
                 }
-                
+
                 
                 
                 
@@ -1285,7 +1285,7 @@ public abstract class AbstractSAXParser
                     
                     return false;
                 }
-                
+
                 
                 
                 
@@ -1294,7 +1294,7 @@ public abstract class AbstractSAXParser
                     featureId.endsWith(Constants.USE_ENTITY_RESOLVER2_FEATURE)) {
                     return fUseEntityResolver2;
                 }
-                
+
                 
                 
                 
@@ -1307,8 +1307,8 @@ public abstract class AbstractSAXParser
                     (suffixLength == Constants.USE_LOCATOR2_FEATURE.length() &&
                     featureId.endsWith(Constants.USE_LOCATOR2_FEATURE))) {
                     return true;
-                }                
-                
+                }
+
 
                 
                 
@@ -1327,12 +1327,12 @@ public abstract class AbstractSAXParser
             String identifier = e.getIdentifier();
             if (e.getType() == Status.NOT_RECOGNIZED) {
                 throw new SAXNotRecognizedException(
-                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                     "feature-not-recognized", new Object [] {identifier}));
             }
             else {
                 throw new SAXNotSupportedException(
-                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                     "feature-not-supported", new Object [] {identifier}));
             }
         }
@@ -1357,14 +1357,14 @@ public abstract class AbstractSAXParser
                 
                 
                 
-                if (suffixLength == Constants.LEXICAL_HANDLER_PROPERTY.length() && 
+                if (suffixLength == Constants.LEXICAL_HANDLER_PROPERTY.length() &&
                     propertyId.endsWith(Constants.LEXICAL_HANDLER_PROPERTY)) {
                     try {
                         setLexicalHandler((LexicalHandler)value);
                     }
                     catch (ClassCastException e) {
                         throw new SAXNotSupportedException(
-                            SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                            SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                             "incompatible-class", new Object [] {propertyId, "org.xml.sax.ext.LexicalHandler"}));
                     }
                     return;
@@ -1375,14 +1375,14 @@ public abstract class AbstractSAXParser
                 
                 
                 
-                if (suffixLength == Constants.DECLARATION_HANDLER_PROPERTY.length() && 
+                if (suffixLength == Constants.DECLARATION_HANDLER_PROPERTY.length() &&
                     propertyId.endsWith(Constants.DECLARATION_HANDLER_PROPERTY)) {
                     try {
                         setDeclHandler((DeclHandler)value);
                     }
                     catch (ClassCastException e) {
                         throw new SAXNotSupportedException(
-                            SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                            SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                             "incompatible-class", new Object [] {propertyId, "org.xml.sax.ext.DeclHandler"}));
                     }
                     return;
@@ -1401,12 +1401,12 @@ public abstract class AbstractSAXParser
                 
                 
                 
-                if ((suffixLength == Constants.DOM_NODE_PROPERTY.length() && 
+                if ((suffixLength == Constants.DOM_NODE_PROPERTY.length() &&
                     propertyId.endsWith(Constants.DOM_NODE_PROPERTY)) ||
                     (suffixLength == Constants.DOCUMENT_XML_VERSION_PROPERTY.length() &&
                     propertyId.endsWith(Constants.DOCUMENT_XML_VERSION_PROPERTY))) {
                     throw new SAXNotSupportedException(
-                        SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                        SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                         "property-read-only", new Object [] {propertyId}));
                 }
                 
@@ -1430,12 +1430,12 @@ public abstract class AbstractSAXParser
             String identifier = e.getIdentifier();
             if (e.getType() == Status.NOT_RECOGNIZED) {
                 throw new SAXNotRecognizedException(
-                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                     "property-not-recognized", new Object [] {identifier}));
             }
             else {
                 throw new SAXNotSupportedException(
-                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                     "property-not-supported", new Object [] {identifier}));
             }
         }
@@ -1464,14 +1464,14 @@ public abstract class AbstractSAXParser
                     propertyId.endsWith(Constants.DOCUMENT_XML_VERSION_PROPERTY)) {
                     return fVersion;
                 }
+
                 
                 
                 
                 
                 
                 
-                
-                if (suffixLength == Constants.LEXICAL_HANDLER_PROPERTY.length() && 
+                if (suffixLength == Constants.LEXICAL_HANDLER_PROPERTY.length() &&
                     propertyId.endsWith(Constants.LEXICAL_HANDLER_PROPERTY)) {
                     return getLexicalHandler();
                 }
@@ -1481,10 +1481,11 @@ public abstract class AbstractSAXParser
                 
                 
                 
-                if (suffixLength == Constants.DECLARATION_HANDLER_PROPERTY.length() && 
+                if (suffixLength == Constants.DECLARATION_HANDLER_PROPERTY.length() &&
                     propertyId.endsWith(Constants.DECLARATION_HANDLER_PROPERTY)) {
                     return getDeclHandler();
                 }
+
                 
                 
                 
@@ -1495,15 +1496,14 @@ public abstract class AbstractSAXParser
                 
                 
                 
-                
-                if (suffixLength == Constants.DOM_NODE_PROPERTY.length() && 
+                if (suffixLength == Constants.DOM_NODE_PROPERTY.length() &&
                     propertyId.endsWith(Constants.DOM_NODE_PROPERTY)) {
                     
                     throw new SAXNotSupportedException(
-                        SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                        SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                         "dom-node-read-not-supported", null));
                 }
-                
+
                 
                 
                 
@@ -1525,12 +1525,12 @@ public abstract class AbstractSAXParser
             String identifier = e.getIdentifier();
             if (e.getType() == Status.NOT_RECOGNIZED) {
                 throw new SAXNotRecognizedException(
-                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                     "property-not-recognized", new Object [] {identifier}));
             }
             else {
                 throw new SAXNotSupportedException(
-                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                     "property-not-supported", new Object [] {identifier}));
             }
         }
@@ -1549,7 +1549,7 @@ public abstract class AbstractSAXParser
 
         if (fParseInProgress) {
             throw new SAXNotSupportedException(
-                SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                 "property-not-parsing-supported",
                 new Object [] {"http://xml.org/sax/properties/declaration-handler"}));
         }
@@ -1569,7 +1569,7 @@ public abstract class AbstractSAXParser
 
         if (fParseInProgress) {
             throw new SAXNotSupportedException(
-                SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                 "property-not-parsing-supported",
                 new Object [] {"http://xml.org/sax/properties/lexical-handler"}));
         }
@@ -1592,12 +1592,12 @@ public abstract class AbstractSAXParser
             for (int i = 0; i < count; i++) {
                 prefix = fNamespaceContext.getDeclaredPrefixAt(i);
                 uri = fNamespaceContext.getURI(prefix);
-                fContentHandler.startPrefixMapping(prefix, 
+                fContentHandler.startPrefixMapping(prefix,
                     (uri == null) ? "" : uri);
             }
         }
     }
-    
+
     
     protected final void endNamespaceMapping() throws SAXException {
         int count = fNamespaceContext.getDeclaredPrefixCount();
@@ -1607,7 +1607,7 @@ public abstract class AbstractSAXParser
             }
         }
     }
-	
+
     
     
     
@@ -1622,11 +1622,11 @@ public abstract class AbstractSAXParser
         fStandalone = false;
 
         
-        fNamespaces = fConfiguration.getFeature(NAMESPACES);           
+        fNamespaces = fConfiguration.getFeature(NAMESPACES);
         fNamespacePrefixes = fConfiguration.getFeature(NAMESPACE_PREFIXES);
         fAugmentations = null;
         fDeclaredAttrs = null;
-        
+
     } 
 
     
@@ -1763,7 +1763,7 @@ public abstract class AbstractSAXParser
             return uri.equals("") ? fAttributes.getIndex(null, localPart) :
                                     fAttributes.getIndex(uri, localPart);
         }
-        
+
         
         
         public boolean isDeclared(int index) {
@@ -1774,7 +1774,7 @@ public abstract class AbstractSAXParser
                 fAttributes.getAugmentations(index).getItem(
                 Constants.ATTRIBUTE_DECLARED));
         }
-        
+
         public boolean isDeclared(String qName) {
             int index = getIndex(qName);
             if (index == -1) {
@@ -1784,7 +1784,7 @@ public abstract class AbstractSAXParser
                 fAttributes.getAugmentations(index).getItem(
                 Constants.ATTRIBUTE_DECLARED));
         }
-		
+
         public boolean isDeclared(String uri, String localName) {
             int index = getIndex(uri, localName);
             if (index == -1) {
@@ -1794,14 +1794,14 @@ public abstract class AbstractSAXParser
                 fAttributes.getAugmentations(index).getItem(
                 Constants.ATTRIBUTE_DECLARED));
         }
-                
+
         public boolean isSpecified(int index) {
             if (index < 0 || index >= fAttributes.getLength()) {
                 throw new ArrayIndexOutOfBoundsException(index);
             }
             return fAttributes.isSpecified(index);
         }
-        
+
         public boolean isSpecified(String qName) {
             int index = getIndex(qName);
             if (index == -1) {
@@ -1809,7 +1809,7 @@ public abstract class AbstractSAXParser
             }
             return fAttributes.isSpecified(index);
         }
-        
+
         public boolean isSpecified(String uri, String localName) {
             int index = getIndex(uri, localName);
             if (index == -1) {
@@ -1834,7 +1834,7 @@ public abstract class AbstractSAXParser
     }
 
 
-    public AttributePSVI getAttributePSVIByName(String uri, 
+    public AttributePSVI getAttributePSVIByName(String uri,
                                                 String localname){
         return (AttributePSVI)fAttributesProxy.fAttributes.getAugmentations(uri, localname).getItem(Constants.ATTRIBUTE_PSVI);
     }

@@ -9,6 +9,7 @@ import org.xml.sax.*;
 
 import javax.xml.parsers.*;
 
+import com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl;
 import com.sun.org.apache.xml.internal.resolver.*;
 
 
@@ -22,7 +23,8 @@ public class ResolvingXMLReader extends ResolvingXMLFilter {
   
   public ResolvingXMLReader() {
     super();
-    SAXParserFactory spf = SAXParserFactory.newInstance();
+    SAXParserFactory spf = catalogManager.useServicesMechanism() ?
+                    SAXParserFactory.newInstance() : new SAXParserFactoryImpl();
     spf.setNamespaceAware(namespaceAware);
     spf.setValidating(validating);
     try {
@@ -36,7 +38,8 @@ public class ResolvingXMLReader extends ResolvingXMLFilter {
   
   public ResolvingXMLReader(CatalogManager manager) {
     super(manager);
-    SAXParserFactory spf = SAXParserFactory.newInstance();
+    SAXParserFactory spf = catalogManager.useServicesMechanism() ?
+                    SAXParserFactory.newInstance() : new SAXParserFactoryImpl();
     spf.setNamespaceAware(namespaceAware);
     spf.setValidating(validating);
     try {

@@ -6,21 +6,21 @@ package com.sun.org.apache.xml.internal.utils;
 
 public class ThreadControllerWrapper
 {
-  
+
   
   private static ThreadController m_tpool = new ThreadController();
-  
+
   public static Thread runThread(Runnable runnable, int priority)
   {
     return m_tpool.run(runnable, priority);
   }
-  
+
   public static void waitThread(Thread worker, Runnable task)
     throws InterruptedException
   {
     m_tpool.waitThread(worker, task);
   }
-  
+
   
   public static class ThreadController
   {
@@ -28,11 +28,11 @@ public class ThreadControllerWrapper
     
     final class SafeThread extends Thread {
          private volatile boolean ran = false;
-         
+
          public SafeThread(Runnable target) {
              super(target);
          }
-         
+
          public final void run() {
              if (Thread.currentThread() != this) {
                  throw new IllegalStateException("The run() method in a"
@@ -45,8 +45,8 @@ public class ThreadControllerWrapper
                 else {
                  throw new IllegalStateException("The run() method in a"
                      + " SafeThread cannot be called more than once.");
-                 }                 
-             }             
+                 }
+             }
              super.run();
          }
     }
@@ -73,5 +73,5 @@ public class ThreadControllerWrapper
       worker.join();
     }
   }
- 
+
 }

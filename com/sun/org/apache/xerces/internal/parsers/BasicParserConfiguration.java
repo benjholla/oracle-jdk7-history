@@ -41,35 +41,35 @@ public abstract class BasicParserConfiguration
     
     protected static final String VALIDATION =
         Constants.SAX_FEATURE_PREFIX + Constants.VALIDATION_FEATURE;
-    
+
     
     protected static final String NAMESPACES =
         Constants.SAX_FEATURE_PREFIX + Constants.NAMESPACES_FEATURE;
-    
+
     
     protected static final String EXTERNAL_GENERAL_ENTITIES =
         Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE;
-    
+
     
     protected static final String EXTERNAL_PARAMETER_ENTITIES =
         Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE;
-    
+
     
 
     
-    protected static final String XML_STRING = 
+    protected static final String XML_STRING =
         Constants.SAX_PROPERTY_PREFIX + Constants.XML_STRING_PROPERTY;
 
     
-    protected static final String SYMBOL_TABLE = 
+    protected static final String SYMBOL_TABLE =
         Constants.XERCES_PROPERTY_PREFIX + Constants.SYMBOL_TABLE_PROPERTY;
 
     
-    protected static final String ERROR_HANDLER = 
+    protected static final String ERROR_HANDLER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.ERROR_HANDLER_PROPERTY;
 
     
-    protected static final String ENTITY_RESOLVER = 
+    protected static final String ENTITY_RESOLVER =
         Constants.XERCES_PROPERTY_PREFIX + Constants.ENTITY_RESOLVER_PROPERTY;
 
     
@@ -101,7 +101,7 @@ public abstract class BasicParserConfiguration
     
     protected XMLDTDContentModelHandler fDTDContentModelHandler;
 
-         
+    
     protected XMLDocumentSource fLastComponent;
 
     
@@ -132,25 +132,25 @@ public abstract class BasicParserConfiguration
 
         
         final String[] recognizedFeatures = {
-        	PARSER_SETTINGS,
-            VALIDATION,                 
-            NAMESPACES, 
-            EXTERNAL_GENERAL_ENTITIES,  
+                PARSER_SETTINGS,
+            VALIDATION,
+            NAMESPACES,
+            EXTERNAL_GENERAL_ENTITIES,
             EXTERNAL_PARAMETER_ENTITIES,
         };
         addRecognizedFeatures(recognizedFeatures);
         fFeatures.put(PARSER_SETTINGS, Boolean.TRUE);
         
-		fFeatures.put(VALIDATION, Boolean.FALSE);
-		fFeatures.put(NAMESPACES, Boolean.TRUE);
-		fFeatures.put(EXTERNAL_GENERAL_ENTITIES, Boolean.TRUE);
-		fFeatures.put(EXTERNAL_PARAMETER_ENTITIES, Boolean.TRUE);
+                fFeatures.put(VALIDATION, Boolean.FALSE);
+                fFeatures.put(NAMESPACES, Boolean.TRUE);
+                fFeatures.put(EXTERNAL_GENERAL_ENTITIES, Boolean.TRUE);
+                fFeatures.put(EXTERNAL_PARAMETER_ENTITIES, Boolean.TRUE);
 
         
         final String[] recognizedProperties = {
-            XML_STRING,     
+            XML_STRING,
             SYMBOL_TABLE,
-            ERROR_HANDLER,  
+            ERROR_HANDLER,
             ENTITY_RESOLVER,
         };
         addRecognizedProperties(recognizedProperties);
@@ -175,7 +175,7 @@ public abstract class BasicParserConfiguration
         
         String[] recognizedFeatures = component.getRecognizedFeatures();
         addRecognizedFeatures(recognizedFeatures);
-        
+
         
         String[] recognizedProperties = component.getRecognizedProperties();
         addRecognizedProperties(recognizedProperties);
@@ -207,7 +207,7 @@ public abstract class BasicParserConfiguration
     
 
     
-    public abstract void parse(XMLInputSource inputSource) 
+    public abstract void parse(XMLInputSource inputSource)
         throws XNIException, IOException;
 
     
@@ -333,8 +333,8 @@ public abstract class BasicParserConfiguration
 
         
         if (propertyId.startsWith(Constants.SAX_PROPERTY_PREFIX)) {
-            final int suffixLength = propertyId.length() - Constants.SAX_PROPERTY_PREFIX.length();	
-        	
+            final int suffixLength = propertyId.length() - Constants.SAX_PROPERTY_PREFIX.length();
+
             
             
             
@@ -345,7 +345,7 @@ public abstract class BasicParserConfiguration
             
             
             
-            if (suffixLength == Constants.XML_STRING_PROPERTY.length() && 
+            if (suffixLength == Constants.XML_STRING_PROPERTY.length() &&
                 propertyId.endsWith(Constants.XML_STRING_PROPERTY)) {
                 
                 
@@ -358,8 +358,8 @@ public abstract class BasicParserConfiguration
         return super.checkProperty(propertyId);
 
     } 
-    
-    
+
+
     
     protected FeatureState checkFeature(String featureId)
         throws XMLConfigurationException {
@@ -373,7 +373,7 @@ public abstract class BasicParserConfiguration
             
             
             
-            if (suffixLength == Constants.PARSER_SETTINGS.length() && 
+            if (suffixLength == Constants.PARSER_SETTINGS.length() &&
                 featureId.endsWith(Constants.PARSER_SETTINGS)) {
                 return FeatureState.NOT_SUPPORTED;
             }

@@ -295,13 +295,13 @@ public class ErrorMessages_ko extends ListResourceBundle {
         
         {ErrorMsg.XSLTC_SOURCE_ERR,
         "systemId\uB97C \uC124\uC815\uD558\uC9C0 \uC54A\uC740 \uC0C1\uD0DC\uB85C XSLTCSource.build()\uAC00 \uD638\uCD9C\uB418\uC5C8\uC2B5\uB2C8\uB2E4."},
-        
+
         { ErrorMsg.ER_RESULT_NULL,
             "\uACB0\uACFC\uB294 \uB110\uC774 \uC544\uB2C8\uC5B4\uC57C \uD569\uB2C8\uB2E4."},
 
         
         {ErrorMsg.JAXP_INVALID_SET_PARAM_VALUE,
-        "{0} \uB9E4\uAC1C\uBCC0\uC218\uC758 \uAC12\uC740 \uC801\uD569\uD55C Java \uAC1D\uCCB4\uC5EC\uC57C \uD569\uB2C8\uB2E4."},            
+        "{0} \uB9E4\uAC1C\uBCC0\uC218\uC758 \uAC12\uC740 \uC801\uD569\uD55C Java \uAC1D\uCCB4\uC5EC\uC57C \uD569\uB2C8\uB2E4."},
 
 
         {ErrorMsg.COMPILE_STDIN_ERR,
@@ -377,7 +377,7 @@ public class ErrorMessages_ko extends ListResourceBundle {
         
         {ErrorMsg.ERROR_MSG,
         "ERROR:  ''{0}''"},
-        
+
         
         {ErrorMsg.TRANSFORM_WITH_TRANSLET_STR,
         "translet ''{0}''\uC744(\uB97C) \uC0AC\uC6A9\uD558\uC5EC \uBCC0\uD658\uD558\uC2ED\uC2DC\uC624. "},
@@ -405,10 +405,10 @@ public class ErrorMessages_ko extends ListResourceBundle {
         
         {ErrorMsg.RUNTIME_ERROR_KEY,
         "Translet \uC624\uB958:"},
-        
+
         
         {ErrorMsg.INVALID_QNAME_ERR,
-        "\uAC12\uC774 QName \uB610\uB294 \uACF5\uBC31\uC73C\uB85C \uAD6C\uBD84\uB41C QName \uBAA9\uB85D\uC774\uC5B4\uC57C \uD558\uB294 \uC18D\uC131\uC758 \uAC12\uC774 ''{0}''\uC785\uB2C8\uB2E4."}, 
+        "\uAC12\uC774 QName \uB610\uB294 \uACF5\uBC31\uC73C\uB85C \uAD6C\uBD84\uB41C QName \uBAA9\uB85D\uC774\uC5B4\uC57C \uD558\uB294 \uC18D\uC131\uC758 \uAC12\uC774 ''{0}''\uC785\uB2C8\uB2E4."},
 
         
         {ErrorMsg.INVALID_NCNAME_ERR,
@@ -417,10 +417,10 @@ public class ErrorMessages_ko extends ListResourceBundle {
         
         {ErrorMsg.INVALID_METHOD_IN_OUTPUT,
         "<xsl:output> \uC694\uC18C\uC5D0 \uB300\uD55C method \uC18D\uC131\uC758 \uAC12\uC774 ''{0}''\uC785\uB2C8\uB2E4. \uAC12\uC740 ''xml'', ''html'', ''text'' \uB610\uB294 qname-but-not-ncname \uC911 \uD558\uB098\uC5EC\uC57C \uD569\uB2C8\uB2E4."},
-        
+
         {ErrorMsg.JAXP_GET_FEATURE_NULL_NAME,
         "\uAE30\uB2A5 \uC774\uB984\uC740 TransformerFactory.getFeature(\uBB38\uC790\uC5F4 \uC774\uB984)\uC5D0\uC11C \uB110\uC77C \uC218 \uC5C6\uC2B5\uB2C8\uB2E4."},
-        
+
         {ErrorMsg.JAXP_SET_FEATURE_NULL_NAME,
         "\uAE30\uB2A5 \uC774\uB984\uC740 TransformerFactory.setFeature(\uBB38\uC790\uC5F4 \uC774\uB984, \uBD80\uC6B8 \uAC12)\uC5D0\uC11C \uB110\uC77C \uC218 \uC5C6\uC2B5\uB2C8\uB2E4."},
 

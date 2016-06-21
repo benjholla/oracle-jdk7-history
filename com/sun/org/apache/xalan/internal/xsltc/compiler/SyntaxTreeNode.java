@@ -346,9 +346,12 @@ public abstract class SyntaxTreeNode implements Constants {
                                      MethodGenerator methodGen) {
         
         final int n = elementCount();
+
         for (int i = 0; i < n; i++) {
+            methodGen.markChunkStart();
             final SyntaxTreeNode item = (SyntaxTreeNode)_contents.elementAt(i);
             item.translate(classGen, methodGen);
+            methodGen.markChunkEnd();
         }
 
         

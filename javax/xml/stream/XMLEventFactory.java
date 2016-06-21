@@ -12,7 +12,7 @@ public abstract class XMLEventFactory {
   protected XMLEventFactory(){}
 
   
-  public static XMLEventFactory newInstance() 
+  public static XMLEventFactory newInstance()
     throws FactoryConfigurationError
   {
     return (XMLEventFactory) FactoryFinder.find(
@@ -99,15 +99,15 @@ public abstract class XMLEventFactory {
                                                   );
 
   
-  public abstract EndElement createEndElement(QName name, 
+  public abstract EndElement createEndElement(QName name,
                                               Iterator namespaces);
 
   
-  public abstract EndElement createEndElement(String prefix, 
+  public abstract EndElement createEndElement(String prefix,
                                               String namespaceUri,
                                               String localName);
   
-  public abstract EndElement createEndElement(String prefix, 
+  public abstract EndElement createEndElement(String prefix,
                                               String namespaceUri,
                                               String localName,
                                               Iterator namespaces);
@@ -154,7 +154,3 @@ public abstract class XMLEventFactory {
   
   public abstract DTD createDTD(String dtd);
 }
-
-
-
-

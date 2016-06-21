@@ -295,13 +295,13 @@ public class ErrorMessages_fr extends ListResourceBundle {
         
         {ErrorMsg.XSLTC_SOURCE_ERR,
         "XSLTCSource.build() appel\u00E9 sans que l'ID syst\u00E8me soit d\u00E9fini."},
-        
+
         { ErrorMsg.ER_RESULT_NULL,
             "Le r\u00E9sultat ne doit pas \u00EAtre NULL"},
 
         
         {ErrorMsg.JAXP_INVALID_SET_PARAM_VALUE,
-        "La valeur du param\u00E8tre {0} doit \u00EAtre un objet Java valide"},            
+        "La valeur du param\u00E8tre {0} doit \u00EAtre un objet Java valide"},
 
 
         {ErrorMsg.COMPILE_STDIN_ERR,
@@ -377,7 +377,7 @@ public class ErrorMessages_fr extends ListResourceBundle {
         
         {ErrorMsg.ERROR_MSG,
         "ERROR:  ''{0}''"},
-        
+
         
         {ErrorMsg.TRANSFORM_WITH_TRANSLET_STR,
         "Transformation \u00E0 l''aide du translet ''{0}'' "},
@@ -405,10 +405,10 @@ public class ErrorMessages_fr extends ListResourceBundle {
         
         {ErrorMsg.RUNTIME_ERROR_KEY,
         "Erreurs de translet :"},
-        
+
         
         {ErrorMsg.INVALID_QNAME_ERR,
-        "Un attribut dont la valeur doit \u00EAtre un QName ou une liste de QNames s\u00E9par\u00E9s par des espaces avait la valeur ''{0}''"}, 
+        "Un attribut dont la valeur doit \u00EAtre un QName ou une liste de QNames s\u00E9par\u00E9s par des espaces avait la valeur ''{0}''"},
 
         
         {ErrorMsg.INVALID_NCNAME_ERR,
@@ -417,10 +417,10 @@ public class ErrorMessages_fr extends ListResourceBundle {
         
         {ErrorMsg.INVALID_METHOD_IN_OUTPUT,
         "L''attribut \"method\" d''un \u00E9l\u00E9ment <xsl:output> avait la valeur ''{0}''. La valeur doit \u00EAtre l''une des suivantes : ''xml'', ''html'', ''text'' ou qname-but-not-ncname"},
-        
+
         {ErrorMsg.JAXP_GET_FEATURE_NULL_NAME,
         "Le nom de la fonctionnalit\u00E9 ne peut pas \u00EAtre NULL dans TransformerFactory.getFeature (cha\u00EEne pour le nom)."},
-        
+
         {ErrorMsg.JAXP_SET_FEATURE_NULL_NAME,
         "Le nom de la fonctionnalit\u00E9 ne peut pas \u00EAtre NULL dans TransformerFactory.setFeature (cha\u00EEne pour le nom, valeur bool\u00E9enne)."},
 

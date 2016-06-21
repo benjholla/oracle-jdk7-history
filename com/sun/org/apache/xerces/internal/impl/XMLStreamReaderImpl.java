@@ -42,42 +42,42 @@ import com.sun.xml.internal.stream.dtd.DTDGrammarUtil;
 
 
 public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
-    
+
     
     protected static final String ENTITY_MANAGER =
     Constants.XERCES_PROPERTY_PREFIX + Constants.ENTITY_MANAGER_PROPERTY;
-    
+
     
     protected static final String ERROR_REPORTER =
     Constants.XERCES_PROPERTY_PREFIX + Constants.ERROR_REPORTER_PROPERTY;
-    
+
     
     protected static final String SYMBOL_TABLE =
     Constants.XERCES_PROPERTY_PREFIX + Constants.SYMBOL_TABLE_PROPERTY;
-    
+
     protected static final String READER_IN_DEFINED_STATE =
     Constants.READER_IN_DEFINED_STATE;
-    
+
     private SymbolTable fSymbolTable = new SymbolTable();
-    
+
     
     protected XMLDocumentScannerImpl fScanner = new XMLNSDocumentScannerImpl();
-        
+
     
     
     protected NamespaceContextWrapper fNamespaceContextWrapper = new NamespaceContextWrapper((NamespaceSupport)fScanner.getNamespaceContext()) ;
     protected XMLEntityManager fEntityManager = new XMLEntityManager();
     protected StaxErrorReporter fErrorReporter = new StaxErrorReporter();
-    
-    
+
+
     
     protected XMLEntityScanner fEntityScanner = null;
-    
+
     
     protected XMLInputSource fInputSource = null;
     
     protected PropertyManager fPropertyManager = null ;
-    
+
     
     private int fEventType ;
     
@@ -88,7 +88,7 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
     private boolean fBindNamespaces = true;
     private String fDTDDecl = null;
     private String versionStr = null;
-    
+
     
     public XMLStreamReaderImpl(InputStream inputStream, PropertyManager props) throws  XMLStreamException {
         init(props);
@@ -97,7 +97,7 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         
         setInputSource(inputSource);
     }
-    
+
     public XMLDocumentScannerImpl getScanner(){
         System.out.println("returning scanner");
         return fScanner;
@@ -110,8 +110,8 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         
         setInputSource(inputSource);
     }
-    
-    
+
+
     
     public XMLStreamReaderImpl(InputStream inputStream, String encoding, PropertyManager props ) throws  XMLStreamException {
         init(props);
@@ -120,7 +120,7 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         
         setInputSource(inputSource);
     }
-    
+
     
     public XMLStreamReaderImpl(Reader reader, PropertyManager props) throws  XMLStreamException {
         init(props);
@@ -130,34 +130,34 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         
         setInputSource(inputSource);
     }
-    
+
     
     public XMLStreamReaderImpl(XMLInputSource inputSource, PropertyManager props) throws  XMLStreamException {
         init(props);
         
         setInputSource(inputSource);
     }
-    
+
     
     public void setInputSource(XMLInputSource inputSource ) throws XMLStreamException {
         
         
         
         fReuse = false;
-        
+
         try{
-            
+
             fScanner.setInputSource(inputSource) ;
             
             if(fReaderInDefinedState){
                 fEventType = fScanner.next();
                 if (versionStr == null)
                     versionStr = getVersion();
-                
+
                 if (fEventType == XMLStreamConstants.START_DOCUMENT && versionStr != null && versionStr.equals("1.1")){
                     switchToXML11Scanner();
                 }
-                
+
             }
         }catch(java.io.IOException ex){
             throw new XMLStreamException(ex);
@@ -165,7 +165,7 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
             throw new XMLStreamException(ex.getMessage(), getLocation(), ex.getException());
         }
     }
-    
+
     void init(PropertyManager propertyManager) throws XMLStreamException {
         fPropertyManager = propertyManager;
         
@@ -182,7 +182,7 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         
         reset();
     }
-    
+
     
     public boolean canReuse(){
         if(DEBUG){
@@ -193,7 +193,7 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         
         return fReuse;
     }
-    
+
     
     public void reset(){
         fReuse = true;
@@ -212,43 +212,43 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         fBindNamespaces = ((Boolean)fPropertyManager.getProperty(XMLInputFactory.IS_NAMESPACE_AWARE)).booleanValue();
         versionStr = null;
     }
-    
-    
+
+
     
     public void close() throws XMLStreamException {
         
         
         fReuse = true ;
     }
-    
-    
+
+
     
     public String getCharacterEncodingScheme() {
         return fScanner.getCharacterEncodingScheme();
-        
+
     }
-    
-    
+
+
     
     public int getColumnNumber() {
         return fEntityScanner.getColumnNumber();
     }
-    
+
     
     public String getEncoding() {
         return fEntityScanner.getEncoding();
     }
-    
+
     
     public int getEventType() {
         return fEventType ;
     }
-    
+
     
     public int getLineNumber() {
         return fEntityScanner.getLineNumber() ;
     }
-    
+
     public String getLocalName() {
         if(fEventType == XMLEvent.START_ELEMENT || fEventType == XMLEvent.END_ELEMENT){
             
@@ -260,7 +260,7 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         throw new IllegalStateException("Method getLocalName() cannot be called for " +
             getEventTypeString(fEventType) + " event.");
     }
-    
+
     
     public String getNamespaceURI() {
         
@@ -269,9 +269,9 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         }
         return null ;
     }
+
     
-    
-    
+
     public String getPIData() {
         if( fEventType == XMLEvent.PROCESSING_INSTRUCTION){
             return fScanner.getPIData().toString();
@@ -279,8 +279,8 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         else throw new java.lang.IllegalStateException("Current state of the parser is " + getEventTypeString(fEventType) +
         " But Expected state is " + XMLEvent.PROCESSING_INSTRUCTION  ) ;
     }
-    
-    
+
+
     
     public String getPITarget() {
         if( fEventType == XMLEvent.PROCESSING_INSTRUCTION){
@@ -288,10 +288,10 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         }
         else throw new java.lang.IllegalStateException("Current state of the parser is " + getEventTypeString(fEventType) +
         " But Expected state is " + XMLEvent.PROCESSING_INSTRUCTION  ) ;
-        
+
     }
-    
-    
+
+
     
     public String getPrefix() {
         if(fEventType == XMLEvent.START_ELEMENT || fEventType == XMLEvent.END_ELEMENT){
@@ -300,9 +300,9 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         }
         return null ;
     }
-    
-    
-    
+
+
+
     
     public char[] getTextCharacters() {
         if( fEventType == XMLEvent.CHARACTERS || fEventType == XMLEvent.COMMENT
@@ -315,21 +315,21 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
                      + " , " + getEventTypeString(XMLEvent.SPACE) +" valid for getTextCharacters() " ) ;
          }
     }
-    
+
     
     public int getTextLength() {
         if( fEventType == XMLEvent.CHARACTERS || fEventType == XMLEvent.COMMENT
                  || fEventType == XMLEvent.CDATA || fEventType == XMLEvent.SPACE){
              return fScanner.getCharacterData().length;
          } else{
-             throw new IllegalStateException("Current state = " + getEventTypeString(fEventType) 
-             + " is not among the states " + getEventTypeString(XMLEvent.CHARACTERS) + " , " 
-                     + getEventTypeString(XMLEvent.COMMENT) + " , " + getEventTypeString(XMLEvent.CDATA) 
+             throw new IllegalStateException("Current state = " + getEventTypeString(fEventType)
+             + " is not among the states " + getEventTypeString(XMLEvent.CHARACTERS) + " , "
+                     + getEventTypeString(XMLEvent.COMMENT) + " , " + getEventTypeString(XMLEvent.CDATA)
                      + " , " + getEventTypeString(XMLEvent.SPACE) +" valid for getTextLength() " ) ;
          }
-        
+
    }
-    
+
     
     public int getTextStart() {
         if( fEventType == XMLEvent.CHARACTERS || fEventType == XMLEvent.COMMENT || fEventType == XMLEvent.CDATA || fEventType == XMLEvent.SPACE){
@@ -341,7 +341,7 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
                      + " , " + getEventTypeString(XMLEvent.SPACE) +" valid for getTextStart() " ) ;
          }
     }
-    
+
     
     public String getValue() {
         if(fEventType == XMLEvent.PROCESSING_INSTRUCTION){
@@ -355,17 +355,23 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         }
         return null;
     }
-    
+
     
     public String getVersion() {
-        return fEntityScanner.getXMLVersion(); 
+        
+        
+        
+
+        String version = fEntityScanner.getXMLVersion();
+
+        return "1.0".equals(version) && !fEntityScanner.xmlVersionSetExplicitly ? null : version;
     }
-    
+
     
     public boolean hasAttributes() {
         return fScanner.getAttributeIterator().getLength() > 0 ? true : false ;
     }
-    
+
     
     public boolean hasName() {
         if(fEventType == XMLEvent.START_ELEMENT || fEventType == XMLEvent.END_ELEMENT) {
@@ -374,7 +380,7 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
             return false;
         }
     }
-    
+
     
     public boolean hasNext() throws XMLStreamException {
         
@@ -383,7 +389,7 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         
         return fEventType != XMLEvent.END_DOCUMENT;
     }
-    
+
     
     public boolean hasValue() {
         if(fEventType == XMLEvent.START_ELEMENT || fEventType == XMLEvent.END_ELEMENT
@@ -393,24 +399,24 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         } else {
             return false;
         }
-        
+
     }
-    
+
     
     public boolean isEndElement() {
         return fEventType == XMLEvent.END_ELEMENT;
     }
-    
+
     
     public boolean isStandalone() {
         return fScanner.isStandAlone();
     }
-    
+
     
     public boolean isStartElement() {
         return fEventType == XMLEvent.START_ELEMENT;
     }
-    
+
     
     public boolean isWhiteSpace() {
         if(isCharacters() || (fEventType == XMLStreamConstants.CDATA)){
@@ -426,16 +432,16 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         }
         return false;
     }
-    
-    
-    
+
+
+
     
     public int next() throws XMLStreamException {
         if( !hasNext() ) {
             if (fEventType != -1) {
                 throw new java.util.NoSuchElementException( "END_DOCUMENT reached: no more elements on the stream." );
-            } else { 
-                throw new XMLStreamException( "Error processing input source. The input stream is not complete." ); 
+            } else {
+                throw new XMLStreamException( "Error processing input source. The input stream is not complete." );
             }
         }
         try {
@@ -487,26 +493,26 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
     } 
 
     private void switchToXML11Scanner() throws IOException{
-        
+
         int oldEntityDepth = fScanner.fEntityDepth;
         com.sun.org.apache.xerces.internal.xni.NamespaceContext oldNamespaceContext = fScanner.fNamespaceContext;
-        
+
         fScanner = new XML11NSDocumentScannerImpl();
-        
+
         
         fScanner.reset(fPropertyManager);
         fScanner.setPropertyManager(fPropertyManager);
         fEntityScanner = (XMLEntityScanner)fEntityManager.getEntityScanner()  ;
         fEntityManager.fCurrentEntity.mayReadChunks = true;
         fScanner.setScannerState(XMLEvent.START_DOCUMENT);
-        
+
         fScanner.fEntityDepth = oldEntityDepth;
         fScanner.fNamespaceContext = oldNamespaceContext;
         fEventType = fScanner.next();
     }
-    
-    
-    
+
+
+
     final static String getEventTypeString(int eventType) {
         switch (eventType){
             case XMLEvent.START_ELEMENT:
@@ -536,36 +542,36 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         }
         return "UNKNOWN_EVENT_TYPE, " + String.valueOf(eventType);
     }
-    
+
     
     public int getAttributeCount() {
         
         
-        
+
         
         if( fEventType == XMLEvent.START_ELEMENT || fEventType == XMLEvent.ATTRIBUTE) {
             return fScanner.getAttributeIterator().getLength() ;
         } else{
-            throw new java.lang.IllegalStateException( "Current state is not among the states " 
-                     + getEventTypeString(XMLEvent.START_ELEMENT) + " , " 
+            throw new java.lang.IllegalStateException( "Current state is not among the states "
+                     + getEventTypeString(XMLEvent.START_ELEMENT) + " , "
                      + getEventTypeString(XMLEvent.ATTRIBUTE)
                      + "valid for getAttributeCount()") ;
         }
     }
-    
+
     
     public QName getAttributeName(int index) {
         
         if( fEventType == XMLEvent.START_ELEMENT || fEventType == XMLEvent.ATTRIBUTE) {
             return convertXNIQNametoJavaxQName(fScanner.getAttributeIterator().getQualifiedName(index)) ;
         } else{
-            throw new java.lang.IllegalStateException("Current state is not among the states " 
-                     + getEventTypeString(XMLEvent.START_ELEMENT) + " , " 
+            throw new java.lang.IllegalStateException("Current state is not among the states "
+                     + getEventTypeString(XMLEvent.START_ELEMENT) + " , "
                      + getEventTypeString(XMLEvent.ATTRIBUTE)
                      + "valid for getAttributeName()") ;
         }
     }
-    
+
     
     public String getAttributeLocalName(int index) {
         
@@ -575,34 +581,34 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
             throw new java.lang.IllegalStateException() ;
         }
     }
-    
+
     
     public String getAttributeNamespace(int index) {
         
         if( fEventType == XMLEvent.START_ELEMENT || fEventType == XMLEvent.ATTRIBUTE) {
             return fScanner.getAttributeIterator().getURI(index);
         } else{
-            throw new java.lang.IllegalStateException("Current state is not among the states " 
-                     + getEventTypeString(XMLEvent.START_ELEMENT) + " , " 
+            throw new java.lang.IllegalStateException("Current state is not among the states "
+                     + getEventTypeString(XMLEvent.START_ELEMENT) + " , "
                      + getEventTypeString(XMLEvent.ATTRIBUTE)
                      + "valid for getAttributeNamespace()") ;
         }
-        
+
     }
-    
+
     
     public String getAttributePrefix(int index) {
         
         if( fEventType == XMLEvent.START_ELEMENT || fEventType == XMLEvent.ATTRIBUTE) {
             return fScanner.getAttributeIterator().getPrefix(index);
         } else{
-            throw new java.lang.IllegalStateException("Current state is not among the states " 
-                     + getEventTypeString(XMLEvent.START_ELEMENT) + " , " 
+            throw new java.lang.IllegalStateException("Current state is not among the states "
+                     + getEventTypeString(XMLEvent.START_ELEMENT) + " , "
                      + getEventTypeString(XMLEvent.ATTRIBUTE)
                      + "valid for getAttributePrefix()") ;
         }
     }
-    
+
     
     public javax.xml.namespace.QName getAttributeQName(int index) {
         
@@ -612,41 +618,41 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
             String uri = fScanner.getAttributeIterator().getURI(index) ;
             return new javax.xml.namespace.QName(uri, localName) ;
         } else{
-            throw new java.lang.IllegalStateException("Current state is not among the states " 
-                     + getEventTypeString(XMLEvent.START_ELEMENT) + " , " 
+            throw new java.lang.IllegalStateException("Current state is not among the states "
+                     + getEventTypeString(XMLEvent.START_ELEMENT) + " , "
                      + getEventTypeString(XMLEvent.ATTRIBUTE)
                      + "valid for getAttributeQName()") ;
         }
     }
-    
+
     
     public String getAttributeType(int index) {
         
         if( fEventType == XMLEvent.START_ELEMENT || fEventType == XMLEvent.ATTRIBUTE) {
             return fScanner.getAttributeIterator().getType(index) ;
         } else{
-            throw new java.lang.IllegalStateException("Current state is not among the states " 
-                     + getEventTypeString(XMLEvent.START_ELEMENT) + " , " 
+            throw new java.lang.IllegalStateException("Current state is not among the states "
+                     + getEventTypeString(XMLEvent.START_ELEMENT) + " , "
                      + getEventTypeString(XMLEvent.ATTRIBUTE)
                      + "valid for getAttributeType()") ;
         }
-        
+
     }
-    
+
     
     public String getAttributeValue(int index) {
         
         if( fEventType == XMLEvent.START_ELEMENT || fEventType == XMLEvent.ATTRIBUTE) {
             return fScanner.getAttributeIterator().getValue(index) ;
         } else{
-            throw new java.lang.IllegalStateException("Current state is not among the states " 
-                     + getEventTypeString(XMLEvent.START_ELEMENT) + " , " 
+            throw new java.lang.IllegalStateException("Current state is not among the states "
+                     + getEventTypeString(XMLEvent.START_ELEMENT) + " , "
                      + getEventTypeString(XMLEvent.ATTRIBUTE)
                      + "valid for getAttributeValue()") ;
         }
-        
+
     }
-    
+
     
     public String getAttributeValue(String namespaceURI, String localName) {
         
@@ -658,19 +664,19 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
                 return fScanner.getAttributeIterator().getValue(
                         namespaceURI.length() == 0 ? null : namespaceURI, localName) ;
             }
-            
+
         } else{
-            throw new java.lang.IllegalStateException("Current state is not among the states " 
-                     + getEventTypeString(XMLEvent.START_ELEMENT) + " , " 
+            throw new java.lang.IllegalStateException("Current state is not among the states "
+                     + getEventTypeString(XMLEvent.START_ELEMENT) + " , "
                      + getEventTypeString(XMLEvent.ATTRIBUTE)
                      + "valid for getAttributeValue()") ;
         }
-        
+
     }
-    
+
     
     public String getElementText() throws XMLStreamException {
-        
+
         if(getEventType() != XMLStreamConstants.START_ELEMENT) {
             throw new XMLStreamException(
             "parser must be on START_ELEMENT to read next text", getLocation());
@@ -699,7 +705,7 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         }
         return content.toString();
     }
-    
+
     
     public Location getLocation() {
         return new Location() {
@@ -707,31 +713,31 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
             String _publicId = fEntityScanner.getPublicId();
             int _offset = fEntityScanner.getCharacterOffset();
             int _columnNumber = fEntityScanner.getColumnNumber();
-            int _lineNumber = fEntityScanner.getLineNumber(); 
+            int _lineNumber = fEntityScanner.getLineNumber();
             public String getLocationURI(){
                 return _systemId;
             }
-            
+
             public int getCharacterOffset(){
                 return _offset;
             }
-            
+
             public int getColumnNumber() {
                 return _columnNumber;
             }
-            
+
             public int getLineNumber(){
                 return _lineNumber;
             }
-            
+
             public String getPublicId(){
                 return _publicId;
             }
-            
+
             public String getSystemId(){
                 return _systemId;
             }
-            
+
             public String toString(){
                 StringBuffer sbuffer = new StringBuffer() ;
                 sbuffer.append("Line number = " + getLineNumber());
@@ -749,9 +755,9 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
                 return sbuffer.toString();
             }
         } ;
-        
+
     }
-    
+
     
     public javax.xml.namespace.QName getName() {
         if(fEventType == XMLEvent.START_ELEMENT || fEventType == XMLEvent.END_ELEMENT)
@@ -762,12 +768,12 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
                      + " Valid states are " + getEventTypeString(XMLEvent.START_ELEMENT) + ", "
                      + getEventTypeString(XMLEvent.END_ELEMENT));
     }
-    
+
     
     public NamespaceContext getNamespaceContext() {
         return fNamespaceContextWrapper ;
     }
-    
+
     
     public int getNamespaceCount() {
         
@@ -782,7 +788,7 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
              + " valid for getNamespaceCount()." );
         }
     }
-    
+
     
     public String getNamespacePrefix(int index) {
         if(fEventType == XMLEvent.START_ELEMENT || fEventType == XMLEvent.END_ELEMENT || fEventType == XMLEvent.NAMESPACE){
@@ -798,7 +804,7 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
              + " valid for getNamespacePrefix()." );
         }
     }
-    
+
     
     public String getNamespaceURI(int index) {
         if(fEventType == XMLEvent.START_ELEMENT || fEventType == XMLEvent.END_ELEMENT || fEventType == XMLEvent.NAMESPACE){
@@ -812,9 +818,9 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
                      + getEventTypeString(XMLEvent.NAMESPACE)
              + " valid for getNamespaceURI()." );
         }
-        
+
     }
-    
+
     
     public Object getProperty(java.lang.String name) throws java.lang.IllegalArgumentException {
         if(name == null) throw new java.lang.IllegalArgumentException() ;
@@ -828,10 +834,10 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         }
         return null;
     }
-    
+
     
     public String getText() {
-        if( fEventType == XMLEvent.CHARACTERS || fEventType == XMLEvent.COMMENT 
+        if( fEventType == XMLEvent.CHARACTERS || fEventType == XMLEvent.COMMENT
                 || fEventType == XMLEvent.CDATA || fEventType == XMLEvent.SPACE){
             
             
@@ -841,13 +847,12 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
             if(name != null){
                 if(fScanner.foundBuiltInRefs)
                     return fScanner.getCharacterData().toString();
-                
+
                 XMLEntityStorage entityStore = fEntityManager.getEntityStore();
-                Hashtable ht = entityStore.getDeclaredEntities();
-                 Entity en = (Entity)ht.get(name);
-                  if(en == null)
-                      return null;
-                  if(en.isExternal())
+                Entity en = entityStore.getEntity(name);
+                if(en == null)
+                    return null;
+                if(en.isExternal())
                     return ((Entity.ExternalEntity)en).entityLocation.getExpandedSystemId();
                 else
                     return ((Entity.InternalEntity)en).text;
@@ -862,7 +867,7 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
                 fDTDDecl = tmpBuffer.toString();
                 return fDTDDecl;
         } else{
-                throw new IllegalStateException("Current state " + getEventTypeString(fEventType) 
+                throw new IllegalStateException("Current state " + getEventTypeString(fEventType)
                      + " is not among the states" + getEventTypeString(XMLEvent.CHARACTERS) + ", "
                      + getEventTypeString(XMLEvent.COMMENT) + ", "
                      + getEventTypeString(XMLEvent.CDATA) + ", "
@@ -871,8 +876,8 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
                      + getEventTypeString(XMLEvent.DTD) + " valid for getText() " ) ;
         }
     }
-    
-    
+
+
     
     public void require(int type, String namespaceURI, String localName) throws XMLStreamException {
         if( type != fEventType)
@@ -886,19 +891,19 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
                      "current local name");
         return;
     }
-    
+
     
     public int getTextCharacters(int sourceStart, char[] target, int targetStart, int length) throws XMLStreamException {
-        
+
         if(target == null){
             throw new NullPointerException("target char array can't be null") ;
         }
-        
+
         if(targetStart < 0 || length < 0 || sourceStart < 0 || targetStart >= target.length ||
             (targetStart + length ) > target.length) {
             throw new IndexOutOfBoundsException();
         }
-        
+
         
         
         int copiedLength = 0;
@@ -913,11 +918,11 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         } else{
             copiedLength = length;
         }
-        
+
         System.arraycopy(getTextCharacters(), getTextStart() + sourceStart , target, targetStart, copiedLength);
         return copiedLength;
     }
-    
+
     
     public boolean hasText() {
         if(DEBUG) pr("XMLReaderImpl#EVENT TYPE = " + fEventType ) ;
@@ -928,10 +933,9 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
             if(name != null){
                 if(fScanner.foundBuiltInRefs)
                     return true;
-                
+
                 XMLEntityStorage entityStore = fEntityManager.getEntityStore();
-                Hashtable ht = entityStore.getDeclaredEntities();
-                Entity en =(Entity)ht.get(name);
+                Entity en = entityStore.getEntity(name);
                 if(en == null)
                     return false;
                 if(en.isExternal()){
@@ -947,28 +951,28 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         }
         return false;
     }
-    
+
     
     public boolean isAttributeSpecified(int index) {
         
         if( (fEventType == XMLEvent.START_ELEMENT) || (fEventType == XMLEvent.ATTRIBUTE)){
             return fScanner.getAttributeIterator().isSpecified(index) ;
         } else{
-            throw new IllegalStateException("Current state is not among the states " 
-                     + getEventTypeString(XMLEvent.START_ELEMENT) + " , " 
+            throw new IllegalStateException("Current state is not among the states "
+                     + getEventTypeString(XMLEvent.START_ELEMENT) + " , "
                      + getEventTypeString(XMLEvent.ATTRIBUTE)
                      + "valid for isAttributeSpecified()")  ;
         }
     }
-    
+
     
     public boolean isCharacters() {
         return fEventType == XMLEvent.CHARACTERS ;
     }
-    
+
     
     public int nextTag() throws XMLStreamException {
-        
+
         int eventType = next();
         while((eventType == XMLStreamConstants.CHARACTERS && isWhiteSpace()) 
         || (eventType == XMLStreamConstants.CDATA && isWhiteSpace())
@@ -990,14 +994,14 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
 
         return eventType;
     }
-    
+
     
     public boolean standaloneSet() {
         
         
         return fScanner.standaloneSet() ;
     }
-    
+
     
     public javax.xml.namespace.QName convertXNIQNametoJavaxQName(com.sun.org.apache.xerces.internal.xni.QName qname){
         if (qname == null) return null;
@@ -1008,15 +1012,15 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
             return new javax.xml.namespace.QName(qname.uri, qname.localpart, qname.prefix) ;
         }
     }
-    
+
     
     public String getNamespaceURI(String prefix) {
         if(prefix == null) throw new java.lang.IllegalArgumentException("prefix cannot be null.") ;
-        
+
         
         return fScanner.getNamespaceContext().getURI(fSymbolTable.addSymbol(prefix)) ;
     }
-    
+
     
     protected void setPropertyManager(PropertyManager propertyManager){
         fPropertyManager = propertyManager ;
@@ -1024,28 +1028,27 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         fScanner.setProperty("stax-properties",propertyManager);
         fScanner.setPropertyManager(propertyManager) ;
     }
-    
+
     
     protected PropertyManager getPropertyManager(){
         return fPropertyManager ;
     }
-    
+
     static void pr(String str) {
         System.out.println(str) ;
     }
-    
+
     protected List getEntityDecls(){
         if(fEventType == XMLStreamConstants.DTD){
             XMLEntityStorage entityStore = fEntityManager.getEntityStore();
-            Hashtable ht = entityStore.getDeclaredEntities();
             ArrayList list = null;
-            if(ht != null){
+            if(entityStore.hasEntities()){
                 EntityDeclarationImpl decl = null;
-                list = new ArrayList(ht.size());
-                Enumeration enu = ht.keys();
+                list = new ArrayList(entityStore.getEntitySize());
+                Enumeration enu = entityStore.getEntityKeys();
                 while(enu.hasMoreElements()){
                     String key = (String)enu.nextElement();
-                    Entity en = (Entity)ht.get(key);
+                    Entity en = (Entity)entityStore.getEntity(key);
                     decl = new EntityDeclarationImpl();
                     decl.setEntityName(key);
                     if(en.isExternal()){
@@ -1061,14 +1064,14 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         }
         return null;
     }
-    
+
     protected List getNotationDecls(){
         if(fEventType == XMLStreamConstants.DTD){
             if(fScanner.fDTDScanner == null) return null;
             DTDGrammar grammar = ((XMLDTDScannerImpl)(fScanner.fDTDScanner)).getGrammar();
             if(grammar == null) return null;
             List notations = grammar.getNotationDecls();
-            
+
             Iterator it = notations.iterator();
             ArrayList list = new ArrayList();
             while(it.hasNext()){
@@ -1081,7 +1084,7 @@ public class XMLStreamReaderImpl implements javax.xml.stream.XMLStreamReader {
         }
         return null;
     }
-    
-    
-    
+
+
+
 }

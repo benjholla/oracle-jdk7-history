@@ -34,7 +34,7 @@ public class KeyIndex extends DTMAxisIteratorBase {
 
     
     private DOM        _dom;
-    
+
     private DOMEnhancedForDTM    _enhancedDOM;
 
     
@@ -70,44 +70,44 @@ public class KeyIndex extends DTMAxisIteratorBase {
 
     
     public void merge(KeyIndex other) {
-	if (other == null) return;
+        if (other == null) return;
 
-	if (other._nodes != null) {
-	    if (_nodes == null) {
-		_nodes = (IntegerArray)other._nodes.clone();
-	    }
-	    else {
-		_nodes.merge(other._nodes);
-	    }
-	}
+        if (other._nodes != null) {
+            if (_nodes == null) {
+                _nodes = (IntegerArray)other._nodes.clone();
+            }
+            else {
+                _nodes.merge(other._nodes);
+            }
+        }
     }
 
     
     public void lookupId(Object value) {
-	
-	_nodes = null;
+        
+        _nodes = null;
 
-	final StringTokenizer values = new StringTokenizer((String) value,
+        final StringTokenizer values = new StringTokenizer((String) value,
                                                            " \n\t");
-	while (values.hasMoreElements()) {
+        while (values.hasMoreElements()) {
             final String token = (String) values.nextElement();
-	    IntegerArray nodes = (IntegerArray) _index.get(token);
+            IntegerArray nodes = (IntegerArray) _index.get(token);
 
             if (nodes == null && _enhancedDOM != null
                 && _enhancedDOM.hasDOMSource()) {
                 nodes = getDOMNodeById(token);
             }
 
-	    if (nodes == null) continue;
+            if (nodes == null) continue;
 
-	    if (_nodes == null) {
-		 nodes = (IntegerArray)nodes.clone();
-		_nodes = nodes;
-	    }
-	    else {
-		_nodes.merge(nodes);
-	    }
-	}
+            if (_nodes == null) {
+                 nodes = (IntegerArray)nodes.clone();
+                _nodes = nodes;
+            }
+            else {
+                _nodes.merge(nodes);
+            }
+        }
     }
 
     
@@ -139,7 +139,7 @@ public class KeyIndex extends DTMAxisIteratorBase {
 
         return nodes;
     }
-    
+
     
     public void lookupKey(Object value) {
         IntegerArray nodes = (IntegerArray) _index.get(value);
@@ -149,10 +149,10 @@ public class KeyIndex extends DTMAxisIteratorBase {
 
     
     public int next() {
-	if (_nodes == null) return DTMAxisIterator.END;
+        if (_nodes == null) return DTMAxisIterator.END;
 
-	return (_position < _nodes.cardinality()) ? 
-	    _dom.getNodeHandle(_nodes.at(_position++)) : DTMAxisIterator.END;
+        return (_position < _nodes.cardinality()) ?
+            _dom.getNodeHandle(_nodes.at(_position++)) : DTMAxisIterator.END;
     }
 
     
@@ -180,7 +180,7 @@ public class KeyIndex extends DTMAxisIteratorBase {
             
             if (nodes == null && _enhancedDOM != null
                 && _enhancedDOM.hasDOMSource()) {
-                nodes = getDOMNodeById(token);	
+                nodes = getDOMNodeById(token);
             }
 
             
@@ -215,79 +215,79 @@ public class KeyIndex extends DTMAxisIteratorBase {
 
     
     public DTMAxisIterator reset() {
-	_position = 0;
-	return this;
+        _position = 0;
+        return this;
     }
 
     
     public int getLast() {
-	return (_nodes == null) ? 0 : _nodes.cardinality();
+        return (_nodes == null) ? 0 : _nodes.cardinality();
     }
 
     
     public int getPosition() {
-	return _position;
+        return _position;
     }
 
     
     public void setMark() {
-	_markedPosition = _position;
+        _markedPosition = _position;
     }
 
     
     public void gotoMark() {
-	_position = _markedPosition;
+        _position = _markedPosition;
     }
 
     
     public DTMAxisIterator setStartNode(int start) {
-	if (start == DTMAxisIterator.END) {
-	    _nodes = null;
-	}
-	else if (_nodes != null) {
-	    _position = 0;
-	}
-	return (DTMAxisIterator) this;
+        if (start == DTMAxisIterator.END) {
+            _nodes = null;
+        }
+        else if (_nodes != null) {
+            _position = 0;
+        }
+        return (DTMAxisIterator) this;
     }
+
     
-    
-    public int getStartNode() {      
+    public int getStartNode() {
         return 0;
     }
 
     
     public boolean isReverse() {
-	return(false);
+        return(false);
     }
 
     
     public DTMAxisIterator cloneIterator() {
-	KeyIndex other = new KeyIndex(0);
-	other._index = _index;
+        KeyIndex other = new KeyIndex(0);
+        other._index = _index;
         other._rootToIndexMap = _rootToIndexMap;
-	other._nodes = _nodes;
-	other._position = _position;
-	return (DTMAxisIterator) other;
+        other._nodes = _nodes;
+        other._position = _position;
+        return (DTMAxisIterator) other;
     }
-    
+
     public void setDom(DOM dom, int node) {
         _dom = dom;
-        
+
         
         
         if (dom instanceof MultiDOM) {
             dom = ((MultiDOM) dom).getDTM(node);
         }
-        
-    	if (dom instanceof DOMEnhancedForDTM) {
-    	    _enhancedDOM = (DOMEnhancedForDTM)dom;
-    	}
-    	else if (dom instanceof DOMAdapter) {
-    	    DOM idom = ((DOMAdapter)dom).getDOMImpl();
-    	    if (idom instanceof DOMEnhancedForDTM) {
-    	        _enhancedDOM = (DOMEnhancedForDTM)idom;
-    	    }
-    	}
+
+        if (dom instanceof DOMEnhancedForDTM) {
+            _enhancedDOM = (DOMEnhancedForDTM)dom;
+        }
+        else if (dom instanceof DOMAdapter) {
+            DOM idom = ((DOMAdapter)dom).getDOMImpl();
+            if (idom instanceof DOMEnhancedForDTM) {
+                _enhancedDOM = (DOMEnhancedForDTM)idom;
+            }
+        }
     }
 
     
@@ -463,7 +463,7 @@ public class KeyIndex extends DTMAxisIteratorBase {
         
         public DTMAxisIterator setStartNode(int node) {
             _startNode = node;
-            
+
             
             
             if (_keyValueIterator != null) {

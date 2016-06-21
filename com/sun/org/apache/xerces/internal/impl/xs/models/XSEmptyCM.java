@@ -19,7 +19,7 @@ public class XSEmptyCM  implements XSCMValidator {
 
     
     private static final short STATE_START = 0;
-    
+
     private static final Vector EMPTY = new Vector(0);
 
     
@@ -29,7 +29,7 @@ public class XSEmptyCM  implements XSCMValidator {
     
     
     
-    
+
     
     public int[] startContentModel(){
         return (new int[] {STATE_START});
@@ -75,7 +75,7 @@ public class XSEmptyCM  implements XSCMValidator {
     public Vector whatCanGoHere(int[] state) {
         return EMPTY;
     }
-    
+
     public ArrayList checkMinMaxBounds() {
         return null;
     }

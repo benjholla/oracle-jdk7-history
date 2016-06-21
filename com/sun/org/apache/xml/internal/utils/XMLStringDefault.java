@@ -60,6 +60,11 @@ public class XMLStringDefault implements XMLString
     }
   }
 
+   
+  public boolean equals(String obj2) {
+      return m_str.equals(obj2);
+  }
+
   
   public boolean equals(XMLString anObject)
   {

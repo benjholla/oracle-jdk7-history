@@ -688,6 +688,15 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
     }
 
     
+    void ensurePrestart() {
+        int wc = workerCountOf(ctl.get());
+        if (wc < corePoolSize)
+            addWorker(null, true);
+        else if (wc == 0)
+            addWorker(null, false);
+    }
+
+    
     public int prestartAllCoreThreads() {
         int n = 0;
         while (addWorker(null, true))

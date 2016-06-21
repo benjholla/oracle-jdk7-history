@@ -5,6 +5,7 @@
 package com.sun.org.apache.xalan.internal.xsltc.compiler;
 
 import com.sun.org.apache.bcel.internal.generic.ConstantPoolGen;
+import com.sun.org.apache.bcel.internal.generic.INVOKEINTERFACE;
 import com.sun.org.apache.bcel.internal.generic.INVOKESPECIAL;
 import com.sun.org.apache.bcel.internal.generic.INVOKEVIRTUAL;
 import com.sun.org.apache.bcel.internal.generic.InstructionList;
@@ -74,36 +75,41 @@ final class Message extends Instruction {
                 
                 il.append(methodGen.loadHandler());
                 il.append(SWAP);
-                il.append(new INVOKEVIRTUAL(
-                    cpg.addMethodref(OUTPUT_BASE, "setWriter",
-                                     "("+WRITER_SIG+")V")));
+                il.append(new INVOKEINTERFACE(
+                    cpg.addInterfaceMethodref(TRANSLET_OUTPUT_INTERFACE,
+                                              "setWriter",
+                                              "("+WRITER_SIG+")V"), 2));
 
                 
                 il.append(methodGen.loadHandler());
                 il.append(new PUSH(cpg, "UTF-8"));   
-                il.append(new INVOKEVIRTUAL(
-                    cpg.addMethodref(OUTPUT_BASE, "setEncoding",
-                                     "("+STRING_SIG+")V")));
+                il.append(new INVOKEINTERFACE(
+                    cpg.addInterfaceMethodref(TRANSLET_OUTPUT_INTERFACE,
+                                              "setEncoding",
+                                              "("+STRING_SIG+")V"), 2));
 
                 
                 il.append(methodGen.loadHandler());
                 il.append(ICONST_1);
-                il.append(new INVOKEVIRTUAL(
-                    cpg.addMethodref(OUTPUT_BASE, "setOmitXMLDeclaration",
-                                     "(Z)V")));
+                il.append(new INVOKEINTERFACE(
+                    cpg.addInterfaceMethodref(TRANSLET_OUTPUT_INTERFACE,
+                                              "setOmitXMLDeclaration",
+                                              "(Z)V"), 2));
 
                 il.append(methodGen.loadHandler());
-                il.append(new INVOKEVIRTUAL(
-                    cpg.addMethodref(OUTPUT_BASE, "startDocument",
-                                     "()V")));
+                il.append(new INVOKEINTERFACE(
+                    cpg.addInterfaceMethodref(TRANSLET_OUTPUT_INTERFACE,
+                                              "startDocument",
+                                              "()V"), 1));
 
                 
                 translateContents(classGen, methodGen);
 
                 il.append(methodGen.loadHandler());
-                il.append(new INVOKEVIRTUAL(
-                    cpg.addMethodref(OUTPUT_BASE, "endDocument",
-                                     "()V")));
+                il.append(new INVOKEINTERFACE(
+                    cpg.addInterfaceMethodref(TRANSLET_OUTPUT_INTERFACE,
+                                              "endDocument",
+                                              "()V"), 1));
 
                 
                 il.append(new INVOKEVIRTUAL(

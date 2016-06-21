@@ -15,13 +15,13 @@ public abstract class SAXParserFactory {
 
     
     private boolean validating = false;
-    
+
     
     private boolean namespaceAware = false;
-    
+
     
     protected SAXParserFactory () {
-    
+
     }
 
     
@@ -47,35 +47,35 @@ public abstract class SAXParserFactory {
         } catch (FactoryFinder.ConfigurationError e) {
             throw new FactoryConfigurationError(e.getException(),
                                                 e.getMessage());
-        }        
+        }
     }
+
     
-    
-    
+
     public abstract SAXParser newSAXParser()
         throws ParserConfigurationException, SAXException;
 
+
     
-    
-    
+
     public void setNamespaceAware(boolean awareness) {
         this.namespaceAware = awareness;
     }
 
     
-    
+
     public void setValidating(boolean validating) {
         this.validating = validating;
     }
 
     
-    
+
     public boolean isNamespaceAware() {
         return namespaceAware;
     }
 
     
-    
+
     public boolean isValidating() {
         return validating;
     }
@@ -91,10 +91,10 @@ public abstract class SAXParserFactory {
                 SAXNotSupportedException;
 
 
+
     
     
-    
-    
+
     
     public Schema getSchema() {
         throw new UnsupportedOperationException(
@@ -105,10 +105,10 @@ public abstract class SAXParserFactory {
             + "\""
             );
     }
+
     
     
-    
-    
+
     
     public void setSchema(Schema schema) {
         throw new UnsupportedOperationException(
@@ -140,4 +140,3 @@ public abstract class SAXParserFactory {
             );
     }
 }
-

@@ -69,7 +69,7 @@ public class XSSimpleTypeDecl implements XSSimpleType, TypeInfo {
     protected static final short DV_LIST          = DV_NOTATION + 5;
     protected static final short DV_UNION         = DV_NOTATION + 6;
     protected static final short DV_YEARMONTHDURATION = DV_NOTATION + 7;
-    protected static final short DV_DAYTIMEDURATION	= DV_NOTATION + 8;
+    protected static final short DV_DAYTIMEDURATION     = DV_NOTATION + 8;
     protected static final short DV_ANYATOMICTYPE = DV_NOTATION + 9;
 
     private static final TypeValidator[] gDVs = {
@@ -3037,4 +3037,3 @@ public class XSSimpleTypeDecl implements XSSimpleType, TypeInfo {
     }
 
 } 
-

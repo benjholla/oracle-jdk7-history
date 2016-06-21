@@ -24,7 +24,7 @@ public class SAXParser
 
     protected static final String REPORT_WHITESPACE =
             Constants.SUN_SCHEMA_FEATURE_PREFIX + Constants.SUN_REPORT_IGNORED_ELEMENT_CONTENT_WHITESPACE;
-    
+
     
     private static final String[] RECOGNIZED_FEATURES = {
         NOTIFY_BUILTIN_REFS,
@@ -68,10 +68,7 @@ public class SAXParser
 
     
     public SAXParser(SymbolTable symbolTable, XMLGrammarPool grammarPool) {
-        super((XMLParserConfiguration)ObjectFactory.createObject(
-            "com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration",
-            "com.sun.org.apache.xerces.internal.parsers.XIncludeAwareParserConfiguration"
-            ));
+        super(new XIncludeAwareParserConfiguration());
 
         
         fConfiguration.addRecognizedFeatures(RECOGNIZED_FEATURES);

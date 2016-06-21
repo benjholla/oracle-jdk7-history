@@ -20,6 +20,7 @@ import com.sun.org.apache.xerces.internal.xni.grammars.XMLGrammarPool;
 import com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver;
 import com.sun.org.apache.xerces.internal.xni.parser.XMLErrorHandler;
 import com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
+import com.sun.org.apache.xerces.internal.utils.ObjectFactory;
 
 
 public class XMLGrammarPreparser {
@@ -113,8 +114,7 @@ public class XMLGrammarPreparser {
                 
                 String loaderName = (String)KNOWN_LOADERS.get(grammarType);
                 try {
-                    ClassLoader cl = ObjectFactory.findClassLoader();
-                    XMLGrammarLoader gl = (XMLGrammarLoader)(ObjectFactory.newInstance(loaderName, cl, true));
+                    XMLGrammarLoader gl = (XMLGrammarLoader)(ObjectFactory.newInstance(loaderName, true));
                     fLoaders.put(grammarType, gl);
                 } catch (Exception e) {
                     return false;

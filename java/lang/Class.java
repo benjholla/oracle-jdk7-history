@@ -1649,4 +1649,7 @@ public final
     AnnotationType getAnnotationType() {
         return annotationType;
     }
+
+    
+    transient ClassValue.ClassValueMap classValueMap;
 }

@@ -23,6 +23,7 @@ import javax.xml.transform.stax.StAXResult;
 import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamSource;
 
+import com.sun.org.apache.xalan.internal.utils.FactoryImpl;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.XSLTC;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMsg;
 
@@ -80,8 +81,7 @@ public final class Util {
 
                                
                                
-                               SAXParserFactory parserFactory =
-                                      SAXParserFactory.newInstance();
+                               SAXParserFactory parserFactory = FactoryImpl.getSAXFactory(xsltc.useServicesMechnism());
                                parserFactory.setNamespaceAware(true);
 
                                if (xsltc.isSecureProcessing()) {

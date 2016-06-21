@@ -36,27 +36,27 @@ public abstract class NodeCounter {
     private int _nSepars  = 0;
     private int _nFormats = 0;
 
-    private final static String[] Thousands = 
+    private final static String[] Thousands =
         {"", "m", "mm", "mmm" };
-    private final static String[] Hundreds = 
+    private final static String[] Hundreds =
     {"", "c", "cc", "ccc", "cd", "d", "dc", "dcc", "dccc", "cm"};
-    private final static String[] Tens = 
+    private final static String[] Tens =
     {"", "x", "xx", "xxx", "xl", "l", "lx", "lxx", "lxxx", "xc"};
-    private final static String[] Ones = 
+    private final static String[] Ones =
     {"", "i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix"};
-  
+
     private StringBuilder _tempBuffer = new StringBuilder();
-    
+
     
     protected boolean _hasFrom;
-    
+
     protected NodeCounter(Translet translet,
               DOM document, DTMAxisIterator iterator) {
     _translet = translet;
     _document = document;
     _iterator = iterator;
     }
-    
+
     protected NodeCounter(Translet translet,
               DOM document, DTMAxisIterator iterator, boolean hasFrom) {
         _translet = translet;
@@ -135,7 +135,7 @@ public abstract class NodeCounter {
             return -result;
         }
     }
-  
+
   
  private final void setTokens(final String format){
      if( (_format!=null) &&(format.equals(_format)) ){
@@ -181,7 +181,7 @@ public abstract class NodeCounter {
              }
 
          _nSepars = _separToks.size();
-         _nFormats = _formatToks.size(); 
+         _nFormats = _formatToks.size();
          if (_nSepars > _nFormats) _separLast = true;
 
          if (_separFirst) _nSepars--;
@@ -191,7 +191,7 @@ public abstract class NodeCounter {
              _nSepars++;
          }
          if (_separFirst) _nSepars ++;
- 
+
  }
     
     public NodeCounter setDefaultFormatting() {
@@ -278,12 +278,12 @@ public abstract class NodeCounter {
                 s = (char) ((int) zero + (n % 10)) + s;
                 n = n / 10;
             }
-                
+
             for (int i = 0; i < format.length() - s.length(); i++) {
                 temp.append(zero);
             }
             temp.append(s);
-            
+
             if (_groupSize > 0) {
                 for (int i = 0; i < temp.length(); i++) {
                     if (i != 0 && ((temp.length() - i) % _groupSize) == 0) {
@@ -292,13 +292,13 @@ public abstract class NodeCounter {
                     buffer.append(temp.charAt(i));
                 }
             }
-        } 
+        }
     else if (c == 'i' && !_letterValue.equals("alphabetic")) {
             buffer.append(romanValue(value));
-        } 
+        }
     else if (c == 'I' && !_letterValue.equals("alphabetic")) {
             buffer.append(romanValue(value).toUpperCase());
-        } 
+        }
     else {
         int min = (int) c;
         int max = (int) c;
@@ -326,7 +326,7 @@ public abstract class NodeCounter {
         char last = (char)(((value-1) % range) + min);
         if (value > range) {
             return alphaValue((value-1) / range, min, max) + last;
-        } 
+        }
     else {
             return "" + last;
         }
@@ -344,4 +344,3 @@ public abstract class NodeCounter {
     }
 
 }
-

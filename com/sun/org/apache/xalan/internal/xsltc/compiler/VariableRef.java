@@ -46,12 +46,10 @@ final class VariableRef extends VariableRefBase {
                 }
                 else {
                     il.append(_variable.loadInstruction());
-                    _variable.removeReference(this);
                 }
             }
             else {
                 il.append(_variable.loadInstruction());
-                _variable.removeReference(this);
             }
         }
         else {

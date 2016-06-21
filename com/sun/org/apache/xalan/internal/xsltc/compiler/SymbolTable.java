@@ -5,6 +5,7 @@
 package com.sun.org.apache.xalan.internal.xsltc.compiler;
 
 import java.util.Hashtable;
+import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -23,6 +24,7 @@ final class SymbolTable {
     private Hashtable _attributeSets = null;
     private Hashtable _aliases = null;
     private Hashtable _excludedURI = null;
+    private Stack     _excludedURIStack = null;
     private Hashtable _decimalFormats = null;
     private Hashtable _keys = null;
 
@@ -125,7 +127,7 @@ final class SymbolTable {
     private int _nsCounter = 0;
 
     public String generateNamespacePrefix() {
-        return(new String("ns"+(_nsCounter++)));
+        return("ns"+(_nsCounter++));
     }
 
     
@@ -210,6 +212,22 @@ final class SymbolTable {
                 if (refcnt != null)
                     _excludedURI.put(uri, new Integer(refcnt.intValue() - 1));
             }
+        }
+    }
+    
+    public void pushExcludedNamespacesContext() {
+        if (_excludedURIStack == null) {
+            _excludedURIStack = new Stack();
+        }
+        _excludedURIStack.push(_excludedURI);
+        _excludedURI = null;
+    }
+
+    
+    public void popExcludedNamespacesContext() {
+        _excludedURI = (Hashtable) _excludedURIStack.pop();
+        if (_excludedURIStack.isEmpty()) {
+            _excludedURIStack = null;
         }
     }
 

@@ -24,7 +24,7 @@ import com.sun.org.apache.xerces.internal.xni.parser.XMLEntityResolver;
 import com.sun.org.apache.xerces.internal.xni.parser.XMLInputSource;
 
 
-public class XMLGrammarCachingConfiguration 
+public class XMLGrammarCachingConfiguration
     extends XIncludeAwareParserConfiguration {
 
     
@@ -38,7 +38,7 @@ public class XMLGrammarCachingConfiguration
     public static final int BIG_PRIME = 2039;
 
     
-    protected static final SynchronizedSymbolTable fStaticSymbolTable = 
+    protected static final SynchronizedSymbolTable fStaticSymbolTable =
             new SynchronizedSymbolTable(BIG_PRIME);
 
     
@@ -140,11 +140,11 @@ public class XMLGrammarCachingConfiguration
     
     
     
-    
+
     
 
     
-    SchemaGrammar parseXMLSchema(XMLInputSource is) 
+    SchemaGrammar parseXMLSchema(XMLInputSource is)
                 throws IOException {
         XMLEntityResolver resolver = getEntityResolver();
         if(resolver != null) {
@@ -152,7 +152,7 @@ public class XMLGrammarCachingConfiguration
         }
         if (fErrorReporter.getMessageFormatter(XSMessageFormatter.SCHEMA_DOMAIN) == null) {
             fErrorReporter.putMessageFormatter(XSMessageFormatter.SCHEMA_DOMAIN, new XSMessageFormatter());
-        } 
+        }
         fSchemaLoader.setProperty(ERROR_REPORTER, fErrorReporter);
 
         String propPrefix = Constants.XERCES_PROPERTY_PREFIX;
@@ -173,13 +173,13 @@ public class XMLGrammarCachingConfiguration
             fGrammarPool.cacheGrammars(XMLGrammarDescription.XML_SCHEMA,
                                       new Grammar[]{grammar});
         }
-        
+
         return grammar;
 
     } 
 
     
-    DTDGrammar parseDTD(XMLInputSource is) 
+    DTDGrammar parseDTD(XMLInputSource is)
                 throws IOException {
         XMLEntityResolver resolver = getEntityResolver();
         if(resolver != null) {
@@ -196,7 +196,7 @@ public class XMLGrammarCachingConfiguration
             fGrammarPool.cacheGrammars(XMLGrammarDescription.XML_DTD,
                                       new Grammar[]{grammar});
         }
-        
+
         return grammar;
 
     } 

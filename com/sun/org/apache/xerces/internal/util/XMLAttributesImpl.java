@@ -15,13 +15,13 @@ implements XMLAttributes, XMLBufferListener {
     
     
     
-    
+
     
     protected static final int TABLE_SIZE = 101;
-    
+
     
     protected static final int SIZE_LIMIT = 20;
-    
+
     
     
     
@@ -35,7 +35,7 @@ implements XMLAttributes, XMLBufferListener {
 
     
     protected int fLargeCount = 1;
-    
+
     
     protected int fLength;
 
@@ -44,13 +44,13 @@ implements XMLAttributes, XMLBufferListener {
 
     
     protected Attribute[] fAttributeTableView;
-    
+
     
     protected int[] fAttributeTableViewChainState;
-    
+
     
     protected int fTableViewBuckets;
-    
+
     
     protected boolean fIsTableViewConsistent;
 
@@ -62,7 +62,7 @@ implements XMLAttributes, XMLBufferListener {
     public XMLAttributesImpl() {
         this(TABLE_SIZE);
     }
-    
+
     
     public XMLAttributesImpl(int tableSize) {
         fTableViewBuckets = tableSize;
@@ -92,10 +92,10 @@ implements XMLAttributes, XMLBufferListener {
 
         int index;
         if (fLength < SIZE_LIMIT) {
-            index = name.uri != null && !name.uri.equals("") 
+            index = name.uri != null && !name.uri.equals("")
                 ? getIndexFast(name.uri, name.localpart)
                 : getIndexFast(name.rawname);
-    
+
             if (index == -1) {
                 index = fLength;
                 if (fLength++ == fAttributes.length) {
@@ -108,18 +108,18 @@ implements XMLAttributes, XMLBufferListener {
                 }
             }
         }
-        else if (name.uri == null || 
-            name.uri.length() == 0 || 
+        else if (name.uri == null ||
+            name.uri.length() == 0 ||
             (index = getIndexFast(name.uri, name.localpart)) == -1) {
-            
+
             
             if (!fIsTableViewConsistent || fLength == SIZE_LIMIT) {
                 prepareAndPopulateTableView();
                 fIsTableViewConsistent = true;
             }
 
-            int bucket = getTableViewBucket(name.rawname); 
-        
+            int bucket = getTableViewBucket(name.rawname);
+
             
             
             if (fAttributeTableViewChainState[bucket] != fLargeCount) {
@@ -132,7 +132,7 @@ implements XMLAttributes, XMLBufferListener {
                     }
                     fAttributes = attributes;
                 }
-            
+
                 
                 fAttributeTableViewChainState[bucket] = fLargeCount;
                 fAttributes[index].next = null;
@@ -160,7 +160,7 @@ implements XMLAttributes, XMLBufferListener {
                         }
                         fAttributes = attributes;
                     }
-                 
+
                     
                     fAttributes[index].next = fAttributeTableView[bucket];
                     fAttributeTableView[bucket] = fAttributes[index];
@@ -170,7 +170,7 @@ implements XMLAttributes, XMLBufferListener {
                     index = getIndexFast(name.rawname);
                 }
             }
-        }          
+        }
 
         
         Attribute attribute = fAttributes[index];
@@ -184,7 +184,7 @@ implements XMLAttributes, XMLBufferListener {
         
         if(attribute.augs != null)
             attribute.augs.removeAllItems();
-        
+
         return index;
 
     } 
@@ -227,7 +227,7 @@ implements XMLAttributes, XMLBufferListener {
     public void setValue(int attrIndex, String attrValue) {
         setValue(attrIndex,attrValue,null);
     }
-    
+
     public void setValue(int attrIndex, String attrValue,XMLString value) {
         Attribute attribute = fAttributes[attrIndex];
         attribute.value = attrValue;
@@ -329,7 +329,7 @@ implements XMLAttributes, XMLBufferListener {
         }
         return -1;
     } 
-    
+
     
     public int getIndex(String uri, String localPart) {
         for (int i = 0; i < fLength; i++) {
@@ -375,7 +375,7 @@ implements XMLAttributes, XMLBufferListener {
         String rawname = fAttributes[index].name.rawname;
         return rawname != null ? rawname : "";
     } 
-    
+
     public QName getQualifiedName(int index){
         if (index < 0 || index >= fLength) {
             return null;
@@ -401,7 +401,7 @@ implements XMLAttributes, XMLBufferListener {
         }
         return -1;
     } 
-    
+
     
     public void addAttributeNS(QName name, String type, String value) {
         int index = fLength;
@@ -419,7 +419,7 @@ implements XMLAttributes, XMLBufferListener {
             }
             fAttributes = attributes;
         }
-        
+
         
         Attribute attribute = fAttributes[index];
         attribute.name.setValues(name);
@@ -427,11 +427,11 @@ implements XMLAttributes, XMLBufferListener {
         attribute.value = value;
         attribute.nonNormalizedValue = value;
         attribute.specified = false;
-            
+
         
         attribute.augs.removeAllItems();
     }
-    
+
     
     public QName checkDuplicatesNS() {
         
@@ -442,7 +442,7 @@ implements XMLAttributes, XMLBufferListener {
                     Attribute att2 = fAttributes[j];
                     if (att1.name.localpart == att2.name.localpart &&
                         att1.name.uri == att2.name.uri) {
-                        return att2.name;       
+                        return att2.name;
                     }
                 }
             }
@@ -461,14 +461,14 @@ implements XMLAttributes, XMLBufferListener {
             for (int i = fLength - 1; i >= 0; --i) {
                 attr = fAttributes[i];
                 bucket = getTableViewBucket(attr.name.localpart, attr.name.uri);
-                
+
                 
                 
                 if (fAttributeTableViewChainState[bucket] != fLargeCount) {
                     fAttributeTableViewChainState[bucket] = fLargeCount;
                     attr.next = null;
                     fAttributeTableView[bucket] = attr;
-                } 
+                }
                 
                 
                 else {
@@ -481,7 +481,7 @@ implements XMLAttributes, XMLBufferListener {
                         }
                         found = found.next;
                     }
-                    
+
                     
                     attr.next = fAttributeTableView[bucket];
                     fAttributeTableView[bucket] = attr;
@@ -490,12 +490,12 @@ implements XMLAttributes, XMLBufferListener {
         }
         return null;
     }
-    
+
     
     public int getIndexFast(String uri, String localPart) {
         for (int i = 0; i < fLength; ++i) {
             Attribute attribute = fAttributes[i];
-            if (attribute.name.localpart == localPart && 
+            if (attribute.name.localpart == localPart &&
                 attribute.name.uri == uri) {
                 return i;
             }
@@ -511,23 +511,23 @@ implements XMLAttributes, XMLBufferListener {
         }
         return type;
     }
-    
+
     
     protected int getTableViewBucket(String qname) {
         return (qname.hashCode() & 0x7FFFFFFF) % fTableViewBuckets;
     }
-    
+
     
     protected int getTableViewBucket(String localpart, String uri) {
         if (uri == null) {
             return (localpart.hashCode() & 0x7FFFFFFF) % fTableViewBuckets;
         }
         else {
-            return ((localpart.hashCode() + uri.hashCode()) 
+            return ((localpart.hashCode() + uri.hashCode())
                & 0x7FFFFFFF) % fTableViewBuckets;
         }
     }
-    
+
     
     protected void cleanTableView() {
         if (++fLargeCount < 0) {
@@ -535,12 +535,12 @@ implements XMLAttributes, XMLBufferListener {
             if (fAttributeTableViewChainState != null) {
                 for (int i = fTableViewBuckets - 1; i >= 0; --i) {
                     fAttributeTableViewChainState[i] = 0;
-                } 
+                }
             }
             fLargeCount = 1;
         }
     }
-    
+
     
     protected void prepareTableView() {
         if (fAttributeTableView == null) {
@@ -551,7 +551,7 @@ implements XMLAttributes, XMLBufferListener {
             cleanTableView();
         }
     }
-    
+
     
     protected void prepareAndPopulateTableView() {
         prepareTableView();
@@ -565,7 +565,7 @@ implements XMLAttributes, XMLBufferListener {
                 fAttributeTableViewChainState[bucket] = fLargeCount;
                 attr.next = null;
                 fAttributeTableView[bucket] = attr;
-            } 
+            }
             else {
                 
                 attr.next = fAttributeTableView[bucket];
@@ -591,7 +591,7 @@ implements XMLAttributes, XMLBufferListener {
             return null;
         }
         String uri = fAttributes[index].name.uri;
-        return uri;                        
+        return uri;
     } 
 
     
@@ -631,24 +631,24 @@ implements XMLAttributes, XMLBufferListener {
     public void setURI(int attrIndex, String uri) {
         fAttributes[attrIndex].name.uri = uri;
     } 
-    
+
     
     public void setSchemaId(int attrIndex, boolean schemaId) {
         fAttributes[attrIndex].schemaId = schemaId;
     }
-    
+
     public boolean getSchemaId(int index) {
         if (index < 0 || index >= fLength) {
             return false;
         }
         return fAttributes[index].schemaId;
     }
-    
+
     public boolean getSchemaId(String qname) {
         int index = getIndex(qname);
-        return index != -1 ? fAttributes[index].schemaId : false; 
+        return index != -1 ? fAttributes[index].schemaId : false;
     } 
-    
+
     public boolean getSchemaId(String uri, String localName) {
         if (!fNamespaces) {
             return false;
@@ -656,7 +656,7 @@ implements XMLAttributes, XMLBufferListener {
         int index = getIndex(uri, localName);
         return index != -1 ? fAttributes[index].schemaId : false;
     } 
-    
+
     
     
     public void refresh() {
@@ -665,9 +665,9 @@ implements XMLAttributes, XMLBufferListener {
                 getValue(i);
             }
         }
-    }  
+    }
     public void refresh(int pos) {
-	}
+        }
 
     
     
@@ -675,7 +675,7 @@ implements XMLAttributes, XMLBufferListener {
 
     
     static class Attribute {
-        
+
         
         
         
@@ -693,24 +693,24 @@ implements XMLAttributes, XMLBufferListener {
 
         
         public XMLString xmlValue;
-        
+
         
         public String nonNormalizedValue;
 
         
         public boolean specified;
-        
+
         
         public boolean schemaId;
-        
+
         
         public Augmentations augs = new AugmentationsImpl();
+
         
-        
-        
+
         
         public Attribute next;
-        
+
     } 
 
 } 

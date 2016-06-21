@@ -11,27 +11,27 @@ import com.sun.org.apache.xerces.internal.util.EncodingMap;
 
 
 public class EncodingInfo {
-    
+
     
     private Object [] fArgsForMethod = null;
-    
+
     
     
     String ianaName;
     String javaName;
     int lastPrintable;
-    
+
     
     Object fCharsetEncoder = null;
-    
+
     
     Object fCharToByteConverter = null;
-    
+
     
     
     
     boolean fHaveTriedCToB = false;
-    
+
     
     boolean fHaveTriedCharsetEncoder = false;
 
@@ -51,15 +51,15 @@ public class EncodingInfo {
     public Writer getWriter(OutputStream output)
         throws UnsupportedEncodingException {
         
-        if (javaName != null) 
+        if (javaName != null)
             return new OutputStreamWriter(output, javaName);
         javaName = EncodingMap.getIANA2JavaMapping(ianaName);
-        if(javaName == null) 
+        if(javaName == null)
             
             return new OutputStreamWriter(output, "UTF8");
         return new OutputStreamWriter(output, javaName);
     }
-    
+
     
     public boolean isPrintable(char ch) {
         if (ch <= this.lastPrintable) {
@@ -67,10 +67,10 @@ public class EncodingInfo {
         }
         return isPrintable0(ch);
     }
-    
+
     
     private boolean isPrintable0(char ch) {
-        
+
         
         if (fCharsetEncoder == null && CharsetMethods.fgNIOCharsetAvailable && !fHaveTriedCharsetEncoder) {
             if (fArgsForMethod == null) {
@@ -86,9 +86,9 @@ public class EncodingInfo {
                 
                 else {
                     fHaveTriedCharsetEncoder = true;
-                } 
-            } 
-            catch (Exception e) {   
+                }
+            }
+            catch (Exception e) {
                 
                 fHaveTriedCharsetEncoder = true;
             }
@@ -98,14 +98,14 @@ public class EncodingInfo {
             try {
                 fArgsForMethod[0] = new Character(ch);
                 return ((Boolean) CharsetMethods.fgCharsetEncoderCanEncodeMethod.invoke(fCharsetEncoder, fArgsForMethod)).booleanValue();
-            } 
+            }
             catch (Exception e) {
                 
                 fCharsetEncoder = null;
                 fHaveTriedCharsetEncoder = false;
             }
         }
-        
+
         
         
         
@@ -121,8 +121,8 @@ public class EncodingInfo {
             try {
                 fArgsForMethod[0] = javaName;
                 fCharToByteConverter = CharToByteConverterMethods.fgGetConverterMethod.invoke(null, fArgsForMethod);
-            } 
-            catch (Exception e) {   
+            }
+            catch (Exception e) {
                 
                 fHaveTriedCToB = true;
                 return false;
@@ -131,7 +131,7 @@ public class EncodingInfo {
         try {
             fArgsForMethod[0] = new Character(ch);
             return ((Boolean) CharToByteConverterMethods.fgCanConvertMethod.invoke(fCharToByteConverter, fArgsForMethod)).booleanValue();
-        } 
+        }
         catch (Exception e) {
             
             
@@ -147,27 +147,27 @@ public class EncodingInfo {
         final byte [] bTest = {(byte)'v', (byte)'a', (byte)'l', (byte)'i', (byte)'d'};
         String s = new String(bTest, name);
     }
-    
+
     
     static class CharsetMethods {
+
         
-        
-        private static java.lang.reflect.Method fgCharsetForNameMethod = null; 
-        
+        private static java.lang.reflect.Method fgCharsetForNameMethod = null;
+
         
         private static java.lang.reflect.Method fgCharsetCanEncodeMethod = null;
-        
+
         
         private static java.lang.reflect.Method fgCharsetNewEncoderMethod = null;
-        
+
         
         private static java.lang.reflect.Method fgCharsetEncoderCanEncodeMethod = null;
-        
+
         
         private static boolean fgNIOCharsetAvailable = false;
-        
+
         private CharsetMethods() {}
-        
+
         
         static {
             try {
@@ -190,21 +190,21 @@ public class EncodingInfo {
             }
         }
     }
-    
+
     
     static class CharToByteConverterMethods {
+
         
-        
-        private static java.lang.reflect.Method fgGetConverterMethod = null; 
-        
+        private static java.lang.reflect.Method fgGetConverterMethod = null;
+
         
         private static java.lang.reflect.Method fgCanConvertMethod = null;
-        
+
         
         private static boolean fgConvertersAvailable = false;
-        
+
         private CharToByteConverterMethods() {}
-        
+
         
         static {
             try {

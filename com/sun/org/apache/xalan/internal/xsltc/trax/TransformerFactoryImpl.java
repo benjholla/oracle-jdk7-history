@@ -30,6 +30,7 @@ import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
@@ -45,11 +46,14 @@ import javax.xml.transform.stax.*;
 import com.sun.org.apache.xml.internal.utils.StylesheetPIHandler;
 import com.sun.org.apache.xml.internal.utils.StopParseException;
 
+import com.sun.org.apache.xalan.internal.XalanConstants;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.Constants;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.SourceLoader;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.XSLTC;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMsg;
 import com.sun.org.apache.xalan.internal.xsltc.dom.XSLTCDTMManager;
+import com.sun.org.apache.xalan.internal.utils.ObjectFactory;
+import com.sun.org.apache.xalan.internal.utils.FactoryImpl;
 
 
 import org.xml.sax.InputSource;
@@ -59,7 +63,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 
 public class TransformerFactoryImpl
-    extends SAXTransformerFactory implements SourceLoader, ErrorListener 
+    extends SAXTransformerFactory implements SourceLoader, ErrorListener
 {
     
     public final static String TRANSLET_NAME = "translet-name";
@@ -72,25 +76,25 @@ public class TransformerFactoryImpl
     public final static String DEBUG = "debug";
     public final static String ENABLE_INLINING = "enable-inlining";
     public final static String INDENT_NUMBER = "indent-number";
-        
+
     
-    private ErrorListener _errorListener = this; 
+    private ErrorListener _errorListener = this;
 
     
     private URIResolver _uriResolver = null;
 
     
     protected final static String DEFAULT_TRANSLET_NAME = "GregorSamsa";
-    
+
     
     private String _transletName = DEFAULT_TRANSLET_NAME;
-    
+
     
     private String _destinationDirectory = null;
-    
+
     
     private String _packageName = null;
-    
+
     
     private String _jarFileName = null;
 
@@ -99,15 +103,15 @@ public class TransformerFactoryImpl
 
     
     private static class PIParamWrapper {
-	public String _media = null;
-	public String _title = null;
-	public String _charset = null;
-	
-	public PIParamWrapper(String media, String title, String charset) {
-	    _media = media;
-	    _title = title;
-	    _charset = charset;
-	}
+        public String _media = null;
+        public String _title = null;
+        public String _charset = null;
+
+        public PIParamWrapper(String media, String title, String charset) {
+            _media = media;
+            _title = title;
+            _charset = charset;
+        }
     }
 
     
@@ -115,13 +119,13 @@ public class TransformerFactoryImpl
 
     
     private boolean _enableInlining = false;
-    
+
     
     private boolean _generateTranslet = false;
-    
+
     
     private boolean _autoTranslet = false;
-    
+
     
     private boolean _useClasspath = false;
 
@@ -135,9 +139,22 @@ public class TransformerFactoryImpl
     private boolean _isNotSecureProcessing = true;
     
     private boolean _isSecureMode = false;
+
+    
+    private boolean _useServicesMechanism;
+
     
     public TransformerFactoryImpl() {
-        m_DTMManagerClass = XSLTCDTMManager.getDTMManagerClass();
+        this(true);
+    }
+
+    public static TransformerFactory newTransformerFactoryNoServiceLoader() {
+        return new TransformerFactoryImpl(false);
+    }
+
+    private TransformerFactoryImpl(boolean useServicesMechanism) {
+        this.m_DTMManagerClass = XSLTCDTMManager.getDTMManagerClass(useServicesMechanism);
+        this._useServicesMechanism = useServicesMechanism;
         if (System.getSecurityManager() != null) {
             _isSecureMode = true;
             _isNotSecureProcessing = false;
@@ -145,213 +162,229 @@ public class TransformerFactoryImpl
     }
 
     
-    public void setErrorListener(ErrorListener listener) 
-	throws IllegalArgumentException 
+    public void setErrorListener(ErrorListener listener)
+        throws IllegalArgumentException
     {
-	if (listener == null) {
-	    ErrorMsg err = new ErrorMsg(ErrorMsg.ERROR_LISTENER_NULL_ERR,
-					"TransformerFactory");
+        if (listener == null) {
+            ErrorMsg err = new ErrorMsg(ErrorMsg.ERROR_LISTENER_NULL_ERR,
+                                        "TransformerFactory");
             throw new IllegalArgumentException(err.toString());
-	}
-	_errorListener = listener;
+        }
+        _errorListener = listener;
     }
 
     
-    public ErrorListener getErrorListener() { 
-	return _errorListener;
+    public ErrorListener getErrorListener() {
+        return _errorListener;
     }
 
     
-    public Object getAttribute(String name) 
-	throws IllegalArgumentException 
-    { 
-	
-	if (name.equals(TRANSLET_NAME)) {
-	    return _transletName;
-	}
-	else if (name.equals(GENERATE_TRANSLET)) {
-	    return new Boolean(_generateTranslet);
-	}
-	else if (name.equals(AUTO_TRANSLET)) {
-	    return new Boolean(_autoTranslet);
-	}
+    public Object getAttribute(String name)
+        throws IllegalArgumentException
+    {
+        
+        if (name.equals(TRANSLET_NAME)) {
+            return _transletName;
+        }
+        else if (name.equals(GENERATE_TRANSLET)) {
+            return new Boolean(_generateTranslet);
+        }
+        else if (name.equals(AUTO_TRANSLET)) {
+            return new Boolean(_autoTranslet);
+        }
+        else if (name.equals(ENABLE_INLINING)) {
+            if (_enableInlining)
+              return Boolean.TRUE;
+            else
+              return Boolean.FALSE;
+        }
 
-	
-	ErrorMsg err = new ErrorMsg(ErrorMsg.JAXP_INVALID_ATTR_ERR, name);
-	throw new IllegalArgumentException(err.toString());
+        
+        ErrorMsg err = new ErrorMsg(ErrorMsg.JAXP_INVALID_ATTR_ERR, name);
+        throw new IllegalArgumentException(err.toString());
     }
 
     
-    public void setAttribute(String name, Object value) 
-	throws IllegalArgumentException 
-    { 
-	
-	
-	if (name.equals(TRANSLET_NAME) && value instanceof String) {
-	    _transletName = (String) value;	      
-	    return;
-	}
-	else if (name.equals(DESTINATION_DIRECTORY) && value instanceof String) {
-	    _destinationDirectory = (String) value;
-	    return;
-	}
-	else if (name.equals(PACKAGE_NAME) && value instanceof String) {
-	    _packageName = (String) value;
-	    return;
-	}
-	else if (name.equals(JAR_NAME) && value instanceof String) {
-	    _jarFileName = (String) value;
-	    return;
-	}
-	else if (name.equals(GENERATE_TRANSLET)) {
-	    if (value instanceof Boolean) {
-		_generateTranslet = ((Boolean) value).booleanValue();
-		return;
-	    }
-	    else if (value instanceof String) {
-		_generateTranslet = ((String) value).equalsIgnoreCase("true");
-		return;
-	    }
-	}
-	else if (name.equals(AUTO_TRANSLET)) {
-	    if (value instanceof Boolean) {
-		_autoTranslet = ((Boolean) value).booleanValue();
-		return;
-	    }
-	    else if (value instanceof String) {
-		_autoTranslet = ((String) value).equalsIgnoreCase("true");
-		return;
-	    }
-	}
-	else if (name.equals(USE_CLASSPATH)) {
-	    if (value instanceof Boolean) {
-		_useClasspath = ((Boolean) value).booleanValue();
-		return;
-	    }
-	    else if (value instanceof String) {
-		_useClasspath = ((String) value).equalsIgnoreCase("true");
-		return;
-	    }	    
-	}
-	else if (name.equals(DEBUG)) {
-	    if (value instanceof Boolean) {
-		_debug = ((Boolean) value).booleanValue();
-		return;
-	    }
-	    else if (value instanceof String) {
-		_debug = ((String) value).equalsIgnoreCase("true");
-		return;
-	    }
-	}
-	else if (name.equals(ENABLE_INLINING)) {
-	    if (value instanceof Boolean) {
-		_enableInlining = ((Boolean) value).booleanValue();
-		return;
-	    }
-	    else if (value instanceof String) {
-		_enableInlining = ((String) value).equalsIgnoreCase("true");
-		return;
-	    }
-	}
-	else if (name.equals(INDENT_NUMBER)) {
-	    if (value instanceof String) {
-		try {
-		    _indentNumber = Integer.parseInt((String) value);
-		    return;
-		}
-		catch (NumberFormatException e) {
-		    
-		}
-	    }
-	    else if (value instanceof Integer) {
-		_indentNumber = ((Integer) value).intValue();
-		return;
-	    }
-	}
+    public void setAttribute(String name, Object value)
+        throws IllegalArgumentException
+    {
+        
+        
+        if (name.equals(TRANSLET_NAME) && value instanceof String) {
+            _transletName = (String) value;
+            return;
+        }
+        else if (name.equals(DESTINATION_DIRECTORY) && value instanceof String) {
+            _destinationDirectory = (String) value;
+            return;
+        }
+        else if (name.equals(PACKAGE_NAME) && value instanceof String) {
+            _packageName = (String) value;
+            return;
+        }
+        else if (name.equals(JAR_NAME) && value instanceof String) {
+            _jarFileName = (String) value;
+            return;
+        }
+        else if (name.equals(GENERATE_TRANSLET)) {
+            if (value instanceof Boolean) {
+                _generateTranslet = ((Boolean) value).booleanValue();
+                return;
+            }
+            else if (value instanceof String) {
+                _generateTranslet = ((String) value).equalsIgnoreCase("true");
+                return;
+            }
+        }
+        else if (name.equals(AUTO_TRANSLET)) {
+            if (value instanceof Boolean) {
+                _autoTranslet = ((Boolean) value).booleanValue();
+                return;
+            }
+            else if (value instanceof String) {
+                _autoTranslet = ((String) value).equalsIgnoreCase("true");
+                return;
+            }
+        }
+        else if (name.equals(USE_CLASSPATH)) {
+            if (value instanceof Boolean) {
+                _useClasspath = ((Boolean) value).booleanValue();
+                return;
+            }
+            else if (value instanceof String) {
+                _useClasspath = ((String) value).equalsIgnoreCase("true");
+                return;
+            }
+        }
+        else if (name.equals(DEBUG)) {
+            if (value instanceof Boolean) {
+                _debug = ((Boolean) value).booleanValue();
+                return;
+            }
+            else if (value instanceof String) {
+                _debug = ((String) value).equalsIgnoreCase("true");
+                return;
+            }
+        }
+        else if (name.equals(ENABLE_INLINING)) {
+            if (value instanceof Boolean) {
+                _enableInlining = ((Boolean) value).booleanValue();
+                return;
+            }
+            else if (value instanceof String) {
+                _enableInlining = ((String) value).equalsIgnoreCase("true");
+                return;
+            }
+        }
+        else if (name.equals(INDENT_NUMBER)) {
+            if (value instanceof String) {
+                try {
+                    _indentNumber = Integer.parseInt((String) value);
+                    return;
+                }
+                catch (NumberFormatException e) {
+                    
+                }
+            }
+            else if (value instanceof Integer) {
+                _indentNumber = ((Integer) value).intValue();
+                return;
+            }
+        }
 
-	
-	final ErrorMsg err 
-	    = new ErrorMsg(ErrorMsg.JAXP_INVALID_ATTR_ERR, name);
-	throw new IllegalArgumentException(err.toString());
+        
+        final ErrorMsg err
+            = new ErrorMsg(ErrorMsg.JAXP_INVALID_ATTR_ERR, name);
+        throw new IllegalArgumentException(err.toString());
     }
 
     
     public void setFeature(String name, boolean value)
         throws TransformerConfigurationException {
 
-	
-	if (name == null) {
+        
+        if (name == null) {
             ErrorMsg err = new ErrorMsg(ErrorMsg.JAXP_SET_FEATURE_NULL_NAME);
-    	    throw new NullPointerException(err.toString());
-	}		
-	
-	else if (name.equals(XMLConstants.FEATURE_SECURE_PROCESSING)) {
+            throw new NullPointerException(err.toString());
+        }
+        
+        else if (name.equals(XMLConstants.FEATURE_SECURE_PROCESSING)) {
             if ((_isSecureMode) && (!value)) {
                 ErrorMsg err = new ErrorMsg(ErrorMsg.JAXP_SECUREPROCESSING_FEATURE);
                 throw new TransformerConfigurationException(err.toString());
             }
-	    _isNotSecureProcessing = !value;
-	    
-	    return;
-	}
-	else {	
-	    
+            _isNotSecureProcessing = !value;
+            
+            return;
+        }
+        else if (name.equals(XalanConstants.ORACLE_FEATURE_SERVICE_MECHANISM)) {
+            
+            if (!_isSecureMode)
+                _useServicesMechanism = value;
+        }
+        else {
+            
             ErrorMsg err = new ErrorMsg(ErrorMsg.JAXP_UNSUPPORTED_FEATURE, name);
             throw new TransformerConfigurationException(err.toString());
         }
     }
 
     
-    public boolean getFeature(String name) { 
-	
-	String[] features = {
-	    DOMSource.FEATURE,
-	    DOMResult.FEATURE,
-	    SAXSource.FEATURE,
-	    SAXResult.FEATURE,
-	    StAXSource.FEATURE,
-	    StAXResult.FEATURE,
-	    StreamSource.FEATURE,
-	    StreamResult.FEATURE,
-	    SAXTransformerFactory.FEATURE,
-	    SAXTransformerFactory.FEATURE_XMLFILTER
-	};
+    public boolean getFeature(String name) {
+        
+        String[] features = {
+            DOMSource.FEATURE,
+            DOMResult.FEATURE,
+            SAXSource.FEATURE,
+            SAXResult.FEATURE,
+            StAXSource.FEATURE,
+            StAXResult.FEATURE,
+            StreamSource.FEATURE,
+            StreamResult.FEATURE,
+            SAXTransformerFactory.FEATURE,
+            SAXTransformerFactory.FEATURE_XMLFILTER,
+            XalanConstants.ORACLE_FEATURE_SERVICE_MECHANISM
+        };
 
-	
-	if (name == null) {
-    	    ErrorMsg err = new ErrorMsg(ErrorMsg.JAXP_GET_FEATURE_NULL_NAME);
-    	    throw new NullPointerException(err.toString());
-	}
+        
+        if (name == null) {
+            ErrorMsg err = new ErrorMsg(ErrorMsg.JAXP_GET_FEATURE_NULL_NAME);
+            throw new NullPointerException(err.toString());
+        }
 
-	
-	for (int i =0; i < features.length; i++) {
-	    if (name.equals(features[i])) {
-		return true;
-	    }
-	}
-	
-	if (name.equals(XMLConstants.FEATURE_SECURE_PROCESSING)) {
-		return !_isNotSecureProcessing;
-	}
+        
+        for (int i =0; i < features.length; i++) {
+            if (name.equals(features[i])) {
+                return true;
+            }
+        }
+        
+        if (name.equals(XMLConstants.FEATURE_SECURE_PROCESSING)) {
+                return !_isNotSecureProcessing;
+        }
 
-	
-	return false;
+        
+        return false;
+    }
+    
+    public boolean useServicesMechnism() {
+        return _useServicesMechanism;
     }
 
-        
+    
     public URIResolver getURIResolver() {
-	return _uriResolver;
-    } 
+        return _uriResolver;
+    }
 
-        
+    
     public void setURIResolver(URIResolver resolver) {
-	_uriResolver = resolver;
+        _uriResolver = resolver;
     }
 
     
     public Source  getAssociatedStylesheet(Source source, String media,
-					  String title, String charset)
-	throws TransformerConfigurationException {
+                                          String title, String charset)
+        throws TransformerConfigurationException {
 
         String baseId;
         XMLReader reader = null;
@@ -362,7 +395,7 @@ public class TransformerFactoryImpl
         StylesheetPIHandler _stylesheetPIHandler = new StylesheetPIHandler(null,media,title,charset);
 
         try {
-  
+
             if (source instanceof DOMSource ) {
                 final DOMSource domsrc = (DOMSource) source;
                 baseId = domsrc.getSystemId();
@@ -377,16 +410,16 @@ public class TransformerFactoryImpl
                 isource = SAXSource.sourceToInputSource(source);
                 baseId = isource.getSystemId();
 
-                SAXParserFactory factory = SAXParserFactory.newInstance();
+                SAXParserFactory factory = FactoryImpl.getSAXFactory(_useServicesMechanism);
                 factory.setNamespaceAware(true);
-                
+
                 if (!_isNotSecureProcessing) {
                     try {
                         factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
                     }
                     catch (org.xml.sax.SAXException e) {}
                 }
-                
+
                 SAXParser jaxpParser = factory.newSAXParser();
 
                 reader = jaxpParser.getXMLReader();
@@ -428,231 +461,234 @@ public class TransformerFactoryImpl
 
     }
 
-        
+    
     public Transformer newTransformer()
-	throws TransformerConfigurationException 
-    { 
-	TransformerImpl result = new TransformerImpl(new Properties(), 
-	    _indentNumber, this);
-	if (_uriResolver != null) {
-	    result.setURIResolver(_uriResolver);
-	}
-	
-	if (!_isNotSecureProcessing) {
-	    result.setSecureProcessing(true);
-	}
-	return result;
+        throws TransformerConfigurationException
+    {
+        TransformerImpl result = new TransformerImpl(new Properties(),
+            _indentNumber, this);
+        if (_uriResolver != null) {
+            result.setURIResolver(_uriResolver);
+        }
+
+        if (!_isNotSecureProcessing) {
+            result.setSecureProcessing(true);
+        }
+        return result;
     }
 
     
     public Transformer newTransformer(Source source) throws
-	TransformerConfigurationException 
+        TransformerConfigurationException
     {
-	final Templates templates = newTemplates(source);
-	final Transformer transformer = templates.newTransformer();
-	if (_uriResolver != null) {
-	    transformer.setURIResolver(_uriResolver);
-	}
-	return(transformer);
+        final Templates templates = newTemplates(source);
+        final Transformer transformer = templates.newTransformer();
+        if (_uriResolver != null) {
+            transformer.setURIResolver(_uriResolver);
+        }
+        return(transformer);
     }
 
     
-    private void passWarningsToListener(Vector messages) 
-	throws TransformerException 
+    private void passWarningsToListener(Vector messages)
+        throws TransformerException
     {
-	if (_errorListener == null || messages == null) {
-	    return;
-	}
-	
-	final int count = messages.size();
-	for (int pos = 0; pos < count; pos++) {
-	    ErrorMsg msg = (ErrorMsg)messages.elementAt(pos);
-	    
-	    if (msg.isWarningError())
-	        _errorListener.error(
-		    new TransformerConfigurationException(msg.toString()));
-	    else
-	    	_errorListener.warning(
-		    new TransformerConfigurationException(msg.toString()));
-	}
+        if (_errorListener == null || messages == null) {
+            return;
+        }
+        
+        final int count = messages.size();
+        for (int pos = 0; pos < count; pos++) {
+            ErrorMsg msg = (ErrorMsg)messages.elementAt(pos);
+            
+            if (msg.isWarningError())
+                _errorListener.error(
+                    new TransformerConfigurationException(msg.toString()));
+            else
+                _errorListener.warning(
+                    new TransformerConfigurationException(msg.toString()));
+        }
     }
 
     
     private void passErrorsToListener(Vector messages) {
-	try {
-	    if (_errorListener == null || messages == null) {
-		return;
-	    }
-	    
-	    final int count = messages.size();
-	    for (int pos = 0; pos < count; pos++) {
-		String message = messages.elementAt(pos).toString();
-		_errorListener.error(new TransformerException(message));
-	    }
-	}
-	catch (TransformerException e) {
-	    
-	}
+        try {
+            if (_errorListener == null || messages == null) {
+                return;
+            }
+            
+            final int count = messages.size();
+            for (int pos = 0; pos < count; pos++) {
+                String message = messages.elementAt(pos).toString();
+                _errorListener.error(new TransformerException(message));
+            }
+        }
+        catch (TransformerException e) {
+            
+        }
     }
 
     
     public Templates newTemplates(Source source)
-	throws TransformerConfigurationException 
+        throws TransformerConfigurationException
     {
-	
-	
-	
-	if (_useClasspath) {
-	    String transletName = getTransletBaseName(source);
-	            
-	    if (_packageName != null)
-	        transletName = _packageName + "." + transletName;
-	        
-	    try {
-                final Class clazz = ObjectFactory.findProviderClass(
-                    transletName, ObjectFactory.findClassLoader(), true);
-	        resetTransientAttributes();
-	            
-	        return new TemplatesImpl(new Class[]{clazz}, transletName, null, _indentNumber, this);
-	    }
-	    catch (ClassNotFoundException cnfe) {
-	        ErrorMsg err = new ErrorMsg(ErrorMsg.CLASS_NOT_FOUND_ERR, transletName);
-	        throw new TransformerConfigurationException(err.toString());
-	    }
-	    catch (Exception e) {
-	        ErrorMsg err = new ErrorMsg(
+        
+        
+        
+        if (_useClasspath) {
+            String transletName = getTransletBaseName(source);
+
+            if (_packageName != null)
+                transletName = _packageName + "." + transletName;
+
+            try {
+                final Class clazz = ObjectFactory.findProviderClass(transletName, true);
+                resetTransientAttributes();
+
+                return new TemplatesImpl(new Class[]{clazz}, transletName, null, _indentNumber, this);
+            }
+            catch (ClassNotFoundException cnfe) {
+                ErrorMsg err = new ErrorMsg(ErrorMsg.CLASS_NOT_FOUND_ERR, transletName);
+                throw new TransformerConfigurationException(err.toString());
+            }
+            catch (Exception e) {
+                ErrorMsg err = new ErrorMsg(
                                      new ErrorMsg(ErrorMsg.RUNTIME_ERROR_KEY)
                                      + e.getMessage());
-	        throw new TransformerConfigurationException(err.toString());
-	    }
-	}
-	
-	
-	
-	if (_autoTranslet)  {
-	    byte[][] bytecodes = null;
-	    String transletClassName = getTransletBaseName(source);
-	    
-	    if (_packageName != null)
-	        transletClassName = _packageName + "." + transletClassName;
-	    
-	    if (_jarFileName != null)
-	    	bytecodes = getBytecodesFromJar(source, transletClassName);
-	    else
-	    	bytecodes = getBytecodesFromClasses(source, transletClassName);	    
-	  
-	    if (bytecodes != null) {
-	    	if (_debug) {
-	      	    if (_jarFileName != null)
-	        	System.err.println(new ErrorMsg(
-	            	    ErrorMsg.TRANSFORM_WITH_JAR_STR, transletClassName, _jarFileName));
-	            else
-	            	System.err.println(new ErrorMsg(
-	            	    ErrorMsg.TRANSFORM_WITH_TRANSLET_STR, transletClassName));
-	    	}
+                throw new TransformerConfigurationException(err.toString());
+            }
+        }
 
-	    	
-	    	
-	    	resetTransientAttributes();
-	    
-	    	return new TemplatesImpl(bytecodes, transletClassName, null, _indentNumber, this);	    
-	    }
-	}
-	
-	
-	final XSLTC xsltc = new XSLTC();
-	if (_debug) xsltc.setDebug(true);
-	if (_enableInlining) xsltc.setTemplateInlining(true);
-	if (!_isNotSecureProcessing) xsltc.setSecureProcessing(true);
-	xsltc.init();
-
-	
-	if (_uriResolver != null) {
-	    xsltc.setSourceLoader(this);
-	}
-
-	
-	
-	if ((_piParams != null) && (_piParams.get(source) != null)) {
-	    
-	    PIParamWrapper p = (PIParamWrapper)_piParams.get(source);
-	    
-	    if (p != null) {
-		xsltc.setPIParameters(p._media, p._title, p._charset);
-	    }
-	}
-
-	
-	int outputType = XSLTC.BYTEARRAY_OUTPUT;
-	if (_generateTranslet || _autoTranslet) {
-	    
-	    xsltc.setClassName(getTransletBaseName(source));
-	  
-	    if (_destinationDirectory != null)
-	    	xsltc.setDestDirectory(_destinationDirectory);
-	    else {
-	    	String xslName = getStylesheetFileName(source);
-	    	if (xslName != null) {
-	      	    File xslFile = new File(xslName);
-	            String xslDir = xslFile.getParent();
-	    
-	      	    if (xslDir != null)
-	                xsltc.setDestDirectory(xslDir);
-	    	}
-	    }
-	  
-	    if (_packageName != null)
-	        xsltc.setPackageName(_packageName);
-	
-	    if (_jarFileName != null) {
-	    	xsltc.setJarFileName(_jarFileName);
-	    	outputType = XSLTC.BYTEARRAY_AND_JAR_OUTPUT;
-	    }
-	    else
-	    	outputType = XSLTC.BYTEARRAY_AND_FILE_OUTPUT;
-	}
-
-	
-	final InputSource input = Util.getInputSource(xsltc, source);
-	byte[][] bytecodes = xsltc.compile(null, input, outputType);
-	final String transletName = xsltc.getClassName();
-
-	
-	if ((_generateTranslet || _autoTranslet)
-	   	&& bytecodes != null && _jarFileName != null) {
-	    try {
-	    	xsltc.outputToJar();
-	    }
-	    catch (java.io.IOException e) { }
-	}
-
-	
-	
-	resetTransientAttributes();
-
-	
-	if (_errorListener != this) {
-	    try {
-		passWarningsToListener(xsltc.getWarnings());
-	    }
-	    catch (TransformerException e) {
-		throw new TransformerConfigurationException(e);
-	    }
-	}
-	else {
-	    xsltc.printWarnings();
-	}
-
-	
-    if (bytecodes == null) {
         
+        
+        if (_autoTranslet)  {
+            byte[][] bytecodes = null;
+            String transletClassName = getTransletBaseName(source);
+
+            if (_packageName != null)
+                transletClassName = _packageName + "." + transletClassName;
+
+            if (_jarFileName != null)
+                bytecodes = getBytecodesFromJar(source, transletClassName);
+            else
+                bytecodes = getBytecodesFromClasses(source, transletClassName);
+
+            if (bytecodes != null) {
+                if (_debug) {
+                    if (_jarFileName != null)
+                        System.err.println(new ErrorMsg(
+                            ErrorMsg.TRANSFORM_WITH_JAR_STR, transletClassName, _jarFileName));
+                    else
+                        System.err.println(new ErrorMsg(
+                            ErrorMsg.TRANSFORM_WITH_TRANSLET_STR, transletClassName));
+                }
+
+                
+                
+                resetTransientAttributes();
+
+                return new TemplatesImpl(bytecodes, transletClassName, null, _indentNumber, this);
+            }
+        }
+
+        
+        final XSLTC xsltc = new XSLTC(_useServicesMechanism);
+        if (_debug) xsltc.setDebug(true);
+        if (_enableInlining)
+                xsltc.setTemplateInlining(true);
+        else
+                xsltc.setTemplateInlining(false);
+
+        if (!_isNotSecureProcessing) xsltc.setSecureProcessing(true);
+        xsltc.init();
+
+        
+        if (_uriResolver != null) {
+            xsltc.setSourceLoader(this);
+        }
+
+        
+        
+        if ((_piParams != null) && (_piParams.get(source) != null)) {
+            
+            PIParamWrapper p = (PIParamWrapper)_piParams.get(source);
+            
+            if (p != null) {
+                xsltc.setPIParameters(p._media, p._title, p._charset);
+            }
+        }
+
+        
+        int outputType = XSLTC.BYTEARRAY_OUTPUT;
+        if (_generateTranslet || _autoTranslet) {
+            
+            xsltc.setClassName(getTransletBaseName(source));
+
+            if (_destinationDirectory != null)
+                xsltc.setDestDirectory(_destinationDirectory);
+            else {
+                String xslName = getStylesheetFileName(source);
+                if (xslName != null) {
+                    File xslFile = new File(xslName);
+                    String xslDir = xslFile.getParent();
+
+                    if (xslDir != null)
+                        xsltc.setDestDirectory(xslDir);
+                }
+            }
+
+            if (_packageName != null)
+                xsltc.setPackageName(_packageName);
+
+            if (_jarFileName != null) {
+                xsltc.setJarFileName(_jarFileName);
+                outputType = XSLTC.BYTEARRAY_AND_JAR_OUTPUT;
+            }
+            else
+                outputType = XSLTC.BYTEARRAY_AND_FILE_OUTPUT;
+        }
+
+        
+        final InputSource input = Util.getInputSource(xsltc, source);
+        byte[][] bytecodes = xsltc.compile(null, input, outputType);
+        final String transletName = xsltc.getClassName();
+
+        
+        if ((_generateTranslet || _autoTranslet)
+                && bytecodes != null && _jarFileName != null) {
+            try {
+                xsltc.outputToJar();
+            }
+            catch (java.io.IOException e) { }
+        }
+
+        
+        
+        resetTransientAttributes();
+
+        
+        if (_errorListener != this) {
+            try {
+                passWarningsToListener(xsltc.getWarnings());
+            }
+            catch (TransformerException e) {
+                throw new TransformerConfigurationException(e);
+            }
+        }
+        else {
+            xsltc.printWarnings();
+        }
+
+        
+    if (bytecodes == null) {
+
         ErrorMsg err = new ErrorMsg(ErrorMsg.JAXP_COMPILE_ERR);
         TransformerConfigurationException exc =  new TransformerConfigurationException(err.toString());
-        
+
         
         if (_errorListener != null) {
             passErrorsToListener(xsltc.getErrors());
-            
+
             
             
             
@@ -660,7 +696,7 @@ public class TransformerFactoryImpl
                 _errorListener.fatalError(exc);
             } catch (TransformerException te) {
                 
-            }    
+            }
         }
         else {
             xsltc.printErrors();
@@ -668,88 +704,88 @@ public class TransformerFactoryImpl
         throw exc;
     }
 
-	return new TemplatesImpl(bytecodes, transletName,
-	    xsltc.getOutputProperties(), _indentNumber, this);
+        return new TemplatesImpl(bytecodes, transletName,
+            xsltc.getOutputProperties(), _indentNumber, this);
     }
 
     
-    public TemplatesHandler newTemplatesHandler() 
-	throws TransformerConfigurationException 
-    { 
-	final TemplatesHandlerImpl handler = 
-	    new TemplatesHandlerImpl(_indentNumber, this);
-	if (_uriResolver != null) {
-	    handler.setURIResolver(_uriResolver);
-	}
-	return handler;
-    }
-
-    
-    public TransformerHandler newTransformerHandler() 
-	throws TransformerConfigurationException 
+    public TemplatesHandler newTemplatesHandler()
+        throws TransformerConfigurationException
     {
-	final Transformer transformer = newTransformer();
-	if (_uriResolver != null) {
-	    transformer.setURIResolver(_uriResolver);
-	}
-	return new TransformerHandlerImpl((TransformerImpl) transformer);
+        final TemplatesHandlerImpl handler =
+            new TemplatesHandlerImpl(_indentNumber, this);
+        if (_uriResolver != null) {
+            handler.setURIResolver(_uriResolver);
+        }
+        return handler;
     }
 
     
-    public TransformerHandler newTransformerHandler(Source src) 
-	throws TransformerConfigurationException 
-    { 
-	final Transformer transformer = newTransformer(src);
-	if (_uriResolver != null) {
-	    transformer.setURIResolver(_uriResolver);
-	}
-	return new TransformerHandlerImpl((TransformerImpl) transformer);
-    }
-
-        
-    public TransformerHandler newTransformerHandler(Templates templates) 
-	throws TransformerConfigurationException  
+    public TransformerHandler newTransformerHandler()
+        throws TransformerConfigurationException
     {
-	final Transformer transformer = templates.newTransformer();
-	final TransformerImpl internal = (TransformerImpl)transformer;
-	return new TransformerHandlerImpl(internal);
+        final Transformer transformer = newTransformer();
+        if (_uriResolver != null) {
+            transformer.setURIResolver(_uriResolver);
+        }
+        return new TransformerHandlerImpl((TransformerImpl) transformer);
     }
 
     
-    public XMLFilter newXMLFilter(Source src) 
-	throws TransformerConfigurationException 
+    public TransformerHandler newTransformerHandler(Source src)
+        throws TransformerConfigurationException
     {
-	Templates templates = newTemplates(src);
-	if (templates == null) return null; 
-	return newXMLFilter(templates);
+        final Transformer transformer = newTransformer(src);
+        if (_uriResolver != null) {
+            transformer.setURIResolver(_uriResolver);
+        }
+        return new TransformerHandlerImpl((TransformerImpl) transformer);
     }
 
     
-    public XMLFilter newXMLFilter(Templates templates) 
-	throws TransformerConfigurationException 
+    public TransformerHandler newTransformerHandler(Templates templates)
+        throws TransformerConfigurationException
     {
-	try {
-      	    return new com.sun.org.apache.xalan.internal.xsltc.trax.TrAXFilter(templates);
-    	}
-	catch (TransformerConfigurationException e1) {
-      	    if (_errorListener != null) {
+        final Transformer transformer = templates.newTransformer();
+        final TransformerImpl internal = (TransformerImpl)transformer;
+        return new TransformerHandlerImpl(internal);
+    }
+
+    
+    public XMLFilter newXMLFilter(Source src)
+        throws TransformerConfigurationException
+    {
+        Templates templates = newTemplates(src);
+        if (templates == null) return null;
+        return newXMLFilter(templates);
+    }
+
+    
+    public XMLFilter newXMLFilter(Templates templates)
+        throws TransformerConfigurationException
+    {
+        try {
+            return new com.sun.org.apache.xalan.internal.xsltc.trax.TrAXFilter(templates);
+        }
+        catch (TransformerConfigurationException e1) {
+            if (_errorListener != null) {
                 try {
-          	    _errorListener.fatalError(e1);
-          	    return null;
-        	}
-		catch (TransformerException e2) {
-          	    new TransformerConfigurationException(e2);
-        	}
-      	    }
-      	    throw e1;
-    	}
+                    _errorListener.fatalError(e1);
+                    return null;
+                }
+                catch (TransformerException e2) {
+                    new TransformerConfigurationException(e2);
+                }
+            }
+            throw e1;
+        }
     }
 
     
     public void error(TransformerException e)
-	throws TransformerException 
+        throws TransformerException
     {
-	Throwable wrapped = e.getException();
+        Throwable wrapped = e.getException();
         if (wrapped != null) {
             System.err.println(new ErrorMsg(ErrorMsg.ERROR_PLUS_WRAPPED_MSG,
                                             e.getMessageAndLocation(),
@@ -757,15 +793,15 @@ public class TransformerFactoryImpl
         } else {
             System.err.println(new ErrorMsg(ErrorMsg.ERROR_MSG,
                                             e.getMessageAndLocation()));
-	}
-	throw e; 	
+        }
+        throw e;
     }
 
     
     public void fatalError(TransformerException e)
-	throws TransformerException 
+        throws TransformerException
     {
-	Throwable wrapped = e.getException();
+        Throwable wrapped = e.getException();
         if (wrapped != null) {
             System.err.println(new ErrorMsg(ErrorMsg.FATAL_ERR_PLUS_WRAPPED_MSG,
                                             e.getMessageAndLocation(),
@@ -774,19 +810,19 @@ public class TransformerFactoryImpl
             System.err.println(new ErrorMsg(ErrorMsg.FATAL_ERR_MSG,
                                             e.getMessageAndLocation()));
         }
-	throw e;
+        throw e;
     }
 
     
     public void warning(TransformerException e)
-	throws TransformerException 
+        throws TransformerException
     {
-	Throwable wrapped = e.getException();
-	if (wrapped != null) {
+        Throwable wrapped = e.getException();
+        if (wrapped != null) {
             System.err.println(new ErrorMsg(ErrorMsg.WARNING_PLUS_WRAPPED_MSG,
                                             e.getMessageAndLocation(),
                                             wrapped.getMessage()));
-	} else {
+        } else {
             System.err.println(new ErrorMsg(ErrorMsg.WARNING_MSG,
                                             e.getMessageAndLocation()));
         }
@@ -794,253 +830,253 @@ public class TransformerFactoryImpl
 
     
     public InputSource loadSource(String href, String context, XSLTC xsltc) {
-	try {
-	    if (_uriResolver != null) {
-		final Source source = _uriResolver.resolve(href, context);
-		if (source != null) {
-		    return Util.getInputSource(xsltc, source);
-		}
-	    }
-	}
-	catch (TransformerException e) {            
-	    
+        try {
+            if (_uriResolver != null) {
+                final Source source = _uriResolver.resolve(href, context);
+                if (source != null) {
+                    return Util.getInputSource(xsltc, source);
+                }
+            }
+        }
+        catch (TransformerException e) {
+            
             final ErrorMsg msg = new ErrorMsg(ErrorMsg.INVALID_URI_ERR, href + "\n" + e.getMessage(), this);
             xsltc.getParser().reportError(Constants.FATAL, msg);
-	}
- 
-	return null;
+        }
+
+        return null;
     }
 
     
     private void resetTransientAttributes() {
-	_transletName = DEFAULT_TRANSLET_NAME;
-	_destinationDirectory = null;
-	_packageName = null;
-	_jarFileName = null;    
+        _transletName = DEFAULT_TRANSLET_NAME;
+        _destinationDirectory = null;
+        _packageName = null;
+        _jarFileName = null;
     }
-        
+
     
     private byte[][] getBytecodesFromClasses(Source source, String fullClassName)
     {
-    	if (fullClassName == null)
-    	    return null;
-    	  
-    	String xslFileName = getStylesheetFileName(source);
-    	File xslFile = null;
-    	if (xslFileName != null)
-    	    xslFile = new File(xslFileName);
-    	
-    	
-    	final String transletName;
-    	int lastDotIndex = fullClassName.lastIndexOf('.');
-    	if (lastDotIndex > 0)
-    	    transletName = fullClassName.substring(lastDotIndex+1);
-    	else
-    	    transletName = fullClassName;
-    	    	
-    	
-    	String transletPath = fullClassName.replace('.', '/');
-    	if (_destinationDirectory != null) {
-    	    transletPath = _destinationDirectory + "/" + transletPath + ".class";
-    	}
-    	else {
-    	    if (xslFile != null && xslFile.getParent() != null)
-    	    	transletPath = xslFile.getParent() + "/" + transletPath + ".class";
-    	    else
-    	    	transletPath = transletPath + ".class";
-    	}
-    	    	    	
-    	
-    	File transletFile = new File(transletPath);
-    	if (!transletFile.exists())
-    	    return null;
-    	    	  
-    	
-    	
-    	
-    	
-    	if (xslFile != null && xslFile.exists()) {
-    	    long xslTimestamp = xslFile.lastModified();
-    	    long transletTimestamp = transletFile.lastModified();
-    	    if (transletTimestamp < xslTimestamp)
-    	    	return null;
-    	}
-    	
-    	
-    	Vector bytecodes = new Vector();
-    	int fileLength = (int)transletFile.length();
-    	if (fileLength > 0) {
-    	    FileInputStream input = null;
-    	    try {
-    	    	input = new FileInputStream(transletFile);
-    	    }
-    	    catch (FileNotFoundException e) {
-    	    	return null;
-    	    }
-    	  
-    	    byte[] bytes = new byte[fileLength];
-    	    try {
-	    	readFromInputStream(bytes, input, fileLength);
-	    	input.close();
-	    }
-	    catch (IOException e) {
-    	    	return null;
-    	    }
-    	  
-    	    bytecodes.addElement(bytes);
-    	}
-    	else
-    	    return null;
-    	
-    	
-    	String transletParentDir = transletFile.getParent();
-    	if (transletParentDir == null)
-    	    transletParentDir = System.getProperty("user.dir");
-    	  
-    	File transletParentFile = new File(transletParentDir);
-    	
-    	
-    	final String transletAuxPrefix = transletName + "$";
-    	File[] auxfiles = transletParentFile.listFiles(new FilenameFilter() {
-        	public boolean accept(File dir, String name)
-    		{
-    		    return (name.endsWith(".class") && name.startsWith(transletAuxPrefix));	
-    		}
-    	      });
-    	
-    	
-    	for (int i = 0; i < auxfiles.length; i++)
-    	{
-    	    File auxfile = auxfiles[i];
-    	    int auxlength = (int)auxfile.length();
-    	    if (auxlength > 0) {
-    	    	FileInputStream auxinput = null;
-    	    	try {
-    	      	    auxinput = new FileInputStream(auxfile);
-    	    	}
-    	    	catch (FileNotFoundException e) {
-    	      	    continue;
-    	    	}
-    	  
-    	    	byte[] bytes = new byte[auxlength];
-    	    
-    	    	try {
-    	      	    readFromInputStream(bytes, auxinput, auxlength);
-    	      	    auxinput.close();
-    	    	}
-    	    	catch (IOException e) {
-    	      	    continue;
-    	    	}
-    	    
-    	    	bytecodes.addElement(bytes);   	    
-    	    }
-    	}
-    	
-    	
-    	final int count = bytecodes.size();
-    	if ( count > 0) {
-    	    final byte[][] result = new byte[count][1];
-    	    for (int i = 0; i < count; i++) {
-    	    	result[i] = (byte[])bytecodes.elementAt(i);
-    	    }
-    	  
-    	    return result;
-    	}
-    	else
-    	    return null;
+        if (fullClassName == null)
+            return null;
+
+        String xslFileName = getStylesheetFileName(source);
+        File xslFile = null;
+        if (xslFileName != null)
+            xslFile = new File(xslFileName);
+
+        
+        final String transletName;
+        int lastDotIndex = fullClassName.lastIndexOf('.');
+        if (lastDotIndex > 0)
+            transletName = fullClassName.substring(lastDotIndex+1);
+        else
+            transletName = fullClassName;
+
+        
+        String transletPath = fullClassName.replace('.', '/');
+        if (_destinationDirectory != null) {
+            transletPath = _destinationDirectory + "/" + transletPath + ".class";
+        }
+        else {
+            if (xslFile != null && xslFile.getParent() != null)
+                transletPath = xslFile.getParent() + "/" + transletPath + ".class";
+            else
+                transletPath = transletPath + ".class";
+        }
+
+        
+        File transletFile = new File(transletPath);
+        if (!transletFile.exists())
+            return null;
+
+        
+        
+        
+        
+        if (xslFile != null && xslFile.exists()) {
+            long xslTimestamp = xslFile.lastModified();
+            long transletTimestamp = transletFile.lastModified();
+            if (transletTimestamp < xslTimestamp)
+                return null;
+        }
+
+        
+        Vector bytecodes = new Vector();
+        int fileLength = (int)transletFile.length();
+        if (fileLength > 0) {
+            FileInputStream input = null;
+            try {
+                input = new FileInputStream(transletFile);
+            }
+            catch (FileNotFoundException e) {
+                return null;
+            }
+
+            byte[] bytes = new byte[fileLength];
+            try {
+                readFromInputStream(bytes, input, fileLength);
+                input.close();
+            }
+            catch (IOException e) {
+                return null;
+            }
+
+            bytecodes.addElement(bytes);
+        }
+        else
+            return null;
+
+        
+        String transletParentDir = transletFile.getParent();
+        if (transletParentDir == null)
+            transletParentDir = System.getProperty("user.dir");
+
+        File transletParentFile = new File(transletParentDir);
+
+        
+        final String transletAuxPrefix = transletName + "$";
+        File[] auxfiles = transletParentFile.listFiles(new FilenameFilter() {
+                public boolean accept(File dir, String name)
+                {
+                    return (name.endsWith(".class") && name.startsWith(transletAuxPrefix));
+                }
+              });
+
+        
+        for (int i = 0; i < auxfiles.length; i++)
+        {
+            File auxfile = auxfiles[i];
+            int auxlength = (int)auxfile.length();
+            if (auxlength > 0) {
+                FileInputStream auxinput = null;
+                try {
+                    auxinput = new FileInputStream(auxfile);
+                }
+                catch (FileNotFoundException e) {
+                    continue;
+                }
+
+                byte[] bytes = new byte[auxlength];
+
+                try {
+                    readFromInputStream(bytes, auxinput, auxlength);
+                    auxinput.close();
+                }
+                catch (IOException e) {
+                    continue;
+                }
+
+                bytecodes.addElement(bytes);
+            }
+        }
+
+        
+        final int count = bytecodes.size();
+        if ( count > 0) {
+            final byte[][] result = new byte[count][1];
+            for (int i = 0; i < count; i++) {
+                result[i] = (byte[])bytecodes.elementAt(i);
+            }
+
+            return result;
+        }
+        else
+            return null;
     }
-    
+
     
     private byte[][] getBytecodesFromJar(Source source, String fullClassName)
     {
-    	String xslFileName = getStylesheetFileName(source);
-    	File xslFile = null;
-    	if (xslFileName != null)
-    	    xslFile = new File(xslFileName);
-      
-      	
-      	String jarPath = null;
-      	if (_destinationDirectory != null)
+        String xslFileName = getStylesheetFileName(source);
+        File xslFile = null;
+        if (xslFileName != null)
+            xslFile = new File(xslFileName);
+
+        
+        String jarPath = null;
+        if (_destinationDirectory != null)
             jarPath = _destinationDirectory + "/" + _jarFileName;
-      	else {
-      	    if (xslFile != null && xslFile.getParent() != null)
-    	    	jarPath = xslFile.getParent() + "/" + _jarFileName;
-    	    else
-    	    	jarPath = _jarFileName;
-    	}
-            
-      	
-      	File file = new File(jarPath);
-      	if (!file.exists())
+        else {
+            if (xslFile != null && xslFile.getParent() != null)
+                jarPath = xslFile.getParent() + "/" + _jarFileName;
+            else
+                jarPath = _jarFileName;
+        }
+
+        
+        File file = new File(jarPath);
+        if (!file.exists())
             return null;
 
-     	
-     	
-    	if (xslFile != null && xslFile.exists()) {
-    	    long xslTimestamp = xslFile.lastModified();
-    	    long transletTimestamp = file.lastModified();
-    	    if (transletTimestamp < xslTimestamp)
-    	        return null;
-    	}
-      
-      	
-      	ZipFile jarFile = null;
-      	try {
+        
+        
+        if (xslFile != null && xslFile.exists()) {
+            long xslTimestamp = xslFile.lastModified();
+            long transletTimestamp = file.lastModified();
+            if (transletTimestamp < xslTimestamp)
+                return null;
+        }
+
+        
+        ZipFile jarFile = null;
+        try {
             jarFile = new ZipFile(file);
-      	}
-      	catch (IOException e) {
+        }
+        catch (IOException e) {
             return null;
-      	}
-      
-      	String transletPath = fullClassName.replace('.', '/');
-      	String transletAuxPrefix = transletPath + "$";
-      	String transletFullName = transletPath + ".class";
-      
-      	Vector bytecodes = new Vector();      
-      
-      	
-      	
-      	Enumeration entries = jarFile.entries();
-      	while (entries.hasMoreElements())
-      	{
+        }
+
+        String transletPath = fullClassName.replace('.', '/');
+        String transletAuxPrefix = transletPath + "$";
+        String transletFullName = transletPath + ".class";
+
+        Vector bytecodes = new Vector();
+
+        
+        
+        Enumeration entries = jarFile.entries();
+        while (entries.hasMoreElements())
+        {
             ZipEntry entry = (ZipEntry)entries.nextElement();
             String entryName = entry.getName();
-            if (entry.getSize() > 0 && 
-            	  (entryName.equals(transletFullName) ||
-              	  (entryName.endsWith(".class") && 
-              	      entryName.startsWith(transletAuxPrefix))))
+            if (entry.getSize() > 0 &&
+                  (entryName.equals(transletFullName) ||
+                  (entryName.endsWith(".class") &&
+                      entryName.startsWith(transletAuxPrefix))))
             {
-            	try {
-              	    InputStream input = jarFile.getInputStream(entry);
-              	    int size = (int)entry.getSize();
-              	    byte[] bytes = new byte[size];
-              	    readFromInputStream(bytes, input, size);
-              	    input.close();
-              	    bytecodes.addElement(bytes);
-            	}
-            	catch (IOException e) {
-              	    return null;
-            	}          
+                try {
+                    InputStream input = jarFile.getInputStream(entry);
+                    int size = (int)entry.getSize();
+                    byte[] bytes = new byte[size];
+                    readFromInputStream(bytes, input, size);
+                    input.close();
+                    bytecodes.addElement(bytes);
+                }
+                catch (IOException e) {
+                    return null;
+                }
             }
-      	}
-      
+        }
+
         
-    	final int count = bytecodes.size();
-    	if (count > 0) {
-    	    final byte[][] result = new byte[count][1];
-    	    for (int i = 0; i < count; i++) {
-    	    	result[i] = (byte[])bytecodes.elementAt(i);
-    	    }
-    	  
-    	    return result;
-    	}
-    	else
-    	    return null;
+        final int count = bytecodes.size();
+        if (count > 0) {
+            final byte[][] result = new byte[count][1];
+            for (int i = 0; i < count; i++) {
+                result[i] = (byte[])bytecodes.elementAt(i);
+            }
+
+            return result;
+        }
+        else
+            return null;
     }
-    
+
     
     private void readFromInputStream(byte[] bytes, InputStream input, int size)
-      	throws IOException
+        throws IOException
     {
       int n = 0;
       int offset = 0;
@@ -1048,53 +1084,53 @@ public class TransformerFactoryImpl
       while (length > 0 && (n = input.read(bytes, offset, length)) > 0) {
           offset = offset + n;
           length = length - n;
-      }    
+      }
     }
 
     
     private String getTransletBaseName(Source source)
-    {      
+    {
         String transletBaseName = null;
         if (!_transletName.equals(DEFAULT_TRANSLET_NAME))
             return _transletName;
-      	else {
+        else {
             String systemId = source.getSystemId();
             if (systemId != null) {
-          	String baseName = Util.baseName(systemId);
-		if (baseName != null) {
-		    baseName = Util.noExtName(baseName);
-		    transletBaseName = Util.toJavaName(baseName);
-		}
+                String baseName = Util.baseName(systemId);
+                if (baseName != null) {
+                    baseName = Util.noExtName(baseName);
+                    transletBaseName = Util.toJavaName(baseName);
+                }
             }
-      	}
-      
+        }
+
         return (transletBaseName != null) ? transletBaseName : DEFAULT_TRANSLET_NAME;
     }
-        
+
     
     private String getStylesheetFileName(Source source)
     {
-    	String systemId = source.getSystemId();
-      	if (systemId != null) {
+        String systemId = source.getSystemId();
+        if (systemId != null) {
             File file = new File(systemId);
             if (file.exists())
                 return systemId;
             else {
-              	URL url = null;
-          	try {
-            	    url = new URL(systemId);
-          	}
-          	catch (MalformedURLException e) {
-            	    return null;
-          	}
-          
-          	if ("file".equals(url.getProtocol()))
-            	    return url.getFile();
-          	else
-            	    return null;
+                URL url = null;
+                try {
+                    url = new URL(systemId);
+                }
+                catch (MalformedURLException e) {
+                    return null;
+                }
+
+                if ("file".equals(url.getProtocol()))
+                    return url.getFile();
+                else
+                    return null;
             }
-      	}
-      	else
+        }
+        else
             return null;
     }
 

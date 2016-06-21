@@ -5,6 +5,7 @@
 
 package com.sun.org.apache.xml.internal.resolver;
 
+import com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -143,18 +144,19 @@ public class Catalog {
 
   
   public void setupReaders() {
-    SAXParserFactory spf = SAXParserFactory.newInstance();
+    SAXParserFactory spf = catalogManager.useServicesMechanism() ?
+                    SAXParserFactory.newInstance() : new SAXParserFactoryImpl();
     spf.setNamespaceAware(true);
     spf.setValidating(false);
 
     SAXCatalogReader saxReader = new SAXCatalogReader(spf);
 
     saxReader.setCatalogParser(null, "XMLCatalog",
-			       "com.sun.org.apache.xml.internal.resolver.readers.XCatalogReader");
+                               "com.sun.org.apache.xml.internal.resolver.readers.XCatalogReader");
 
     saxReader.setCatalogParser(OASISXMLCatalogReader.namespaceName,
-			       "catalog",
-			       "com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader");
+                               "catalog",
+                               "com.sun.org.apache.xml.internal.resolver.readers.OASISXMLCatalogReader");
 
     addReader("application/xml", saxReader);
 
@@ -195,8 +197,8 @@ public class Catalog {
       String mimeType = (String) mapArr.get(count);
       Integer pos = (Integer) readerMap.get(mimeType);
       newCatalog.addReader(mimeType,
-			   (CatalogReader)
-			   readerArr.get(pos.intValue()));
+                           (CatalogReader)
+                           readerArr.get(pos.intValue()));
     }
   }
 
@@ -248,7 +250,7 @@ public class Catalog {
     Vector catalogs = catalogManager.getCatalogFiles();
     if (catalogs != null) {
       for (int count = 0; count < catalogs.size(); count++) {
-	catalogFiles.addElement(catalogs.elementAt(count));
+        catalogFiles.addElement(catalogs.elementAt(count));
       }
     }
 
@@ -328,7 +330,7 @@ public class Catalog {
       CatalogReader reader = (CatalogReader) readerArr.get(count);
 
       try {
-      	inStream = new DataInputStream(aUrl.openStream());
+        inStream = new DataInputStream(aUrl.openStream());
       } catch (FileNotFoundException fnfe) {
         
         break;
@@ -347,9 +349,9 @@ public class Catalog {
       }
 
       try {
-      	inStream.close();
+        inStream.close();
       } catch (IOException e) {
-      	
+        
       }
     }
 
@@ -366,13 +368,13 @@ public class Catalog {
       Vector newQueue = new Vector();
       Enumeration q = localCatalogFiles.elements();
       while (q.hasMoreElements()) {
-	newQueue.addElement(q.nextElement());
+        newQueue.addElement(q.nextElement());
       }
 
       
       for (int curCat = 0; curCat < catalogFiles.size(); curCat++) {
-	String catfile = (String) catalogFiles.elementAt(curCat);
-	newQueue.addElement(catfile);
+        String catfile = (String) catalogFiles.elementAt(curCat);
+        newQueue.addElement(catfile);
       }
 
       catalogFiles = newQueue;
@@ -385,7 +387,7 @@ public class Catalog {
     if (catalogFiles.isEmpty() && !localDelegate.isEmpty()) {
       Enumeration e = localDelegate.elements();
       while (e.hasMoreElements()) {
-	catalogEntries.addElement(e.nextElement());
+        catalogEntries.addElement(e.nextElement());
       }
       localDelegate.clear();
     }
@@ -396,50 +398,50 @@ public class Catalog {
     while (!catalogFiles.isEmpty()) {
       String catfile = (String) catalogFiles.elementAt(0);
       try {
-	catalogFiles.remove(0);
+        catalogFiles.remove(0);
       } catch (ArrayIndexOutOfBoundsException e) {
-	
+        
       }
 
       if (catalogEntries.size() == 0 && catalogs.size() == 0) {
-	
-	
-	try {
-	  parseCatalogFile(catfile);
-	} catch (CatalogException ce) {
-	  System.out.println("FIXME: " + ce.toString());
-	}
+        
+        
+        try {
+          parseCatalogFile(catfile);
+        } catch (CatalogException ce) {
+          System.out.println("FIXME: " + ce.toString());
+        }
       } else {
-	
-	
-	catalogs.addElement(catfile);
+        
+        
+        catalogs.addElement(catfile);
       }
 
       if (!localCatalogFiles.isEmpty()) {
-	
-	
-	Vector newQueue = new Vector();
-	Enumeration q = localCatalogFiles.elements();
-	while (q.hasMoreElements()) {
-	  newQueue.addElement(q.nextElement());
-	}
+        
+        
+        Vector newQueue = new Vector();
+        Enumeration q = localCatalogFiles.elements();
+        while (q.hasMoreElements()) {
+          newQueue.addElement(q.nextElement());
+        }
 
-	
-	for (int curCat = 0; curCat < catalogFiles.size(); curCat++) {
-	  catfile = (String) catalogFiles.elementAt(curCat);
-	  newQueue.addElement(catfile);
-	}
+        
+        for (int curCat = 0; curCat < catalogFiles.size(); curCat++) {
+          catfile = (String) catalogFiles.elementAt(curCat);
+          newQueue.addElement(catfile);
+        }
 
-	catalogFiles = newQueue;
-	localCatalogFiles.clear();
+        catalogFiles = newQueue;
+        localCatalogFiles.clear();
       }
 
       if (!localDelegate.isEmpty()) {
-	Enumeration e = localDelegate.elements();
-	while (e.hasMoreElements()) {
-	  catalogEntries.addElement(e.nextElement());
-	}
-	localDelegate.clear();
+        Enumeration e = localDelegate.elements();
+        while (e.hasMoreElements()) {
+          catalogEntries.addElement(e.nextElement());
+        }
+        localDelegate.clear();
       }
     }
 
@@ -471,11 +473,11 @@ public class Catalog {
       base = new URL(catalogCwd, fixSlashes(fileName));
     } catch (MalformedURLException e) {
       try {
-	base = new URL("file:" + fixSlashes(fileName));
+        base = new URL("file:" + fixSlashes(fileName));
       } catch (MalformedURLException e2) {
-	catalogManager.debug.message(1, "Malformed URL on catalog filename",
-		      fixSlashes(fileName));
-	base = null;
+        catalogManager.debug.message(1, "Malformed URL on catalog filename",
+                      fixSlashes(fileName));
+        base = null;
       }
     }
 
@@ -492,38 +494,38 @@ public class Catalog {
       CatalogReader reader = (CatalogReader) readerArr.get(count);
 
       try {
-	notFound = false;
-	inStream = new DataInputStream(base.openStream());
+        notFound = false;
+        inStream = new DataInputStream(base.openStream());
       } catch (FileNotFoundException fnfe) {
-	
-	notFound = true;
-	break;
+        
+        notFound = true;
+        break;
       }
 
       try {
-	reader.readCatalog(this, inStream);
-	parsed = true;
+        reader.readCatalog(this, inStream);
+        parsed = true;
       } catch (CatalogException ce) {
-	if (ce.getExceptionType() == CatalogException.PARSE_FAILED) {
-	  
-	  break;
-	} else {
-	  
-	}
+        if (ce.getExceptionType() == CatalogException.PARSE_FAILED) {
+          
+          break;
+        } else {
+          
+        }
       }
 
       try {
-	inStream.close();
+        inStream.close();
       } catch (IOException e) {
-	
+        
       }
     }
 
     if (!parsed) {
       if (notFound) {
-	catalogManager.debug.message(3, "Catalog does not exist", fileName);
+        catalogManager.debug.message(3, "Catalog does not exist", fileName);
       } else {
-	catalogManager.debug.message(1, "Failed to parse catalog", fileName);
+        catalogManager.debug.message(1, "Failed to parse catalog", fileName);
       }
     }
   }
@@ -537,26 +539,26 @@ public class Catalog {
       URL newbase = null;
 
       if (base == null) {
-	catalogManager.debug.message(5, "BASE CUR", "null");
+        catalogManager.debug.message(5, "BASE CUR", "null");
       } else {
-	catalogManager.debug.message(5, "BASE CUR", base.toString());
+        catalogManager.debug.message(5, "BASE CUR", base.toString());
       }
       catalogManager.debug.message(4, "BASE STR", value);
 
       try {
-	value = fixSlashes(value);
-	newbase = new URL(base, value);
+        value = fixSlashes(value);
+        newbase = new URL(base, value);
       } catch (MalformedURLException e) {
-	try {
-	  newbase = new URL("file:" + value);
-	} catch (MalformedURLException e2) {
-	  catalogManager.debug.message(1, "Malformed URL on base", value);
-	  newbase = null;
-	}
+        try {
+          newbase = new URL("file:" + value);
+        } catch (MalformedURLException e2) {
+          catalogManager.debug.message(1, "Malformed URL on base", value);
+          newbase = null;
+        }
       }
 
       if (newbase != null) {
-	base = newbase;
+        base = newbase;
       }
 
       catalogManager.debug.message(5, "BASE NEW", base.toString());
@@ -744,14 +746,14 @@ public class Catalog {
       Catalog c = null;
 
       try {
-	c = (Catalog) catalogs.elementAt(catPos);
+        c = (Catalog) catalogs.elementAt(catPos);
       } catch (ClassCastException e) {
-	String catfile = (String) catalogs.elementAt(catPos);
-	c = newCatalog();
+        String catfile = (String) catalogs.elementAt(catPos);
+        c = newCatalog();
 
-	c.parseCatalog(catfile);
-	catalogs.setElementAt(c, catPos);
-	c.parseAllCatalogs();
+        c.parseCatalog(catfile);
+        catalogs.setElementAt(c, catPos);
+        c.parseAllCatalogs();
       }
     }
 
@@ -760,10 +762,10 @@ public class Catalog {
     while (en.hasMoreElements()) {
       CatalogEntry e = (CatalogEntry) en.nextElement();
       if (e.getEntryType() == DELEGATE_PUBLIC
-	  || e.getEntryType() == DELEGATE_SYSTEM
-	  || e.getEntryType() == DELEGATE_URI) {
-	Catalog dcat = newCatalog();
-	dcat.parseCatalog(e.getEntryArg(1));
+          || e.getEntryType() == DELEGATE_SYSTEM
+          || e.getEntryType() == DELEGATE_URI) {
+        Catalog dcat = newCatalog();
+        dcat.parseCatalog(e.getEntryArg(1));
       }
     }
   }
@@ -771,13 +773,13 @@ public class Catalog {
 
   
   public String resolveDoctype(String entityName,
-			       String publicId,
-			       String systemId)
+                               String publicId,
+                               String systemId)
     throws MalformedURLException, IOException {
     String resolved = null;
 
     catalogManager.debug.message(3, "resolveDoctype("
-		  +entityName+","+publicId+","+systemId+")");
+                  +entityName+","+publicId+","+systemId+")");
 
     systemId = normalizeURI(systemId);
 
@@ -788,11 +790,11 @@ public class Catalog {
     if (systemId != null && systemId.startsWith("urn:publicid:")) {
       systemId = PublicId.decodeURN(systemId);
       if (publicId != null && !publicId.equals(systemId)) {
-	catalogManager.debug.message(1, "urn:publicid: system identifier differs from public identifier; using public identifier");
-	systemId = null;
+        catalogManager.debug.message(1, "urn:publicid: system identifier differs from public identifier; using public identifier");
+        systemId = null;
       } else {
-	publicId = systemId;
-	systemId = null;
+        publicId = systemId;
+        systemId = null;
       }
     }
 
@@ -800,18 +802,18 @@ public class Catalog {
       
       resolved = resolveLocalSystem(systemId);
       if (resolved != null) {
-	return resolved;
+        return resolved;
       }
     }
 
     if (publicId != null) {
       
       resolved = resolveLocalPublic(DOCTYPE,
-				    entityName,
-				    publicId,
-				    systemId);
+                                    entityName,
+                                    publicId,
+                                    systemId);
       if (resolved != null) {
-	return resolved;
+        return resolved;
       }
     }
 
@@ -821,23 +823,23 @@ public class Catalog {
     while (en.hasMoreElements()) {
       CatalogEntry e = (CatalogEntry) en.nextElement();
       if (e.getEntryType() == OVERRIDE) {
-	over = e.getEntryArg(0).equalsIgnoreCase("YES");
-	continue;
+        over = e.getEntryArg(0).equalsIgnoreCase("YES");
+        continue;
       }
 
       if (e.getEntryType() == DOCTYPE
-	  && e.getEntryArg(0).equals(entityName)) {
-	if (over || systemId == null) {
-	  return e.getEntryArg(1);
-	}
+          && e.getEntryArg(0).equals(entityName)) {
+        if (over || systemId == null) {
+          return e.getEntryArg(1);
+        }
       }
     }
 
     
     return resolveSubordinateCatalogs(DOCTYPE,
-				      entityName,
-				      publicId,
-				      systemId);
+                                      entityName,
+                                      publicId,
+                                      systemId);
   }
 
   
@@ -851,23 +853,23 @@ public class Catalog {
     while (en.hasMoreElements()) {
       CatalogEntry e = (CatalogEntry) en.nextElement();
       if (e.getEntryType() == DOCUMENT) {
-	return e.getEntryArg(0);
+        return e.getEntryArg(0);
       }
     }
 
     return resolveSubordinateCatalogs(DOCUMENT,
-				      null, null, null);
+                                      null, null, null);
   }
 
   
   public String resolveEntity(String entityName,
-			      String publicId,
-			      String systemId)
+                              String publicId,
+                              String systemId)
     throws MalformedURLException, IOException {
     String resolved = null;
 
     catalogManager.debug.message(3, "resolveEntity("
-		  +entityName+","+publicId+","+systemId+")");
+                  +entityName+","+publicId+","+systemId+")");
 
     systemId = normalizeURI(systemId);
 
@@ -878,11 +880,11 @@ public class Catalog {
     if (systemId != null && systemId.startsWith("urn:publicid:")) {
       systemId = PublicId.decodeURN(systemId);
       if (publicId != null && !publicId.equals(systemId)) {
-	catalogManager.debug.message(1, "urn:publicid: system identifier differs from public identifier; using public identifier");
-	systemId = null;
+        catalogManager.debug.message(1, "urn:publicid: system identifier differs from public identifier; using public identifier");
+        systemId = null;
       } else {
-	publicId = systemId;
-	systemId = null;
+        publicId = systemId;
+        systemId = null;
       }
     }
 
@@ -890,18 +892,18 @@ public class Catalog {
       
       resolved = resolveLocalSystem(systemId);
       if (resolved != null) {
-	return resolved;
+        return resolved;
       }
     }
 
     if (publicId != null) {
       
       resolved = resolveLocalPublic(ENTITY,
-				    entityName,
-				    publicId,
-				    systemId);
+                                    entityName,
+                                    publicId,
+                                    systemId);
       if (resolved != null) {
-	return resolved;
+        return resolved;
       }
     }
 
@@ -911,34 +913,34 @@ public class Catalog {
     while (en.hasMoreElements()) {
       CatalogEntry e = (CatalogEntry) en.nextElement();
       if (e.getEntryType() == OVERRIDE) {
-	over = e.getEntryArg(0).equalsIgnoreCase("YES");
-	continue;
+        over = e.getEntryArg(0).equalsIgnoreCase("YES");
+        continue;
       }
 
       if (e.getEntryType() == ENTITY
-	  && e.getEntryArg(0).equals(entityName)) {
-	if (over || systemId == null) {
-	  return e.getEntryArg(1);
-	}
+          && e.getEntryArg(0).equals(entityName)) {
+        if (over || systemId == null) {
+          return e.getEntryArg(1);
+        }
       }
     }
 
     
     return resolveSubordinateCatalogs(ENTITY,
-				      entityName,
-				      publicId,
-				      systemId);
+                                      entityName,
+                                      publicId,
+                                      systemId);
   }
 
   
   public String resolveNotation(String notationName,
-				String publicId,
-				String systemId)
+                                String publicId,
+                                String systemId)
     throws MalformedURLException, IOException {
     String resolved = null;
 
     catalogManager.debug.message(3, "resolveNotation("
-		  +notationName+","+publicId+","+systemId+")");
+                  +notationName+","+publicId+","+systemId+")");
 
     systemId = normalizeURI(systemId);
 
@@ -949,11 +951,11 @@ public class Catalog {
     if (systemId != null && systemId.startsWith("urn:publicid:")) {
       systemId = PublicId.decodeURN(systemId);
       if (publicId != null && !publicId.equals(systemId)) {
-	catalogManager.debug.message(1, "urn:publicid: system identifier differs from public identifier; using public identifier");
-	systemId = null;
+        catalogManager.debug.message(1, "urn:publicid: system identifier differs from public identifier; using public identifier");
+        systemId = null;
       } else {
-	publicId = systemId;
-	systemId = null;
+        publicId = systemId;
+        systemId = null;
       }
     }
 
@@ -961,18 +963,18 @@ public class Catalog {
       
       resolved = resolveLocalSystem(systemId);
       if (resolved != null) {
-	return resolved;
+        return resolved;
       }
     }
 
     if (publicId != null) {
       
       resolved = resolveLocalPublic(NOTATION,
-				    notationName,
-				    publicId,
-				    systemId);
+                                    notationName,
+                                    publicId,
+                                    systemId);
       if (resolved != null) {
-	return resolved;
+        return resolved;
       }
     }
 
@@ -982,27 +984,27 @@ public class Catalog {
     while (en.hasMoreElements()) {
       CatalogEntry e = (CatalogEntry) en.nextElement();
       if (e.getEntryType() == OVERRIDE) {
-	over = e.getEntryArg(0).equalsIgnoreCase("YES");
-	continue;
+        over = e.getEntryArg(0).equalsIgnoreCase("YES");
+        continue;
       }
 
       if (e.getEntryType() == NOTATION
-	  && e.getEntryArg(0).equals(notationName)) {
-	if (over || systemId == null) {
-	  return e.getEntryArg(1);
-	}
+          && e.getEntryArg(0).equals(notationName)) {
+        if (over || systemId == null) {
+          return e.getEntryArg(1);
+        }
       }
     }
 
     
     return resolveSubordinateCatalogs(NOTATION,
-				      notationName,
-				      publicId,
-				      systemId);
+                                      notationName,
+                                      publicId,
+                                      systemId);
   }
 
   
-  public String resolvePublic(String publicId, String systemId) 
+  public String resolvePublic(String publicId, String systemId)
     throws MalformedURLException, IOException {
 
     catalogManager.debug.message(3, "resolvePublic("+publicId+","+systemId+")");
@@ -1016,11 +1018,11 @@ public class Catalog {
     if (systemId != null && systemId.startsWith("urn:publicid:")) {
       systemId = PublicId.decodeURN(systemId);
       if (publicId != null && !publicId.equals(systemId)) {
-	catalogManager.debug.message(1, "urn:publicid: system identifier differs from public identifier; using public identifier");
-	systemId = null;
+        catalogManager.debug.message(1, "urn:publicid: system identifier differs from public identifier; using public identifier");
+        systemId = null;
       } else {
-	publicId = systemId;
-	systemId = null;
+        publicId = systemId;
+        systemId = null;
       }
     }
 
@@ -1028,31 +1030,31 @@ public class Catalog {
     if (systemId != null) {
       String resolved = resolveLocalSystem(systemId);
       if (resolved != null) {
-	return resolved;
+        return resolved;
       }
     }
 
     
     String resolved = resolveLocalPublic(PUBLIC,
-					 null,
-					 publicId,
-					 systemId);
+                                         null,
+                                         publicId,
+                                         systemId);
     if (resolved != null) {
       return resolved;
     }
 
     
     return resolveSubordinateCatalogs(PUBLIC,
-				      null,
-				      publicId,
-				      systemId);
+                                      null,
+                                      publicId,
+                                      systemId);
   }
 
   
   protected synchronized String resolveLocalPublic(int entityType,
-						   String entityName,
-						   String publicId,
-						   String systemId)
+                                                   String entityName,
+                                                   String publicId,
+                                                   String systemId)
     throws MalformedURLException, IOException {
 
     
@@ -1062,7 +1064,7 @@ public class Catalog {
     if (systemId != null) {
       String resolved = resolveLocalSystem(systemId);
       if (resolved != null) {
-	return resolved;
+        return resolved;
       }
     }
 
@@ -1072,15 +1074,15 @@ public class Catalog {
     while (en.hasMoreElements()) {
       CatalogEntry e = (CatalogEntry) en.nextElement();
       if (e.getEntryType() == OVERRIDE) {
-	over = e.getEntryArg(0).equalsIgnoreCase("YES");
-	continue;
+        over = e.getEntryArg(0).equalsIgnoreCase("YES");
+        continue;
       }
 
       if (e.getEntryType() == PUBLIC
-	  && e.getEntryArg(0).equals(publicId)) {
-	if (over || systemId == null) {
-	  return e.getEntryArg(1);
-	}
+          && e.getEntryArg(0).equals(publicId)) {
+        if (over || systemId == null) {
+          return e.getEntryArg(1);
+        }
       }
     }
 
@@ -1091,19 +1093,19 @@ public class Catalog {
     while (en.hasMoreElements()) {
       CatalogEntry e = (CatalogEntry) en.nextElement();
       if (e.getEntryType() == OVERRIDE) {
-	over = e.getEntryArg(0).equalsIgnoreCase("YES");
-	continue;
+        over = e.getEntryArg(0).equalsIgnoreCase("YES");
+        continue;
       }
 
       if (e.getEntryType() == DELEGATE_PUBLIC
-	  && (over || systemId == null)) {
-	String p = (String) e.getEntryArg(0);
-	if (p.length() <= publicId.length()
-	    && p.equals(publicId.substring(0, p.length()))) {
-	  
+          && (over || systemId == null)) {
+        String p = (String) e.getEntryArg(0);
+        if (p.length() <= publicId.length()
+            && p.equals(publicId.substring(0, p.length()))) {
+          
 
-	  delCats.addElement(e.getEntryArg(1));
-	}
+          delCats.addElement(e.getEntryArg(1));
+        }
       }
     }
 
@@ -1111,19 +1113,19 @@ public class Catalog {
       Enumeration enCats = delCats.elements();
 
       if (catalogManager.debug.getDebug() > 1) {
-	catalogManager.debug.message(2, "Switching to delegated catalog(s):");
-	while (enCats.hasMoreElements()) {
-	  String delegatedCatalog = (String) enCats.nextElement();
-	  catalogManager.debug.message(2, "\t" + delegatedCatalog);
-	}
+        catalogManager.debug.message(2, "Switching to delegated catalog(s):");
+        while (enCats.hasMoreElements()) {
+          String delegatedCatalog = (String) enCats.nextElement();
+          catalogManager.debug.message(2, "\t" + delegatedCatalog);
+        }
       }
 
       Catalog dcat = newCatalog();
 
       enCats = delCats.elements();
       while (enCats.hasMoreElements()) {
-	String delegatedCatalog = (String) enCats.nextElement();
-	dcat.parseCatalog(delegatedCatalog);
+        String delegatedCatalog = (String) enCats.nextElement();
+        dcat.parseCatalog(delegatedCatalog);
       }
 
       return dcat.resolvePublic(publicId, null);
@@ -1150,15 +1152,15 @@ public class Catalog {
     if (systemId != null) {
       String resolved = resolveLocalSystem(systemId);
       if (resolved != null) {
-	return resolved;
+        return resolved;
       }
     }
 
     
     return resolveSubordinateCatalogs(SYSTEM,
-				      null,
-				      null,
-				      systemId);
+                                      null,
+                                      null,
+                                      systemId);
   }
 
   
@@ -1171,10 +1173,10 @@ public class Catalog {
     while (en.hasMoreElements()) {
       CatalogEntry e = (CatalogEntry) en.nextElement();
       if (e.getEntryType() == SYSTEM
-	  && (e.getEntryArg(0).equals(systemId)
-	      || (windows
-		  && e.getEntryArg(0).equalsIgnoreCase(systemId)))) {
-	return e.getEntryArg(1);
+          && (e.getEntryArg(0).equals(systemId)
+              || (windows
+                  && e.getEntryArg(0).equalsIgnoreCase(systemId)))) {
+        return e.getEntryArg(1);
       }
     }
 
@@ -1186,16 +1188,16 @@ public class Catalog {
       CatalogEntry e = (CatalogEntry) en.nextElement();
 
       if (e.getEntryType() == REWRITE_SYSTEM) {
-	String p = (String) e.getEntryArg(0);
-	if (p.length() <= systemId.length()
-	    && p.equals(systemId.substring(0, p.length()))) {
-	  
-	  if (startString == null
-	      || p.length() > startString.length()) {
-	    startString = p;
-	    prefix = e.getEntryArg(1);
-	  }
-	}
+        String p = (String) e.getEntryArg(0);
+        if (p.length() <= systemId.length()
+            && p.equals(systemId.substring(0, p.length()))) {
+          
+          if (startString == null
+              || p.length() > startString.length()) {
+            startString = p;
+            prefix = e.getEntryArg(1);
+          }
+        }
       }
     }
 
@@ -1212,16 +1214,16 @@ public class Catalog {
       CatalogEntry e = (CatalogEntry) en.nextElement();
 
       if (e.getEntryType() == SYSTEM_SUFFIX) {
-	String p = (String) e.getEntryArg(0);
-	if (p.length() <= systemId.length()
-	    && systemId.endsWith(p)) {
-	  
-	  if (suffixString == null
-	      || p.length() > suffixString.length()) {
-	    suffixString = p;
-	    suffixURI = e.getEntryArg(1);
-	  }
-	}
+        String p = (String) e.getEntryArg(0);
+        if (p.length() <= systemId.length()
+            && systemId.endsWith(p)) {
+          
+          if (suffixString == null
+              || p.length() > suffixString.length()) {
+            suffixString = p;
+            suffixURI = e.getEntryArg(1);
+          }
+        }
       }
     }
 
@@ -1237,13 +1239,13 @@ public class Catalog {
       CatalogEntry e = (CatalogEntry) en.nextElement();
 
       if (e.getEntryType() == DELEGATE_SYSTEM) {
-	String p = (String) e.getEntryArg(0);
-	if (p.length() <= systemId.length()
-	    && p.equals(systemId.substring(0, p.length()))) {
-	  
+        String p = (String) e.getEntryArg(0);
+        if (p.length() <= systemId.length()
+            && p.equals(systemId.substring(0, p.length()))) {
+          
 
-	  delCats.addElement(e.getEntryArg(1));
-	}
+          delCats.addElement(e.getEntryArg(1));
+        }
       }
     }
 
@@ -1251,19 +1253,19 @@ public class Catalog {
       Enumeration enCats = delCats.elements();
 
       if (catalogManager.debug.getDebug() > 1) {
-	catalogManager.debug.message(2, "Switching to delegated catalog(s):");
-	while (enCats.hasMoreElements()) {
-	  String delegatedCatalog = (String) enCats.nextElement();
-	  catalogManager.debug.message(2, "\t" + delegatedCatalog);
-	}
+        catalogManager.debug.message(2, "Switching to delegated catalog(s):");
+        while (enCats.hasMoreElements()) {
+          String delegatedCatalog = (String) enCats.nextElement();
+          catalogManager.debug.message(2, "\t" + delegatedCatalog);
+        }
       }
 
       Catalog dcat = newCatalog();
 
       enCats = delCats.elements();
       while (enCats.hasMoreElements()) {
-	String delegatedCatalog = (String) enCats.nextElement();
-	dcat.parseCatalog(delegatedCatalog);
+        String delegatedCatalog = (String) enCats.nextElement();
+        dcat.parseCatalog(delegatedCatalog);
       }
 
       return dcat.resolveSystem(systemId);
@@ -1289,15 +1291,15 @@ public class Catalog {
     if (uri != null) {
       String resolved = resolveLocalURI(uri);
       if (resolved != null) {
-	return resolved;
+        return resolved;
       }
     }
 
     
     return resolveSubordinateCatalogs(URI,
-				      null,
-				      null,
-				      uri);
+                                      null,
+                                      null,
+                                      uri);
   }
 
   
@@ -1307,8 +1309,8 @@ public class Catalog {
     while (en.hasMoreElements()) {
       CatalogEntry e = (CatalogEntry) en.nextElement();
       if (e.getEntryType() == URI
-	  && (e.getEntryArg(0).equals(uri))) {
-	return e.getEntryArg(1);
+          && (e.getEntryArg(0).equals(uri))) {
+        return e.getEntryArg(1);
       }
     }
 
@@ -1320,16 +1322,16 @@ public class Catalog {
       CatalogEntry e = (CatalogEntry) en.nextElement();
 
       if (e.getEntryType() == REWRITE_URI) {
-	String p = (String) e.getEntryArg(0);
-	if (p.length() <= uri.length()
-	    && p.equals(uri.substring(0, p.length()))) {
-	  
-	  if (startString == null
-	      || p.length() > startString.length()) {
-	    startString = p;
-	    prefix = e.getEntryArg(1);
-	  }
-	}
+        String p = (String) e.getEntryArg(0);
+        if (p.length() <= uri.length()
+            && p.equals(uri.substring(0, p.length()))) {
+          
+          if (startString == null
+              || p.length() > startString.length()) {
+            startString = p;
+            prefix = e.getEntryArg(1);
+          }
+        }
       }
     }
 
@@ -1346,16 +1348,16 @@ public class Catalog {
       CatalogEntry e = (CatalogEntry) en.nextElement();
 
       if (e.getEntryType() == URI_SUFFIX) {
-	String p = (String) e.getEntryArg(0);
-	if (p.length() <= uri.length()
-	    && uri.endsWith(p)) {
-	  
-	  if (suffixString == null
-	      || p.length() > suffixString.length()) {
-	    suffixString = p;
-	    suffixURI = e.getEntryArg(1);
-	  }
-	}
+        String p = (String) e.getEntryArg(0);
+        if (p.length() <= uri.length()
+            && uri.endsWith(p)) {
+          
+          if (suffixString == null
+              || p.length() > suffixString.length()) {
+            suffixString = p;
+            suffixURI = e.getEntryArg(1);
+          }
+        }
       }
     }
 
@@ -1371,13 +1373,13 @@ public class Catalog {
       CatalogEntry e = (CatalogEntry) en.nextElement();
 
       if (e.getEntryType() == DELEGATE_URI) {
-	String p = (String) e.getEntryArg(0);
-	if (p.length() <= uri.length()
-	    && p.equals(uri.substring(0, p.length()))) {
-	  
+        String p = (String) e.getEntryArg(0);
+        if (p.length() <= uri.length()
+            && p.equals(uri.substring(0, p.length()))) {
+          
 
-	  delCats.addElement(e.getEntryArg(1));
-	}
+          delCats.addElement(e.getEntryArg(1));
+        }
       }
     }
 
@@ -1385,19 +1387,19 @@ public class Catalog {
       Enumeration enCats = delCats.elements();
 
       if (catalogManager.debug.getDebug() > 1) {
-	catalogManager.debug.message(2, "Switching to delegated catalog(s):");
-	while (enCats.hasMoreElements()) {
-	  String delegatedCatalog = (String) enCats.nextElement();
-	  catalogManager.debug.message(2, "\t" + delegatedCatalog);
-	}
+        catalogManager.debug.message(2, "Switching to delegated catalog(s):");
+        while (enCats.hasMoreElements()) {
+          String delegatedCatalog = (String) enCats.nextElement();
+          catalogManager.debug.message(2, "\t" + delegatedCatalog);
+        }
       }
 
       Catalog dcat = newCatalog();
 
       enCats = delCats.elements();
       while (enCats.hasMoreElements()) {
-	String delegatedCatalog = (String) enCats.nextElement();
-	dcat.parseCatalog(delegatedCatalog);
+        String delegatedCatalog = (String) enCats.nextElement();
+        dcat.parseCatalog(delegatedCatalog);
       }
 
       return dcat.resolveURI(uri);
@@ -1408,61 +1410,61 @@ public class Catalog {
 
   
   protected synchronized String resolveSubordinateCatalogs(int entityType,
-							   String entityName,
-							   String publicId,
-							   String systemId)
+                                                           String entityName,
+                                                           String publicId,
+                                                           String systemId)
     throws MalformedURLException, IOException {
 
     for (int catPos = 0; catPos < catalogs.size(); catPos++) {
       Catalog c = null;
 
       try {
-	c = (Catalog) catalogs.elementAt(catPos);
+        c = (Catalog) catalogs.elementAt(catPos);
       } catch (ClassCastException e) {
-	String catfile = (String) catalogs.elementAt(catPos);
-	c = newCatalog();
+        String catfile = (String) catalogs.elementAt(catPos);
+        c = newCatalog();
 
-	try {
-	  c.parseCatalog(catfile);
-	} catch (MalformedURLException mue) {
-	  catalogManager.debug.message(1, "Malformed Catalog URL", catfile);
-	} catch (FileNotFoundException fnfe) {
-	  catalogManager.debug.message(1, "Failed to load catalog, file not found",
-			catfile);
-	} catch (IOException ioe) {
-	  catalogManager.debug.message(1, "Failed to load catalog, I/O error", catfile);
-	}
+        try {
+          c.parseCatalog(catfile);
+        } catch (MalformedURLException mue) {
+          catalogManager.debug.message(1, "Malformed Catalog URL", catfile);
+        } catch (FileNotFoundException fnfe) {
+          catalogManager.debug.message(1, "Failed to load catalog, file not found",
+                        catfile);
+        } catch (IOException ioe) {
+          catalogManager.debug.message(1, "Failed to load catalog, I/O error", catfile);
+        }
 
-	catalogs.setElementAt(c, catPos);
+        catalogs.setElementAt(c, catPos);
       }
 
       String resolved = null;
 
       
       if (entityType == DOCTYPE) {
-	resolved = c.resolveDoctype(entityName,
-				    publicId,
-				    systemId);
+        resolved = c.resolveDoctype(entityName,
+                                    publicId,
+                                    systemId);
       } else if (entityType == DOCUMENT) {
-	resolved = c.resolveDocument();
+        resolved = c.resolveDocument();
       } else if (entityType == ENTITY) {
-	resolved = c.resolveEntity(entityName,
-				   publicId,
-				   systemId);
+        resolved = c.resolveEntity(entityName,
+                                   publicId,
+                                   systemId);
       } else if (entityType == NOTATION) {
-	resolved = c.resolveNotation(entityName,
-				     publicId,
-				     systemId);
+        resolved = c.resolveNotation(entityName,
+                                     publicId,
+                                     systemId);
       } else if (entityType == PUBLIC) {
-	resolved = c.resolvePublic(publicId, systemId);
+        resolved = c.resolvePublic(publicId, systemId);
       } else if (entityType == SYSTEM) {
-	resolved = c.resolveSystem(systemId);
+        resolved = c.resolveSystem(systemId);
       } else if (entityType == URI) {
-	resolved = c.resolveURI(systemId);
+        resolved = c.resolveURI(systemId);
       }
 
       if (resolved != null) {
-	return resolved;
+        return resolved;
       }
     }
 
@@ -1515,18 +1517,18 @@ public class Catalog {
       int ch = bytes[count] & 0xFF;
 
       if ((ch <= 0x20)    
-	  || (ch > 0x7F)  
-	  || (ch == 0x22) 
-	  || (ch == 0x3C) 
-	  || (ch == 0x3E) 
-	  || (ch == 0x5C) 
-	  || (ch == 0x5E) 
-	  || (ch == 0x60) 
-	  || (ch == 0x7B) 
-	  || (ch == 0x7C) 
-	  || (ch == 0x7D) 
-	  || (ch == 0x7F)) {
-	newRef.append(encodedByte(ch));
+          || (ch > 0x7F)  
+          || (ch == 0x22) 
+          || (ch == 0x3C) 
+          || (ch == 0x3E) 
+          || (ch == 0x5C) 
+          || (ch == 0x5E) 
+          || (ch == 0x60) 
+          || (ch == 0x7B) 
+          || (ch == 0x7C) 
+          || (ch == 0x7D) 
+          || (ch == 0x7F)) {
+        newRef.append(encodedByte(ch));
       } else {
         newRef.append((char) bytes[count]);
       }
@@ -1557,14 +1559,14 @@ public class Catalog {
       CatalogEntry dpe = (CatalogEntry) local.nextElement();
       String dp = dpe.getEntryArg(0);
       if (dp.equals(partial)) {
-	
-	return;
+        
+        return;
       }
       if (dp.length() > partial.length()) {
-	pos++;
+        pos++;
       }
       if (dp.length() < partial.length()) {
-	break;
+        break;
       }
     }
 
@@ -1576,4 +1578,3 @@ public class Catalog {
     }
   }
 }
-

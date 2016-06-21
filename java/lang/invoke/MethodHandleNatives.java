@@ -34,15 +34,6 @@ class MethodHandleNatives {
     static native void init(MethodType self);
 
     
-    static native void registerBootstrap(Class<?> caller, MethodHandle bootstrapMethod);
-
-    
-    static native MethodHandle getBootstrap(Class<?> caller);
-
-    
-    static native void setCallSiteTarget(CallSite site, MethodHandle target);
-
-    
     static native Object getTarget(MethodHandle self, int format);
 
     
@@ -80,6 +71,12 @@ class MethodHandleNatives {
     static final int OP_ROT_ARGS_DOWN_LIMIT_BIAS;
 
     static final boolean COUNT_GWT;
+
+    
+
+    
+    static native void setCallSiteTargetNormal(CallSite site, MethodHandle target);
+    static native void setCallSiteTargetVolatile(CallSite site, MethodHandle target);
 
     private static native void registerNatives();
     static {

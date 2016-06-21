@@ -12,35 +12,35 @@ import javax.xml.datatype.DatatypeConstants;
 
 
 class DurationDayTimeImpl
-	extends DurationImpl {
+        extends DurationImpl {
 
     public DurationDayTimeImpl(
-	boolean isPositive,
-	BigInteger days,
-	BigInteger hours,
-	BigInteger minutes,
-	BigDecimal seconds) {
+        boolean isPositive,
+        BigInteger days,
+        BigInteger hours,
+        BigInteger minutes,
+        BigDecimal seconds) {
 
-	super(isPositive, null, null, days, hours, minutes, seconds);
-	convertToCanonicalDayTime();
+        super(isPositive, null, null, days, hours, minutes, seconds);
+        convertToCanonicalDayTime();
     }
 
     public DurationDayTimeImpl(
-	boolean isPositive,
-	int days,
-	int hours,
-	int minutes,
-	int seconds) {
+        boolean isPositive,
+        int days,
+        int hours,
+        int minutes,
+        int seconds) {
 
-	this(
-	    isPositive,
-	    wrap(days),
-	    wrap(hours),
-	    wrap(minutes),
-	    (seconds != DatatypeConstants.FIELD_UNDEFINED ? new BigDecimal(String.valueOf(seconds)) : null));
+        this(
+            isPositive,
+            wrap(days),
+            wrap(hours),
+            wrap(minutes),
+            (seconds != DatatypeConstants.FIELD_UNDEFINED ? new BigDecimal(String.valueOf(seconds)) : null));
     }
 
-	
+        
     protected DurationDayTimeImpl(String lexicalRepresentation) {
         super(lexicalRepresentation);
 
@@ -53,7 +53,7 @@ class DurationDayTimeImpl
 
         convertToCanonicalDayTime();
     }
-	
+        
     protected DurationDayTimeImpl(final long durationInMilliseconds) {
             super(durationInMilliseconds);
             convertToCanonicalDayTime();
@@ -66,10 +66,10 @@ class DurationDayTimeImpl
     
     public float getValue() {
         float sec = (seconds==null)?0:seconds.floatValue();
-	return (((((getDays() * 24) +
-		    getHours()) * 60) +
-		    getMinutes())*60) +
-		    sec;
+        return (((((getDays() * 24) +
+                    getHours()) * 60) +
+                    getMinutes())*60) +
+                    sec;
     }
 
     private void convertToCanonicalDayTime() {

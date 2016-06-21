@@ -14,6 +14,8 @@ import org.w3c.dom.UserDataHandler;
 import com.sun.org.apache.xerces.internal.util.XMLChar;
 import com.sun.org.apache.xerces.internal.util.XML11Char;
 import com.sun.org.apache.xerces.internal.xni.NamespaceContext;
+import com.sun.org.apache.xerces.internal.utils.ObjectFactory;
+import com.sun.org.apache.xerces.internal.utils.SecuritySupport;
 import org.w3c.dom.Attr;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Comment;
@@ -42,7 +44,7 @@ import org.w3c.dom.ls.LSSerializer;
 public class CoreDocumentImpl
 extends ParentNode implements Document  {
 
-	
+        
     
     
     
@@ -80,7 +82,7 @@ extends ParentNode implements Document  {
     
     protected String fDocumentURI;
 
-	
+        
     
     protected Hashtable userData;
 
@@ -91,7 +93,7 @@ extends ParentNode implements Document  {
     
     transient DOMNormalizer domNormalizer = null;
     transient DOMConfigurationImpl fConfiguration = null;
-    
+
     
     transient Object fXPathEvaluator = null;
 
@@ -110,7 +112,7 @@ extends ParentNode implements Document  {
     protected boolean errorChecking = true;
     
     protected boolean ancestorChecking = true;
-    
+
     
     
     protected boolean xmlVersionChanged = false ;
@@ -173,8 +175,7 @@ extends ParentNode implements Document  {
         super(null);
         ownerDocument = this;
         allowGrammarAccess = grammarAccess;
-        SecuritySupport ss = SecuritySupport.getInstance();
-        String systemProp = ss.getSystemProperty(Constants.SUN_DOM_PROPERTY_PREFIX+Constants.SUN_DOM_ANCESTOR_CHECCK);
+        String systemProp = SecuritySupport.getSystemProperty(Constants.SUN_DOM_PROPERTY_PREFIX+Constants.SUN_DOM_ANCESTOR_CHECCK);
         if (systemProp != null) {
             if (systemProp.equalsIgnoreCase("false")) {
                 ancestorChecking = false;
@@ -332,12 +333,12 @@ extends ParentNode implements Document  {
         }
 
         if (errorChecking &&((docType != null &&
-            oldChild.getNodeType() != Node.DOCUMENT_TYPE_NODE && 
-            newChild.getNodeType() == Node.DOCUMENT_TYPE_NODE) 
-            || (docElement != null && 
-            oldChild.getNodeType() != Node.ELEMENT_NODE && 
+            oldChild.getNodeType() != Node.DOCUMENT_TYPE_NODE &&
+            newChild.getNodeType() == Node.DOCUMENT_TYPE_NODE)
+            || (docElement != null &&
+            oldChild.getNodeType() != Node.ELEMENT_NODE &&
             newChild.getNodeType() == Node.ELEMENT_NODE))) {
-            	
+
             throw new DOMException(
                 DOMException.HIERARCHY_REQUEST_ERR,
                 DOMMessageFormatter.formatMessage(DOMMessageFormatter.DOM_DOMAIN, "HIERARCHY_REQUEST_ERR", null));
@@ -367,9 +368,9 @@ extends ParentNode implements Document  {
 
     
     public Object getFeature(String feature, String version) {
-        
+
         boolean anyVersion = version == null || version.length() == 0;
-        
+
         
         
         
@@ -377,20 +378,19 @@ extends ParentNode implements Document  {
         
         if ((feature.equalsIgnoreCase("+XPath"))
             && (anyVersion || version.equals("3.0"))) {
-            
+
             
             
             if (fXPathEvaluator != null) {
                 return fXPathEvaluator;
             }
-            
+
             try {
-                Class xpathClass = ObjectFactory.findProviderClass(
-                    "com.sun.org.apache.xpath.internal.domapi.XPathEvaluatorImpl",
-                    ObjectFactory.findClassLoader(), true);
-                Constructor xpathClassConstr = 
+                Class xpathClass = ObjectFactory.findProviderClass (
+                        "com.sun.org.apache.xpath.internal.domapi.XPathEvaluatorImpl", true);
+                Constructor xpathClassConstr =
                     xpathClass.getConstructor(new Class[] { Document.class });
-                
+
                 
                 
                 Class interfaces[] = xpathClass.getInterfaces();
@@ -412,13 +412,13 @@ extends ParentNode implements Document  {
     
     
     
+
     
-    
-    
+
     
     public Attr createAttribute(String name)
         throws DOMException {
-        
+
         if (errorChecking && !isXMLName(name,xml11Version)) {
             String msg =
                 DOMMessageFormatter.formatMessage(
@@ -428,7 +428,7 @@ extends ParentNode implements Document  {
             throw new DOMException(DOMException.INVALID_CHARACTER_ERR, msg);
         }
         return new AttrImpl(this, name);
-        
+
     } 
 
     
@@ -562,7 +562,7 @@ extends ParentNode implements Document  {
     public void setXmlEncoding(String value) {
         encoding = value;
     }
-    
+
     
     public void setEncoding(String value) {
         setXmlEncoding(value);
@@ -572,7 +572,7 @@ extends ParentNode implements Document  {
     public String getXmlEncoding() {
         return encoding;
     }
-    
+
     
     public String getEncoding() {
         return getXmlEncoding();
@@ -605,7 +605,7 @@ extends ParentNode implements Document  {
             xml11Version = false;
         }
     }
-    
+
     
     public void setVersion(String value) {
         setXmlVersion(value);
@@ -616,7 +616,7 @@ extends ParentNode implements Document  {
     public String getXmlVersion() {
         return (version == null)?"1.0":version;
     }
-    
+
     
     public String getVersion() {
         return getXmlVersion();
@@ -627,7 +627,7 @@ extends ParentNode implements Document  {
                                   throws DOMException {
             standalone = value;
     }
-    
+
     
     public void setStandalone(boolean value) {
         setXmlStandalone(value);
@@ -637,7 +637,7 @@ extends ParentNode implements Document  {
     public boolean getXmlStandalone() {
         return standalone;
     }
-    
+
     
     public boolean getStandalone() {
         return getXmlStandalone();
@@ -652,7 +652,7 @@ extends ParentNode implements Document  {
     
     public Node renameNode(Node n,String namespaceURI,String name)
     throws DOMException{
-        
+
         if (errorChecking && n.getOwnerDocument() != this && n != this) {
             String msg = DOMMessageFormatter.formatMessage(
                     DOMMessageFormatter.DOM_DOMAIN, "WRONG_DOCUMENT_ERR", null);
@@ -663,7 +663,7 @@ extends ParentNode implements Document  {
                 ElementImpl el = (ElementImpl) n;
                 if (el instanceof ElementNSImpl) {
                     ((ElementNSImpl) el).rename(namespaceURI, name);
-                    
+
                     
                     callUserDataHandlers(el, null, UserDataHandler.NODE_RENAMED);
                 }
@@ -688,7 +688,7 @@ extends ParentNode implements Document  {
                             }
                         }
                         el.rename(name);
-                        
+
                         
                         callUserDataHandlers(el, null,
                                 UserDataHandler.NODE_RENAMED);
@@ -697,13 +697,13 @@ extends ParentNode implements Document  {
                         
                         ElementNSImpl nel =
                             new ElementNSImpl(this, namespaceURI, name);
-                        
+
                         
                         copyEventListeners(el, nel);
-                        
+
                         
                         Hashtable data = removeUserDataTable(el);
-                        
+
                         
                         Node parent = el.getParentNode();
                         Node nextSib = el.getNextSibling();
@@ -719,14 +719,14 @@ extends ParentNode implements Document  {
                         }
                         
                         nel.moveSpecifiedAttributes(el);
-                        
+
                         
                         setUserDataTable(nel, data);
-                        
+
                         
                         callUserDataHandlers(el, nel,
                                 UserDataHandler.NODE_RENAMED);
-                        
+
                         
                         if (parent != null) {
                             parent.insertBefore(nel, nextSib);
@@ -740,7 +740,7 @@ extends ParentNode implements Document  {
             }
             case ATTRIBUTE_NODE: {
                 AttrImpl at = (AttrImpl) n;
-                
+
                 
                 Element el = at.getOwnerElement();
                 if (el != null) {
@@ -752,7 +752,7 @@ extends ParentNode implements Document  {
                     if (el != null) {
                         el.setAttributeNodeNS(at);
                     }
-                    
+
                     
                     callUserDataHandlers(at, null, UserDataHandler.NODE_RENAMED);
                 }
@@ -763,20 +763,20 @@ extends ParentNode implements Document  {
                         if (el != null) {
                             el.setAttributeNode(at);
                         }
-                        
+
                         
                         callUserDataHandlers(at, null, UserDataHandler.NODE_RENAMED);
                     }
                     else {
                         
                         AttrNSImpl nat = new AttrNSImpl(this, namespaceURI, name);
-                        
+
                         
                         copyEventListeners(at, nat);
-                        
+
                         
                         Hashtable data = removeUserDataTable(at);
-                        
+
                         
                         Node child = at.getFirstChild();
                         while (child != null) {
@@ -784,13 +784,13 @@ extends ParentNode implements Document  {
                             nat.appendChild(child);
                             child = at.getFirstChild();
                         }
-                        
+
                         
                         setUserDataTable(nat, data);
-                        
+
                         
                         callUserDataHandlers(at, nat, UserDataHandler.NODE_RENAMED);
-                        
+
                         
                         if (el != null) {
                             el.setAttributeNode(nat);
@@ -800,7 +800,7 @@ extends ParentNode implements Document  {
                 }
                 
                 renamedAttrNode((Attr) n, at);
-                
+
                 return at;
             }
             default: {
@@ -808,7 +808,7 @@ extends ParentNode implements Document  {
                 throw new DOMException(DOMException.NOT_SUPPORTED_ERR, msg);
             }
         }
-        
+
     }
 
 
@@ -860,7 +860,7 @@ extends ParentNode implements Document  {
                 
                 return null;
             }
-        }            
+        }
         return fDocumentURI;
     }
 
@@ -1026,7 +1026,7 @@ extends ParentNode implements Document  {
     Hashtable reversedIdentifiers)
     throws DOMException {
         Node newnode=null;
-		Hashtable userData = null;
+                Hashtable userData = null;
 
         
         
@@ -1039,8 +1039,8 @@ extends ParentNode implements Document  {
         
         
         
-		if(source instanceof NodeImpl)
-			userData = ((NodeImpl)source).getUserDataRecord();
+                if(source instanceof NodeImpl)
+                        userData = ((NodeImpl)source).getUserDataRecord();
         int type = source.getNodeType();
         switch (type) {
             case ELEMENT_NODE: {
@@ -1243,8 +1243,8 @@ extends ParentNode implements Document  {
             }
         }
 
-		if(userData != null)
-			callUserDataHandlers(source, newnode, UserDataHandler.NODE_IMPORTED,userData);
+                if(userData != null)
+                        callUserDataHandlers(source, newnode, UserDataHandler.NODE_IMPORTED,userData);
 
         
         if (deep) {
@@ -1265,26 +1265,26 @@ extends ParentNode implements Document  {
     
     public Node adoptNode(Node source) {
         NodeImpl node;
-		Hashtable userData = null;
+                Hashtable userData = null;
         try {
             node = (NodeImpl) source;
         } catch (ClassCastException e) {
             
             return null;
         }
+
         
-        
-        
+
         if (source == null ) {
-        	return null;
+                return null;
         } else if (source != null && source.getOwnerDocument() != null) {
 
             DOMImplementation thisImpl = this.getImplementation();
             DOMImplementation otherImpl = source.getOwnerDocument().getImplementation();
-            
+
             
             if (thisImpl != otherImpl) {
-            
+
                 
                 if (thisImpl instanceof com.sun.org.apache.xerces.internal.dom.DOMImplementationImpl &&
                         otherImpl instanceof com.sun.org.apache.xerces.internal.dom.DeferredDOMImplementationImpl) {
@@ -1295,11 +1295,11 @@ extends ParentNode implements Document  {
                     
                 } else {
                     
-                    return null;  
+                    return null;
                 }
-        	}
+                }
         }
-        
+
         switch (node.getNodeType()) {
             case ATTRIBUTE_NODE: {
                 AttrImpl attr = (AttrImpl) node;
@@ -1310,12 +1310,12 @@ extends ParentNode implements Document  {
                 }
                 
                 attr.isSpecified(true);
-				userData = node.getUserDataRecord();
+                                userData = node.getUserDataRecord();
 
                 
                 attr.setOwnerDocument(this);
-				if(userData != null )
-					setUserDataTable(node,userData);
+                                if(userData != null )
+                                        setUserDataTable(node,userData);
                 break;
             }
             
@@ -1334,7 +1334,7 @@ extends ParentNode implements Document  {
                 throw new DOMException(DOMException.NOT_SUPPORTED_ERR, msg);
             }
             case ENTITY_REFERENCE_NODE: {
-				userData = node.getUserDataRecord();
+                                userData = node.getUserDataRecord();
                 
                 Node parent = node.getParentNode();
                 if (parent != null) {
@@ -1347,8 +1347,8 @@ extends ParentNode implements Document  {
                 }
                 
                 node.setOwnerDocument(this);
-				if(userData != null)
-					setUserDataTable(node,userData);
+                                if(userData != null)
+                                        setUserDataTable(node,userData);
                 
                 if (docType == null) {
                     break;
@@ -1366,7 +1366,7 @@ extends ParentNode implements Document  {
                 break;
             }
             case ELEMENT_NODE: {
-				userData = node.getUserDataRecord();
+                                userData = node.getUserDataRecord();
                 
                 Node parent = node.getParentNode();
                 if (parent != null) {
@@ -1374,14 +1374,14 @@ extends ParentNode implements Document  {
                 }
                 
                 node.setOwnerDocument(this);
-				if(userData != null)
-					setUserDataTable(node,userData);
+                                if(userData != null)
+                                        setUserDataTable(node,userData);
                 
                 ((ElementImpl)node).reconcileDefaultAttributes();
                 break;
             }
             default: {
-				userData = node.getUserDataRecord();
+                                userData = node.getUserDataRecord();
                 
                 Node parent = node.getParentNode();
                 if (parent != null) {
@@ -1389,30 +1389,30 @@ extends ParentNode implements Document  {
                 }
                 
                 node.setOwnerDocument(this);
-				if(userData != null)
-					setUserDataTable(node,userData);
+                                if(userData != null)
+                                        setUserDataTable(node,userData);
             }
         }
 
-		
-		
-		if(userData != null)
-			callUserDataHandlers(source, null, UserDataHandler.NODE_ADOPTED,userData);
+                
+                
+                if(userData != null)
+                        callUserDataHandlers(source, null, UserDataHandler.NODE_ADOPTED,userData);
 
         return node;
     }
 
     
     protected void undeferChildren(Node node) {
-        
+
         Node top = node;
-        
+
         while (null != node) {
-            
+
             if (((NodeImpl)node).needsSyncData()) {
                 ((NodeImpl)node).synchronizeData();
             }
-            
+
             NamedNodeMap attributes = node.getAttributes();
             if (attributes != null) {
                 int length = attributes.getLength();
@@ -1420,31 +1420,31 @@ extends ParentNode implements Document  {
                     undeferChildren(attributes.item(i));
                 }
             }
-            
+
             Node nextNode = null;
             nextNode = node.getFirstChild();
-            
+
             while (null == nextNode) {
-                
+
                 if (top.equals(node))
                     break;
-                
+
                 nextNode = node.getNextSibling();
-                
+
                 if (null == nextNode) {
                     node = node.getParentNode();
-                    
+
                     if ((null == node) || (top.equals(node))) {
                         nextNode = null;
                         break;
                     }
                 }
             }
-            
+
             node = nextNode;
         }
     }
-    
+
     
     
     public Element getElementById(String elementId) {
@@ -1706,7 +1706,7 @@ extends ParentNode implements Document  {
             return null;
         }
     }
-	
+
 
     
     public Object getUserData(Node n, String key) {
@@ -1725,7 +1725,7 @@ extends ParentNode implements Document  {
         return null;
     }
 
-	protected Hashtable getUserDataRecord(Node n){
+        protected Hashtable getUserDataRecord(Node n){
         if (userData == null) {
             return null;
         }
@@ -1733,10 +1733,10 @@ extends ParentNode implements Document  {
         if (t == null) {
             return null;
         }
-		return t;
-	}
-    
-	
+                return t;
+        }
+
+        
     Hashtable removeUserDataTable(Node n) {
         if (userData == null) {
             return null;
@@ -1746,8 +1746,8 @@ extends ParentNode implements Document  {
 
     
     void setUserDataTable(Node n, Hashtable data) {
-		if (userData == null)
-			userData = new Hashtable();
+                if (userData == null)
+                        userData = new Hashtable();
         if (data != null) {
             userData.put(n, data);
         }
@@ -1759,17 +1759,17 @@ extends ParentNode implements Document  {
             return;
         }
         
-		if(n instanceof NodeImpl){
-			Hashtable t = ((NodeImpl)n).getUserDataRecord();
-			if (t == null || t.isEmpty()) {
-				return;
-			}
-			callUserDataHandlers(n, c, operation,t);
-		}
+                if(n instanceof NodeImpl){
+                        Hashtable t = ((NodeImpl)n).getUserDataRecord();
+                        if (t == null || t.isEmpty()) {
+                                return;
+                        }
+                        callUserDataHandlers(n, c, operation,t);
+                }
     }
 
-	
-	void callUserDataHandlers(Node n, Node c, short operation,Hashtable userData) {
+        
+        void callUserDataHandlers(Node n, Node c, short operation,Hashtable userData) {
         if (userData == null || userData.isEmpty()) {
             return;
         }
@@ -1782,8 +1782,8 @@ extends ParentNode implements Document  {
             }
         }
     }
-    
-	
+
+        
     
     
     
@@ -1850,7 +1850,7 @@ extends ParentNode implements Document  {
             return;
         }
 
-		
+                
         boolean validNCName = false;
         if (!xml11Version) {
             validNCName = (prefix == null || XMLChar.isValidNCName(prefix))
@@ -1976,7 +1976,7 @@ extends ParentNode implements Document  {
     void replacedCharacterData(NodeImpl node, String oldvalue, String value) {
     }
 
-    
+
     
     void modifiedAttrValue(AttrImpl attr, String oldvalue) {
     }

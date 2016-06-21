@@ -38,9 +38,9 @@ public class DOMParser
     
     
     
+
     
-    
-    
+
     
     protected static final String USE_ENTITY_RESOLVER2 =
         Constants.SAX_FEATURE_PREFIX + Constants.USE_ENTITY_RESOLVER2_FEATURE;
@@ -52,7 +52,7 @@ public class DOMParser
     private static final String[] RECOGNIZED_FEATURES = {
         REPORT_WHITESPACE
     };
-    
+
     
 
     
@@ -68,13 +68,13 @@ public class DOMParser
         SYMBOL_TABLE,
         XMLGRAMMAR_POOL,
     };
+
     
     
     
+
     
-    
-    
-    
+
     
     protected boolean fUseEntityResolver2 = true;
 
@@ -100,10 +100,7 @@ public class DOMParser
 
     
     public DOMParser(SymbolTable symbolTable, XMLGrammarPool grammarPool) {
-        super((XMLParserConfiguration)ObjectFactory.createObject(
-            "com.sun.org.apache.xerces.internal.xni.parser.XMLParserConfiguration",
-            "com.sun.org.apache.xerces.internal.parsers.XIncludeAwareParserConfiguration"
-            ));
+        super(new XIncludeAwareParserConfiguration());
 
         
         fConfiguration.addRecognizedProperties(RECOGNIZED_PROPERTIES);
@@ -269,7 +266,7 @@ public class DOMParser
                         ((EntityResolverWrapper) xmlEntityResolver).getEntityResolver();
                 }
                 else if (xmlEntityResolver instanceof EntityResolver2Wrapper) {
-                    entityResolver = 
+                    entityResolver =
                         ((EntityResolver2Wrapper) xmlEntityResolver).getEntityResolver();
                 }
             }
@@ -325,7 +322,7 @@ public class DOMParser
         throws SAXNotRecognizedException, SAXNotSupportedException {
 
         try {
-            
+
             
             
             
@@ -338,23 +335,23 @@ public class DOMParser
                 }
                 return;
             }
+
             
             
             
-            
-            
+
             fConfiguration.setFeature(featureId, state);
         }
         catch (XMLConfigurationException e) {
             String identifier = e.getIdentifier();
             if (e.getType() == Status.NOT_RECOGNIZED) {
                 throw new SAXNotRecognizedException(
-                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                     "feature-not-recognized", new Object [] {identifier}));
             }
             else {
                 throw new SAXNotSupportedException(
-                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                     "feature-not-supported", new Object [] {identifier}));
             }
         }
@@ -374,23 +371,23 @@ public class DOMParser
             if (featureId.equals(USE_ENTITY_RESOLVER2)) {
                 return fUseEntityResolver2;
             }
+
             
             
             
-            
-            
+
             return fConfiguration.getFeature(featureId);
         }
         catch (XMLConfigurationException e) {
             String identifier = e.getIdentifier();
             if (e.getType() == Status.NOT_RECOGNIZED) {
                 throw new SAXNotRecognizedException(
-                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                     "feature-not-recognized", new Object [] {identifier}));
             }
             else {
                 throw new SAXNotSupportedException(
-                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                     "feature-not-supported", new Object [] {identifier}));
             }
         }
@@ -408,12 +405,12 @@ public class DOMParser
             String identifier = e.getIdentifier();
             if (e.getType() == Status.NOT_RECOGNIZED) {
                 throw new SAXNotRecognizedException(
-                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                     "property-not-recognized", new Object [] {identifier}));
             }
             else {
                 throw new SAXNotSupportedException(
-                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                     "property-not-supported", new Object [] {identifier}));
             }
         }
@@ -446,18 +443,18 @@ public class DOMParser
             String identifier = e.getIdentifier();
             if (e.getType() == Status.NOT_RECOGNIZED) {
                 throw new SAXNotRecognizedException(
-                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                     "property-not-recognized", new Object [] {identifier}));
             }
             else {
                 throw new SAXNotSupportedException(
-                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(), 
+                    SAXMessageFormatter.formatMessage(fConfiguration.getLocale(),
                     "property-not-supported", new Object [] {identifier}));
             }
         }
 
     } 
-    
+
     
     public XMLParserConfiguration getXMLParserConfiguration() {
         return fConfiguration;

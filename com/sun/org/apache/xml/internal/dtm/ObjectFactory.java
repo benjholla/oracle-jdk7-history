@@ -46,7 +46,7 @@ class ObjectFactory {
     } 
 
     
-    static Object createObject(String factoryId, 
+    static Object createObject(String factoryId,
                                       String propertiesFilename,
                                       String fallbackClassName)
         throws ConfigurationError
@@ -72,7 +72,7 @@ class ObjectFactory {
     } 
 
     
-    static Class lookUpFactoryClass(String factoryId) 
+    static Class lookUpFactoryClass(String factoryId)
         throws ConfigurationError
     {
         return lookUpFactoryClass(factoryId, null, null);
@@ -179,13 +179,13 @@ class ObjectFactory {
                         fis = ss.getFileInputStream(propertiesFile);
                         fXalanProperties.load(fis);
                     }
-	        } catch (Exception x) {
-	            fXalanProperties = null;
-	            fLastModified = -1;
+                } catch (Exception x) {
+                    fXalanProperties = null;
+                    fLastModified = -1;
                     
-	            
-	            
-	        }
+                    
+                    
+                }
                 finally {
                     
                     if (fis != null) {
@@ -195,7 +195,7 @@ class ObjectFactory {
                         
                         catch (IOException exc) {}
                     }
-                }	            
+                }
             }
             if(fXalanProperties != null) {
                 factoryClassName = fXalanProperties.getProperty(factoryId);
@@ -221,7 +221,7 @@ class ObjectFactory {
                     
                     catch (IOException exc) {}
                 }
-            }               
+            }
         }
         if (factoryClassName != null) {
             if (DEBUG) debugPrintln("found in " + propertiesFilename + ", value="
@@ -247,7 +247,7 @@ class ObjectFactory {
     
     static ClassLoader findClassLoader()
         throws ConfigurationError
-    { 
+    {
         SecuritySupport ss = SecuritySupport.getInstance();
 
         
@@ -301,7 +301,7 @@ class ObjectFactory {
         return context;
     } 
 
-     
+    
     static Object newInstance(String className, ClassLoader cl,
                                       boolean doFallback)
         throws ConfigurationError
@@ -323,11 +323,11 @@ class ObjectFactory {
         }
     }
 
-     
+    
     static Class findProviderClass(String className, ClassLoader cl,
                                            boolean doFallback)
         throws ClassNotFoundException, ConfigurationError
-    {   
+    {
         
         
         SecurityManager security = System.getSecurityManager();
@@ -337,11 +337,11 @@ class ObjectFactory {
                     String packageName = className;
                     if (lastDot != -1) packageName = className.substring(0, lastDot);
                     security.checkPackageAccess(packageName);
-                 }   
+                 }
         }catch(SecurityException e){
             throw e;
         }
-        
+
         Class providerClass;
         if (cl == null) {
             
@@ -429,7 +429,7 @@ class ObjectFactory {
         } catch (java.io.UnsupportedEncodingException e) {
             rd = new BufferedReader(new InputStreamReader(is));
         }
-        
+
         String factoryClassName = null;
         try {
             
@@ -446,7 +446,7 @@ class ObjectFactory {
             }
             
             catch (IOException exc) {}
-        }          
+        }
 
         if (factoryClassName != null &&
             ! "".equals(factoryClassName)) {
@@ -469,7 +469,7 @@ class ObjectFactory {
     
 
     
-    static class ConfigurationError 
+    static class ConfigurationError
         extends Error {
                 static final long serialVersionUID = 5122054096615067992L;
         

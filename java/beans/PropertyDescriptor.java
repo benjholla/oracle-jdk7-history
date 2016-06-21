@@ -388,7 +388,7 @@ public class PropertyDescriptor extends FeatureDescriptor {
 
         
         try {
-            if (yr != null && yr.getDeclaringClass() == getClass0()) {
+            if (isAssignable(xr, yr)) {
                 setReadMethod(yr);
             } else {
                 setReadMethod(xr);
@@ -525,5 +525,38 @@ public class PropertyDescriptor extends FeatureDescriptor {
         appendTo(sb, "propertyType", this.propertyTypeRef);
         appendTo(sb, "readMethod", this.readMethodRef);
         appendTo(sb, "writeMethod", this.writeMethodRef);
+    }
+
+    private boolean isAssignable(Method m1, Method m2) {
+        if (m1 == null) {
+            return true; 
+        }
+        if (m2 == null) {
+            return false; 
+        }
+        if (!m1.getName().equals(m2.getName())) {
+            return true; 
+        }
+        Class<?> type1 = m1.getDeclaringClass();
+        Class<?> type2 = m2.getDeclaringClass();
+        if (!type1.isAssignableFrom(type2)) {
+            return false; 
+        }
+        type1 = getReturnType(getClass0(), m1);
+        type2 = getReturnType(getClass0(), m2);
+        if (!type1.isAssignableFrom(type2)) {
+            return false; 
+        }
+        Class<?>[] args1 = getParameterTypes(getClass0(), m1);
+        Class<?>[] args2 = getParameterTypes(getClass0(), m2);
+        if (args1.length != args2.length) {
+            return true; 
+        }
+        for (int i = 0; i < args1.length; i++) {
+            if (!args1[i].isAssignableFrom(args2[i])) {
+                return false; 
+            }
+        }
+        return true; 
     }
 }

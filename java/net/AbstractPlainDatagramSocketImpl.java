@@ -5,6 +5,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.Enumeration;
+import java.security.AccessController;
 import sun.net.ResourceManager;
 
 
@@ -22,6 +23,13 @@ abstract class AbstractPlainDatagramSocketImpl extends DatagramSocketImpl
     private int multicastInterface = 0;
     private boolean loopbackMode = true;
     private int ttl = -1;
+
+    private static final String os = AccessController.doPrivileged(
+        new sun.security.action.GetPropertyAction("os.name")
+    );
+
+    
+    private final static boolean connectDisabled = os.contains("OS X");
 
     
     static {
@@ -252,4 +260,7 @@ abstract class AbstractPlainDatagramSocketImpl extends DatagramSocketImpl
     protected abstract void connect0(InetAddress address, int port) throws SocketException;
     protected abstract void disconnect0(int family);
 
+    protected boolean nativeConnectDisabled() {
+        return connectDisabled;
+    }
 }

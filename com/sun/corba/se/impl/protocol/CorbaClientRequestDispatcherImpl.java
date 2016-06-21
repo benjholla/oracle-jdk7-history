@@ -85,11 +85,17 @@ import com.sun.corba.se.impl.protocol.giopmsgheaders.ReferenceAddr;
 import com.sun.corba.se.impl.transport.CorbaContactInfoListIteratorImpl;
 import com.sun.corba.se.impl.util.JDKBridge;
 
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
+
 
 public class CorbaClientRequestDispatcherImpl
     implements
         ClientRequestDispatcher
 {
+    private ConcurrentMap<ContactInfo, Object> locks =
+            new ConcurrentHashMap<ContactInfo, Object>();
+
     public OutputObject beginRequest(Object self, String opName,
                                      boolean isOneWay, ContactInfo contactInfo)
     {
@@ -117,7 +123,20 @@ public class CorbaClientRequestDispatcherImpl
         
         
         
-        synchronized (contactInfo) {
+        
+        
+
+        Object lock = locks.get(contactInfo);
+
+        if (lock == null) {
+            Object newLock = new Object();
+            lock = locks.putIfAbsent(contactInfo, newLock);
+            if (lock == null) {
+                lock = newLock;
+            }
+        }
+
+        synchronized (lock) {
             if (contactInfo.isConnectionBased()) {
                 if (contactInfo.shouldCacheConnection()) {
                     connection = (CorbaConnection)
@@ -222,7 +241,7 @@ public class CorbaClientRequestDispatcherImpl
         registerWaiter(messageMediator);
 
         
-        synchronized (contactInfo) {
+        synchronized (lock) {
             if (contactInfo.isConnectionBased()) {
                 if (contactInfo.shouldCacheConnection()) {
                     OutboundConnectionCache connectionCache =

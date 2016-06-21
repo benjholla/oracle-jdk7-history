@@ -12,6 +12,8 @@ import com.sun.org.apache.xpath.internal.objects.XNumber;
 import com.sun.org.apache.xpath.internal.objects.XObject;
 import com.sun.org.apache.xpath.internal.objects.XString;
 import com.sun.org.apache.xpath.internal.res.XPATHErrorResources;
+import com.sun.org.apache.xalan.internal.utils.ObjectFactory;
+import com.sun.org.apache.xalan.internal.utils.SecuritySupport;
 
 
 public class FuncSystemProperty extends FunctionOneArg
@@ -129,9 +131,8 @@ public class FuncSystemProperty extends FunctionOneArg
     try
     {
       
-      SecuritySupport ss = SecuritySupport.getInstance();
 
-      InputStream is = ss.getResourceAsStream(ObjectFactory.findClassLoader(),
+      InputStream is = SecuritySupport.getResourceAsStream(ObjectFactory.findClassLoader(),
                                               file);
 
       

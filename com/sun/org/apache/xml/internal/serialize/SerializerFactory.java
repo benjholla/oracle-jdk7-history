@@ -4,7 +4,7 @@
 
 package com.sun.org.apache.xml.internal.serialize;
 
-
+import com.sun.org.apache.xerces.internal.utils.ObjectFactory;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.io.UnsupportedEncodingException;
@@ -47,8 +47,7 @@ public abstract class SerializerFactory
             while ( token.hasMoreTokens() ) {
                 className = token.nextToken();
                 try {
-                    factory = (SerializerFactory) ObjectFactory.newInstance( className,
-                        SerializerFactory.class.getClassLoader(), true);
+                    factory = (SerializerFactory) ObjectFactory.newInstance( className, true);
                     if ( _factories.containsKey( factory.getSupportedMethod() ) )
                         _factories.put( factory.getSupportedMethod(), factory );
                 } catch ( Exception except ) { }

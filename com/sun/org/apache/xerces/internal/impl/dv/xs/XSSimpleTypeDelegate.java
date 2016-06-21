@@ -193,4 +193,3 @@ public class XSSimpleTypeDelegate
         return type.toString();
     }
 }
-
