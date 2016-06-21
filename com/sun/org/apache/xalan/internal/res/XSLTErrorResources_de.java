@@ -943,7 +943,7 @@ public class XSLTErrorResources_de extends ListResourceBundle
      "Systemeigenschaft \"org.xml.sax.parser\" nicht angegeben"},
 
     { ER_PARSER_ARG_CANNOT_BE_NULL,
-     "Parser-Argument darf nicht null sein"},
+     "Parserargument darf nicht null sein"},
 
     { ER_FEATURE,
      "Feature: {0}"},
@@ -1140,7 +1140,7 @@ public class XSLTErrorResources_de extends ListResourceBundle
       "Funktionsname darf nicht null sein."},
 
     { ER_XPATH_RESOLVER_NEGATIVE_ARITY,
-      "Anzahl von Argumenten darf nicht negativ sein."},
+      "Argumentanzahl darf nicht negativ sein."},
   
 
     { WG_FOUND_CURLYBRACE,
@@ -1292,7 +1292,7 @@ public class XSLTErrorResources_de extends ListResourceBundle
   {  "optionQ", "   [-Q  (Stiller Modus)]"},
   {  "optionLF", "   [-LF (Nur Zeilenvorsch\u00FCbe bei Ausgabe verwenden {Standard ist CR/LF})]"},
   {  "optionCR", "   [-CR (Nur Zeilenschaltungen bei Ausgabe verwenden {Standard ist CR/LF})]"},
-  { "optionESCAPE", "   [-ESCAPE (Escape-Zeichen {Standard ist <>&\"\'\r\n}]"},
+  { "optionESCAPE", "   [-ESCAPE (Escapezeichen {Standard ist <>&\"'\r\n}]"},
   { "optionINDENT", "   [-INDENT (Steuern, wie viele Leerzeichen der Einzug enthalten soll {Standard ist 0})]"},
   { "optionTT", "   [-TT (Vorlagen verfolgen, wenn diese aufgerufen werden.)]"},
   { "optionTG", "   [-TG (Jedes Generierungsereignis verfolgen.)]"},

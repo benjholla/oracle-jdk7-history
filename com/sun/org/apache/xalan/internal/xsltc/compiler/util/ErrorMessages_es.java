@@ -198,7 +198,7 @@ public class ErrorMessages_es extends ListResourceBundle {
 
         
         {ErrorMsg.ACCESSING_XSLT_TARGET_ERR,
-        "Could not read stylesheet target ''{0}'', because ''{1}'' access is not allowed."},
+        "No se ha podido leer el destino de hoja de estilos ''{0}'', porque no se permite el acceso ''{1}'' debido a una restricci\u00F3n definida por la propiedad accessExternalStylesheet."},
 
         
         {ErrorMsg.NOT_IMPLEMENTED_ERR,
@@ -363,7 +363,7 @@ public class ErrorMessages_es extends ListResourceBundle {
 
         
         {ErrorMsg.WARNING_PLUS_WRAPPED_MSG,
-        "ADVERTENCIA: ''{0}''\n       :{1}"},
+        "WARNING:  ''{0}''\n       :{1}"},
 
         
         {ErrorMsg.WARNING_MSG,
@@ -371,7 +371,7 @@ public class ErrorMessages_es extends ListResourceBundle {
 
         
         {ErrorMsg.FATAL_ERR_PLUS_WRAPPED_MSG,
-        "ERROR FATAL: ''{0}''\n           :{1}"},
+        "FATAL ERROR:  ''{0}''\n           :{1}"},
 
         
         {ErrorMsg.FATAL_ERR_MSG,
@@ -379,7 +379,7 @@ public class ErrorMessages_es extends ListResourceBundle {
 
         
         {ErrorMsg.ERROR_PLUS_WRAPPED_MSG,
-        "ERROR: ''{0}''\n     :{1}"},
+        "ERROR:  ''{0}''\n     :{1}"},
 
         
         {ErrorMsg.ERROR_MSG,
@@ -435,7 +435,29 @@ public class ErrorMessages_es extends ListResourceBundle {
         "No se puede definir la funci\u00F3n ''{0}''en esta f\u00E1brica del transformador."},
 
         {ErrorMsg.JAXP_SECUREPROCESSING_FEATURE,
-        "FEATURE_SECURE_PROCESSING: no se puede definir la funci\u00F3n en false cuando est\u00E1 presente el gestor de seguridad."}
+        "FEATURE_SECURE_PROCESSING: no se puede definir la funci\u00F3n en false cuando est\u00E1 presente el gestor de seguridad."},
+
+        
+        {ErrorMsg.OUTLINE_ERR_TRY_CATCH,
+         "Error interno de XSLTC: el c\u00F3digo de bytes generado contiene un bloque try-catch-finally y no se puede delimitar."},
+
+        
+        {ErrorMsg.OUTLINE_ERR_UNBALANCED_MARKERS,
+         "Error interno de XSLTC: los marcadores OutlineableChunkStart y OutlineableChunkEnd deben estar equilibrados y correctamente anidados."},
+
+        
+        {ErrorMsg.OUTLINE_ERR_DELETED_TARGET,
+         "Error interno de XSLTC: todav\u00EDa se hace referencia a una instrucci\u00F3n que formaba parte de un bloque de c\u00F3digo de bytes delimitado en el m\u00E9todo original."
+        },
+
+
+        
+        {ErrorMsg.OUTLINE_ERR_METHOD_TOO_BIG,
+         "Error interno de XSLTC: un m\u00E9todo en el translet excede la limitaci\u00F3n de Java Virtual Machine de longitud de un m\u00E9todo de 64 kilobytes. Normalmente, esto lo causan plantillas en una hoja de estilos demasiado grandes. Pruebe a reestructurar la hoja de estilos para utilizar plantillas m\u00E1s peque\u00F1as."
+        },
+
+         {ErrorMsg.DESERIALIZE_TRANSLET_ERR, "Cuando la seguridad de Java est\u00E1 activada, el soporte para anular la serializaci\u00F3n de TemplatesImpl est\u00E1 desactivado. Esto se puede sustituir definiendo la propiedad del sistema jdk.xml.enableTemplatesImplDeserialization en true."}
+
     };
 
     }

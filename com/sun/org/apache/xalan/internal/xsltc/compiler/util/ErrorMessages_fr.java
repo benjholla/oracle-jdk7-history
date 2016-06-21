@@ -198,7 +198,7 @@ public class ErrorMessages_fr extends ListResourceBundle {
 
         
         {ErrorMsg.ACCESSING_XSLT_TARGET_ERR,
-        "Could not read stylesheet target ''{0}'', because ''{1}'' access is not allowed."},
+        "Impossible de lire la cible de feuille de style ''{0}'' car l''acc\u00E8s \u00E0 ''{1}'' n''est pas autoris\u00E9 en raison d''une restriction d\u00E9finie par la propri\u00E9t\u00E9 accessExternalStylesheet."},
 
         
         {ErrorMsg.NOT_IMPLEMENTED_ERR,
@@ -363,7 +363,7 @@ public class ErrorMessages_fr extends ListResourceBundle {
 
         
         {ErrorMsg.WARNING_PLUS_WRAPPED_MSG,
-        "AVERTISSEMENT :  ''{0}''\n       :{1}"},
+        "WARNING:  ''{0}''\n       :{1}"},
 
         
         {ErrorMsg.WARNING_MSG,
@@ -371,7 +371,7 @@ public class ErrorMessages_fr extends ListResourceBundle {
 
         
         {ErrorMsg.FATAL_ERR_PLUS_WRAPPED_MSG,
-        "ERREUR FATALE :  ''{0}''\n           :{1}"},
+        "FATAL ERROR:  ''{0}''\n           :{1}"},
 
         
         {ErrorMsg.FATAL_ERR_MSG,
@@ -379,7 +379,7 @@ public class ErrorMessages_fr extends ListResourceBundle {
 
         
         {ErrorMsg.ERROR_PLUS_WRAPPED_MSG,
-        "ERREUR :  ''{0}''\n     :{1}"},
+        "ERROR:  ''{0}''\n     :{1}"},
 
         
         {ErrorMsg.ERROR_MSG,
@@ -435,7 +435,29 @@ public class ErrorMessages_fr extends ListResourceBundle {
         "Impossible de d\u00E9finir la fonctionnalit\u00E9 ''{0}'' sur cette propri\u00E9t\u00E9 TransformerFactory."},
 
         {ErrorMsg.JAXP_SECUREPROCESSING_FEATURE,
-        "FEATURE_SECURE_PROCESSING : impossible de d\u00E9finir la fonctionnalit\u00E9 sur False en pr\u00E9sence du gestionnaire de s\u00E9curit\u00E9."}
+        "FEATURE_SECURE_PROCESSING : impossible de d\u00E9finir la fonctionnalit\u00E9 sur False en pr\u00E9sence du gestionnaire de s\u00E9curit\u00E9."},
+
+        
+        {ErrorMsg.OUTLINE_ERR_TRY_CATCH,
+         "Erreur XSLTC interne : le code ex\u00E9cutable g\u00E9n\u00E9r\u00E9 contient un bloc try-catch-finally et ne peut pas \u00EAtre d\u00E9limit\u00E9."},
+
+        
+        {ErrorMsg.OUTLINE_ERR_UNBALANCED_MARKERS,
+         "Erreur XSLTC interne : les marqueurs OutlineableChunkStart et OutlineableChunkEnd doivent \u00EAtre \u00E9quilibr\u00E9s et correctement imbriqu\u00E9s."},
+
+        
+        {ErrorMsg.OUTLINE_ERR_DELETED_TARGET,
+         "Erreur XSLTC interne : une instruction ayant fait partie d'un bloc de code ex\u00E9cutable d\u00E9limit\u00E9 est toujours r\u00E9f\u00E9renc\u00E9e dans la m\u00E9thode d'origine."
+        },
+
+
+        
+        {ErrorMsg.OUTLINE_ERR_METHOD_TOO_BIG,
+         "Erreur XSLTC interne : une m\u00E9thode dans le translet d\u00E9passe la limite de la JVM concernant la longueur d'une m\u00E9thode de 64 kilo-octets. En g\u00E9n\u00E9ral, ceci est d\u00FB \u00E0 de tr\u00E8s grands mod\u00E8les dans une feuille de style. Essayez de restructurer la feuille de style pour utiliser des mod\u00E8les plus petits."
+        },
+
+         {ErrorMsg.DESERIALIZE_TRANSLET_ERR, "Lorsque la s\u00E9curit\u00E9 Java est activ\u00E9e, la prise en charge de la d\u00E9s\u00E9rialisation de TemplatesImpl est d\u00E9sactiv\u00E9e. La d\u00E9finition de la propri\u00E9t\u00E9 syst\u00E8me jdk.xml.enableTemplatesImplDeserialization sur True permet de remplacer ce param\u00E8tre."}
+
     };
 
     }

@@ -355,7 +355,7 @@ public static final String ER_IGNORABLE_WHITESPACE_NOT_HANDLED =
      "ERROR. C\u00F3digo de operaci\u00F3n desconocido: {0}"},
 
   { ER_EXTRA_ILLEGAL_TOKENS,
-     "Elementos no permitidos adicionales: {0}"},
+     "Tokens no permitidos adicionales: {0}"},
 
   { ER_EXPECTED_DOUBLE_QUOTE,
       "literal con comillas incorrectas... se esperaban comillas dobles"},
@@ -472,7 +472,7 @@ public static final String ER_IGNORABLE_WHITESPACE_NOT_HANDLED =
      "En XPath.readObject: {0}"},
 
   { ER_FUNCTION_TOKEN_NOT_FOUND,
-      "No se ha encontrado el elemento de funci\u00F3n."},
+      "No se ha encontrado el token de funci\u00F3n."},
 
   { ER_CANNOT_DEAL_XPATH_TYPE,
        "No se puede negociar con el tipo de XPath: {0}"},
@@ -566,13 +566,13 @@ public static final String ER_IGNORABLE_WHITESPACE_NOT_HANDLED =
   
   
   { ER_EXPECTED_REL_LOC_PATH,
-      "Se esperaba una ruta de acceso de ubicaci\u00F3n relativa despu\u00E9s del elemento '/' o '//'."},
+      "Se esperaba una ruta de acceso de ubicaci\u00F3n relativa despu\u00E9s del token '/' o '//'."},
 
   
   
   
   { ER_EXPECTED_LOC_PATH,
-       "Se esperaba una ruta de acceso de ubicaci\u00F3n, pero se ha encontrado el siguiente elemento: {0}"},
+       "Se esperaba una ruta de acceso de ubicaci\u00F3n, pero se ha encontrado el siguiente token: {0}"},
 
   
   
@@ -584,7 +584,7 @@ public static final String ER_IGNORABLE_WHITESPACE_NOT_HANDLED =
   
   
   { ER_EXPECTED_LOC_STEP,
-       "Se esperaba un paso de ubicaci\u00F3n despu\u00E9s del elemento '/' o '//'."},
+       "Se esperaba un paso de ubicaci\u00F3n despu\u00E9s del token '/' o '//'."},
 
   
   
@@ -769,7 +769,7 @@ public static final String ER_IGNORABLE_WHITESPACE_NOT_HANDLED =
       "XPath necesita un objeto derivado para implantar una prueba de nodo."},
 
   { WG_FUNCTION_TOKEN_NOT_FOUND,
-      "No se ha encontrado el elemento de funci\u00F3n."},
+      "No se ha encontrado el token de funci\u00F3n."},
 
   { WG_COULDNOT_FIND_FUNCTION,
       "No se ha encontrado la funci\u00F3n: {0}"},

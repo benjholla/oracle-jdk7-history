@@ -1,7 +1,6 @@
 
 
 
-
 package com.sun.org.apache.xpath.internal.res;
 
 import java.util.ListResourceBundle;
@@ -440,7 +439,7 @@ public static final String ER_IGNORABLE_WHITESPACE_NOT_HANDLED =
       "O prefixo deve ser resolvido para um namespace: {0}"},
 
   { ER_PARSE_NOT_SUPPORTED,
-      "parse (InputSource source) n\u00E3o suportado em XPathContext! N\u00E3o \u00E9 poss\u00EDvel abrir {0}"},
+      "parsing (InputSource source) n\u00E3o suportado em XPathContext! N\u00E3o \u00E9 poss\u00EDvel abrir {0}"},
 
   { ER_SAX_API_NOT_HANDLED,
       "Caracteres SAX API(char ch[]... n\u00E3o tratados por DTM!"},

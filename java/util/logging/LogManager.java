@@ -221,11 +221,11 @@ public class LogManager {
         JavaAWTAccess javaAwtAccess = SharedSecrets.getJavaAWTAccess();
         if (sm != null && javaAwtAccess != null) {
             
-            synchronized (javaAwtAccess) {
-                
-                
-                final Object ecx = javaAwtAccess.getAppletContext();
-                if (ecx != null) {
+            final Object ecx = javaAwtAccess.getAppletContext();
+            if (ecx != null) {
+                synchronized (javaAwtAccess) {
+                    
+                    
                     if (contextsMap == null) {
                         contextsMap = new WeakHashMap<>();
                     }

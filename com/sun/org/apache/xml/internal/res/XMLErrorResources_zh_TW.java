@@ -109,7 +109,7 @@ public class XMLErrorResources_zh_TW extends ListResourceBundle
   
 
   
-  private static final Object[][] _contents = {
+  private static final Object[][] contents = {
 
   
     {"ER0000" , "{0}" },
@@ -358,7 +358,7 @@ public class XMLErrorResources_zh_TW extends ListResourceBundle
   
 
     protected Object[][] getContents() {
-        return _contents;
+        return contents;
     }
 
 }

@@ -23,9 +23,6 @@ import java.lang.reflect.Modifier;
 
 import java.net.URL;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -74,16 +71,10 @@ public class Beans {
 
         
         final String serName = beanName.replace('.','/').concat(".ser");
-        final ClassLoader loader = cls;
-        ins = (InputStream)AccessController.doPrivileged
-            (new PrivilegedAction() {
-                public Object run() {
-                    if (loader == null)
-                        return ClassLoader.getSystemResourceAsStream(serName);
-                    else
-                        return loader.getResourceAsStream(serName);
-                }
-        });
+        if (cls == null)
+            ins =  ClassLoader.getSystemResourceAsStream(serName);
+        else
+            ins =  cls.getResourceAsStream(serName);
         if (ins != null) {
             try {
                 if (cls == null) {
@@ -172,19 +163,10 @@ public class Beans {
                     URL docBase   = null;
 
                     
-
-                    final ClassLoader cloader = cls;
-                    objectUrl = (URL)
-                        AccessController.doPrivileged
-                        (new PrivilegedAction() {
-                            public Object run() {
-                                if (cloader == null)
-                                    return ClassLoader.getSystemResource
-                                                                (resourceName);
-                                else
-                                    return cloader.getResource(resourceName);
-                            }
-                    });
+                    if (cls == null) {
+                        objectUrl = ClassLoader.getSystemResource(resourceName);
+                    } else
+                        objectUrl = cls.getResource(resourceName);
 
                     
                     

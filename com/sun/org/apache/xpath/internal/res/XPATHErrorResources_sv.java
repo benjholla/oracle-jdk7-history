@@ -370,7 +370,7 @@ public static final String ER_IGNORABLE_WHITESPACE_NOT_HANDLED =
      "F\u00F6rv\u00E4ntade {0}, men hittade: {1}"},
 
   { ER_INCORRECT_PROGRAMMER_ASSERTION,
-      "Programmerarens verifiering \u00E4r inte korrekt! - {0}"},
+      "Programmerarens utsaga \u00E4r inte korrekt! - {0}"},
 
   { ER_BOOLEAN_ARG_NO_LONGER_OPTIONAL,
       "Argumentet boolean(...) \u00E4r inte l\u00E4ngre valfritt med 19990709 XPath-utkast."},
@@ -403,7 +403,7 @@ public static final String ER_IGNORABLE_WHITESPACE_NOT_HANDLED =
       "Fel! Hittade inte xpath select-uttryck (-select)."},
 
   { ER_COULDNOT_FIND_ENDOP_AFTER_OPLOCATIONPATH,
-      "FEL! Kunde inte hitta ENDOP efter OP_LOCATIONPATH"},
+      "FEL! Hittade inte ENDOP efter OP_LOCATIONPATH"},
 
   { ER_ERROR_OCCURED,
      "Fel intr\u00E4ffade!"},
@@ -421,7 +421,7 @@ public static final String ER_IGNORABLE_WHITESPACE_NOT_HANDLED =
       "Funktionen count borde ta emot ett argument!"},
 
   { ER_COULDNOT_FIND_FUNCTION,
-     "Kunde inte hitta funktionen: {0}"},
+     "Hittade inte funktionen: {0}"},
 
   { ER_UNSUPPORTED_ENCODING,
      "Kodning utan st\u00F6d: {0}"},
@@ -490,7 +490,7 @@ public static final String ER_IGNORABLE_WHITESPACE_NOT_HANDLED =
         "Felhanterare med v\u00E4rde null"},
 
   { ER_PROG_ASSERT_UNKNOWN_OPCODE,
-       "Programmerarens verifiering: ok\u00E4nd op-kod: {0}"},
+       "Programmerarens utsaga: ok\u00E4nd op-kod: {0}"},
 
   { ER_ZERO_OR_ONE,
        "0 eller 1"},
@@ -560,7 +560,7 @@ public static final String ER_IGNORABLE_WHITESPACE_NOT_HANDLED =
        "{0} till\u00E5ter endast {1} argument"},
 
   { ER_UNKNOWN_STEP,
-       "Programmerarens verifiering i getNextStepPos: ok\u00E4nt stepType: {0}"},
+       "Programmerarens utsaga i getNextStepPos: ok\u00E4nt stepType: {0}"},
 
   
   
@@ -772,7 +772,7 @@ public static final String ER_IGNORABLE_WHITESPACE_NOT_HANDLED =
       "funktionstecken hittades inte."},
 
   { WG_COULDNOT_FIND_FUNCTION,
-      "Kunde inte hitta funktionen: {0}"},
+      "Hittade inte funktionen: {0}"},
 
   { WG_CANNOT_MAKE_URL_FROM,
       "Kan inte skapa URL fr\u00E5n: {0}"},

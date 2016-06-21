@@ -382,7 +382,7 @@ public static final String ER_IGNORABLE_WHITESPACE_NOT_HANDLED =
       "Caract\u00E8re ',' trouv\u00E9 sans argument le suivant."},
 
   { ER_PREDICATE_ILLEGAL_SYNTAX,
-      "Syntaxe '..[predicate]' ou '.[predicate]' non admise. Utilisez ''self::node()[predicate]'' \u00E0 la place."},
+      "Syntaxe '..[predicate]' ou '.[predicate]' non admise. Utilisez 'self::node()[predicate]' \u00E0 la place."},
 
   { ER_ILLEGAL_AXIS_NAME,
      "nom d''axe non admis : {0}"},
@@ -566,7 +566,7 @@ public static final String ER_IGNORABLE_WHITESPACE_NOT_HANDLED =
   
   
   { ER_EXPECTED_REL_LOC_PATH,
-      "Un chemin d'acc\u00E8s relatif \u00E9tait attendu apr\u00E8s le jeton ''/'' ou ''//''."},
+      "Un chemin d'acc\u00E8s relatif \u00E9tait attendu apr\u00E8s le jeton '/' ou '//'."},
 
   
   
@@ -584,7 +584,7 @@ public static final String ER_IGNORABLE_WHITESPACE_NOT_HANDLED =
   
   
   { ER_EXPECTED_LOC_STEP,
-       "Une \u00E9tape d'emplacement \u00E9tait attendue apr\u00E8s le jeton ''/'' ou ''//''."},
+       "Une \u00E9tape d'emplacement \u00E9tait attendue apr\u00E8s le jeton '/' ou '//'."},
 
   
   
@@ -597,7 +597,7 @@ public static final String ER_IGNORABLE_WHITESPACE_NOT_HANDLED =
   
   
   { ER_EXPECTED_STEP_PATTERN,
-       "Un mod\u00E8le d'\u00E9tape \u00E9tait attendu, mais ''/'' a \u00E9t\u00E9 d\u00E9tect\u00E9."},
+       "Un mod\u00E8le d'\u00E9tape \u00E9tait attendu, mais '/' a \u00E9t\u00E9 d\u00E9tect\u00E9."},
 
   
   

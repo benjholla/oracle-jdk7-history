@@ -1292,7 +1292,7 @@ public class XSLTErrorResources_it extends ListResourceBundle
   {  "optionQ", "   [-Q  (modalit\u00E0 silenziosa)]"},
   {  "optionLF", "   [-LF (usa avanzamenti riga solo nell'output {il valore predefinito \u00E8 CR/LF})]"},
   {  "optionCR", "   [-CR (usa ritorni a capo solo nell'output {il valore predefinito \u00E8 CR/LF})]"},
-  { "optionESCAPE", "   [-ESCAPE (caratteri da sottoporre a escape {il valore predefinito \u00E8 <>&\"\'\\r\\n}]"},
+  { "optionESCAPE", "   [-ESCAPE (caratteri da sottoporre a escape {il valore predefinito \u00E8 <>&\"'\\r\\n}]"},
   { "optionINDENT", "   [-INDENT (determina il numero di spazi da indentare {il valore predefinito \u00E8 0})]"},
   { "optionTT", "   [-TT (tiene traccia dei modelli mentre vengono richiamati.)]"},
   { "optionTG", "   [-TG (tiene traccia di ogni evento di generazione.)]"},

@@ -1292,7 +1292,7 @@ public class XSLTErrorResources_es extends ListResourceBundle
   {  "optionQ", "   [-Q  (Modo Silencioso)]"},
   {  "optionLF", "   [-LF (Utilizar saltos de l\u00EDnea s\u00F3lo en la salida {el valor por defecto es CR/LF})]"},
   {  "optionCR", "   [-CR (Utilizar retornos de carro s\u00F3lo en la salida {el valor por defecto es CR/LF})]"},
-  { "optionESCAPE", "   [-ESCAPE (Caracteres para introducir escape {el valor por defecto es <>&\"\'\\r\\n}]"},
+  { "optionESCAPE", "   [-ESCAPE (Caracteres para introducir escape {el valor por defecto es <>&\"'\\r\\n}]"},
   { "optionINDENT", "   [-INDENT (Control del n\u00FAmero de espacios para el sangrado {el valor por defecto es 0})]"},
   { "optionTT", "   [-TT (Rastrear las plantillas como si se estuviesen llamando.)]"},
   { "optionTG", "   [-TG (Rastrear cada evento de generaci\u00F3n.)]"},

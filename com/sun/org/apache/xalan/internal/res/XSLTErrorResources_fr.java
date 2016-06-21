@@ -858,7 +858,7 @@ public class XSLTErrorResources_fr extends ListResourceBundle
         "Gestionnaire de contenu NULL"},
 
     { ER_NULL_ERROR_HANDLER,
-        "Gestionnaire d'erreur NULL"},
+        "Gestionnaire d'erreurs NULL"},
 
     { ER_CANNOT_CALL_PARSE,
         "impossible d'appeler l'analyse si le gestionnaire de contenu n'est pas d\u00E9fini"},
@@ -1292,7 +1292,7 @@ public class XSLTErrorResources_fr extends ListResourceBundle
   {  "optionQ", "   [-Q  (Mode silencieux)]"},
   {  "optionLF", "   [-LF (Utiliser les retours \u00E0 la ligne uniquement en sortie {valeur par d\u00E9faut : CR/LF})]"},
   {  "optionCR", "   [-CR (Utiliser les retours chariot uniquement en sortie {valeur par d\u00E9faut : CR/LF})]"},
-  { "optionESCAPE", "   [-ESCAPE (Avec caract\u00E8res d'espacement {valeur par d\u00E9faut : <>&\"\'\\r\\n}]"},
+  { "optionESCAPE", "   [-ESCAPE (Avec caract\u00E8res d'espacement {valeur par d\u00E9faut : <>&\"'\\r\\n}]"},
   { "optionINDENT", "   [-INDENT (Contr\u00F4ler le nombre d'espaces \u00E0 mettre en retrait {valeur par d\u00E9faut : 0})]"},
   { "optionTT", "   [-TT (G\u00E9n\u00E9rer une trace des mod\u00E8les pendant qu'ils sont appel\u00E9s.)]"},
   { "optionTG", "   [-TG (G\u00E9n\u00E9rer une trace de chaque \u00E9v\u00E9nement de g\u00E9n\u00E9ration.)]"},

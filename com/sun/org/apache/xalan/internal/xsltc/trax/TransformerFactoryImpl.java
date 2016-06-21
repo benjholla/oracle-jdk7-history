@@ -8,12 +8,12 @@ import com.sun.org.apache.xalan.internal.XalanConstants;
 import com.sun.org.apache.xalan.internal.utils.FactoryImpl;
 import com.sun.org.apache.xalan.internal.utils.FeatureManager;
 import com.sun.org.apache.xalan.internal.utils.FeaturePropertyBase;
+import com.sun.org.apache.xalan.internal.utils.FeaturePropertyBase.State;
 import com.sun.org.apache.xalan.internal.utils.ObjectFactory;
 import com.sun.org.apache.xalan.internal.utils.SecuritySupport;
 import com.sun.org.apache.xalan.internal.utils.XMLSecurityManager;
 import com.sun.org.apache.xalan.internal.utils.XMLSecurityPropertyManager;
 import com.sun.org.apache.xalan.internal.utils.XMLSecurityPropertyManager.Property;
-import com.sun.org.apache.xalan.internal.utils.FeaturePropertyBase.State;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.Constants;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.SourceLoader;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.XSLTC;
@@ -31,6 +31,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.zip.ZipEntry;
@@ -38,7 +39,6 @@ import java.util.zip.ZipFile;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
 import javax.xml.transform.Templates;
@@ -154,6 +154,13 @@ public class TransformerFactoryImpl
 
     private final FeatureManager _featureManager;
 
+    private ClassLoader _extensionClassLoader = null;
+
+    
+    
+    
+    private Map<String, Class> _xsltcExtensionFunctions;
+
     
     public TransformerFactoryImpl() {
         this(true);
@@ -183,6 +190,12 @@ public class TransformerFactoryImpl
 
         
         _xmlSecurityManager = new XMLSecurityManager(true);
+        
+        _xsltcExtensionFunctions = null;
+    }
+
+    public Map<String,Class> getExternalExtensionsMap() {
+        return _xsltcExtensionFunctions;
     }
 
     
@@ -223,6 +236,8 @@ public class TransformerFactoryImpl
               return Boolean.FALSE;
         } else if (name.equals(XalanConstants.SECURITY_MANAGER)) {
             return _xmlSecurityManager;
+        } else if (name.equals(XalanConstants.JDK_EXTENSION_CLASSLOADER)) {
+           return _extensionClassLoader;
         }
 
         
@@ -328,6 +343,16 @@ public class TransformerFactoryImpl
             else if (value instanceof Integer) {
                 _indentNumber = ((Integer) value).intValue();
                 return;
+            }
+        }
+        else if ( name.equals(XalanConstants.JDK_EXTENSION_CLASSLOADER)) {
+            if (value instanceof ClassLoader) {
+                _extensionClassLoader = (ClassLoader) value;
+                return;
+            } else {
+                final ErrorMsg err
+                    = new ErrorMsg(ErrorMsg.JAXP_INVALID_ATTR_VALUE_ERR, "Extension Functions ClassLoader");
+                throw new IllegalArgumentException(err.toString());
             }
         }
 
@@ -673,7 +698,6 @@ public class TransformerFactoryImpl
                 
                 
                 resetTransientAttributes();
-
                 return new TemplatesImpl(bytecodes, transletClassName, null, _indentNumber, this);
             }
         }
@@ -690,8 +714,10 @@ public class TransformerFactoryImpl
         xsltc.setProperty(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, _accessExternalStylesheet);
         xsltc.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, _accessExternalDTD);
         xsltc.setProperty(XalanConstants.SECURITY_MANAGER, _xmlSecurityManager);
+        xsltc.setProperty(XalanConstants.JDK_EXTENSION_CLASSLOADER, _extensionClassLoader);
         xsltc.init();
-
+        if (!_isNotSecureProcessing)
+            _xsltcExtensionFunctions = xsltc.getExternalExtensionFunctions();
         
         if (_uriResolver != null) {
             xsltc.setSourceLoader(this);

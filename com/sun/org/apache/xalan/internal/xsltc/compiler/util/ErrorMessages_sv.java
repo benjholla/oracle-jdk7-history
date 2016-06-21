@@ -178,7 +178,7 @@ public class ErrorMessages_sv extends ListResourceBundle {
 
         
         {ErrorMsg.INTERNAL_ERR,
-        "Irreparabelt XSLTC-internfel: ''{0}''"},
+        "O\u00E5terkalleligt internt XSLTC-fel: ''{0}''"},
 
         
         {ErrorMsg.UNSUPPORTED_XSL_ERR,
@@ -198,7 +198,7 @@ public class ErrorMessages_sv extends ListResourceBundle {
 
         
         {ErrorMsg.ACCESSING_XSLT_TARGET_ERR,
-        "Could not read stylesheet target ''{0}'', because ''{1}'' access is not allowed."},
+        "Kunde inte l\u00E4sa formatmallen ''{0}'', eftersom ''{1}''-\u00E5tkomst inte till\u00E5ts p\u00E5 grund av begr\u00E4nsning som anges av egenskapen accessExternalStylesheet."},
 
         
         {ErrorMsg.NOT_IMPLEMENTED_ERR,
@@ -363,7 +363,7 @@ public class ErrorMessages_sv extends ListResourceBundle {
 
         
         {ErrorMsg.WARNING_PLUS_WRAPPED_MSG,
-        "VARNING:  ''{0}''\n       :{1}"},
+        "WARNING:  ''{0}''\n       :{1}"},
 
         
         {ErrorMsg.WARNING_MSG,
@@ -371,7 +371,7 @@ public class ErrorMessages_sv extends ListResourceBundle {
 
         
         {ErrorMsg.FATAL_ERR_PLUS_WRAPPED_MSG,
-        "O\u00C5TERKALLELIGT FEL:  ''{0}''\n           :{1}"},
+        "FATAL ERROR:  ''{0}''\n           :{1}"},
 
         
         {ErrorMsg.FATAL_ERR_MSG,
@@ -379,7 +379,7 @@ public class ErrorMessages_sv extends ListResourceBundle {
 
         
         {ErrorMsg.ERROR_PLUS_WRAPPED_MSG,
-        "FEL:  ''{0}''\n     :{1}"},
+        "ERROR:  ''{0}''\n     :{1}"},
 
         
         {ErrorMsg.ERROR_MSG,
@@ -415,7 +415,7 @@ public class ErrorMessages_sv extends ListResourceBundle {
 
         
         {ErrorMsg.INVALID_QNAME_ERR,
-        "Ett attribut vars v\u00E4rde m\u00E5ste vara ett QName eller en blankteckenseparerad lista med QNames hade v\u00E4rdet ''{0}''"},
+        "Ett attribut vars v\u00E4rde m\u00E5ste vara ett QName eller en blankteckenavgr\u00E4nsad lista med QNames hade v\u00E4rdet ''{0}''"},
 
         
         {ErrorMsg.INVALID_NCNAME_ERR,
@@ -435,7 +435,29 @@ public class ErrorMessages_sv extends ListResourceBundle {
         "Kan inte st\u00E4lla in funktionen ''{0}'' i denna TransformerFactory."},
 
         {ErrorMsg.JAXP_SECUREPROCESSING_FEATURE,
-        "FEATURE_SECURE_PROCESSING: Funktionen kan inte anges till false om s\u00E4kerhetshanteraren anv\u00E4nds."}
+        "FEATURE_SECURE_PROCESSING: Funktionen kan inte anges till false om s\u00E4kerhetshanteraren anv\u00E4nds."},
+
+        
+        {ErrorMsg.OUTLINE_ERR_TRY_CATCH,
+         "Internt XSLTC-fel: den genererade bytekoden inneh\u00E5ller ett try-catch-finally-block och kan inte g\u00F6ras till en disposition."},
+
+        
+        {ErrorMsg.OUTLINE_ERR_UNBALANCED_MARKERS,
+         "Internt XSLTC-fel: mark\u00F6rerna OutlineableChunkStart och OutlineableChunkEnd m\u00E5ste vara balanserade och korrekt kapslade."},
+
+        
+        {ErrorMsg.OUTLINE_ERR_DELETED_TARGET,
+         "Internt XSLTC-fel: originalmetoden refererar fortfarande till en instruktion som var en del av ett bytekodsblock som gjordes till en disposition."
+        },
+
+
+        
+        {ErrorMsg.OUTLINE_ERR_METHOD_TOO_BIG,
+         "Internt XSLTC-fel: en metod i transleten \u00F6verstiger Java Virtual Machines l\u00E4ngdbegr\u00E4nsning f\u00F6r en metod p\u00E5 64 kilobytes.  Det h\u00E4r orsakas vanligen av mycket stora mallar i en formatmall. F\u00F6rs\u00F6k att omstrukturera formatmallen att anv\u00E4nda mindre mallar."
+        },
+
+         {ErrorMsg.DESERIALIZE_TRANSLET_ERR, "N\u00E4r Java-s\u00E4kerheten \u00E4r aktiverad \u00E4r st\u00F6det f\u00F6r avserialisering av TemplatesImpl avaktiverat. Du kan \u00E5sidos\u00E4tta det h\u00E4r genom att st\u00E4lla in systemegenskapen jdk.xml.enableTemplatesImplDeserialization till sant."}
+
     };
 
     }

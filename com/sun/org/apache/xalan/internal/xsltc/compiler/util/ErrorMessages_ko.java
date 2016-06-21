@@ -198,7 +198,7 @@ public class ErrorMessages_ko extends ListResourceBundle {
 
         
         {ErrorMsg.ACCESSING_XSLT_TARGET_ERR,
-        "Could not read stylesheet target ''{0}'', because ''{1}'' access is not allowed."},
+        "accessExternalStylesheet \uC18D\uC131\uC73C\uB85C \uC124\uC815\uB41C \uC81C\uD55C\uC73C\uB85C \uC778\uD574 ''{1}'' \uC561\uC138\uC2A4\uAC00 \uD5C8\uC6A9\uB418\uC9C0 \uC54A\uC73C\uBBC0\uB85C \uC2A4\uD0C0\uC77C\uC2DC\uD2B8 \uB300\uC0C1 ''{0}''\uC744(\uB97C) \uC77D\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4."},
 
         
         {ErrorMsg.NOT_IMPLEMENTED_ERR,
@@ -363,7 +363,7 @@ public class ErrorMessages_ko extends ListResourceBundle {
 
         
         {ErrorMsg.WARNING_PLUS_WRAPPED_MSG,
-        "\uACBD\uACE0: ''{0}''\n       :{1}"},
+        "WARNING:  ''{0}''\n       :{1}"},
 
         
         {ErrorMsg.WARNING_MSG,
@@ -371,7 +371,7 @@ public class ErrorMessages_ko extends ListResourceBundle {
 
         
         {ErrorMsg.FATAL_ERR_PLUS_WRAPPED_MSG,
-        "\uCE58\uBA85\uC801\uC778 \uC624\uB958: ''{0}''\n           :{1}"},
+        "FATAL ERROR:  ''{0}''\n           :{1}"},
 
         
         {ErrorMsg.FATAL_ERR_MSG,
@@ -379,7 +379,7 @@ public class ErrorMessages_ko extends ListResourceBundle {
 
         
         {ErrorMsg.ERROR_PLUS_WRAPPED_MSG,
-        "\uC624\uB958: ''{0}''\n     :{1}"},
+        "ERROR:  ''{0}''\n     :{1}"},
 
         
         {ErrorMsg.ERROR_MSG,
@@ -435,7 +435,29 @@ public class ErrorMessages_ko extends ListResourceBundle {
         "\uC774 TransformerFactory\uC5D0\uC11C ''{0}'' \uAE30\uB2A5\uC744 \uC124\uC815\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4."},
 
         {ErrorMsg.JAXP_SECUREPROCESSING_FEATURE,
-        "FEATURE_SECURE_PROCESSING: \uBCF4\uC548 \uAD00\uB9AC\uC790\uAC00 \uC788\uC744 \uACBD\uC6B0 \uAE30\uB2A5\uC744 false\uB85C \uC124\uC815\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4."}
+        "FEATURE_SECURE_PROCESSING: \uBCF4\uC548 \uAD00\uB9AC\uC790\uAC00 \uC788\uC744 \uACBD\uC6B0 \uAE30\uB2A5\uC744 false\uB85C \uC124\uC815\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4."},
+
+        
+        {ErrorMsg.OUTLINE_ERR_TRY_CATCH,
+         "\uB0B4\uBD80 XSLTC \uC624\uB958: \uC0DD\uC131\uB41C \uBC14\uC774\uD2B8 \uCF54\uB4DC\uAC00 try-catch-finally \uBE14\uB85D\uC744 \uD3EC\uD568\uD558\uBBC0\uB85C outlined \uCC98\uB9AC\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4."},
+
+        
+        {ErrorMsg.OUTLINE_ERR_UNBALANCED_MARKERS,
+         "\uB0B4\uBD80 XSLTC \uC624\uB958: OutlineableChunkStart \uBC0F OutlineableChunkEnd \uD45C\uC2DC\uC790\uC758 \uC9DD\uC774 \uB9DE\uC544\uC57C \uD558\uACE0 \uC62C\uBC14\uB974\uAC8C \uC911\uCCA9\uB418\uC5B4\uC57C \uD569\uB2C8\uB2E4."},
+
+        
+        {ErrorMsg.OUTLINE_ERR_DELETED_TARGET,
+         "\uB0B4\uBD80 XSLTC \uC624\uB958: outlined \uCC98\uB9AC\uB41C \uBC14\uC774\uD2B8 \uCF54\uB4DC \uBE14\uB85D\uC5D0 \uC18D\uD55C \uBA85\uB839\uC774 \uC5EC\uC804\uD788 \uC6D0\uB798 \uBA54\uC18C\uB4DC\uC5D0\uC11C \uCC38\uC870\uB429\uB2C8\uB2E4."
+        },
+
+
+        
+        {ErrorMsg.OUTLINE_ERR_METHOD_TOO_BIG,
+         "\uB0B4\uBD80 XSLTC \uC624\uB958: translet\uC758 \uBA54\uC18C\uB4DC\uAC00 Java Virtual Machine\uC758 \uBA54\uC18C\uB4DC \uAE38\uC774 \uC81C\uD55C\uC778 64KB\uB97C \uCD08\uACFC\uD569\uB2C8\uB2E4. \uB300\uAC1C \uC2A4\uD0C0\uC77C\uC2DC\uD2B8\uC758 \uD15C\uD50C\uB9AC\uD2B8\uAC00 \uB9E4\uC6B0 \uD06C\uAE30 \uB54C\uBB38\uC5D0 \uBC1C\uC0DD\uD569\uB2C8\uB2E4. \uB354 \uC791\uC740 \uD15C\uD50C\uB9AC\uD2B8\uB97C \uC0AC\uC6A9\uD558\uB3C4\uB85D \uC2A4\uD0C0\uC77C\uC2DC\uD2B8\uB97C \uC7AC\uAD6C\uC131\uD574 \uBCF4\uC2ED\uC2DC\uC624."
+        },
+
+         {ErrorMsg.DESERIALIZE_TRANSLET_ERR, "Java \uBCF4\uC548\uC774 \uC0AC\uC6A9\uC73C\uB85C \uC124\uC815\uB41C \uACBD\uC6B0 TemplatesImpl \uC9C1\uB82C\uD654 \uD574\uC81C\uC5D0 \uB300\uD55C \uC9C0\uC6D0\uC774 \uC0AC\uC6A9 \uC548\uD568\uC73C\uB85C \uC124\uC815\uB429\uB2C8\uB2E4. jdk.xml.enableTemplatesImplDeserialization \uC2DC\uC2A4\uD15C \uC18D\uC131\uC744 true\uB85C \uC124\uC815\uD558\uBA74 \uC774\uB97C \uBB34\uD6A8\uD654\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4."}
+
     };
 
     }

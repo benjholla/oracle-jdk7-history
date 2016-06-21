@@ -198,7 +198,7 @@ public class ErrorMessages_de extends ListResourceBundle {
 
         
         {ErrorMsg.ACCESSING_XSLT_TARGET_ERR,
-        "Could not read stylesheet target ''{0}'', because ''{1}'' access is not allowed."},
+        "Stylesheet-Ziel \"{0}\" konnte nicht gelesen werden, weil der \"{1}\"-Zugriff wegen einer von der Eigenschaft accessExternalStylesheet festgelegten Einschr\u00E4nkung nicht zul\u00E4ssig ist."},
 
         
         {ErrorMsg.NOT_IMPLEMENTED_ERR,
@@ -363,7 +363,7 @@ public class ErrorMessages_de extends ListResourceBundle {
 
         
         {ErrorMsg.WARNING_PLUS_WRAPPED_MSG,
-        "WARNING:  \"{0}\"\n       :{1}"},
+        "WARNING:  ''{0}''\n       :{1}"},
 
         
         {ErrorMsg.WARNING_MSG,
@@ -371,7 +371,7 @@ public class ErrorMessages_de extends ListResourceBundle {
 
         
         {ErrorMsg.FATAL_ERR_PLUS_WRAPPED_MSG,
-        "FATAL ERROR:  \"{0}\"\n           :{1}"},
+        "FATAL ERROR:  ''{0}''\n           :{1}"},
 
         
         {ErrorMsg.FATAL_ERR_MSG,
@@ -379,7 +379,7 @@ public class ErrorMessages_de extends ListResourceBundle {
 
         
         {ErrorMsg.ERROR_PLUS_WRAPPED_MSG,
-        "ERROR:  \"{0}\"\n     :{1}"},
+        "ERROR:  ''{0}''\n     :{1}"},
 
         
         {ErrorMsg.ERROR_MSG,
@@ -435,7 +435,29 @@ public class ErrorMessages_de extends ListResourceBundle {
         "Das Feature \"{0}\" kann nicht f\u00FCr diese TransformerFactory festgelegt werden."},
 
         {ErrorMsg.JAXP_SECUREPROCESSING_FEATURE,
-        "FEATURE_SECURE_PROCESSING: Feature kann nicht auf \"false\" gesetzt werden, wenn Security Manager vorhanden ist."}
+        "FEATURE_SECURE_PROCESSING: Feature kann nicht auf \"false\" gesetzt werden, wenn Security Manager vorhanden ist."},
+
+        
+        {ErrorMsg.OUTLINE_ERR_TRY_CATCH,
+         "Interner XSLTC-Fehler: Der generierte Bytecode enth\u00E4lt einen Try-Catch-Finally-Block. Outline nicht m\u00F6glich."},
+
+        
+        {ErrorMsg.OUTLINE_ERR_UNBALANCED_MARKERS,
+         "Interner XSLTC-Fehler: Die Marker OutlineableChunkStart und OutlineableChunkEnd m\u00FCssen ausgeglichen und ordnungsgem\u00E4\u00DF platziert sein."},
+
+        
+        {ErrorMsg.OUTLINE_ERR_DELETED_TARGET,
+         "Interner XSLTC-Fehler: Eine Anweisung, die Teil eines Bytecodeblocks war, f\u00FCr den ein Outline erstellt wurde, wird nach wie vor in der Originalmethode referenziert."
+        },
+
+
+        
+        {ErrorMsg.OUTLINE_ERR_METHOD_TOO_BIG,
+         "Interner XSLTC-Fehler: Eine Methode im Translet \u00FCberschreitet die Java Virtual Machine-L\u00E4ngeneinschr\u00E4nkung einer Methode von 64 KB. Ursache hierf\u00FCr sind in der Regel sehr gro\u00DFe Vorlagen in einem Stylesheet. Versuchen Sie, das Stylesheet mit kleineren Vorlagen umzustrukturieren."
+        },
+
+         {ErrorMsg.DESERIALIZE_TRANSLET_ERR, "Wenn die Java-Sicherheit aktiviert ist, ist die Unterst\u00FCtzung f\u00FCr das Deserialisieren von TemplatesImpl deaktiviert. Dies kann durch Setzen der Systemeigenschaft jdk.xml.enableTemplatesImplDeserialization auf \"True\" au\u00DFer Kraft gesetzt werden."}
+
     };
 
     }

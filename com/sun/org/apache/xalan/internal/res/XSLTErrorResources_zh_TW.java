@@ -1292,7 +1292,7 @@ public class XSLTErrorResources_zh_TW extends ListResourceBundle
   {  "optionQ", "   [-Q  (\u975C\u97F3\u6A21\u5F0F)]"},
   {  "optionLF", "   [-LF (\u8F38\u51FA\u4E0A\u50C5\u4F7F\u7528\u63DB\u884C\u5B57\u5143 {\u9810\u8A2D\u70BA CR/LF})]"},
   {  "optionCR", "   [-CR (\u8F38\u51FA\u4E0A\u50C5\u4F7F\u7528\u6B78\u4F4D\u5B57\u5143 {\u9810\u8A2D\u70BA CR/LF})]"},
-  { "optionESCAPE", "   [-ESCAPE (\u8981\u9041\u96E2\u7684\u5B57\u5143 {\u9810\u8A2D\u70BA <>&\"\'\\r\\n}]"},
+  { "optionESCAPE", "   [-ESCAPE (\u8981\u9041\u96E2\u7684\u5B57\u5143 {\u9810\u8A2D\u70BA <>&\"'\\r\\n}]"},
   { "optionINDENT", "   [-INDENT (\u63A7\u5236\u8981\u7E2E\u6392\u7684\u7A7A\u9593 {\u9810\u8A2D\u70BA 0})]"},
   { "optionTT", "   [-TT (\u8FFD\u8E64\u547C\u53EB\u7684\u6A23\u677F\u3002)]"},
   { "optionTG", "   [-TG (\u8FFD\u8E64\u6BCF\u500B\u7522\u751F\u4E8B\u4EF6\u3002)]"},
