@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2012, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1998, 2014, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
  *
@@ -2081,6 +2081,13 @@ class Parser implements DTDConstants {
                         // null end tag.
                         endTag(false);
                         continue;
+                    } else if (textpos == 0) {
+                        if (!legalElementContext(dtd.pcdata)) {
+                            error("unexpected.pcdata");
+                        }
+                        if (last.breaksFlow()) {
+                            space = false;
+                        }
                     }
                     break;
 
