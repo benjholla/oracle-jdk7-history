@@ -413,32 +413,9 @@ public abstract class View implements SwingConstants {
     
     protected void forwardUpdate(DocumentEvent.ElementChange ec,
                                       DocumentEvent e, Shape a, ViewFactory f) {
-        Element elem = getElement();
-        int pos = e.getOffset();
-        int index0 = getViewIndex(pos, Position.Bias.Forward);
-        if (index0 == -1 && e.getType() == DocumentEvent.EventType.REMOVE &&
-            pos >= getEndOffset()) {
-            
-            
-            
-            index0 = getViewCount() - 1;
-        }
-        int index1 = index0;
-        View v = (index0 >= 0) ? getView(index0) : null;
-        if (v != null) {
-            if ((v.getStartOffset() == pos) && (pos > 0)) {
-                
-                
-                index0 = Math.max(index0 - 1, 0);
-            }
-        }
-        if (e.getType() != DocumentEvent.EventType.REMOVE) {
-            index1 = getViewIndex(pos + e.getLength(), Position.Bias.Forward);
-            if (index1 < 0) {
-                index1 = getViewCount() - 1;
-            }
-        }
-        int hole0 = index1 + 1;
+        calculateUpdateIndexes(e);
+
+        int hole0 = lastUpdateIndex + 1;
         int hole1 = hole0;
         Element[] addedElems = (ec != null) ? ec.getChildrenAdded() : null;
         if ((addedElems != null) && (addedElems.length > 0)) {
@@ -449,17 +426,44 @@ public abstract class View implements SwingConstants {
         
         
         
-        index0 = Math.max(index0, 0);
-        index1 = Math.max((getViewCount() - 1), 0);
-        for (int i = index0; i <= index1; i++) {
+        for (int i = firstUpdateIndex; i <= lastUpdateIndex; i++) {
             if (! ((i >= hole0) && (i <= hole1))) {
-                v = getView(i);
+                View v = getView(i);
                 if (v != null) {
                     Shape childAlloc = getChildAllocation(i, a);
                     forwardUpdateToView(v, e, childAlloc, f);
                 }
             }
         }
+    }
+
+    
+    void calculateUpdateIndexes(DocumentEvent e) {
+        int pos = e.getOffset();
+        firstUpdateIndex = getViewIndex(pos, Position.Bias.Forward);
+        if (firstUpdateIndex == -1 && e.getType() == DocumentEvent.EventType.REMOVE &&
+            pos >= getEndOffset()) {
+            
+            
+            
+            firstUpdateIndex = getViewCount() - 1;
+        }
+        lastUpdateIndex = firstUpdateIndex;
+        View v = (firstUpdateIndex >= 0) ? getView(firstUpdateIndex) : null;
+        if (v != null) {
+            if ((v.getStartOffset() == pos) && (pos > 0)) {
+                
+                
+                firstUpdateIndex = Math.max(firstUpdateIndex - 1, 0);
+            }
+        }
+        if (e.getType() != DocumentEvent.EventType.REMOVE) {
+            lastUpdateIndex = getViewIndex(pos + e.getLength(), Position.Bias.Forward);
+            if (lastUpdateIndex < 0) {
+                lastUpdateIndex = getViewCount() - 1;
+            }
+        }
+        firstUpdateIndex = Math.max(firstUpdateIndex, 0);
     }
 
     
@@ -526,5 +530,11 @@ public abstract class View implements SwingConstants {
 
     private View parent;
     private Element elem;
+
+    
+    int firstUpdateIndex;
+
+    
+    int lastUpdateIndex;
 
 };

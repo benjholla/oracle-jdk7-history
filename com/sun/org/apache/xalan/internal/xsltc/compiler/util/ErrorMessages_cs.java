@@ -12,7 +12,10 @@ public class ErrorMessages_cs extends ListResourceBundle {
 
 
     
-    private static final Object[][] _contents = new Object[][] {
+    
+    public Object[][] getContents()
+    {
+      return new Object[][] {
         {ErrorMsg.MULTIPLE_STYLESHEET_ERR,
         "V\u00edce ne\u017e jedna p\u0159edloha stylu je definov\u00e1na ve stejn\u00e9m souboru."},
 
@@ -403,9 +406,5 @@ public class ErrorMessages_cs extends ListResourceBundle {
         "FEATURE_SECURE_PROCESSING: Cannot set the feature to false when security manager is present."}
     };
 
-    
-    public Object[][] getContents()
-    {
-      return _contents;
     }
 }

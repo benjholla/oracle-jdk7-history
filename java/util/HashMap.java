@@ -115,13 +115,9 @@ public class HashMap<K,V>
 
     private static int roundUpToPowerOf2(int number) {
         
-        int rounded = number >= MAXIMUM_CAPACITY
+        return number >= MAXIMUM_CAPACITY
                 ? MAXIMUM_CAPACITY
-                : (rounded = Integer.highestOneBit(number)) != 0
-                    ? (Integer.bitCount(number) > 1) ? rounded << 1 : rounded
-                    : 1;
-
-        return rounded;
+                : (number > 1) ? Integer.highestOneBit((number - 1) << 1) : 1;
     }
 
     

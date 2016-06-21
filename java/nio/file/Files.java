@@ -5,6 +5,8 @@ package java.nio.file;
 import java.nio.file.attribute.*;
 import java.nio.file.spi.FileSystemProvider;
 import java.nio.file.spi.FileTypeDetector;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -715,44 +717,50 @@ public final class Files {
     }
 
     
+    private static final int MAX_BUFFER_SIZE = Integer.MAX_VALUE - 8;
+
+    
     private static byte[] read(InputStream source, int initialSize)
-        throws IOException
+            throws IOException
     {
         int capacity = initialSize;
         byte[] buf = new byte[capacity];
         int nread = 0;
-        int rem = buf.length;
         int n;
-        
-        
-        while ((n = source.read(buf, nread, rem)) > 0) {
-            nread += n;
-            rem -= n;
-            assert rem >= 0;
-            if (rem == 0) {
-                
-                int newCapacity = capacity << 1;
-                if (newCapacity < 0) {
-                    if (capacity == Integer.MAX_VALUE)
-                        throw new OutOfMemoryError("Required array size too large");
-                    newCapacity = Integer.MAX_VALUE;
-                }
-                rem = newCapacity - capacity;
-                buf = Arrays.copyOf(buf, newCapacity);
-                capacity = newCapacity;
+        for (;;) {
+            
+            
+            while ((n = source.read(buf, nread, capacity - nread)) > 0)
+                nread += n;
+
+            
+            
+            if (n < 0 || (n = source.read()) < 0)
+                break;
+
+            
+            if (capacity <= MAX_BUFFER_SIZE - capacity) {
+                capacity = Math.max(capacity << 1, BUFFER_SIZE);
+            } else {
+                if (capacity == MAX_BUFFER_SIZE)
+                    throw new OutOfMemoryError("Required array size too large");
+                capacity = MAX_BUFFER_SIZE;
             }
+            buf = Arrays.copyOf(buf, capacity);
+            buf[nread++] = (byte)n;
         }
         return (capacity == nread) ? buf : Arrays.copyOf(buf, nread);
     }
 
     
     public static byte[] readAllBytes(Path path) throws IOException {
-        long size = size(path);
-        if (size > (long)Integer.MAX_VALUE)
-            throw new OutOfMemoryError("Required array size too large");
+        try (SeekableByteChannel sbc = Files.newByteChannel(path);
+             InputStream in = Channels.newInputStream(sbc)) {
+            long size = sbc.size();
+            if (size > (long)MAX_BUFFER_SIZE)
+                throw new OutOfMemoryError("Required array size too large");
 
-        try (InputStream in = newInputStream(path)) {
-             return read(in, (int)size);
+            return read(in, (int)size);
         }
     }
 

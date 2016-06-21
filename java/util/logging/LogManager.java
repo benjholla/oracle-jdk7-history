@@ -19,7 +19,15 @@ public class LogManager {
     
     private static LogManager manager;
 
-    private Properties props = new Properties();
+    
+    
+    
+    
+    
+    
+    
+    private volatile Properties props = new Properties();
+
     private PropertyChangeSupport changes
                          = new PropertyChangeSupport(LogManager.class);
     private final static Level defaultLevel = Level.INFO;
@@ -378,7 +386,7 @@ public class LogManager {
             if (logger == null) {
                 
                 
-                removeLogger(name);
+                ref.dispose();
             }
             return logger;
         }
@@ -465,7 +473,7 @@ public class LogManager {
                     
                     
                     
-                    removeLogger(name);
+                    ref.dispose();
                 } else {
                     
                     return false;
@@ -511,10 +519,10 @@ public class LogManager {
             return true;
         }
 
-        
-        
-        void removeLogger(String name) {
-            namedLoggers.remove(name);
+        synchronized void removeLoggerRef(String name, LoggerWeakRef ref) {
+            if (namedLoggers.get(name) == ref) {
+                namedLoggers.remove(name);
+            }
         }
 
         synchronized Enumeration<String> getLoggerNames() {
@@ -692,6 +700,7 @@ public class LogManager {
         private String                name;       
         private LogNode               node;       
         private WeakReference<Logger> parentRef;  
+        private boolean disposed = false;         
 
         LoggerWeakRef(Logger logger) {
             super(logger, loggerRefQueue);
@@ -701,14 +710,45 @@ public class LogManager {
 
         
         void dispose() {
-            if (node != null) {
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            synchronized(this) {
                 
                 
-                node.context.removeLogger(name);
-                name = null;  
+                
+                
+                
+                
+                if (disposed) return;
+                disposed = true;
+            }
 
-                node.loggerRef = null;  
-                node = null;            
+            final LogNode n = node;
+            if (n != null) {
+                
+                
+                
+                
+                synchronized (n.context) {
+                    
+                    
+                    n.context.removeLoggerRef(name, this);
+                    name = null;  
+
+                    
+                    
+                    if (n.loggerRef == this) {
+                        n.loggerRef = null;  
+                    }
+                    node = null;            
+                }
             }
 
             if (parentRef != null) {
@@ -761,7 +801,7 @@ public class LogManager {
     
     
     private final static int MAX_ITERATIONS = 400;
-    final synchronized void drainLoggerRefQueueBounded() {
+    final void drainLoggerRefQueueBounded() {
         for (int i = 0; i < MAX_ITERATIONS; i++) {
             if (loggerRefQueue == null) {
                 

@@ -213,10 +213,11 @@ public class JPEGMetadata extends IIOMetadata implements Cloneable {
                         (JFIFMarkerSegment) findMarkerSegment
                         (JFIFMarkerSegment.class, true);
                     if (jfif == null) {
-                        throw new IIOException
-                            ("ICC APP2 encountered without prior JFIF!");
+                        newGuy = new MarkerSegment(buffer);
+                        newGuy.loadData(buffer);
+                    } else {
+                        jfif.addICC(buffer);
                     }
-                    jfif.addICC(buffer);
                     
                 } else {
                     newGuy = new MarkerSegment(buffer);

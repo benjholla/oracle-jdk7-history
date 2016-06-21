@@ -9,6 +9,7 @@ import java.net.SocketException;
 import java.net.ServerSocket;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.ServerSocketChannel;
+import java.security.PrivilegedAction;
 
 import com.sun.corba.se.pept.transport.Acceptor;
 
@@ -21,6 +22,22 @@ public class DefaultSocketFactoryImpl
     implements ORBSocketFactory
 {
     private ORB orb;
+    private static final boolean keepAlive;
+
+    static {
+        keepAlive = java.security.AccessController.doPrivileged(
+            new PrivilegedAction<Boolean>() {
+                @Override
+                public Boolean run () {
+                    String value =
+                        System.getProperty("com.sun.CORBA.transport.enableTcpKeepAlive");
+                    if (value != null)
+                        return new Boolean(!"false".equalsIgnoreCase(value));
+
+                    return Boolean.FALSE;
+                }
+            });
+    }
 
     public void setORB(ORB orb)
     {
@@ -62,6 +79,9 @@ public class DefaultSocketFactoryImpl
         
         socket.setTcpNoDelay(true);
 
+        if (keepAlive)
+            socket.setKeepAlive(true);
+
         return socket;
     }
 
@@ -72,6 +92,8 @@ public class DefaultSocketFactoryImpl
     {
         
         socket.setTcpNoDelay(true);
+        if (keepAlive)
+            socket.setKeepAlive(true);
     }
 }
 

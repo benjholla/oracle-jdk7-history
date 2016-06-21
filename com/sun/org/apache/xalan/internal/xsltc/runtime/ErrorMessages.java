@@ -12,7 +12,10 @@ public class ErrorMessages extends ListResourceBundle {
 
 
     
-    private static final Object[][] _contents =  new Object[][] {
+    
+    public Object[][] getContents()
+    {
+        return new Object[][] {
 
         
         {BasisLibrary.RUN_TIME_INTERNAL_ERR,
@@ -110,10 +113,6 @@ public class ErrorMessages extends ListResourceBundle {
         {BasisLibrary.UNALLOWED_EXTENSION_ELEMENT_ERR,
         "Use of the extension element ''{0}'' is not allowed when the secure processing feature is set to true."},
     };
-    
-    public Object[][] getContents()
-    {
-        return _contents;
     }
 
 }

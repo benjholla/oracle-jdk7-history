@@ -12,7 +12,10 @@ public class ErrorMessages_fr extends ListResourceBundle {
 
 
     
-    private static final Object[][] _contents =  new Object[][] {
+    
+    public Object[][] getContents()
+    {
+        return new Object[][] {
 
         
         {BasisLibrary.RUN_TIME_INTERNAL_ERR,
@@ -110,10 +113,6 @@ public class ErrorMessages_fr extends ListResourceBundle {
         {BasisLibrary.UNALLOWED_EXTENSION_ELEMENT_ERR,
         "L''utilisation de l''\u00E9l\u00E9ment d''extension ''{0}'' n''est pas autoris\u00E9e lorsque la fonctionnalit\u00E9 de traitement s\u00E9curis\u00E9 est d\u00E9finie sur True."},
     };
-    
-    public Object[][] getContents()
-    {
-        return _contents;
     }
 
 }

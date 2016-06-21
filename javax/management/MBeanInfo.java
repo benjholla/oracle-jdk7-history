@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.Objects;
 
 import static javax.management.ImmutableDescriptor.nonNullDescriptor;
 
@@ -250,22 +251,13 @@ public class MBeanInfo implements Cloneable, Serializable, DescriptorRead {
         if (hashCode != 0)
             return hashCode;
 
-        hashCode =
-            getClassName().hashCode() ^
-            getDescriptor().hashCode() ^
-            arrayHashCode(fastGetAttributes()) ^
-            arrayHashCode(fastGetOperations()) ^
-            arrayHashCode(fastGetConstructors()) ^
-            arrayHashCode(fastGetNotifications());
+        hashCode = Objects.hash(getClassName(), getDescriptor())
+                ^ Arrays.hashCode(fastGetAttributes())
+                ^ Arrays.hashCode(fastGetOperations())
+                ^ Arrays.hashCode(fastGetConstructors())
+                ^ Arrays.hashCode(fastGetNotifications());
 
         return hashCode;
-    }
-
-    private static int arrayHashCode(Object[] array) {
-        int hash = 0;
-        for (int i = 0; i < array.length; i++)
-            hash ^= array[i].hashCode();
-        return hash;
     }
 
     

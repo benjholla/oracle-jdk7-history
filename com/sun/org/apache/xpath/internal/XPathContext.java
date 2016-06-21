@@ -58,8 +58,7 @@ public class XPathContext extends DTMManager
   private boolean m_useServicesMechanism = true;
 
   
-  protected DTMManager m_dtmManager = DTMManager.newInstance(
-                   com.sun.org.apache.xpath.internal.objects.XMLStringFactoryImpl.getFactory());
+  protected DTMManager m_dtmManager = null;
 
   
    public DTMManager getDTMManager()

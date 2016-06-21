@@ -464,9 +464,13 @@ import java.io.Serializable;
         if (!initializeAuthority(uriSpec.substring(startPos, index))) {
           index = startPos - 2;
         }
-      }
-      else {
+      } else if (index < uriSpecLen) {
+        
+        
+        
         m_host = "";
+      } else {
+        throw new MalformedURIException("Expected authority.");
       }
     }
 

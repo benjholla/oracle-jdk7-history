@@ -12,7 +12,10 @@ public class ErrorMessages_sv extends ListResourceBundle {
 
 
     
-    private static final Object[][] _contents =  new Object[][] {
+    
+    public Object[][] getContents()
+    {
+      return new Object[][] {
         {ErrorMsg.MULTIPLE_STYLESHEET_ERR,
         "Fler \u00E4n en formatmall har definierats i samma fil."},
 
@@ -435,9 +438,5 @@ public class ErrorMessages_sv extends ListResourceBundle {
         "FEATURE_SECURE_PROCESSING: Funktionen kan inte anges till false om s\u00E4kerhetshanteraren anv\u00E4nds."}
     };
 
-    
-    public Object[][] getContents()
-    {
-        return _contents;
     }
 }

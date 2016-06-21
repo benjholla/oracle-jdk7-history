@@ -12,7 +12,10 @@ public class ErrorMessages_sk extends ListResourceBundle {
 
 
     
-    private static final Object[][] _contents =  new Object[][] {
+    
+    public Object[][] getContents()
+    {
+      return new Object[][] {
         {ErrorMsg.MULTIPLE_STYLESHEET_ERR,
         "Viac ne\u017e jeden \u0161t\u00fdl dokumentu bol definovan\u00fd v rovnakom s\u00fabore."},
 
@@ -403,9 +406,5 @@ public class ErrorMessages_sk extends ListResourceBundle {
         "FEATURE_SECURE_PROCESSING: Cannot set the feature to false when security manager is present."}
     };
 
-    
-    public Object[][] getContents()
-    {
-      return _contents;
     }
 }

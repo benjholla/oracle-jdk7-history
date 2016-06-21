@@ -7,6 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.io.StreamCorruptedException;
+import java.util.Objects;
 
 
 public class MBeanFeatureInfo implements Serializable, DescriptorRead {
@@ -60,9 +61,9 @@ public class MBeanFeatureInfo implements Serializable, DescriptorRead {
         if (!(o instanceof MBeanFeatureInfo))
             return false;
         MBeanFeatureInfo p = (MBeanFeatureInfo) o;
-        return (p.getName().equals(getName()) &&
-                p.getDescription().equals(getDescription()) &&
-                p.getDescriptor().equals(getDescriptor()));
+        return (Objects.equals(p.getName(), getName()) &&
+                Objects.equals(p.getDescription(), getDescription()) &&
+                Objects.equals(p.getDescriptor(), getDescriptor()));
     }
 
     public int hashCode() {

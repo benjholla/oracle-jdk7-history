@@ -41,7 +41,6 @@ final class ConditionalSpecialCasing {
         new Entry(0x00CC, new char[]{0x0069, 0x0307, 0x0300}, new char[]{0x00CC}, "lt", 0), 
         new Entry(0x00CD, new char[]{0x0069, 0x0307, 0x0301}, new char[]{0x00CD}, "lt", 0), 
         new Entry(0x0128, new char[]{0x0069, 0x0307, 0x0303}, new char[]{0x0128}, "lt", 0), 
-        new Entry(0x0130, new char[]{0x0069, 0x0307}, new char[]{0x0130}, "lt", 0), 
 
         
         
@@ -52,10 +51,7 @@ final class ConditionalSpecialCasing {
         new Entry(0x0049, new char[]{0x0131}, new char[]{0x0049}, "tr", NOT_BEFORE_DOT), 
         new Entry(0x0049, new char[]{0x0131}, new char[]{0x0049}, "az", NOT_BEFORE_DOT), 
         new Entry(0x0069, new char[]{0x0069}, new char[]{0x0130}, "tr", 0), 
-        new Entry(0x0069, new char[]{0x0069}, new char[]{0x0130}, "az", 0), 
-        
-        
-        new Entry(0x0130, new char[]{0x0069, 0x0307}, new char[]{0x0130}, "en", 0), 
+        new Entry(0x0069, new char[]{0x0069}, new char[]{0x0130}, "az", 0)  
     };
 
     

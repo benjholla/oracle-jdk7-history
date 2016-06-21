@@ -33,6 +33,7 @@ import sun.awt.HeadlessToolkit;
 import sun.awt.NullComponentPeer;
 import sun.awt.PeerEvent;
 import sun.awt.SunToolkit;
+import sun.awt.AWTAccessor;
 import sun.security.util.SecurityConstants;
 
 import sun.util.CoreResourceBundleControl;
@@ -542,6 +543,12 @@ public abstract class Toolkit {
 
     
     private static ResourceBundle resources;
+    private static ResourceBundle platformResources;
+
+    
+    private static void setPlatformResources(ResourceBundle bundle) {
+        platformResources = bundle;
+    }
 
     
     private static native void initIDs();
@@ -557,6 +564,13 @@ public abstract class Toolkit {
     }
 
     static {
+        AWTAccessor.setToolkitAccessor(
+                new AWTAccessor.ToolkitAccessor() {
+                    @Override
+                    public void setPlatformResources(ResourceBundle bundle) {
+                        Toolkit.setPlatformResources(bundle);
+                    }
+                });
         java.security.AccessController.doPrivileged(
                                  new java.security.PrivilegedAction() {
             public Object run() {
@@ -581,6 +595,14 @@ public abstract class Toolkit {
 
     
     public static String getProperty(String key, String defaultValue) {
+        
+        if (platformResources != null) {
+            try {
+                return platformResources.getString(key);
+            } catch (MissingResourceException e) {}
+        }
+
+        
         if (resources != null) {
             try {
                 return resources.getString(key);
@@ -1161,7 +1183,7 @@ public abstract class Toolkit {
             Runnable updater = new Runnable() {
                 public void run() {
                     PropertyChangeSupport pcs = (PropertyChangeSupport)
-                            AppContext.getAppContext().get(PROP_CHANGE_SUPPORT_KEY);
+                        AppContext.getAppContext().get(PROP_CHANGE_SUPPORT_KEY);
                     if (null != pcs) {
                         pcs.firePropertyChange(evt);
                     }

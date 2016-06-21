@@ -4,13 +4,14 @@ package java.util.logging;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
 
 
 public class Level implements java.io.Serializable {
-    private static String defaultBundle = "sun.util.logging.resources.logging";
+    private static final String defaultBundle = "sun.util.logging.resources.logging";
 
     
     private final String name;
@@ -22,7 +23,8 @@ public class Level implements java.io.Serializable {
     private final String resourceBundleName;
 
     
-    private String localizedLevelName;
+    private transient String localizedLevelName;
+    private transient Locale cachedLocale;
 
     
     public static final Level OFF = new Level("OFF",Integer.MAX_VALUE, defaultBundle);
@@ -65,6 +67,7 @@ public class Level implements java.io.Serializable {
         this.value = value;
         this.resourceBundleName = resourceBundleName;
         this.localizedLevelName = resourceBundleName == null ? name : null;
+        this.cachedLocale = null;
         KnownLevel.add(this);
     }
 
@@ -89,17 +92,71 @@ public class Level implements java.io.Serializable {
         return this.name;
     }
 
-    final synchronized String getLocalizedLevelName() {
+    private String computeLocalizedLevelName(Locale newLocale) {
+        ResourceBundle rb = ResourceBundle.getBundle(resourceBundleName, newLocale);
+        final String localizedName = rb.getString(name);
+
+        final boolean isDefaultBundle = defaultBundle.equals(resourceBundleName);
+        if (!isDefaultBundle) return localizedName;
+
+        
+        
+        
+        final Locale rbLocale = rb.getLocale();
+        final Locale locale =
+                Locale.ROOT.equals(rbLocale)
+                || name.equals(localizedName.toUpperCase(Locale.ROOT))
+                ? Locale.ROOT : rbLocale;
+
+        
+        
+        
+        
+        return Locale.ROOT.equals(locale) ? name : localizedName.toUpperCase(locale);
+    }
+
+    
+    
+    final String getCachedLocalizedLevelName() {
+
         if (localizedLevelName != null) {
-            return localizedLevelName;
+            if (cachedLocale != null) {
+                if (cachedLocale.equals(Locale.getDefault())) {
+                    
+                    
+                    return localizedLevelName;
+                }
+            }
         }
 
+        if (resourceBundleName == null) {
+            
+            return name;
+        }
+
+        
+        
+        
+        return null;
+    }
+
+    final synchronized String getLocalizedLevelName() {
+
+        
+        final String cachedLocalizedName = getCachedLocalizedLevelName();
+        if (cachedLocalizedName != null) {
+            return cachedLocalizedName;
+        }
+
+        
+        
+        final Locale newLocale = Locale.getDefault();
         try {
-            ResourceBundle rb = ResourceBundle.getBundle(resourceBundleName);
-            localizedLevelName = rb.getString(name);
+            localizedLevelName = computeLocalizedLevelName(newLocale);
         } catch (Exception ex) {
             localizedLevelName = name;
         }
+        cachedLocale = newLocale;
         return localizedLevelName;
     }
 
@@ -153,6 +210,7 @@ public class Level implements java.io.Serializable {
     }
 
     
+    @Override
     public final String toString() {
         return name;
     }
@@ -221,6 +279,7 @@ public class Level implements java.io.Serializable {
     }
 
     
+    @Override
     public boolean equals(Object ox) {
         try {
             Level lx = (Level)ox;
@@ -231,6 +290,7 @@ public class Level implements java.io.Serializable {
     }
 
     
+    @Override
     public int hashCode() {
         return this.value;
     }

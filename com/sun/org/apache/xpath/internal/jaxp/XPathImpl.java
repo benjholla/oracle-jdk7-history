@@ -18,6 +18,7 @@ import com.sun.org.apache.xpath.internal.objects.XObject;
 import com.sun.org.apache.xpath.internal.res.XPATHErrorResources;
 import com.sun.org.apache.xalan.internal.res.XSLMessages;
 import com.sun.org.apache.xalan.internal.utils.FactoryImpl;
+import com.sun.org.apache.xalan.internal.utils.FeatureManager;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.Document;
@@ -45,18 +46,20 @@ public class XPathImpl implements javax.xml.xpath.XPath {
     
     private boolean featureSecureProcessing = false;
     private boolean useServiceMechanism = true;
+    private final FeatureManager featureManager;
 
     XPathImpl( XPathVariableResolver vr, XPathFunctionResolver fr ) {
-        this.origVariableResolver = this.variableResolver = vr;
-        this.origFunctionResolver = this.functionResolver = fr;
+        this(vr, fr, false, true, new FeatureManager());
     }
 
     XPathImpl( XPathVariableResolver vr, XPathFunctionResolver fr,
-            boolean featureSecureProcessing, boolean useServiceMechanism ) {
+            boolean featureSecureProcessing, boolean useServiceMechanism,
+            FeatureManager featureManager) {
         this.origVariableResolver = this.variableResolver = vr;
         this.origFunctionResolver = this.functionResolver = fr;
         this.featureSecureProcessing = featureSecureProcessing;
         this.useServiceMechanism = useServiceMechanism;
+        this.featureManager = featureManager;
     }
 
     
@@ -141,7 +144,7 @@ public class XPathImpl implements javax.xml.xpath.XPath {
         com.sun.org.apache.xpath.internal.XPathContext xpathSupport = null;
         if ( functionResolver != null ) {
             JAXPExtensionsProvider jep = new JAXPExtensionsProvider(
-                    functionResolver, featureSecureProcessing );
+                    functionResolver, featureSecureProcessing, featureManager );
             xpathSupport = new com.sun.org.apache.xpath.internal.XPathContext( jep );
         } else {
             xpathSupport = new com.sun.org.apache.xpath.internal.XPathContext();
@@ -273,7 +276,7 @@ public class XPathImpl implements javax.xml.xpath.XPath {
             
             XPathExpressionImpl ximpl = new XPathExpressionImpl (xpath,
                     prefixResolver, functionResolver, variableResolver,
-                    featureSecureProcessing, useServiceMechanism );
+                    featureSecureProcessing, useServiceMechanism, featureManager );
             return ximpl;
         } catch ( javax.xml.transform.TransformerException te ) {
             throw new XPathExpressionException ( te ) ;

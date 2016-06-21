@@ -247,40 +247,54 @@ final class UNIXProcess extends Process {
 
     
     static class ProcessPipeInputStream extends BufferedInputStream {
+        private final Object closeLock = new Object();
+
         ProcessPipeInputStream(int fd) {
             super(new FileInputStream(newFileDescriptor(fd)));
         }
 
-        private static byte[] drainInputStream(InputStream in)
+        private InputStream drainInputStream(InputStream in)
                 throws IOException {
-            if (in == null) return null;
             int n = 0;
             int j;
             byte[] a = null;
-            while ((j = in.available()) > 0) {
-                a = (a == null) ? new byte[j] : Arrays.copyOf(a, n + j);
-                n += in.read(a, n, j);
+            synchronized (closeLock) {
+                if (buf == null) 
+                    return null; 
+                j = in.available();
             }
-            return (a == null || n == a.length) ? a : Arrays.copyOf(a, n);
+            while (j > 0) {
+                a = (a == null) ? new byte[j] : Arrays.copyOf(a, n + j);
+                synchronized (closeLock) {
+                    if (buf == null) 
+                        return null; 
+                    n += in.read(a, n, j);
+                    j = in.available();
+                }
+            }
+            return (a == null) ?
+                    ProcessBuilder.NullInputStream.INSTANCE :
+                    new ByteArrayInputStream(n == a.length ? a : Arrays.copyOf(a, n));
         }
 
         
         synchronized void processExited() {
-            
-            
             try {
                 InputStream in = this.in;
                 if (in != null) {
-                    byte[] stragglers = drainInputStream(in);
+                    InputStream stragglers = drainInputStream(in);
                     in.close();
-                    this.in = (stragglers == null) ?
-                        ProcessBuilder.NullInputStream.INSTANCE :
-                        new ByteArrayInputStream(stragglers);
-                    if (buf == null) 
-                        this.in = null;
+                    this.in = stragglers;
                 }
-            } catch (IOException ignored) {
-                
+            } catch (IOException ignored) { }
+        }
+
+        @Override
+        public void close() throws IOException {
+            
+            
+            synchronized (closeLock) {
+                super.close();
             }
         }
     }

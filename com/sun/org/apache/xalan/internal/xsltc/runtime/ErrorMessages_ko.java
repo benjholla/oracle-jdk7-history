@@ -12,7 +12,10 @@ public class ErrorMessages_ko extends ListResourceBundle {
 
 
     
-    private static final Object[][] _contents =  new Object[][] {
+    
+    public Object[][] getContents()
+    {
+        return new Object[][] {
 
         
         {BasisLibrary.RUN_TIME_INTERNAL_ERR,
@@ -110,10 +113,6 @@ public class ErrorMessages_ko extends ListResourceBundle {
         {BasisLibrary.UNALLOWED_EXTENSION_ELEMENT_ERR,
         "\uBCF4\uC548 \uCC98\uB9AC \uAE30\uB2A5\uC774 true\uB85C \uC124\uC815\uB41C \uACBD\uC6B0 \uD655\uC7A5 \uC694\uC18C ''{0}''\uC744(\uB97C) \uC0AC\uC6A9\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4."},
     };
-    
-    public Object[][] getContents()
-    {
-        return _contents;
     }
 
 }

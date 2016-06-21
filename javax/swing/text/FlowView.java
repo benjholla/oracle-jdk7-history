@@ -512,6 +512,22 @@ public abstract class FlowView extends BoxView {
         }
 
         
+        @Override
+        protected void forwardUpdate(DocumentEvent.ElementChange ec,
+                                          DocumentEvent e, Shape a, ViewFactory f) {
+            calculateUpdateIndexes(e);
+            
+            lastUpdateIndex = Math.max((getViewCount() - 1), 0);
+            for (int i = firstUpdateIndex; i <= lastUpdateIndex; i++) {
+                View v = getView(i);
+                if (v != null) {
+                    Shape childAlloc = getChildAllocation(i, a);
+                    forwardUpdateToView(v, e, childAlloc, f);
+                }
+            }
+        }
+
+        
         
 
         

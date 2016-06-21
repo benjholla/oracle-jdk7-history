@@ -11,11 +11,12 @@ class FactoryFinder {
     
     private static Object newInstance(String className,
                                       ClassLoader classLoader)
-        throws SOAPException
+            throws SOAPException
     {
         try {
             Class spiClass = safeLoadClass(className, classLoader);
             return spiClass.newInstance();
+
         } catch (ClassNotFoundException x) {
             throw new SOAPException("Provider " + className + " not found", x);
         } catch (Exception x) {
@@ -25,21 +26,21 @@ class FactoryFinder {
 
     
     static Object find(String factoryId)
-        throws SOAPException
+            throws SOAPException
     {
         return find(factoryId, null, false);
     }
 
     
     static Object find(String factoryId, String fallbackClassName)
-        throws SOAPException
+            throws SOAPException
     {
         return find(factoryId, fallbackClassName, true);
     }
 
     
     static Object find(String factoryId, String defaultClassName,
-            boolean tryFallback) throws SOAPException {
+                       boolean tryFallback) throws SOAPException {
         ClassLoader classLoader;
         try {
             classLoader = Thread.currentThread().getContextClassLoader();
@@ -50,7 +51,7 @@ class FactoryFinder {
         
         try {
             String systemProp =
-                System.getProperty( factoryId );
+                    System.getProperty( factoryId );
             if( systemProp!=null) {
                 return newInstance(systemProp, classLoader);
             }
@@ -61,7 +62,7 @@ class FactoryFinder {
         try {
             String javah=System.getProperty( "java.home" );
             String configFile = javah + File.separator +
-                "lib" + File.separator + "jaxm.properties";
+                    "lib" + File.separator + "jaxm.properties";
             File f=new File( configFile );
             if( f.exists()) {
                 Properties props=new Properties();
@@ -84,13 +85,13 @@ class FactoryFinder {
 
             if( is!=null ) {
                 BufferedReader rd =
-                    new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                        new BufferedReader(new InputStreamReader(is, "UTF-8"));
 
                 String factoryClassName = rd.readLine();
                 rd.close();
 
                 if (factoryClassName != null &&
-                    ! "".equals(factoryClassName)) {
+                        ! "".equals(factoryClassName)) {
                     return newInstance(factoryClassName, classLoader);
                 }
             }
@@ -105,14 +106,14 @@ class FactoryFinder {
         
         if (defaultClassName == null) {
             throw new SOAPException(
-                "Provider for " + factoryId + " cannot be found", null);
+                    "Provider for " + factoryId + " cannot be found", null);
         }
         return newInstance(defaultClassName, classLoader);
     }
 
     
     private static Class safeLoadClass(String className,
-            ClassLoader classLoader)
+                                       ClassLoader classLoader)
             throws ClassNotFoundException {
         try {
             

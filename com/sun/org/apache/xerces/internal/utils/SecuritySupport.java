@@ -170,7 +170,7 @@ public final class SecuritySupport {
         if (i > 0) {
             return uri.substring(i+1, uri.length());
         }
-        return "";
+        return uri;
     }
 
     

@@ -355,7 +355,7 @@ public class GlyphView extends View implements TabableView, Cloneable {
             int x1 = x0 + (int) painter.getSpan(this, p0, p1, getTabExpander(), x0);
 
             
-            int y = alloc.y + alloc.height - (int) painter.getDescent(this);
+            int y = alloc.y + (int)(painter.getHeight(this) - painter.getDescent(this));
             if (underline) {
                 int yTmp = y + 1;
                 g.drawLine(x0, yTmp, x1, yTmp);

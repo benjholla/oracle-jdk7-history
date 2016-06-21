@@ -12,7 +12,10 @@ public class ErrorMessages_cs extends ListResourceBundle {
 
 
     
-    private static final Object[][] _contents =  new Object[][] {
+    
+    public Object[][] getContents()
+    {
+        return new Object[][] {
 
         
         {BasisLibrary.RUN_TIME_INTERNAL_ERR,
@@ -83,10 +86,6 @@ public class ErrorMessages_cs extends ListResourceBundle {
         "Nelze p\u0159elo\u017eit odkazy URI ''{0}''."}
     };
 
-    
-    public Object[][] getContents()
-    {
-      return _contents;
     }
 
 }

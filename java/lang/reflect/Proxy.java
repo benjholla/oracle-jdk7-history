@@ -2,19 +2,15 @@
 
 package java.lang.reflect;
 
-import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.WeakCache.BiFunction;
 import java.security.AccessController;
 import java.security.Permission;
 import java.security.PrivilegedAction;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.List;
-import java.util.WeakHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import sun.misc.ProxyGenerator;
 import sun.reflect.CallerSensitive;
 import sun.reflect.Reflection;
@@ -27,26 +23,12 @@ public class Proxy implements java.io.Serializable {
     private static final long serialVersionUID = -2222568056686623797L;
 
     
-    private final static String proxyClassNamePrefix = "$Proxy";
-
-    
-    private final static Class[] constructorParams =
+    private static final Class<?>[] constructorParams =
         { InvocationHandler.class };
 
     
-    private static Map<ClassLoader, Map<List<String>, Object>> loaderToCache
-        = new WeakHashMap<>();
-
-    
-    private static Object pendingGenerationMarker = new Object();
-
-    
-    private static long nextUniqueNumber = 0;
-    private static Object nextUniqueNumberLock = new Object();
-
-    
-    private static Map<Class<?>, Void> proxyClasses =
-        Collections.synchronizedMap(new WeakHashMap<Class<?>, Void>());
+    private static final WeakCache<ClassLoader, Class<?>[], Class<?>>
+        proxyClassCache = new WeakCache<>(new KeyFactory(), new ProxyClassFactory());
 
     
     protected InvocationHandler h;
@@ -151,92 +133,171 @@ public class Proxy implements java.io.Serializable {
             throw new IllegalArgumentException("interface limit exceeded");
         }
 
-        Class<?> proxyClass = null;
-
         
-        String[] interfaceNames = new String[interfaces.length];
-
         
-        Set<Class<?>> interfaceSet = new HashSet<>();
+        
+        return proxyClassCache.get(loader, interfaces);
+    }
 
-        for (int i = 0; i < interfaces.length; i++) {
-            
-            String interfaceName = interfaces[i].getName();
-            Class<?> interfaceClass = null;
-            try {
-                interfaceClass = Class.forName(interfaceName, false, loader);
-            } catch (ClassNotFoundException e) {
-            }
-            if (interfaceClass != interfaces[i]) {
-                throw new IllegalArgumentException(
-                    interfaces[i] + " is not visible from class loader");
-            }
+    
+    private static final Object key0 = new Object();
 
-            
-            if (!interfaceClass.isInterface()) {
-                throw new IllegalArgumentException(
-                    interfaceClass.getName() + " is not an interface");
-            }
+    
 
-            
-            if (interfaceSet.contains(interfaceClass)) {
-                throw new IllegalArgumentException(
-                    "repeated interface: " + interfaceClass.getName());
-            }
-            interfaceSet.add(interfaceClass);
+    
+    private static final class Key1 extends WeakReference<Class<?>> {
+        private final int hash;
 
-            interfaceNames[i] = interfaceName;
+        Key1(Class<?> intf) {
+            super(intf);
+            this.hash = intf.hashCode();
         }
 
-        
-        List<String> key = Arrays.asList(interfaceNames);
-
-        
-        Map<List<String>, Object> cache;
-        synchronized (loaderToCache) {
-            cache = loaderToCache.get(loader);
-            if (cache == null) {
-                cache = new HashMap<>();
-                loaderToCache.put(loader, cache);
-            }
-            
+        @Override
+        public int hashCode() {
+            return hash;
         }
 
-        
-        synchronized (cache) {
-            
-            do {
-                Object value = cache.get(key);
-                if (value instanceof Reference) {
-                    proxyClass = (Class<?>) ((Reference) value).get();
+        @Override
+        public boolean equals(Object obj) {
+            Class<?> intf;
+            return this == obj ||
+                   obj != null &&
+                   obj.getClass() == Key1.class &&
+                   (intf = get()) != null &&
+                   intf == ((Key1) obj).get();
+        }
+    }
+
+    
+    private static final class Key2 extends WeakReference<Class<?>> {
+        private final int hash;
+        private final WeakReference<Class<?>> ref2;
+
+        Key2(Class<?> intf1, Class<?> intf2) {
+            super(intf1);
+            hash = 31 * intf1.hashCode() + intf2.hashCode();
+            ref2 = new WeakReference<Class<?>>(intf2);
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            Class<?> intf1, intf2;
+            return this == obj ||
+                   obj != null &&
+                   obj.getClass() == Key2.class &&
+                   (intf1 = get()) != null &&
+                   intf1 == ((Key2) obj).get() &&
+                   (intf2 = ref2.get()) != null &&
+                   intf2 == ((Key2) obj).ref2.get();
+        }
+    }
+
+    
+    private static final class KeyX {
+        private final int hash;
+        private final WeakReference<Class<?>>[] refs;
+
+        KeyX(Class<?>[] interfaces) {
+            hash = Arrays.hashCode(interfaces);
+            refs = new WeakReference[interfaces.length];
+            for (int i = 0; i < interfaces.length; i++) {
+                refs[i] = new WeakReference(interfaces[i]);
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return this == obj ||
+                   obj != null &&
+                   obj.getClass() == KeyX.class &&
+                   equals(refs, ((KeyX) obj).refs);
+        }
+
+        private static boolean equals(WeakReference<Class<?>>[] refs1,
+                                      WeakReference<Class<?>>[] refs2) {
+            if (refs1.length != refs2.length) {
+                return false;
+            }
+            for (int i = 0; i < refs1.length; i++) {
+                Class<?> intf = refs1[i].get();
+                if (intf == null || intf != refs2[i].get()) {
+                    return false;
                 }
-                if (proxyClass != null) {
-                    
-                    return proxyClass;
-                } else if (value == pendingGenerationMarker) {
-                    
-                    try {
-                        cache.wait();
-                    } catch (InterruptedException e) {
-                        
-                    }
-                    continue;
-                } else {
-                    
-                    cache.put(key, pendingGenerationMarker);
-                    break;
-                }
-            } while (true);
+            }
+            return true;
         }
+    }
 
-        try {
+    
+    private static final class KeyFactory
+        implements BiFunction<ClassLoader, Class<?>[], Object>
+    {
+        @Override
+        public Object apply(ClassLoader classLoader, Class<?>[] interfaces) {
+            switch (interfaces.length) {
+                case 1: return new Key1(interfaces[0]); 
+                case 2: return new Key2(interfaces[0], interfaces[1]);
+                case 0: return key0;
+                default: return new KeyX(interfaces);
+            }
+        }
+    }
+
+    
+    private static final class ProxyClassFactory
+        implements BiFunction<ClassLoader, Class<?>[], Class<?>>
+    {
+        
+        private static final String proxyClassNamePrefix = "$Proxy";
+
+        
+        private static final AtomicLong nextUniqueNumber = new AtomicLong();
+
+        @Override
+        public Class<?> apply(ClassLoader loader, Class<?>[] interfaces) {
+
+            Map<Class<?>, Boolean> interfaceSet = new IdentityHashMap<>(interfaces.length);
+            for (Class<?> intf : interfaces) {
+                
+                Class<?> interfaceClass = null;
+                try {
+                    interfaceClass = Class.forName(intf.getName(), false, loader);
+                } catch (ClassNotFoundException e) {
+                }
+                if (interfaceClass != intf) {
+                    throw new IllegalArgumentException(
+                        intf + " is not visible from class loader");
+                }
+                
+                if (!interfaceClass.isInterface()) {
+                    throw new IllegalArgumentException(
+                        interfaceClass.getName() + " is not an interface");
+                }
+                
+                if (interfaceSet.put(interfaceClass, Boolean.TRUE) != null) {
+                    throw new IllegalArgumentException(
+                        "repeated interface: " + interfaceClass.getName());
+                }
+            }
+
             String proxyPkg = null;     
 
             
-            for (int i = 0; i < interfaces.length; i++) {
-                int flags = interfaces[i].getModifiers();
+            for (Class<?> intf : interfaces) {
+                int flags = intf.getModifiers();
                 if (!Modifier.isPublic(flags)) {
-                    String name = interfaces[i].getName();
+                    String name = intf.getName();
                     int n = name.lastIndexOf('.');
                     String pkg = ((n == -1) ? "" : name.substring(0, n + 1));
                     if (proxyPkg == null) {
@@ -253,41 +314,21 @@ public class Proxy implements java.io.Serializable {
                 proxyPkg = ReflectUtil.PROXY_PACKAGE + ".";
             }
 
-            {
-                
-                long num;
-                synchronized (nextUniqueNumberLock) {
-                    num = nextUniqueNumber++;
-                }
-                String proxyName = proxyPkg + proxyClassNamePrefix + num;
-                
-
-                
-                byte[] proxyClassFile = ProxyGenerator.generateProxyClass(
-                    proxyName, interfaces);
-                try {
-                    proxyClass = defineClass0(loader, proxyName,
-                        proxyClassFile, 0, proxyClassFile.length);
-                } catch (ClassFormatError e) {
-                    
-                    throw new IllegalArgumentException(e.toString());
-                }
-            }
             
-            proxyClasses.put(proxyClass, null);
+            long num = nextUniqueNumber.getAndIncrement();
+            String proxyName = proxyPkg + proxyClassNamePrefix + num;
 
-        } finally {
             
-            synchronized (cache) {
-                if (proxyClass != null) {
-                    cache.put(key, new WeakReference<Class<?>>(proxyClass));
-                } else {
-                    cache.remove(key);
-                }
-                cache.notifyAll();
+            byte[] proxyClassFile = ProxyGenerator.generateProxyClass(
+                proxyName, interfaces);
+            try {
+                return defineClass0(loader, proxyName,
+                                    proxyClassFile, 0, proxyClassFile.length);
+            } catch (ClassFormatError e) {
+                
+                throw new IllegalArgumentException(e.toString());
             }
         }
-        return proxyClass;
     }
 
     
@@ -346,11 +387,7 @@ public class Proxy implements java.io.Serializable {
 
     
     public static boolean isProxyClass(Class<?> cl) {
-        if (cl == null) {
-            throw new NullPointerException();
-        }
-
-        return proxyClasses.containsKey(cl);
+        return Proxy.class.isAssignableFrom(cl) && proxyClassCache.containsValue(cl);
     }
 
     

@@ -12,7 +12,10 @@ public class ErrorMessages_de extends ListResourceBundle {
 
 
     
-    private static final Object[][] _contents =  new Object[][] {
+    
+    public Object[][] getContents()
+    {
+      return new Object[][] {
         {ErrorMsg.MULTIPLE_STYLESHEET_ERR,
         "Mehrere Stylesheets in derselben Datei definiert."},
 
@@ -435,9 +438,5 @@ public class ErrorMessages_de extends ListResourceBundle {
         "FEATURE_SECURE_PROCESSING: Feature kann nicht auf \"false\" gesetzt werden, wenn Security Manager vorhanden ist."}
     };
 
-    
-    public Object[][] getContents()
-    {
-        return _contents;
     }
 }

@@ -7,13 +7,7 @@ import com.sun.org.apache.xalan.internal.XalanConstants;
 import javax.xml.XMLConstants;
 
 
-public final class XMLSecurityPropertyManager {
-
-    
-    public static enum State {
-        
-        DEFAULT, FSP, JAXPDOTPROPERTIES, SYSTEMPROPERTY, APIPROPERTY
-    }
+public final class XMLSecurityPropertyManager extends FeaturePropertyBase {
 
     
     public static enum Property {
@@ -41,11 +35,6 @@ public final class XMLSecurityPropertyManager {
 
 
     
-    private final String[] values;
-    
-    private State[] states = {State.DEFAULT, State.DEFAULT};
-
-    
     public XMLSecurityPropertyManager() {
         values = new String[Property.values().length];
         for (Property property : Property.values()) {
@@ -53,54 +42,6 @@ public final class XMLSecurityPropertyManager {
         }
         
         readSystemProperties();
-    }
-
-    
-    public boolean setValue(String propertyName, State state, Object value) {
-        int index = getIndex(propertyName);
-        if (index > -1) {
-            setValue(index, state, (String)value);
-            return true;
-        }
-        return false;
-    }
-
-    
-    public void setValue(Property property, State state, String value) {
-        
-        if (state.compareTo(states[property.ordinal()]) >= 0) {
-            values[property.ordinal()] = value;
-            states[property.ordinal()] = state;
-        }
-    }
-
-    
-    public void setValue(int index, State state, String value) {
-        
-        if (state.compareTo(states[index]) >= 0) {
-            values[index] = value;
-            states[index] = state;
-        }
-    }
-
-    
-    public String getValue(String propertyName) {
-        int index = getIndex(propertyName);
-        if (index > -1) {
-            return getValueByIndex(index);
-        }
-
-        return null;
-    }
-
-    
-    public String getValue(Property property) {
-        return values[property.ordinal()];
-    }
-
-    
-    public String getValueByIndex(int index) {
-        return values[index];
     }
 
     
@@ -122,23 +63,4 @@ public final class XMLSecurityPropertyManager {
                 XalanConstants.SP_ACCESS_EXTERNAL_STYLESHEET);
     }
 
-    
-    private void getSystemProperty(Property property, String systemProperty) {
-        try {
-            String value = SecuritySupport.getSystemProperty(systemProperty);
-            if (value != null) {
-                values[property.ordinal()] = value;
-                states[property.ordinal()] = State.SYSTEMPROPERTY;
-                return;
-            }
-
-            value = SecuritySupport.readJAXPProperty(systemProperty);
-            if (value != null) {
-                values[property.ordinal()] = value;
-                states[property.ordinal()] = State.JAXPDOTPROPERTIES;
-            }
-        } catch (NumberFormatException e) {
-            
-        }
-    }
 }

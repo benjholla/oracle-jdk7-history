@@ -119,7 +119,7 @@ public class DocumentBuilderImpl extends DocumentBuilder
         
         
         if (dbf.isValidating()) {
-            fInitErrorHandler = new DefaultValidationErrorHandler();
+            fInitErrorHandler = new DefaultValidationErrorHandler(domParser.getXMLParserConfiguration().getLocale());
             setErrorHandler(fInitErrorHandler);
         }
         else {

@@ -401,7 +401,10 @@ public class XSLTErrorResources_zh_CN extends ListResourceBundle
 
   
 
-  private static final Object[][] _contents = new Object[][] {
+  
+  public Object[][] getContents()
+  {
+      return new Object[][] {
 
   
   {"ER0000" , "{0}" },
@@ -1342,10 +1345,6 @@ public class XSLTErrorResources_zh_CN extends ListResourceBundle
 
   };
 
-  
-  public Object[][] getContents()
-  {
-      return _contents;
   }
   
 

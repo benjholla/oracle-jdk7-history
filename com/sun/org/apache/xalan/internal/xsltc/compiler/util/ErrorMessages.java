@@ -12,7 +12,10 @@ public class ErrorMessages extends ListResourceBundle {
 
 
     
-    private static final Object[][] _contents =  new Object[][] {
+    
+    public Object[][] getContents()
+    {
+      return new Object[][] {
         {ErrorMsg.MULTIPLE_STYLESHEET_ERR,
         "More than one stylesheet defined in the same file."},
 
@@ -505,9 +508,5 @@ public class ErrorMessages extends ListResourceBundle {
 
     };
 
-    
-    public Object[][] getContents()
-    {
-        return _contents;
     }
 }

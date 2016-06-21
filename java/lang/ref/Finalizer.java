@@ -4,12 +4,11 @@ package java.lang.ref;
 
 import java.security.PrivilegedAction;
 import java.security.AccessController;
-
+import sun.misc.JavaLangAccess;
+import sun.misc.SharedSecrets;
+import sun.misc.VM;
 
 final class Finalizer extends FinalReference { 
-
-    
-    static native void invokeFinalizeMethod(Object o) throws Throwable;
 
     private static ReferenceQueue queue = new ReferenceQueue();
     private static Finalizer unfinalized = null;
@@ -63,7 +62,7 @@ final class Finalizer extends FinalReference {
         new Finalizer(finalizee);
     }
 
-    private void runFinalizer() {
+    private void runFinalizer(JavaLangAccess jla) {
         synchronized (this) {
             if (hasBeenFinalized()) return;
             remove();
@@ -71,7 +70,8 @@ final class Finalizer extends FinalReference {
         try {
             Object finalizee = this.get();
             if (finalizee != null && !(finalizee instanceof java.lang.Enum)) {
-                invokeFinalizeMethod(finalizee);
+                jla.invokeFinalize(finalizee);
+
                 
                 finalizee = null;
             }
@@ -101,16 +101,21 @@ final class Finalizer extends FinalReference {
 
     
     static void runFinalization() {
+        if (!VM.isBooted()) {
+            return;
+        }
+
         forkSecondaryFinalizer(new Runnable() {
             private volatile boolean running;
             public void run() {
                 if (running)
                     return;
+                final JavaLangAccess jla = SharedSecrets.getJavaLangAccess();
                 running = true;
                 for (;;) {
                     Finalizer f = (Finalizer)queue.poll();
                     if (f == null) break;
-                    f.runFinalizer();
+                    f.runFinalizer(jla);
                 }
             }
         });
@@ -118,11 +123,16 @@ final class Finalizer extends FinalReference {
 
     
     static void runAllFinalizers() {
+        if (!VM.isBooted()) {
+            return;
+        }
+
         forkSecondaryFinalizer(new Runnable() {
             private volatile boolean running;
             public void run() {
                 if (running)
                     return;
+                final JavaLangAccess jla = SharedSecrets.getJavaLangAccess();
                 running = true;
                 for (;;) {
                     Finalizer f;
@@ -131,7 +141,7 @@ final class Finalizer extends FinalReference {
                         if (f == null) break;
                         unfinalized = f.next;
                     }
-                    f.runFinalizer();
+                    f.runFinalizer(jla);
                 }}});
     }
 
@@ -143,13 +153,25 @@ final class Finalizer extends FinalReference {
         public void run() {
             if (running)
                 return;
+
+            
+            
+            while (!VM.isBooted()) {
+                
+                try {
+                    VM.awaitBooted();
+                } catch (InterruptedException x) {
+                    
+                }
+            }
+            final JavaLangAccess jla = SharedSecrets.getJavaLangAccess();
             running = true;
             for (;;) {
                 try {
                     Finalizer f = (Finalizer)queue.remove();
-                    f.runFinalizer();
+                    f.runFinalizer(jla);
                 } catch (InterruptedException x) {
-                    continue;
+                    
                 }
             }
         }

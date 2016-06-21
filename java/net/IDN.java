@@ -138,13 +138,17 @@ public final class IDN {
         if (useSTD3ASCIIRules) {
             for (int i = 0; i < dest.length(); i++) {
                 int c = dest.charAt(i);
-                if (!isLDHChar(c)) {
-                    throw new IllegalArgumentException("Contains non-LDH characters");
+                if (isNonLDHAsciiCodePoint(c)) {
+                    throw new IllegalArgumentException(
+                        "Contains non-LDH ASCII characters");
                 }
             }
 
-            if (dest.charAt(0) == '-' || dest.charAt(dest.length() - 1) == '-') {
-                throw new IllegalArgumentException("Has leading or trailing hyphen");
+            if (dest.charAt(0) == '-' ||
+                dest.charAt(dest.length() - 1) == '-') {
+
+                throw new IllegalArgumentException(
+                        "Has leading or trailing hyphen");
             }
         }
 
@@ -250,22 +254,16 @@ public final class IDN {
     
     
     
-    private static boolean isLDHChar(int ch){
-        
-        if(ch > 0x007A){
-            return false;
-        }
-        
-        if((ch == 0x002D) ||
-           (0x0030 <= ch && ch <= 0x0039) ||
-           (0x0041 <= ch && ch <= 0x005A) ||
-           (0x0061 <= ch && ch <= 0x007A)
-          ){
-            return true;
-        }
-        return false;
+    
+    
+    
+    private static boolean isNonLDHAsciiCodePoint(int ch){
+        return (0x0000 <= ch && ch <= 0x002C) ||
+               (0x002E <= ch && ch <= 0x002F) ||
+               (0x003A <= ch && ch <= 0x0040) ||
+               (0x005B <= ch && ch <= 0x0060) ||
+               (0x007B <= ch && ch <= 0x007F);
     }
-
 
     
     

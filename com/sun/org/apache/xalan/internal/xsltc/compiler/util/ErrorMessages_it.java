@@ -12,7 +12,10 @@ public class ErrorMessages_it extends ListResourceBundle {
 
 
     
-    private static final Object[][] _contents =  new Object[][] {
+    
+    public Object[][] getContents()
+    {
+      return new Object[][] {
         {ErrorMsg.MULTIPLE_STYLESHEET_ERR,
         "Sono stati definiti pi\u00F9 fogli di stile nello stesso file."},
 
@@ -435,9 +438,5 @@ public class ErrorMessages_it extends ListResourceBundle {
         "FEATURE_SECURE_PROCESSING: impossibile impostare la funzione su false se \u00E8 presente Security Manager."}
     };
 
-    
-    public Object[][] getContents()
-    {
-        return _contents;
     }
 }

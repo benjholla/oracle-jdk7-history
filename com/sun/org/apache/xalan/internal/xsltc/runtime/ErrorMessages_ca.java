@@ -12,7 +12,10 @@ public class ErrorMessages_ca extends ListResourceBundle {
 
 
     
-    private static final Object[][] _contents =  new Object[][] {
+    
+    public Object[][] getContents()
+    {
+        return new Object[][] {
 
         
         {BasisLibrary.RUN_TIME_INTERNAL_ERR,
@@ -83,10 +86,6 @@ public class ErrorMessages_ca extends ListResourceBundle {
         "No s''ha pogut resoldre la refer\u00e8ncia d''URI ''{0}''."}
     };
 
-    
-    public Object[][] getContents()
-    {
-      return _contents;
     }
 
 }

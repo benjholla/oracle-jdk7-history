@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.util.Arrays;
+import java.util.Objects;
 
 
 public class MBeanNotificationInfo extends MBeanFeatureInfo implements Cloneable {
@@ -91,9 +92,9 @@ public class MBeanNotificationInfo extends MBeanFeatureInfo implements Cloneable
         if (!(o instanceof MBeanNotificationInfo))
             return false;
         MBeanNotificationInfo p = (MBeanNotificationInfo) o;
-        return (p.getName().equals(getName()) &&
-                p.getDescription().equals(getDescription()) &&
-                p.getDescriptor().equals(getDescriptor()) &&
+        return (Objects.equals(p.getName(), getName()) &&
+                Objects.equals(p.getDescription(), getDescription()) &&
+                Objects.equals(p.getDescriptor(), getDescriptor()) &&
                 Arrays.equals(p.fastGetNotifTypes(), fastGetNotifTypes()));
     }
 

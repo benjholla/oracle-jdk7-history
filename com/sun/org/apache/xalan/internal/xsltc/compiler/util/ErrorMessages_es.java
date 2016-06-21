@@ -12,7 +12,10 @@ public class ErrorMessages_es extends ListResourceBundle {
 
 
     
-    private static final Object[][] _contents =  new Object[][] {
+    
+    public Object[][] getContents()
+    {
+      return new Object[][] {
         {ErrorMsg.MULTIPLE_STYLESHEET_ERR,
         "Se ha definido m\u00E1s de una hoja de estilo en el mismo archivo."},
 
@@ -435,9 +438,5 @@ public class ErrorMessages_es extends ListResourceBundle {
         "FEATURE_SECURE_PROCESSING: no se puede definir la funci\u00F3n en false cuando est\u00E1 presente el gestor de seguridad."}
     };
 
-    
-    public Object[][] getContents()
-    {
-        return _contents;
     }
 }

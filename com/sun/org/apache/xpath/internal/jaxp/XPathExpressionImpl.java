@@ -13,6 +13,7 @@ import com.sun.org.apache.xml.internal.utils.PrefixResolver;
 import com.sun.org.apache.xpath.internal.res.XPATHErrorResources;
 import com.sun.org.apache.xalan.internal.res.XSLMessages;
 import com.sun.org.apache.xalan.internal.utils.FactoryImpl;
+import com.sun.org.apache.xalan.internal.utils.FeatureManager;
 
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
@@ -45,31 +46,34 @@ public class XPathExpressionImpl  implements javax.xml.xpath.XPathExpression{
     private boolean featureSecureProcessing = false;
 
     private boolean useServicesMechanism = true;
-    
-    protected XPathExpressionImpl() { };
 
-    protected XPathExpressionImpl(com.sun.org.apache.xpath.internal.XPath xpath,
-            JAXPPrefixResolver prefixResolver,
-            XPathFunctionResolver functionResolver,
-            XPathVariableResolver variableResolver ) {
-        this.xpath = xpath;
-        this.prefixResolver = prefixResolver;
-        this.functionResolver = functionResolver;
-        this.variableResolver = variableResolver;
-        this.featureSecureProcessing = false;
+    private final FeatureManager featureManager;
+
+    
+    protected XPathExpressionImpl() {
+        this(null, null, null, null,
+             false, true, new FeatureManager());
     };
 
     protected XPathExpressionImpl(com.sun.org.apache.xpath.internal.XPath xpath,
             JAXPPrefixResolver prefixResolver,
             XPathFunctionResolver functionResolver,
-            XPathVariableResolver variableResolver,
-            boolean featureSecureProcessing, boolean useServicesMechanism ) {
+            XPathVariableResolver variableResolver ) {
+        this(xpath, prefixResolver, functionResolver, variableResolver,
+             false, true, new FeatureManager());
+    };
+
+    protected XPathExpressionImpl(com.sun.org.apache.xpath.internal.XPath xpath,
+            JAXPPrefixResolver prefixResolver,XPathFunctionResolver functionResolver,
+            XPathVariableResolver variableResolver, boolean featureSecureProcessing,
+            boolean useServicesMechanism, FeatureManager featureManager ) {
         this.xpath = xpath;
         this.prefixResolver = prefixResolver;
         this.functionResolver = functionResolver;
         this.variableResolver = variableResolver;
         this.featureSecureProcessing = featureSecureProcessing;
         this.useServicesMechanism = useServicesMechanism;
+        this.featureManager = featureManager;
     };
 
     public void setXPath (com.sun.org.apache.xpath.internal.XPath xpath ) {
@@ -87,7 +91,7 @@ public class XPathExpressionImpl  implements javax.xml.xpath.XPathExpression{
         com.sun.org.apache.xpath.internal.XPathContext xpathSupport = null;
         if ( functionResolver != null ) {
             JAXPExtensionsProvider jep = new JAXPExtensionsProvider(
-                    functionResolver, featureSecureProcessing );
+                    functionResolver, featureSecureProcessing, featureManager );
             xpathSupport = new com.sun.org.apache.xpath.internal.XPathContext( jep );
         } else {
             xpathSupport = new com.sun.org.apache.xpath.internal.XPathContext();

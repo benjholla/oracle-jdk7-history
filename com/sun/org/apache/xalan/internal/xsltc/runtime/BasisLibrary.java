@@ -837,6 +837,9 @@ public final class BasisLibrary {
                 return(Double.toString(d));
 
             
+            d = d + 0.0;
+
+            
             StringBuffer result = threadLocalStringBuffer.get();
             result.setLength(0);
             xpathFormatter.format(d, result, _fieldPosition);
