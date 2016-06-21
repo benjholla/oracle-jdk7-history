@@ -317,6 +317,16 @@ public abstract class XMLScanner
 
         boolean dataFoundForTarget = false;
         boolean sawSpace = fEntityScanner.skipSpaces();
+        
+        
+        
+        
+        
+        
+        
+        Entity.ScannedEntity currEnt = fEntityManager.getCurrentEntity();
+        boolean currLiteral = currEnt.literal;
+        currEnt.literal = false;
         while (fEntityScanner.peekChar() != '?') {
             dataFoundForTarget = true;
             String name = scanPseudoAttribute(scanningTextDecl, fString);
@@ -414,6 +424,9 @@ public abstract class XMLScanner
             }
             sawSpace = fEntityScanner.skipSpaces();
         }
+        
+        if(currLiteral)
+            currEnt.literal = true;
         
         if (scanningTextDecl && state != STATE_DONE) {
             reportFatalError("MorePseudoAttributes", null);

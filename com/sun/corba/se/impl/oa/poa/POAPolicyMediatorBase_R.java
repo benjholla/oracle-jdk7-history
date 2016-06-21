@@ -70,7 +70,7 @@ public abstract class POAPolicyMediatorBase_R extends POAPolicyMediatorBase {
 
         activeObjectMap.putServant( servant, entry ) ;
 
-        if (Util.instance != null) {
+        if (Util.isInstanceDefined()) {
             POAManagerImpl pm = (POAManagerImpl)poa.the_POAManager() ;
             POAFactory factory = pm.getFactory() ;
             factory.registerPOAForServant(poa, servant);
@@ -106,7 +106,7 @@ public abstract class POAPolicyMediatorBase_R extends POAPolicyMediatorBase {
 
         activeObjectMap.remove(key);
 
-        if (Util.instance != null) {
+        if (Util.isInstanceDefined()) {
             POAManagerImpl pm = (POAManagerImpl)poa.the_POAManager() ;
             POAFactory factory = pm.getFactory() ;
             factory.unregisterPOAForServant(poa, s);

@@ -55,8 +55,8 @@ public class TOAFactory implements ObjectAdapterFactory
 
     public void shutdown( boolean waitForCompletion )
     {
-        if (Util.instance != null) {
-            Util.instance.unregisterTargetsForORB(orb);
+        if (Util.isInstanceDefined()) {
+            Util.getInstance().unregisterTargetsForORB(orb);
         }
     }
 

@@ -7,7 +7,7 @@ public abstract class CORBALogDomains {
     private CORBALogDomains() {}
 
     
-    public static String TOP_LEVEL_DOMAIN  = "javax.enterprise.resource.corba";
+    public static final String TOP_LEVEL_DOMAIN  = "javax.enterprise.resource.corba";
 
     public static final String RPC              = "rpc" ;
 

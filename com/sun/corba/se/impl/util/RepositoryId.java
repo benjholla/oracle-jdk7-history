@@ -29,7 +29,7 @@ public class RepositoryId {
     
     
 
-    public static final byte[] IDL_IDENTIFIER_CHARS = {
+    private static final byte[] IDL_IDENTIFIER_CHARS = {
 
         
         0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0, 
@@ -67,7 +67,7 @@ public class RepositoryId {
     private static IdentityHashtable classIDLToRepStr = new IdentityHashtable();
     private static IdentityHashtable classSeqToRepStr = new IdentityHashtable();
 
-    private static IdentityHashtable repStrToByteArray = new IdentityHashtable();
+    private static final IdentityHashtable repStrToByteArray = new IdentityHashtable();
     private static Hashtable repStrToClass = new Hashtable();
 
     private String repId = null;
@@ -164,7 +164,7 @@ public class RepositoryId {
     public static final String kRemoteTypeStr = "";
     public static final String kRemoteValueRepID = "";
 
-    public static final Hashtable kSpecialArrayTypeStrings = new Hashtable();
+    private static final Hashtable kSpecialArrayTypeStrings = new Hashtable();
 
     static {
         kSpecialArrayTypeStrings.put("CORBA.WStringValue", new StringBuffer(java.lang.String.class.getName()));
@@ -173,7 +173,7 @@ public class RepositoryId {
 
     }
 
-    public static final Hashtable kSpecialCasesRepIDs = new Hashtable();
+    private static final Hashtable kSpecialCasesRepIDs = new Hashtable();
 
     static {
         kSpecialCasesRepIDs.put(java.lang.String.class, kWStringValueRepID);
@@ -181,7 +181,7 @@ public class RepositoryId {
         kSpecialCasesRepIDs.put(java.rmi.Remote.class, kRemoteValueRepID);
     }
 
-    public static final Hashtable kSpecialCasesStubValues = new Hashtable();
+    private static final Hashtable kSpecialCasesStubValues = new Hashtable();
 
     static {
         kSpecialCasesStubValues.put(java.lang.String.class, kWStringStubValue);
@@ -193,7 +193,7 @@ public class RepositoryId {
     }
 
 
-    public static final Hashtable kSpecialCasesVersions = new Hashtable();
+    private static final Hashtable kSpecialCasesVersions = new Hashtable();
 
     static {
         kSpecialCasesVersions.put(java.lang.String.class, kWStringValueHash);
@@ -204,7 +204,7 @@ public class RepositoryId {
         kSpecialCasesVersions.put(java.rmi.Remote.class, kRemoteValueHash);
     }
 
-    public static final Hashtable kSpecialCasesClasses = new Hashtable();
+    private static final Hashtable kSpecialCasesClasses = new Hashtable();
 
     static {
         kSpecialCasesClasses.put(kWStringTypeStr, java.lang.String.class);
@@ -216,7 +216,7 @@ public class RepositoryId {
         
     }
 
-    public static final Hashtable kSpecialCasesArrayPrefix = new Hashtable();
+    private static final Hashtable kSpecialCasesArrayPrefix = new Hashtable();
 
     static {
         kSpecialCasesArrayPrefix.put(java.lang.String.class, kValuePrefix + kSequencePrefix + kCORBAPrefix);
@@ -227,7 +227,7 @@ public class RepositoryId {
         kSpecialCasesArrayPrefix.put(java.rmi.Remote.class, kValuePrefix + kSequencePrefix + kCORBAPrefix);
     }
 
-    public static final Hashtable kSpecialPrimitives = new Hashtable();
+    private static final Hashtable kSpecialPrimitives = new Hashtable();
 
     static {
         kSpecialPrimitives.put("int","long");

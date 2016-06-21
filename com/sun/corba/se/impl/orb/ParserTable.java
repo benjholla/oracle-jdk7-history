@@ -80,7 +80,9 @@ public class ParserTable {
 
     public ParserData[] getParserData()
     {
-        return parserData ;
+        ParserData[] parserArray = new ParserData[parserData.length];
+        System.arraycopy(parserData, 0, parserArray, 0, parserData.length);
+        return parserArray;
     }
 
     private ParserTable() {

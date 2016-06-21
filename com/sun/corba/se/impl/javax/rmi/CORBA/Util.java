@@ -99,10 +99,23 @@ public class Util implements javax.rmi.CORBA.UtilDelegate
     private UtilSystemException utilWrapper = UtilSystemException.get(
                                                   CORBALogDomains.RPC_ENCODING);
 
-    public static Util instance = null;
+    private static Util instance = null;
 
     public Util() {
-        instance = this;
+        setInstance(this);
+    }
+
+    private static void setInstance( Util util ) {
+        assert instance == null : "Instance already defined";
+        instance = util;
+    }
+
+    public static Util getInstance() {
+        return instance;
+    }
+
+    public static boolean isInstanceDefined() {
+        return instance != null;
     }
 
     

@@ -29,7 +29,7 @@ public abstract class LocalClientRequestDispatcherBase implements LocalClientReq
 
     
     
-    protected static ThreadLocal isNextCallValid = new ThreadLocal() {
+    private static final ThreadLocal isNextCallValid = new ThreadLocal() {
             protected synchronized Object initialValue() {
                 return Boolean.TRUE;
             }

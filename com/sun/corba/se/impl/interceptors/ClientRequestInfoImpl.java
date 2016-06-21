@@ -185,7 +185,7 @@ public final class ClientRequestInfoImpl
 
     
     
-    protected static final boolean validCall[][] = {
+    private static final boolean validCall[][] = {
         
         
         

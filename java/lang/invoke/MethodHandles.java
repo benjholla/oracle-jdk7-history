@@ -81,7 +81,7 @@ public class MethodHandles {
 
         
         Lookup() {
-            this(getCallerClassAtEntryPoint(), ALL_MODES);
+            this(getCallerClassAtEntryPoint(false), ALL_MODES);
             
             checkUnprivilegedlookupClass(lookupClass);
         }
@@ -112,8 +112,8 @@ public class MethodHandles {
                 && !VerifyAccess.isSamePackageMember(this.lookupClass, requestedLookupClass)) {
                 newModes &= ~PRIVATE;
             }
-            if (newModes == PUBLIC
-                && !VerifyAccess.isClassAccessible(requestedLookupClass, this.lookupClass)) {
+            if ((newModes & PUBLIC) != 0
+                && !VerifyAccess.isClassAccessible(requestedLookupClass, this.lookupClass, allowedModes)) {
                 
                 
                 newModes = 0;
@@ -162,12 +162,16 @@ public class MethodHandles {
         }
 
         
-        private static Class<?> getCallerClassAtEntryPoint() {
+        private static Class<?> getCallerClassAtEntryPoint(boolean inSubroutine) {
             final int CALLER_DEPTH = 4;
             
             
             
-            assert(Reflection.getCallerClass(CALLER_DEPTH-1) == MethodHandles.class);
+            
+            
+            
+            assert(Reflection.getCallerClass(CALLER_DEPTH-2) == Lookup.class);
+            assert(Reflection.getCallerClass(CALLER_DEPTH-1) == (inSubroutine ? Lookup.class : MethodHandles.class));
             return Reflection.getCallerClass(CALLER_DEPTH);
         }
 
@@ -394,7 +398,7 @@ public class MethodHandles {
 
         void checkSymbolicClass(Class<?> refc) throws IllegalAccessException {
             Class<?> caller = lookupClassOrNull();
-            if (caller != null && !VerifyAccess.isClassAccessible(refc, caller))
+            if (caller != null && !VerifyAccess.isClassAccessible(refc, caller, allowedModes))
                 throw new MemberName(refc).makeAccessException("symbolic reference class is not public", this);
         }
 
@@ -406,7 +410,13 @@ public class MethodHandles {
             
             smgr.checkMemberAccess(refc, Member.PUBLIC);
             
-            if (!VerifyAccess.classLoaderIsAncestor(lookupClass, refc))
+            Class<?> callerClass = ((allowedModes & PRIVATE) != 0
+                                    ? lookupClass  
+                                    
+                                    : getCallerClassAtEntryPoint(true));
+            if (!VerifyAccess.classLoaderIsAncestor(lookupClass, refc) ||
+                (callerClass != lookupClass &&
+                 !VerifyAccess.classLoaderIsAncestor(callerClass, refc)))
                 smgr.checkPackageAccess(VerifyAccess.getPackageName(refc));
             
             if (m.isPublic()) return;
@@ -447,9 +457,10 @@ public class MethodHandles {
             int requestedModes = fixmods(mods);  
             if ((requestedModes & allowedModes) != 0
                 && VerifyAccess.isMemberAccessible(refc, m.getDeclaringClass(),
-                                                   mods, lookupClass()))
+                                                   mods, lookupClass(), allowedModes))
                 return;
             if (((requestedModes & ~allowedModes) & PROTECTED) != 0
+                && (allowedModes & PACKAGE) != 0
                 && VerifyAccess.isSamePackage(m.getDeclaringClass(), lookupClass()))
                 
                 return;
@@ -464,9 +475,9 @@ public class MethodHandles {
                                (defc == refc ||
                                 Modifier.isPublic(refc.getModifiers())));
             if (!classOK && (allowedModes & PACKAGE) != 0) {
-                classOK = (VerifyAccess.isClassAccessible(defc, lookupClass()) &&
+                classOK = (VerifyAccess.isClassAccessible(defc, lookupClass(), ALL_MODES) &&
                            (defc == refc ||
-                            VerifyAccess.isClassAccessible(refc, lookupClass())));
+                            VerifyAccess.isClassAccessible(refc, lookupClass(), ALL_MODES)));
             }
             if (!classOK)
                 return "class is not public";
