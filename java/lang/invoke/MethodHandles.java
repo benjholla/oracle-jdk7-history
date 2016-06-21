@@ -3,12 +3,15 @@
 package java.lang.invoke;
 
 import java.lang.reflect.*;
+
 import sun.invoke.util.ValueConversions;
 import sun.invoke.util.VerifyAccess;
 import sun.invoke.util.Wrapper;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+
 import sun.reflect.CallerSensitive;
 import sun.reflect.Reflection;
 import sun.reflect.misc.ReflectUtil;
@@ -303,15 +306,16 @@ public class MethodHandles {
         
 
         MemberName resolveOrFail(byte refKind, Class<?> refc, String name, Class<?> type) throws NoSuchFieldException, IllegalAccessException {
-            checkSymbolicClass(refc);  
             name.getClass(); type.getClass();  
+            checkSymbolicClass(refc);  
             return IMPL_NAMES.resolveOrFail(refKind, new MemberName(refc, name, type, refKind), lookupClassOrNull(),
                                             NoSuchFieldException.class);
         }
 
         MemberName resolveOrFail(byte refKind, Class<?> refc, String name, MethodType type) throws NoSuchMethodException, IllegalAccessException {
+            type.getClass();  
             checkSymbolicClass(refc);  
-            name.getClass(); type.getClass();  
+            checkMethodName(refKind, name);
             return IMPL_NAMES.resolveOrFail(refKind, new MemberName(refc, name, type, refKind), lookupClassOrNull(),
                                             NoSuchMethodException.class);
         }
@@ -321,6 +325,12 @@ public class MethodHandles {
             if (caller != null && !VerifyAccess.isClassAccessible(refc, caller, allowedModes))
                 throw new MemberName(refc).makeAccessException("symbolic reference class is not public", this);
         }
+
+        void checkMethodName(byte refKind, String name) throws NoSuchMethodException {
+            if (name.startsWith("<") && refKind != REF_newInvokeSpecial)
+                throw new NoSuchMethodException("illegal method name: "+name);
+        }
+
 
         
         Class<?> findBoundCallerClass(MemberName m) throws IllegalAccessException {
@@ -434,6 +444,10 @@ public class MethodHandles {
             int allowedModes = this.allowedModes;
             if (allowedModes == TRUSTED)  return;
             int mods = m.getModifiers();
+            if (Modifier.isProtected(mods) && refKind == REF_newInvokeSpecial) {
+                
+                mods ^= Modifier.PROTECTED;
+            }
             if (Modifier.isFinal(mods) &&
                     MethodHandleNatives.refKindIsSetter(refKind))
                 throw m.makeAccessException("unexpected set of a final field", this);

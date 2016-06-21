@@ -392,7 +392,7 @@ import static java.lang.invoke.MethodHandles.Lookup.IMPL_LOOKUP;
                 
                 MethodHandle aload = MethodHandles.arrayElementGetter(spreadArgType);
                 Name array = names[argIndex];
-                names[nameCursor++] = new Name(NF_checkSpreadArgument, array, spreadArgCount);
+                names[nameCursor++] = new Name(Lazy.NF_checkSpreadArgument, array, spreadArgCount);
                 for (int j = 0; j < spreadArgCount; i++, j++) {
                     indexes[i] = nameCursor;
                     names[nameCursor++] = new Name(aload, array, j);
@@ -416,14 +416,8 @@ import static java.lang.invoke.MethodHandles.Lookup.IMPL_LOOKUP;
     }
 
     static void checkSpreadArgument(Object av, int n) {
-        
-        
-        final boolean RAISE_RANDOM_EXCEPTIONS = true;  
         if (av == null) {
             if (n == 0)  return;
-            int len;
-            if (RAISE_RANDOM_EXCEPTIONS)
-                len = ((Object[])av).length;  
         } else if (av instanceof Object[]) {
             int len = ((Object[])av).length;
             if (len == n)  return;
@@ -432,19 +426,20 @@ import static java.lang.invoke.MethodHandles.Lookup.IMPL_LOOKUP;
             if (len == n)  return;
         }
         
-        if (RAISE_RANDOM_EXCEPTIONS)
-            throw newIllegalArgumentException("Array is not of length "+n);
-        throw new WrongMethodTypeException("Array is not of length "+n);
+        throw newIllegalArgumentException("array is not of length "+n);
     }
 
-    private static final NamedFunction NF_checkSpreadArgument;
-    static {
-        try {
-            NF_checkSpreadArgument = new NamedFunction(MethodHandleImpl.class
-                    .getDeclaredMethod("checkSpreadArgument", Object.class, int.class));
-            NF_checkSpreadArgument.resolve();
-        } catch (ReflectiveOperationException ex) {
-            throw newInternalError(ex);
+    
+    private static class Lazy {
+        static final NamedFunction NF_checkSpreadArgument;
+        static {
+            try {
+                NF_checkSpreadArgument = new NamedFunction(MethodHandleImpl.class
+                        .getDeclaredMethod("checkSpreadArgument", Object.class, int.class));
+                NF_checkSpreadArgument.resolve();
+            } catch (ReflectiveOperationException ex) {
+                throw newInternalError(ex);
+            }
         }
     }
 

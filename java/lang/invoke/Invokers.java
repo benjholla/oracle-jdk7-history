@@ -290,6 +290,7 @@ class Invokers {
             
             
             outArgs = Arrays.copyOfRange(names, CALL_MH, OUTARG_LIMIT, Object[].class);
+            outArgs[0] = names[CHECK_TYPE];
             outCallType = mtype;
         } else {
             names[CHECK_TYPE] = new Name(NF_checkGenericType, names[CALL_MH], mtypeArg);

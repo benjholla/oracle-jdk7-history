@@ -101,12 +101,13 @@ public class Proxy implements java.io.Serializable {
                                          Class<?>... interfaces)
         throws IllegalArgumentException
     {
-        SecurityManager sm = System.getSecurityManager();
+        final Class<?>[] intfs = interfaces.clone();
+        final SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
-            checkProxyAccess(Reflection.getCallerClass(), loader, interfaces);
+            checkProxyAccess(Reflection.getCallerClass(), loader, intfs);
         }
 
-        return getProxyClass0(loader, interfaces);
+        return getProxyClass0(loader, intfs);
     }
 
     
@@ -342,13 +343,14 @@ public class Proxy implements java.io.Serializable {
             throw new NullPointerException();
         }
 
+        final Class<?>[] intfs = interfaces.clone();
         final SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
-            checkProxyAccess(Reflection.getCallerClass(), loader, interfaces);
+            checkProxyAccess(Reflection.getCallerClass(), loader, intfs);
         }
 
         
-        Class<?> cl = getProxyClass0(loader, interfaces);
+        Class<?> cl = getProxyClass0(loader, intfs);
 
         
         try {

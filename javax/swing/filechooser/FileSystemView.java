@@ -517,7 +517,8 @@ class WindowsFileSystemView extends FileSystemView {
 
     
     public File getHomeDirectory() {
-        return getRoots()[0];
+        File[] roots = getRoots();
+        return (roots.length == 0) ? null : roots[0];
     }
 
     

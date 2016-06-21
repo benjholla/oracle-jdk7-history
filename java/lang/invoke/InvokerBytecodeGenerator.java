@@ -528,6 +528,12 @@ class InvokerBytecodeGenerator {
             return false;  
         if (cls.getClassLoader() != MethodHandle.class.getClassLoader())
             return false;  
+        MethodType mtype = member.getMethodOrFieldType();
+        if (!isStaticallyNameable(mtype.returnType()))
+            return false;
+        for (Class<?> ptype : mtype.parameterArray())
+            if (!isStaticallyNameable(ptype))
+                return false;
         if (!member.isPrivate() && VerifyAccess.isSamePackage(MethodHandle.class, cls))
             return true;   
         if (member.isPublic() && isStaticallyNameable(cls))

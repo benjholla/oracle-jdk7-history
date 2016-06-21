@@ -131,15 +131,7 @@ public abstract class KeyboardFocusManager
     public static void setCurrentKeyboardFocusManager(
         KeyboardFocusManager newManager) throws SecurityException
     {
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-            if (replaceKeyboardFocusManagerPermission == null) {
-                replaceKeyboardFocusManagerPermission =
-                    new AWTPermission("replaceKeyboardFocusManager");
-            }
-            security.
-                checkPermission(replaceKeyboardFocusManagerPermission);
-        }
+        checkReplaceKFMPermission();
 
         KeyboardFocusManager oldManager = null;
 
@@ -296,7 +288,7 @@ public abstract class KeyboardFocusManager
     
     protected Component getGlobalFocusOwner() throws SecurityException {
         synchronized (KeyboardFocusManager.class) {
-            checkCurrentKFMSecurity();
+            checkKFMSecurity();
             return focusOwner;
         }
     }
@@ -308,7 +300,7 @@ public abstract class KeyboardFocusManager
 
         if (focusOwner == null || focusOwner.isFocusable()) {
             synchronized (KeyboardFocusManager.class) {
-                checkCurrentKFMSecurity();
+                checkKFMSecurity();
 
                 oldFocusOwner = getFocusOwner();
 
@@ -349,7 +341,7 @@ public abstract class KeyboardFocusManager
     
     public void clearGlobalFocusOwner() {
         synchronized (KeyboardFocusManager.class) {
-            checkCurrentKFMSecurity();
+            checkKFMSecurity();
         }
         if (!GraphicsEnvironment.isHeadless()) {
             
@@ -399,7 +391,7 @@ public abstract class KeyboardFocusManager
         throws SecurityException
     {
         synchronized (KeyboardFocusManager.class) {
-            checkCurrentKFMSecurity();
+            checkKFMSecurity();
             return permanentFocusOwner;
         }
     }
@@ -411,7 +403,7 @@ public abstract class KeyboardFocusManager
 
         if (permanentFocusOwner == null || permanentFocusOwner.isFocusable()) {
             synchronized (KeyboardFocusManager.class) {
-                checkCurrentKFMSecurity();
+                checkKFMSecurity();
 
                 oldPermanentFocusOwner = getPermanentFocusOwner();
 
@@ -455,7 +447,7 @@ public abstract class KeyboardFocusManager
     
     protected Window getGlobalFocusedWindow() throws SecurityException {
         synchronized (KeyboardFocusManager.class) {
-            checkCurrentKFMSecurity();
+            checkKFMSecurity();
             return focusedWindow;
         }
     }
@@ -467,7 +459,7 @@ public abstract class KeyboardFocusManager
 
         if (focusedWindow == null || focusedWindow.isFocusableWindow()) {
             synchronized (KeyboardFocusManager.class) {
-                checkCurrentKFMSecurity();
+                checkKFMSecurity();
 
                 oldFocusedWindow = getFocusedWindow();
 
@@ -506,7 +498,7 @@ public abstract class KeyboardFocusManager
     
     protected Window getGlobalActiveWindow() throws SecurityException {
         synchronized (KeyboardFocusManager.class) {
-            checkCurrentKFMSecurity();
+            checkKFMSecurity();
             return activeWindow;
         }
     }
@@ -515,7 +507,7 @@ public abstract class KeyboardFocusManager
     protected void setGlobalActiveWindow(Window activeWindow) {
         Window oldActiveWindow;
         synchronized (KeyboardFocusManager.class) {
-            checkCurrentKFMSecurity();
+            checkKFMSecurity();
 
             oldActiveWindow = getActiveWindow();
             if (focusLog.isLoggable(PlatformLogger.FINER)) {
@@ -643,7 +635,7 @@ public abstract class KeyboardFocusManager
         throws SecurityException
     {
         synchronized (KeyboardFocusManager.class) {
-            checkCurrentKFMSecurity();
+            checkKFMSecurity();
             return currentFocusCycleRoot;
         }
     }
@@ -653,7 +645,7 @@ public abstract class KeyboardFocusManager
         Container oldFocusCycleRoot;
 
         synchronized (KeyboardFocusManager.class) {
-            checkCurrentKFMSecurity();
+            checkKFMSecurity();
 
             oldFocusCycleRoot  = getCurrentFocusCycleRoot();
             currentFocusCycleRoot = newFocusCycleRoot;
@@ -1277,7 +1269,8 @@ public abstract class KeyboardFocusManager
                 focusLog.finest("Request {0}", String.valueOf(hwFocusRequest));
             }
             if (hwFocusRequest == null &&
-                heavyweight == nativeFocusOwner)
+                heavyweight == nativeFocusOwner &&
+                heavyweight.getContainingWindow() == nativeFocusedWindow)
             {
                 if (descendant == currentFocusOwner) {
                     
@@ -1912,13 +1905,36 @@ public abstract class KeyboardFocusManager
         }
     }
 
-    private void checkCurrentKFMSecurity() {
-        if (this != getCurrentKeyboardFocusManager()) {
-            if (focusLog.isLoggable(PlatformLogger.FINER)) {
-                focusLog.finer("This manager is " + this +
-                               ", current is " + getCurrentKeyboardFocusManager());
+    private static void checkReplaceKFMPermission()
+            throws SecurityException
+    {
+        SecurityManager security = System.getSecurityManager();
+        if (security != null) {
+            if (replaceKeyboardFocusManagerPermission == null) {
+                replaceKeyboardFocusManagerPermission =
+                        new AWTPermission("replaceKeyboardFocusManager");
             }
-            throw new SecurityException(notPrivileged);
+            security.
+                    checkPermission(replaceKeyboardFocusManagerPermission);
+        }
+    }
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    private void checkKFMSecurity() {
+        if (this != getCurrentKeyboardFocusManager()) {
+            checkReplaceKFMPermission();
         }
     }
 }

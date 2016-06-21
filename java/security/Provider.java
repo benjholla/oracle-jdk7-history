@@ -828,7 +828,9 @@ public abstract class Provider extends Properties {
                             + " engines");
                     }
                     Class clazz = getImplClass();
-                    return clazz.newInstance();
+                    Class<?>[] empty = {};
+                    Constructor<?> con = clazz.getConstructor(empty);
+                    return con.newInstance();
                 } else {
                     Class paramClass = cap.getConstructorParameterClass();
                     if (constructorParameter != null) {
@@ -871,13 +873,18 @@ public abstract class Provider extends Properties {
                     } else {
                         clazz = cl.loadClass(className);
                     }
+                    if (!Modifier.isPublic(clazz.getModifiers())) {
+                        throw new NoSuchAlgorithmException
+                            ("class configured for " + type + " (provider: " +
+                            provider.getName() + ") is not public.");
+                    }
                     classRef = new WeakReference<Class>(clazz);
                 }
                 return clazz;
             } catch (ClassNotFoundException e) {
                 throw new NoSuchAlgorithmException
                     ("class configured for " + type + "(provider: " +
-                    provider.getName() + ")" + "cannot be found.", e);
+                    provider.getName() + ") cannot be found.", e);
             }
         }
 
@@ -886,15 +893,21 @@ public abstract class Provider extends Properties {
                 throws Exception {
             Class clazz = getImplClass();
             if (constructorParameter == null) {
-                Object o = clazz.newInstance();
-                return o;
+                
+                try {
+                    Class<?>[] empty = {};
+                    Constructor<?> con = clazz.getConstructor(empty);
+                    return con.newInstance();
+                } catch (NoSuchMethodException e) {
+                    throw new NoSuchAlgorithmException("No public no-arg "
+                        + "constructor found in class " + className);
+                }
             }
             Class argClass = constructorParameter.getClass();
             Constructor[] cons = clazz.getConstructors();
             
             
-            for (int i = 0; i < cons.length; i++) {
-                Constructor con = cons[i];
+            for (Constructor<?> con : cons) {
                 Class[] paramTypes = con.getParameterTypes();
                 if (paramTypes.length != 1) {
                     continue;
@@ -902,10 +915,9 @@ public abstract class Provider extends Properties {
                 if (paramTypes[0].isAssignableFrom(argClass) == false) {
                     continue;
                 }
-                Object o = con.newInstance(new Object[] {constructorParameter});
-                return o;
+                return con.newInstance(constructorParameter);
             }
-            throw new NoSuchAlgorithmException("No constructor matching "
+            throw new NoSuchAlgorithmException("No public constructor matching "
                 + argClass.getName() + " found in class " + className);
         }
 

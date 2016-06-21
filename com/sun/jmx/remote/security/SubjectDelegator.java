@@ -11,19 +11,11 @@ import javax.security.auth.Subject;
 
 import javax.management.remote.SubjectDelegationPermission;
 
-import com.sun.jmx.remote.util.CacheMap;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 
 public class SubjectDelegator {
-    private static final int PRINCIPALS_CACHE_SIZE = 10;
-    private static final int ACC_CACHE_SIZE = 10;
-
-    private CacheMap<Subject, Principal[]> principalsCache;
-    private CacheMap<Subject, AccessControlContext> accCache;
-
     
-    public synchronized AccessControlContext
+    public AccessControlContext
         delegatedContext(AccessControlContext authenticatedACC,
                          Subject delegatedSubject,
                          boolean removeCallerContext)
@@ -32,56 +24,14 @@ public class SubjectDelegator {
         if (System.getSecurityManager() != null && authenticatedACC == null) {
             throw new SecurityException("Illegal AccessControlContext: null");
         }
-        if (principalsCache == null || accCache == null) {
-            principalsCache =
-                    new CacheMap<>(PRINCIPALS_CACHE_SIZE);
-            accCache =
-                    new CacheMap<>(ACC_CACHE_SIZE);
-        }
-
-        
-        
-        
-        Principal[] delegatedPrincipals = principalsCache.get(delegatedSubject);
 
         
         
         
         
-        if (delegatedPrincipals == null) {
-            delegatedPrincipals =
-                delegatedSubject.getPrincipals().toArray(new Principal[0]);
-            principalsCache.put(delegatedSubject, delegatedPrincipals);
-        }
-
-        
-        
-        
-        AccessControlContext delegatedACC = accCache.get(delegatedSubject);
-
-        
-        
-        
-        
-        if (delegatedACC == null) {
-            if (removeCallerContext) {
-                delegatedACC =
-                    JMXSubjectDomainCombiner.getDomainCombinerContext(
-                                                              delegatedSubject);
-            } else {
-                delegatedACC =
-                    JMXSubjectDomainCombiner.getContext(delegatedSubject);
-            }
-            accCache.put(delegatedSubject, delegatedACC);
-        }
-
-        
-        
-        
-        
-        final Principal[] dp = delegatedPrincipals;
-        final Collection<Permission> permissions = new ArrayList<>(dp.length);
-        for(Principal p : dp) {
+        Collection<Principal> ps = getSubjectPrincipals(delegatedSubject);
+        final Collection<Permission> permissions = new ArrayList<>(ps.size());
+        for(Principal p : ps) {
             final String pname = p.getClass().getName() + "." + p.getName();
             permissions.add(new SubjectDelegationPermission(pname));
         }
@@ -96,18 +46,24 @@ public class SubjectDelegator {
             };
         AccessController.doPrivileged(action, authenticatedACC);
 
-        return delegatedACC;
+        return getDelegatedAcc(delegatedSubject, removeCallerContext);
+    }
+
+    private AccessControlContext getDelegatedAcc(Subject delegatedSubject, boolean removeCallerContext) {
+        if (removeCallerContext) {
+            return JMXSubjectDomainCombiner.getDomainCombinerContext(delegatedSubject);
+        } else {
+            return JMXSubjectDomainCombiner.getContext(delegatedSubject);
+        }
     }
 
     
     public static synchronized boolean
         checkRemoveCallerContext(Subject subject) {
         try {
-            final Principal[] dp =
-                subject.getPrincipals().toArray(new Principal[0]);
-            for (int i = 0 ; i < dp.length ; i++) {
+            for (Principal p : getSubjectPrincipals(subject)) {
                 final String pname =
-                    dp[i].getClass().getName() + "." + dp[i].getName();
+                    p.getClass().getName() + "." + p.getName();
                 final Permission sdp =
                     new SubjectDelegationPermission(pname);
                 AccessController.checkPermission(sdp);
@@ -116,5 +72,15 @@ public class SubjectDelegator {
             return false;
         }
         return true;
+    }
+
+    
+    private static Collection<Principal> getSubjectPrincipals(Subject subject) {
+        if (subject.isReadOnly()) {
+            return subject.getPrincipals();
+        }
+
+        List<Principal> principals = Arrays.asList(subject.getPrincipals().toArray(new Principal[0]));
+        return Collections.unmodifiableList(principals);
     }
 }
