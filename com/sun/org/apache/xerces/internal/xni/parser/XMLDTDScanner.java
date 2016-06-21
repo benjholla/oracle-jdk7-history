@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011-2013, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
 /*
@@ -20,6 +20,7 @@
 
 package com.sun.org.apache.xerces.internal.xni.parser;
 
+import com.sun.org.apache.xerces.internal.utils.XMLLimitAnalyzer;
 import java.io.IOException;
 import com.sun.org.apache.xerces.internal.xni.XNIException;
 
@@ -95,4 +96,5 @@ public interface XMLDTDScanner
     public boolean scanDTDExternalSubset(boolean complete)
         throws IOException, XNIException;
 
+    public void setLimitAnalyzer(XMLLimitAnalyzer limitAnalyzer);
 } // interface XMLDTDScanner

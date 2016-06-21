@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008-2013, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
 /*
@@ -358,7 +358,8 @@ public abstract class Canonicalizer11 extends CanonicalizerBase {
             } else if (!isVisible(xmlns)) {
                 // There is a defn but the xmlns is not selected by the xpath.
                 // then xmlns=""
-                n = ns.addMappingAndRender(XMLNS, "", nullNode);
+                n = ns.addMappingAndRender(XMLNS, "",
+                        getNullNode(xmlns.getOwnerDocument()));
             }
             // output the xmlns def if needed.
             if (n != null) {
