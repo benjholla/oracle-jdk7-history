@@ -201,7 +201,10 @@ public class LogManager {
                         context = userContext;
                     } else {
                         context = new LoggerContext();
-                        context.addLocalLogger(manager.rootLogger);
+                        
+                        
+                        if (manager.rootLogger != null)
+                            context.addLocalLogger(manager.rootLogger);
                     }
                     javaAwtAccess.put(ecx, LoggerContext.class, context);
                 }
@@ -261,7 +264,40 @@ public class LogManager {
     }
 
     Logger demandSystemLogger(String name, String resourceBundleName) {
-        return systemContext.demandLogger(name, resourceBundleName);
+        
+        final Logger sysLogger = systemContext.demandLogger(name, resourceBundleName);
+
+        
+        
+        
+        
+        Logger logger;
+        do {
+            
+            
+            
+            if (addLogger(sysLogger)) {
+                
+                logger = sysLogger;
+            } else {
+                logger = getLogger(name);
+            }
+        } while (logger == null);
+
+        
+        if (logger != sysLogger && sysLogger.getHandlers().length == 0) {
+            
+            final Logger l = logger;
+            AccessController.doPrivileged(new PrivilegedAction<Void>() {
+                public Void run() {
+                    for (Handler hdl : l.getHandlers()) {
+                        sysLogger.addHandler(hdl);
+                    }
+                    return null;
+                }
+            });
+        }
+        return sysLogger;
     }
 
     
@@ -465,21 +501,6 @@ public class LogManager {
                         result = findLogger(name);
                     }
                 } while (result == null);
-            }
-            
-            
-            if (!manager.addLogger(result) && result.getHandlers().length == 0) {
-                
-                final Logger l = manager.getLogger(name);
-                final Logger logger = result;
-                AccessController.doPrivileged(new PrivilegedAction<Void>() {
-                    public Void run() {
-                        for (Handler hdl : l.getHandlers()) {
-                            logger.addHandler(hdl);
-                        }
-                        return null;
-                    }
-                });
             }
             return result;
         }

@@ -28,6 +28,7 @@ import javax.management.MBeanPermission;
 import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerDelegate;
+import javax.management.MBeanServerPermission;
 import javax.management.NotCompliantMBeanException;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
@@ -561,6 +562,8 @@ public final class JmxMBeanServer
         
         final boolean fairLock = DEFAULT_FAIR_LOCK_POLICY;
 
+        checkNewMBeanServerPermission();
+
         
         
         
@@ -640,4 +643,11 @@ public final class JmxMBeanServer
         }
     }
 
+    private static void checkNewMBeanServerPermission() {
+        SecurityManager sm = System.getSecurityManager();
+        if (sm != null) {
+            Permission perm = new MBeanServerPermission("newMBeanServer");
+            sm.checkPermission(perm);
+        }
+    }
 }

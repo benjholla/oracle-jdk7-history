@@ -13,6 +13,7 @@ import java.util.logging.Level;
 
 import javax.management.ObjectName;
 import javax.management.loading.PrivateClassLoader;
+import sun.reflect.misc.ReflectUtil;
 
 
 final class ClassLoaderRepositorySupport
@@ -130,6 +131,7 @@ final class ClassLoaderRepositorySupport
                                final ClassLoader without,
                                final ClassLoader stop)
             throws ClassNotFoundException {
+        ReflectUtil.checkPackageAccess(className);
         final int size = list.length;
         for(int i=0; i<size; i++) {
             try {

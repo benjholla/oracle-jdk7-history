@@ -180,35 +180,37 @@ public class MethodHandles {
         MethodHandle findStatic(Class<?> refc, String name, MethodType type) throws NoSuchMethodException, IllegalAccessException {
             MemberName method = resolveOrFail(refc, name, type, true);
             checkSecurityManager(refc, method);  
-            return accessStatic(refc, method);
+            Class<?> callerClass = findBoundCallerClass(method);  
+            return accessStatic(refc, method, callerClass);
         }
         private
-        MethodHandle accessStatic(Class<?> refc, MemberName method) throws IllegalAccessException {
+        MethodHandle accessStatic(Class<?> refc, MemberName method, Class<?> callerClass) throws IllegalAccessException {
             checkMethod(refc, method, true);
             MethodHandle mh = MethodHandleImpl.findMethod(method, false, lookupClassOrNull());
-            mh = maybeBindCaller(method, mh);
+            mh = maybeBindCaller(method, mh, callerClass);
             return mh;
         }
         private
         MethodHandle resolveStatic(Class<?> refc, String name, MethodType type) throws NoSuchMethodException, IllegalAccessException {
             MemberName method = resolveOrFail(refc, name, type, true);
-            return accessStatic(refc, method);
+            return accessStatic(refc, method, lookupClass);
         }
 
         
         public MethodHandle findVirtual(Class<?> refc, String name, MethodType type) throws NoSuchMethodException, IllegalAccessException {
             MemberName method = resolveOrFail(refc, name, type, false);
             checkSecurityManager(refc, method);  
-            return accessVirtual(refc, method);
+            Class<?> callerClass = findBoundCallerClass(method);  
+            return accessVirtual(refc, method, callerClass);
         }
         private MethodHandle resolveVirtual(Class<?> refc, String name, MethodType type) throws NoSuchMethodException, IllegalAccessException {
             MemberName method = resolveOrFail(refc, name, type, false);
-            return accessVirtual(refc, method);
+            return accessVirtual(refc, method, lookupClass);
         }
-        private MethodHandle accessVirtual(Class<?> refc, MemberName method) throws IllegalAccessException {
+        private MethodHandle accessVirtual(Class<?> refc, MemberName method, Class<?> callerClass) throws IllegalAccessException {
             checkMethod(refc, method, false);
             MethodHandle mh = MethodHandleImpl.findMethod(method, true, lookupClassOrNull());
-            mh = maybeBindCaller(method, mh);
+            mh = maybeBindCaller(method, mh, callerClass);
             return restrictProtectedReceiver(method, mh);
         }
 
@@ -254,20 +256,22 @@ public class MethodHandles {
             checkSpecialCaller(specialCaller);
             MemberName method = resolveOrFail(refc, name, type, false, false, specialCaller);
             checkSecurityManager(refc, method);  
-            return accessSpecial(refc, method, specialCaller);
+            Class<?> callerClass = findBoundCallerClass(method);  
+            return accessSpecial(refc, method, callerClass, specialCaller);
         }
         private MethodHandle accessSpecial(Class<?> refc, MemberName method,
+                                           Class<?> callerClass,
                                            Class<?> specialCaller) throws NoSuchMethodException, IllegalAccessException {
             checkMethod(refc, method, false);
             MethodHandle mh = MethodHandleImpl.findMethod(method, false, specialCaller);
-            mh = maybeBindCaller(method, mh);
+            mh = maybeBindCaller(method, mh, callerClass);
             return restrictReceiver(method, mh, specialCaller);
         }
         private MethodHandle resolveSpecial(Class<?> refc, String name, MethodType type) throws NoSuchMethodException, IllegalAccessException {
             Class<?> specialCaller = lookupClass();
             checkSpecialCaller(specialCaller);
             MemberName method = resolveOrFail(refc, name, type, false, false, specialCaller);
-            return accessSpecial(refc, method, specialCaller);
+            return accessSpecial(refc, method, lookupClass, specialCaller);
         }
 
         
@@ -321,7 +325,8 @@ public class MethodHandles {
             checkSecurityManager(refc, method);  
             checkMethod(refc, method, false);
             MethodHandle dmh = MethodHandleImpl.findMethod(method, true, lookupClassOrNull());
-            MethodHandle bcmh = maybeBindCaller(method, dmh);
+            Class<?> callerClass = findBoundCallerClass(method);  
+            MethodHandle bcmh = maybeBindCaller(method, dmh, callerClass);
             if (bcmh != dmh)  return fixVarargs(bcmh.bindTo(receiver), dmh);
             MethodHandle bmh = MethodHandleImpl.bindReceiver(dmh, receiver);
             if (bmh == null)
@@ -337,7 +342,8 @@ public class MethodHandles {
                 return MethodHandleImpl.findMethod(method, true,  null);
             checkMethod(method.getDeclaringClass(), method, method.isStatic());
             MethodHandle mh = MethodHandleImpl.findMethod(method, true, lookupClassOrNull());
-            mh = maybeBindCaller(method, mh);
+            Class<?> callerClass = findBoundCallerClass(method);  
+            mh = maybeBindCaller(method, mh, callerClass);
             return restrictProtectedReceiver(method, mh);
         }
 
@@ -349,7 +355,8 @@ public class MethodHandles {
             
             checkMethod(m.getDeclaringClass(), method, false);
             MethodHandle mh = MethodHandleImpl.findMethod(method, false, lookupClassOrNull());
-            mh = maybeBindCaller(method, mh);
+            Class<?> callerClass = findBoundCallerClass(method);  
+            mh = maybeBindCaller(method, mh, callerClass);
             return restrictReceiver(method, mh, specialCaller);
         }
 
@@ -412,6 +419,19 @@ public class MethodHandles {
                 throw new MemberName(refc).makeAccessException("symbolic reference class is not public", this);
         }
 
+        
+        Class<?> findBoundCallerClass(MemberName m) {
+            Class<?> callerClass = null;
+            if (MethodHandleNatives.isCallerSensitive(m)) {
+                
+                
+                callerClass = ((allowedModes & PRIVATE) != 0
+                               ? lookupClass  
+                               
+                               : getCallerClassAtEntryPoint(true));
+            }
+            return callerClass;
+        }
         
         void checkSecurityManager(Class<?> refc, MemberName m) {
             SecurityManager smgr = System.getSecurityManager();
@@ -537,12 +557,14 @@ public class MethodHandles {
             MethodHandle narrowMH = MethodHandleImpl.convertArguments(mh, narrowType, rawType, 0);
             return fixVarargs(narrowMH, mh);
         }
-        private MethodHandle maybeBindCaller(MemberName method, MethodHandle mh) throws IllegalAccessException {
+        private MethodHandle maybeBindCaller(MemberName method, MethodHandle mh,
+                                             Class<?> callerClass)
+                                             throws IllegalAccessException {
             if (allowedModes == TRUSTED || !MethodHandleNatives.isCallerSensitive(method))
                 return mh;
             Class<?> hostClass = lookupClass;
             if ((allowedModes & PRIVATE) == 0)  
-                hostClass = null;
+                hostClass = callerClass;  
             MethodHandle cbmh = MethodHandleImpl.bindCaller(mh, hostClass);
             cbmh = fixVarargs(cbmh, mh);  
             return cbmh;

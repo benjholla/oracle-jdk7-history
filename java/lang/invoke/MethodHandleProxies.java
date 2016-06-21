@@ -41,12 +41,15 @@ public class MethodHandleProxies {
     <T> T asInterfaceInstance(final Class<T> intfc, final MethodHandle target) {
         if (!intfc.isInterface() || !Modifier.isPublic(intfc.getModifiers()))
             throw new IllegalArgumentException("not a public interface: "+intfc.getName());
-        SecurityManager smgr = System.getSecurityManager();
-        if (smgr != null) {
+        final MethodHandle mh;
+        if (System.getSecurityManager() != null) {
             final int CALLER_FRAME = 2; 
             final Class<?> caller = Reflection.getCallerClass(CALLER_FRAME);
-            final ClassLoader ccl = caller.getClassLoader();
+            final ClassLoader ccl = (caller != null) ? caller.getClassLoader() : null;
             ReflectUtil.checkProxyPackageAccess(ccl, intfc);
+            mh = maybeBindCaller(target, caller);
+        } else {
+            mh = target;
         }
         ClassLoader proxyLoader = intfc.getClassLoader();
         if (proxyLoader == null) {
@@ -60,7 +63,7 @@ public class MethodHandleProxies {
         for (int i = 0; i < methods.length; i++) {
             Method sm = methods[i];
             MethodType smMT = MethodType.methodType(sm.getReturnType(), sm.getParameterTypes());
-            MethodHandle checkTarget = target.asType(smMT);  
+            MethodHandle checkTarget = mh.asType(smMT);  
             checkTarget = checkTarget.asType(checkTarget.type().changeReturnType(Object.class));
             vaTargets[i] = checkTarget.asSpreader(Object[].class, smMT.parameterCount());
         }
@@ -83,8 +86,8 @@ public class MethodHandleProxies {
                 }
             };
 
-        Object proxy;
-        if (smgr != null) {
+        final Object proxy;
+        if (System.getSecurityManager() != null) {
             
             
             final ClassLoader loader = proxyLoader;
@@ -102,6 +105,19 @@ public class MethodHandleProxies {
                                            ih);
         }
         return intfc.cast(proxy);
+    }
+
+    private static MethodHandle maybeBindCaller(MethodHandle target, Class<?> hostClass) {
+        if (hostClass == null || hostClass.getClassLoader() == null)
+            return target;
+
+        MethodHandle cbmh = MethodHandleImpl.bindCaller(target, hostClass);
+        if (target.isVarargsCollector()) {
+            MethodType type = cbmh.type();
+            int arity = type.parameterCount();
+            return cbmh.asVarargsCollector(type.parameterType(arity-1));
+        }
+        return cbmh;
     }
 
     
