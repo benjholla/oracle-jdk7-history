@@ -2,12 +2,12 @@
 
 package java.awt.event;
 
-import java.awt.Event;
 import java.awt.Component;
 import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import sun.awt.AWTAccessor;
 
 
 public class KeyEvent extends InputEvent {
@@ -493,6 +493,23 @@ public class KeyEvent extends InputEvent {
         if (!GraphicsEnvironment.isHeadless()) {
             initIDs();
         }
+
+        AWTAccessor.setKeyEventAccessor(
+            new AWTAccessor.KeyEventAccessor() {
+                public void setRawCode(KeyEvent ev, long rawCode) {
+                    ev.rawCode = rawCode;
+                }
+
+                public void setPrimaryLevelUnicode(KeyEvent ev,
+                                                   long primaryLevelUnicode) {
+                    ev.primaryLevelUnicode = primaryLevelUnicode;
+                }
+
+                public void setExtendedKeyCode(KeyEvent ev,
+                                               long extendedKeyCode) {
+                    ev.extendedKeyCode = extendedKeyCode;
+                }
+            });
     }
 
     

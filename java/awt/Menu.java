@@ -8,6 +8,7 @@ import java.util.Enumeration;
 import java.awt.peer.MenuPeer;
 import java.awt.event.KeyEvent;
 import javax.accessibility.*;
+import sun.awt.AWTAccessor;
 
 
 public class Menu extends MenuItem implements MenuContainer, Accessible {
@@ -18,6 +19,13 @@ public class Menu extends MenuItem implements MenuContainer, Accessible {
         if (!GraphicsEnvironment.isHeadless()) {
             initIDs();
         }
+
+        AWTAccessor.setMenuAccessor(
+            new AWTAccessor.MenuAccessor() {
+                public Vector getItems(Menu menu) {
+                    return menu.items;
+                }
+            });
     }
 
     

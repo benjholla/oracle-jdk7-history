@@ -1,10 +1,6 @@
 
 package java.awt;
 
-import java.awt.AWTException;
-import java.awt.Point;
-import java.awt.Toolkit;
-
 import java.io.File;
 import java.io.FileInputStream;
 
@@ -16,6 +12,7 @@ import java.util.StringTokenizer;
 import java.security.AccessController;
 
 import sun.util.logging.PlatformLogger;
+import sun.awt.AWTAccessor;
 
 
 public class Cursor implements java.io.Serializable {
@@ -126,6 +123,21 @@ public class Cursor implements java.io.Serializable {
         if (!GraphicsEnvironment.isHeadless()) {
             initIDs();
         }
+
+        AWTAccessor.setCursorAccessor(
+            new AWTAccessor.CursorAccessor() {
+                public long getPData(Cursor cursor) {
+                    return cursor.pData;
+                }
+
+                public void setPData(Cursor cursor, long pData) {
+                    cursor.pData = pData;
+                }
+
+                public int getType(Cursor cursor) {
+                    return cursor.type;
+                }
+            });
     }
 
     

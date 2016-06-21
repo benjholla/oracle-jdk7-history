@@ -10,6 +10,7 @@ import sun.awt.AppContext;
 import sun.awt.SunToolkit;
 import sun.awt.HeadlessToolkit;
 import sun.security.util.SecurityConstants;
+import sun.awt.AWTAccessor;
 
 
 public class SystemTray {
@@ -19,6 +20,18 @@ public class SystemTray {
     transient private SystemTrayPeer peer;
 
     private static final TrayIcon[] EMPTY_TRAY_ARRAY = new TrayIcon[0];
+
+    static {
+        AWTAccessor.setSystemTrayAccessor(
+            new AWTAccessor.SystemTrayAccessor() {
+                public void firePropertyChange(SystemTray tray,
+                                               String propertyName,
+                                               Object oldValue,
+                                               Object newValue) {
+                    tray.firePropertyChange(propertyName, oldValue, newValue);
+                }
+            });
+    }
 
     
     private SystemTray() {

@@ -2,6 +2,8 @@
 
 package javax.swing;
 
+import sun.awt.AWTAccessor;
+
 
 enum ClientPropertyKey {
 
@@ -20,6 +22,15 @@ enum ClientPropertyKey {
 
     
     private final boolean reportValueNotSerializable;
+
+    static {
+        AWTAccessor.setClientPropertyKeyAccessor(
+            new AWTAccessor.ClientPropertyKeyAccessor() {
+                public Object getJComponent_TRANSFER_HANDLER() {
+                    return JComponent_TRANSFER_HANDLER;
+                }
+            });
+    }
 
     
     private ClientPropertyKey() {

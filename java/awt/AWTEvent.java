@@ -12,8 +12,6 @@ import sun.util.logging.PlatformLogger;
 
 import java.security.AccessControlContext;
 import java.security.AccessController;
-import java.io.ObjectInputStream;
-import java.io.IOException;
 
 
 public abstract class AWTEvent extends EventObject {
@@ -126,9 +124,11 @@ public abstract class AWTEvent extends EventObject {
                 public void setPosted(AWTEvent ev) {
                     ev.isPosted = true;
                 }
+
                 public void setSystemGenerated(AWTEvent ev) {
                     ev.isSystemGenerated = true;
                 }
+
                 public boolean isSystemGenerated(AWTEvent ev) {
                     return ev.isSystemGenerated;
                 }
@@ -136,6 +136,15 @@ public abstract class AWTEvent extends EventObject {
                 public AccessControlContext getAccessControlContext(AWTEvent ev) {
                     return ev.getAccessControlContext();
                 }
+
+                public byte[] getBData(AWTEvent ev) {
+                    return ev.bdata;
+                }
+
+                public void setBData(AWTEvent ev, byte[] bdata) {
+                    ev.bdata = bdata;
+                }
+
             });
     }
 
