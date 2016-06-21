@@ -344,7 +344,7 @@ class MethodType implements java.io.Serializable {
 
     
     public List<Class<?>> parameterList() {
-        return Collections.unmodifiableList(Arrays.asList(ptypes));
+        return Collections.unmodifiableList(Arrays.asList(ptypes.clone()));
     }
 
      Class<?> lastParameterType() {

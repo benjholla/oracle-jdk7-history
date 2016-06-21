@@ -26,6 +26,7 @@ import com.sun.org.apache.xml.internal.security.transforms.implementations.Trans
 import com.sun.org.apache.xml.internal.security.transforms.implementations.TransformXSLT;
 import com.sun.org.apache.xml.internal.security.utils.Constants;
 import com.sun.org.apache.xml.internal.security.utils.HelperNodeList;
+import com.sun.org.apache.xml.internal.security.utils.JavaUtils;
 import com.sun.org.apache.xml.internal.security.utils.SignatureElementProxy;
 import com.sun.org.apache.xml.internal.security.utils.XMLUtils;
 import org.w3c.dom.Document;
@@ -113,6 +114,7 @@ public final class Transform extends SignatureElementProxy {
     public static void register(String algorithmURI, String implementingClass)
         throws AlgorithmAlreadyRegisteredException, ClassNotFoundException,
             InvalidTransformException {
+        JavaUtils.checkRegisterPermission();
         
         Class<? extends TransformSpi> transformSpi = transformSpiHash.get(algorithmURI);
         if (transformSpi != null) {
@@ -128,6 +130,7 @@ public final class Transform extends SignatureElementProxy {
     
     public static void register(String algorithmURI, Class<? extends TransformSpi> implementingClass)
         throws AlgorithmAlreadyRegisteredException {
+        JavaUtils.checkRegisterPermission();
         
         Class<? extends TransformSpi> transformSpi = transformSpiHash.get(algorithmURI);
         if (transformSpi != null) {

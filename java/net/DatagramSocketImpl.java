@@ -16,6 +16,12 @@ public abstract class DatagramSocketImpl implements SocketOptions {
     
     protected FileDescriptor fd;
 
+    int dataAvailable() {
+        
+        
+        return 0;
+    }
+
     
     protected abstract void create() throws SocketException;
 

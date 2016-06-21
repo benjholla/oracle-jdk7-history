@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.SecurityPermission;
 
 
 public class JavaUtils {
@@ -15,6 +16,10 @@ public class JavaUtils {
     
     static java.util.logging.Logger log =
         java.util.logging.Logger.getLogger(JavaUtils.class.getName());
+
+    private static final SecurityPermission REGISTER_PERMISSION =
+        new SecurityPermission(
+            "com.sun.org.apache.xml.internal.security.register");
 
     private JavaUtils() {
         
@@ -84,5 +89,13 @@ public class JavaUtils {
 
         refBytes = baos.toByteArray();
         return refBytes;
+    }
+
+    
+    public static void checkRegisterPermission() {
+        SecurityManager sm = System.getSecurityManager();
+        if (sm != null) {
+            sm.checkPermission(REGISTER_PERMISSION);
+        }
     }
 }

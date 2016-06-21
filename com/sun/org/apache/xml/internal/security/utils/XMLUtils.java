@@ -53,11 +53,13 @@ public class XMLUtils {
 
     
     public static void setDsPrefix(String prefix) {
+        JavaUtils.checkRegisterPermission();
         dsPrefix = prefix;
     }
 
     
     public static void setXencPrefix(String prefix) {
+        JavaUtils.checkRegisterPermission();
         xencPrefix = prefix;
     }
 

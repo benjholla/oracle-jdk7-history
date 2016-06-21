@@ -34,6 +34,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Stack;
 import javax.xml.XMLConstants;
+import javax.xml.stream.XMLInputFactory;
 
 
 
@@ -227,6 +228,11 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver {
 
     
     protected PropertyManager fPropertyManager ;
+
+    
+    boolean fSupportDTD = true;
+    boolean fReplaceEntityReferences = true;
+    boolean fSupportExternalEntities = true;
 
     
     protected String fAccessExternalDTD = EXTERNAL_ACCESS_DEFAULT;
@@ -931,7 +937,8 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver {
             boolean parameter = entityName.startsWith("%");
             boolean general = !parameter;
             if (unparsed || (general && !fExternalGeneralEntities) ||
-                    (parameter && !fExternalParameterEntities)) {
+                    (parameter && !fExternalParameterEntities) ||
+                    !fSupportDTD || !fSupportExternalEntities) {
 
                 if (fEntityHandler != null) {
                     fResourceIdentifier.clear();
@@ -1177,6 +1184,10 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver {
             fStaxEntityResolver = null;
         }
 
+        fSupportDTD = ((Boolean)propertyManager.getProperty(XMLInputFactory.SUPPORT_DTD)).booleanValue();
+        fReplaceEntityReferences = ((Boolean)propertyManager.getProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES)).booleanValue();
+        fSupportExternalEntities = ((Boolean)propertyManager.getProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES)).booleanValue();
+
         
         fLoadExternalDTD = !((Boolean)propertyManager.getProperty(Constants.ZEPHYR_PROPERTY_PREFIX + Constants.IGNORE_EXTERNAL_DTD)).booleanValue();
 
@@ -1234,6 +1245,11 @@ public class XMLEntityManager implements XMLComponent, XMLEntityResolver {
         fValidationManager = (ValidationManager)componentManager.getProperty(VALIDATION_MANAGER, null);
         fSecurityManager = (XMLSecurityManager)componentManager.getProperty(SECURITY_MANAGER, null);
         entityExpansionIndex = fSecurityManager.getIndex(Constants.JDK_ENTITY_EXPANSION_LIMIT);
+
+        
+        fSupportDTD = true;
+        fReplaceEntityReferences = true;
+        fSupportExternalEntities = true;
 
         
         XMLSecurityPropertyManager spm = (XMLSecurityPropertyManager) componentManager.getProperty(XML_SECURITY_PROPERTY_MANAGER, null);

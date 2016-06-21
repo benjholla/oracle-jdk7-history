@@ -77,8 +77,8 @@ public final
     @CallerSensitive
     public static Class<?> forName(String className)
                 throws ClassNotFoundException {
-        return forName0(className, true,
-                        ClassLoader.getClassLoader(Reflection.getCallerClass()));
+        Class<?> caller = Reflection.getCallerClass();
+        return forName0(className, true, ClassLoader.getClassLoader(caller), caller);
     }
 
 
@@ -88,22 +88,27 @@ public final
                                    ClassLoader loader)
         throws ClassNotFoundException
     {
-        if (loader == null) {
-            SecurityManager sm = System.getSecurityManager();
-            if (sm != null) {
-                ClassLoader ccl = ClassLoader.getClassLoader(Reflection.getCallerClass());
+        Class<?> caller = null;
+        SecurityManager sm = System.getSecurityManager();
+        if (sm != null) {
+            
+            
+            caller = Reflection.getCallerClass();
+            if (loader == null) {
+                ClassLoader ccl = ClassLoader.getClassLoader(caller);
                 if (ccl != null) {
                     sm.checkPermission(
                         SecurityConstants.GET_CLASSLOADER_PERMISSION);
                 }
             }
         }
-        return forName0(name, initialize, loader);
+        return forName0(name, initialize, loader, caller);
     }
 
     
     private static native Class<?> forName0(String name, boolean initialize,
-                                            ClassLoader loader)
+                                            ClassLoader loader,
+                                            Class<?> caller)
         throws ClassNotFoundException;
 
     
@@ -967,42 +972,106 @@ public final
     }
 
     
+    private static class Atomic {
+        
+        
+        private static final Unsafe unsafe = Unsafe.getUnsafe();
+        
+        private static final long reflectionDataOffset;
+        
+        private static final long annotationTypeOffset;
+
+        static {
+            Field[] fields = Class.class.getDeclaredFields0(false); 
+            reflectionDataOffset = objectFieldOffset(fields, "reflectionData");
+            annotationTypeOffset = objectFieldOffset(fields, "annotationType");
+        }
+
+        private static long objectFieldOffset(Field[] fields, String fieldName) {
+            Field field = searchFields(fields, fieldName);
+            if (field == null) {
+                throw new Error("No " + fieldName + " field found in java.lang.Class");
+            }
+            return unsafe.objectFieldOffset(field);
+        }
+
+        static <T> boolean casReflectionData(Class<?> clazz,
+                                             SoftReference<ReflectionData<T>> oldData,
+                                             SoftReference<ReflectionData<T>> newData) {
+            return unsafe.compareAndSwapObject(clazz, reflectionDataOffset, oldData, newData);
+        }
+
+        static <T> boolean casAnnotationType(Class<?> clazz,
+                                             AnnotationType oldType,
+                                             AnnotationType newType) {
+            return unsafe.compareAndSwapObject(clazz, annotationTypeOffset, oldType, newType);
+        }
+    }
+
+    
 
     
     private static boolean useCaches = true;
-    private volatile transient SoftReference<Field[]> declaredFields;
-    private volatile transient SoftReference<Field[]> publicFields;
-    private volatile transient SoftReference<Method[]> declaredMethods;
-    private volatile transient SoftReference<Method[]> publicMethods;
-    private volatile transient SoftReference<Constructor<T>[]> declaredConstructors;
-    private volatile transient SoftReference<Constructor<T>[]> publicConstructors;
+
     
-    private volatile transient SoftReference<Field[]> declaredPublicFields;
-    private volatile transient SoftReference<Method[]> declaredPublicMethods;
+    static class ReflectionData<T> {
+        volatile Field[] declaredFields;
+        volatile Field[] publicFields;
+        volatile Method[] declaredMethods;
+        volatile Method[] publicMethods;
+        volatile Constructor<T>[] declaredConstructors;
+        volatile Constructor<T>[] publicConstructors;
+        
+        volatile Field[] declaredPublicFields;
+        volatile Method[] declaredPublicMethods;
+        
+        final int redefinedCount;
+
+        ReflectionData(int redefinedCount) {
+            this.redefinedCount = redefinedCount;
+        }
+    }
+
+    private volatile transient SoftReference<ReflectionData<T>> reflectionData;
 
     
     
     private volatile transient int classRedefinedCount = 0;
 
     
-    
-    private volatile transient int lastRedefinedCount = 0;
+    private ReflectionData<T> reflectionData() {
+        SoftReference<ReflectionData<T>> reflectionData = this.reflectionData;
+        int classRedefinedCount = this.classRedefinedCount;
+        ReflectionData<T> rd;
+        if (useCaches &&
+            reflectionData != null &&
+            (rd = reflectionData.get()) != null &&
+            rd.redefinedCount == classRedefinedCount) {
+            return rd;
+        }
+        
+        
+        return newReflectionData(reflectionData, classRedefinedCount);
+    }
 
-    
-    
-    private void clearCachesOnClassRedefinition() {
-        if (lastRedefinedCount != classRedefinedCount) {
-            declaredFields = publicFields = declaredPublicFields = null;
-            declaredMethods = publicMethods = declaredPublicMethods = null;
-            declaredConstructors = publicConstructors = null;
-            annotations = declaredAnnotations = null;
+    private ReflectionData<T> newReflectionData(SoftReference<ReflectionData<T>> oldReflectionData,
+                                                int classRedefinedCount) {
+        if (!useCaches) return null;
 
+        while (true) {
+            ReflectionData<T> rd = new ReflectionData<>(classRedefinedCount);
             
+            if (Atomic.casReflectionData(this, oldReflectionData, new SoftReference<>(rd))) {
+                return rd;
+            }
             
-            
-            
-            
-            lastRedefinedCount = classRedefinedCount;
+            oldReflectionData = this.reflectionData;
+            classRedefinedCount = this.classRedefinedCount;
+            if (oldReflectionData != null &&
+                (rd = oldReflectionData.get()) != null &&
+                rd.redefinedCount == classRedefinedCount) {
+                return rd;
+            }
         }
     }
 
@@ -1030,7 +1099,7 @@ public final
     }
 
     
-    private native byte[] getRawAnnotations();
+    native byte[] getRawAnnotations();
 
     native ConstantPool getConstantPool();
 
@@ -1045,27 +1114,19 @@ public final
     
     private Field[] privateGetDeclaredFields(boolean publicOnly) {
         checkInitted();
-        Field[] res = null;
-        if (useCaches) {
-            clearCachesOnClassRedefinition();
-            if (publicOnly) {
-                if (declaredPublicFields != null) {
-                    res = declaredPublicFields.get();
-                }
-            } else {
-                if (declaredFields != null) {
-                    res = declaredFields.get();
-                }
-            }
+        Field[] res;
+        ReflectionData<T> rd = reflectionData();
+        if (rd != null) {
+            res = publicOnly ? rd.declaredPublicFields : rd.declaredFields;
             if (res != null) return res;
         }
         
         res = Reflection.filterFields(this, getDeclaredFields0(publicOnly));
-        if (useCaches) {
+        if (rd != null) {
             if (publicOnly) {
-                declaredPublicFields = new SoftReference<>(res);
+                rd.declaredPublicFields = res;
             } else {
-                declaredFields = new SoftReference<>(res);
+                rd.declaredFields = res;
             }
         }
         return res;
@@ -1076,12 +1137,10 @@ public final
     
     private Field[] privateGetPublicFields(Set<Class<?>> traversedInterfaces) {
         checkInitted();
-        Field[] res = null;
-        if (useCaches) {
-            clearCachesOnClassRedefinition();
-            if (publicFields != null) {
-                res = publicFields.get();
-            }
+        Field[] res;
+        ReflectionData<T> rd = reflectionData();
+        if (rd != null) {
+            res = rd.publicFields;
             if (res != null) return res;
         }
 
@@ -1114,8 +1173,8 @@ public final
 
         res = new Field[fields.size()];
         fields.toArray(res);
-        if (useCaches) {
-            publicFields = new SoftReference<>(res);
+        if (rd != null) {
+            rd.publicFields = res;
         }
         return res;
     }
@@ -1138,18 +1197,10 @@ public final
     
     private Constructor<T>[] privateGetDeclaredConstructors(boolean publicOnly) {
         checkInitted();
-        Constructor<T>[] res = null;
-        if (useCaches) {
-            clearCachesOnClassRedefinition();
-            if (publicOnly) {
-                if (publicConstructors != null) {
-                    res = publicConstructors.get();
-                }
-            } else {
-                if (declaredConstructors != null) {
-                    res = declaredConstructors.get();
-                }
-            }
+        Constructor<T>[] res;
+        ReflectionData<T> rd = reflectionData();
+        if (rd != null) {
+            res = publicOnly ? rd.publicConstructors : rd.declaredConstructors;
             if (res != null) return res;
         }
         
@@ -1158,11 +1209,11 @@ public final
         } else {
             res = getDeclaredConstructors0(publicOnly);
         }
-        if (useCaches) {
+        if (rd != null) {
             if (publicOnly) {
-                publicConstructors = new SoftReference<>(res);
+                rd.publicConstructors = res;
             } else {
-                declaredConstructors = new SoftReference<>(res);
+                rd.declaredConstructors = res;
             }
         }
         return res;
@@ -1179,27 +1230,19 @@ public final
     
     private Method[] privateGetDeclaredMethods(boolean publicOnly) {
         checkInitted();
-        Method[] res = null;
-        if (useCaches) {
-            clearCachesOnClassRedefinition();
-            if (publicOnly) {
-                if (declaredPublicMethods != null) {
-                    res = declaredPublicMethods.get();
-                }
-            } else {
-                if (declaredMethods != null) {
-                    res = declaredMethods.get();
-                }
-            }
+        Method[] res;
+        ReflectionData<T> rd = reflectionData();
+        if (rd != null) {
+            res = publicOnly ? rd.declaredPublicMethods : rd.declaredMethods;
             if (res != null) return res;
         }
         
         res = Reflection.filterMethods(this, getDeclaredMethods0(publicOnly));
-        if (useCaches) {
+        if (rd != null) {
             if (publicOnly) {
-                declaredPublicMethods = new SoftReference<>(res);
+                rd.declaredPublicMethods = res;
             } else {
-                declaredMethods = new SoftReference<>(res);
+                rd.declaredMethods = res;
             }
         }
         return res;
@@ -1301,12 +1344,10 @@ public final
     
     private Method[] privateGetPublicMethods() {
         checkInitted();
-        Method[] res = null;
-        if (useCaches) {
-            clearCachesOnClassRedefinition();
-            if (publicMethods != null) {
-                res = publicMethods.get();
-            }
+        Method[] res;
+        ReflectionData<T> rd = reflectionData();
+        if (rd != null) {
+            res = rd.publicMethods;
             if (res != null) return res;
         }
 
@@ -1354,8 +1395,8 @@ public final
         methods.addAllIfNotPresent(inheritedMethods);
         methods.compactAndTrim();
         res = methods.getArray();
-        if (useCaches) {
-            publicMethods = new SoftReference<>(res);
+        if (rd != null) {
+            rd.publicMethods = res;
         }
         return res;
     }
@@ -1365,7 +1406,7 @@ public final
     
     
 
-    private Field searchFields(Field[] fields, String name) {
+    private static Field searchFields(Field[] fields, String name) {
         String internedName = name.intern();
         for (int i = 0; i < fields.length; i++) {
             if (fields[i].getName() == internedName) {
@@ -1383,7 +1424,7 @@ public final
         
         
         
-        Field res = null;
+        Field res;
         
         if ((res = searchFields(privateGetDeclaredFields(true), name)) != null) {
             return res;
@@ -1435,7 +1476,7 @@ public final
         
         
         
-        Method res = null;
+        Method res;
         
         if ((res = searchMethods(privateGetDeclaredMethods(true),
                                  name,
@@ -1731,9 +1772,20 @@ public final
     
     private transient Map<Class<? extends Annotation>, Annotation> annotations;
     private transient Map<Class<? extends Annotation>, Annotation> declaredAnnotations;
+    
+    private  transient int lastAnnotationsRedefinedCount = 0;
+
+    
+    
+    private void clearAnnotationCachesOnClassRedefinition() {
+        if (lastAnnotationsRedefinedCount != classRedefinedCount) {
+            annotations = declaredAnnotations = null;
+            lastAnnotationsRedefinedCount = classRedefinedCount;
+        }
+    }
 
     private synchronized void initAnnotationsIfNecessary() {
-        clearCachesOnClassRedefinition();
+        clearAnnotationCachesOnClassRedefinition();
         if (annotations != null)
             return;
         declaredAnnotations = AnnotationParser.parseAnnotations(
@@ -1755,10 +1807,11 @@ public final
 
     
 
-    private AnnotationType annotationType;
+    @SuppressWarnings("UnusedDeclaration")
+    private volatile transient AnnotationType annotationType;
 
-    void setAnnotationType(AnnotationType type) {
-        annotationType = type;
+    boolean casAnnotationType(AnnotationType oldType, AnnotationType newType) {
+        return Atomic.casAnnotationType(this, oldType, newType);
     }
 
     AnnotationType getAnnotationType() {

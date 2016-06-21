@@ -264,7 +264,13 @@ public class LogRecord implements java.io.Serializable {
         
         if (resourceBundleName != null) {
             try {
-                resourceBundle = ResourceBundle.getBundle(resourceBundleName);
+                
+                
+                final ResourceBundle bundle =
+                        ResourceBundle.getBundle(resourceBundleName,
+                                Locale.getDefault(),
+                                ClassLoader.getSystemClassLoader());
+                resourceBundle = bundle;
             } catch (MissingResourceException ex) {
                 
                 

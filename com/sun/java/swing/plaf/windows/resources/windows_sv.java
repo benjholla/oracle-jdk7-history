@@ -14,7 +14,7 @@ public final class windows_sv extends ListResourceBundle {
             { "FileChooser.fileNameLabel.textAndMnemonic", "Fil&namn:" },
             { "FileChooser.fileSizeHeader.textAndMnemonic", "Storlek" },
             { "FileChooser.fileTypeHeader.textAndMnemonic", "Typ" },
-            { "FileChooser.filesOfTypeLabel.textAndMnemonic", "Filer av &typ:" },
+            { "FileChooser.filesOfTypeLabel.textAndMnemonic", "Filer av &typen:" },
             { "FileChooser.folderNameLabel.textAndMnemonic", "Mapp&namn:" },
             { "FileChooser.homeFolderAccessibleName", "Hem" },
             { "FileChooser.homeFolderToolTip.textAndMnemonic", "Hem" },

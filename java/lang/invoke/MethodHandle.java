@@ -221,8 +221,6 @@ public abstract class MethodHandle {
     
     MethodHandle viewAsType(MethodType newType) {
         
-        if (!type.isViewableAs(newType))
-            throw new InternalError();
         return MethodHandleImpl.makePairwiseConvert(this, newType, 0);
     }
 

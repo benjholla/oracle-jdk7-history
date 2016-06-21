@@ -313,6 +313,7 @@ public abstract class ElementProxy {
     
     public static void setDefaultPrefix(String namespace, String prefix)
         throws XMLSecurityException {
+        JavaUtils.checkRegisterPermission();
         if (prefixMappings.containsValue(prefix)) {
             String storedPrefix = prefixMappings.get(namespace);
             if (!storedPrefix.equals(prefix)) {

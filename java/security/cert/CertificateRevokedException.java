@@ -39,7 +39,10 @@ public class CertificateRevokedException extends CertificateException {
         this.revocationDate = new Date(revocationDate.getTime());
         this.reason = reason;
         this.authority = authority;
-        this.extensions = new HashMap(extensions);
+        
+        this.extensions = Collections.checkedMap(new HashMap<String, Extension>(),
+                                                 String.class, Extension.class);
+        this.extensions.putAll(extensions);
     }
 
     
@@ -82,7 +85,8 @@ public class CertificateRevokedException extends CertificateException {
     public String getMessage() {
         return "Certificate has been revoked, reason: "
                + reason + ", revocation date: " + revocationDate
-               + ", authority: " + authority + ", extensions: " + extensions;
+               + ", authority: " + authority + ", extension OIDs: "
+               + extensions.keySet();
     }
 
     

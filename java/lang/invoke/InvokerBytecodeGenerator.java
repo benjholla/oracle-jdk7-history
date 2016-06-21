@@ -572,6 +572,12 @@ class InvokerBytecodeGenerator {
             refKind = REF_invokeVirtual;
         }
 
+        if (member.getDeclaringClass().isInterface() && refKind == REF_invokeVirtual) {
+            
+            
+            refKind = REF_invokeInterface;
+        }
+
         
         for (int i = 0; i < name.arguments.length; i++) {
             emitPushArgument(name, i);

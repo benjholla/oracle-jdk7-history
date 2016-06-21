@@ -7,7 +7,7 @@ package com.sun.org.apache.xalan.internal.xsltc.compiler;
 import java.util.Vector;
 
 import com.sun.org.apache.bcel.internal.generic.ConstantPoolGen;
-import com.sun.org.apache.bcel.internal.generic.INVOKEVIRTUAL;
+import com.sun.org.apache.bcel.internal.generic.INVOKESTATIC;
 import com.sun.org.apache.bcel.internal.generic.InstructionList;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.ClassGenerator;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.MethodGenerator;
@@ -29,7 +29,8 @@ final class StringLengthCall extends FunctionCall {
             il.append(methodGen.loadContextNode());
             Type.Node.translateTo(classGen, methodGen, Type.String);
         }
-        il.append(new INVOKEVIRTUAL(cpg.addMethodref(STRING_CLASS,
-                                                     "length", "()I")));
+        il.append(new INVOKESTATIC(cpg.addMethodref(BASIS_LIBRARY_CLASS,
+                                                     "getStringLength",
+                                                     "(Ljava/lang/String;)I")));
     }
 }

@@ -444,9 +444,30 @@ public class MethodHandles {
             int allowedModes = this.allowedModes;
             if (allowedModes == TRUSTED)  return;
             int mods = m.getModifiers();
-            if (Modifier.isProtected(mods) && refKind == REF_newInvokeSpecial) {
-                
-                mods ^= Modifier.PROTECTED;
+            if (Modifier.isProtected(mods)) {
+                if (refKind == REF_invokeVirtual &&
+                        m.getDeclaringClass() == Object.class &&
+                        m.getName().equals("clone") &&
+                        refc.isArray()) {
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    mods ^= Modifier.PROTECTED | Modifier.PUBLIC;
+                }
+                if (refKind == REF_newInvokeSpecial) {
+                    
+                    mods ^= Modifier.PROTECTED;
+                }
             }
             if (Modifier.isFinal(mods) &&
                     MethodHandleNatives.refKindIsSetter(refKind))

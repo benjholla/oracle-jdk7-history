@@ -799,6 +799,9 @@ public class Logger {
         }
 
         setCallersClassLoaderRef(callersClass);
+        if (isSystemLogger && getCallersClassLoader() != null) {
+            checkPermission();
+        }
         if (findResourceBundle(name, true) == null) {
             
             
@@ -941,7 +944,9 @@ public class Logger {
         Logger target = this;
         while (target != null) {
             final String rbn = isSystemLogger
-                ? target.resourceBundleName
+                
+                
+                ? (target.isSystemLogger ? target.resourceBundleName : null)
                 : target.getResourceBundleName();
             if (rbn != null) {
                 return rbn;

@@ -582,7 +582,7 @@ public class ObjectOutputStream
         }
 
         bout.setBlockDataMode(true);
-        if (isCustomSubclass()) {
+        if (cl != null && isCustomSubclass()) {
             ReflectUtil.checkPackageAccess(cl);
         }
         annotateProxyClass(cl);
@@ -608,7 +608,7 @@ public class ObjectOutputStream
 
         Class cl = desc.forClass();
         bout.setBlockDataMode(true);
-        if (isCustomSubclass()) {
+        if (cl != null && isCustomSubclass()) {
             ReflectUtil.checkPackageAccess(cl);
         }
         annotateClass(cl);

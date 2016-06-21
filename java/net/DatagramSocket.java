@@ -25,6 +25,9 @@ class DatagramSocket implements java.io.Closeable {
     boolean oldImpl = false;
 
     
+    private boolean explicitFilter = false;
+    private int bytesLeftToFilter;
+    
     static final int ST_NOT_CONNECTED = 0;
     static final int ST_CONNECTED = 1;
     static final int ST_CONNECTED_NO_IMPL = 2;
@@ -69,6 +72,15 @@ class DatagramSocket implements java.io.Closeable {
 
                 
                 connectState = ST_CONNECTED;
+                
+                int avail = getImpl().dataAvailable();
+                if (avail == -1) {
+                    throw new SocketException();
+                }
+                explicitFilter = avail > 0;
+                if (explicitFilter) {
+                    bytesLeftToFilter = getReceiveBufferSize();
+                }
             } catch (SocketException se) {
 
                 
@@ -237,6 +249,7 @@ class DatagramSocket implements java.io.Closeable {
             connectedAddress = null;
             connectedPort = -1;
             connectState = ST_NOT_CONNECTED;
+            explicitFilter = false;
         }
     }
 
@@ -366,7 +379,10 @@ class DatagramSocket implements java.io.Closeable {
                     } 
                 }
             }
-            if (connectState == ST_CONNECTED_NO_IMPL) {
+            DatagramPacket tmp = null;
+            if ((connectState == ST_CONNECTED_NO_IMPL) || explicitFilter) {
+                
+                
                 
                 
                 
@@ -388,8 +404,14 @@ class DatagramSocket implements java.io.Closeable {
                     if ((!connectedAddress.equals(peekAddress)) ||
                         (connectedPort != peekPort)) {
                         
-                        DatagramPacket tmp = new DatagramPacket(new byte[1], 1);
+                        tmp = new DatagramPacket(
+                                                new byte[1024], 1024);
                         getImpl().receive(tmp);
+                        if (explicitFilter) {
+                            if (checkFiltering(tmp)) {
+                                stop = true;
+                            }
+                        }
                     } else {
                         stop = true;
                     }
@@ -398,7 +420,21 @@ class DatagramSocket implements java.io.Closeable {
             
             
             getImpl().receive(p);
+            if (explicitFilter && tmp == null) {
+                
+                checkFiltering(p);
+            }
         }
+    }
+
+    
+    private boolean checkFiltering(DatagramPacket p) throws SocketException {
+        bytesLeftToFilter -= p.getLength();
+        if (bytesLeftToFilter <= 0 || getImpl().dataAvailable() <= 0) {
+            explicitFilter = false;
+            return true;
+        }
+        return false;
     }
 
     

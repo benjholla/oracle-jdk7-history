@@ -5,6 +5,8 @@ package com.sun.org.apache.xml.internal.security;
 import java.io.InputStream;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +17,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import com.sun.org.apache.xml.internal.security.algorithms.JCEMapper;
 import com.sun.org.apache.xml.internal.security.algorithms.SignatureAlgorithm;
 import com.sun.org.apache.xml.internal.security.c14n.Canonicalizer;
+import com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException;
 import com.sun.org.apache.xml.internal.security.keys.keyresolver.KeyResolver;
 import com.sun.org.apache.xml.internal.security.transforms.Transform;
 import com.sun.org.apache.xml.internal.security.utils.ElementProxy;
@@ -85,43 +88,50 @@ public class Init {
             log.log(java.util.logging.Level.FINE, "Registering default algorithms");
         }
         try {
-            
-            
-            
-            ElementProxy.registerDefaultPrefixes();
+            AccessController.doPrivileged(new PrivilegedExceptionAction<Void>(){
+                @Override public Void run() throws XMLSecurityException {
+                    
+                    
+                    
+                    ElementProxy.registerDefaultPrefixes();
 
-            
-            
-            
-            Transform.registerDefaultAlgorithms();
+                    
+                    
+                    
+                    Transform.registerDefaultAlgorithms();
 
-            
-            
-            
-            SignatureAlgorithm.registerDefaultAlgorithms();
+                    
+                    
+                    
+                    SignatureAlgorithm.registerDefaultAlgorithms();
 
-            
-            
-            
-            JCEMapper.registerDefaultAlgorithms();
+                    
+                    
+                    
+                    JCEMapper.registerDefaultAlgorithms();
 
-            
-            
-            
-            Canonicalizer.registerDefaultAlgorithms();
+                    
+                    
+                    
+                    Canonicalizer.registerDefaultAlgorithms();
 
-            
-            
-            
-            ResourceResolver.registerDefaultResolvers();
+                    
+                    
+                    
+                    ResourceResolver.registerDefaultResolvers();
 
-            
-            
-            
-            KeyResolver.registerDefaultResolvers();
-        } catch (Exception ex) {
-            log.log(java.util.logging.Level.SEVERE, ex.getMessage(), ex);
-            ex.printStackTrace();
+                    
+                    
+                    
+                    KeyResolver.registerDefaultResolvers();
+
+                    return null;
+                }
+           });
+        } catch (PrivilegedActionException ex) {
+            XMLSecurityException xse = (XMLSecurityException)ex.getException();
+            log.log(java.util.logging.Level.SEVERE, xse.getMessage(), xse);
+            xse.printStackTrace();
         }
     }
 

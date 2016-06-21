@@ -1474,4 +1474,9 @@ public final class BasisLibrary {
     }
 
     
+    public static int getStringLength(String str) {
+        return str.codePointCount(0,str.length());
+    }
+
+    
 }

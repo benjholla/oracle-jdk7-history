@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.sun.org.apache.xml.internal.security.encryption.XMLCipher;
 import com.sun.org.apache.xml.internal.security.signature.XMLSignature;
+import com.sun.org.apache.xml.internal.security.utils.JavaUtils;
 import org.w3c.dom.Element;
 
 
@@ -24,6 +25,7 @@ public class JCEMapper {
 
     
     public static void register(String id, Algorithm algorithm) {
+        JavaUtils.checkRegisterPermission();
         algorithmsMap.put(id, algorithm);
     }
 
@@ -212,6 +214,7 @@ public class JCEMapper {
 
     
     public static void setProviderId(String provider) {
+        JavaUtils.checkRegisterPermission();
         providerName = provider;
     }
 

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput;
+import com.sun.org.apache.xml.internal.security.utils.JavaUtils;
 import com.sun.org.apache.xml.internal.security.utils.resolver.implementations.ResolverDirectHTTP;
 import com.sun.org.apache.xml.internal.security.utils.resolver.implementations.ResolverFragment;
 import com.sun.org.apache.xml.internal.security.utils.resolver.implementations.ResolverLocalFilesystem;
@@ -125,6 +126,7 @@ public class ResourceResolver {
     
     @SuppressWarnings("unchecked")
     public static void register(String className) {
+        JavaUtils.checkRegisterPermission();
         try {
             Class<ResourceResolverSpi> resourceResolverClass =
                 (Class<ResourceResolverSpi>) Class.forName(className);
@@ -137,6 +139,7 @@ public class ResourceResolver {
     
     @SuppressWarnings("unchecked")
     public static void registerAtStart(String className) {
+        JavaUtils.checkRegisterPermission();
         try {
             Class<ResourceResolverSpi> resourceResolverClass =
                 (Class<ResourceResolverSpi>) Class.forName(className);
@@ -148,6 +151,7 @@ public class ResourceResolver {
 
     
     public static void register(Class<? extends ResourceResolverSpi> className, boolean start) {
+        JavaUtils.checkRegisterPermission();
         try {
             ResourceResolverSpi resourceResolverSpi = className.newInstance();
             register(resourceResolverSpi, start);
@@ -160,6 +164,7 @@ public class ResourceResolver {
 
     
     public static void register(ResourceResolverSpi resourceResolverSpi, boolean start) {
+        JavaUtils.checkRegisterPermission();
         synchronized(resolverList) {
             if (start) {
                 resolverList.add(0, new ResourceResolver(resourceResolverSpi));

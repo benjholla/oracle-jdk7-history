@@ -17,6 +17,7 @@ import com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException;
 import com.sun.org.apache.xml.internal.security.signature.XMLSignature;
 import com.sun.org.apache.xml.internal.security.signature.XMLSignatureException;
 import com.sun.org.apache.xml.internal.security.utils.Constants;
+import com.sun.org.apache.xml.internal.security.utils.JavaUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -184,6 +185,7 @@ public class SignatureAlgorithm extends Algorithm {
     public static void register(String algorithmURI, String implementingClass)
        throws AlgorithmAlreadyRegisteredException, ClassNotFoundException,
            XMLSignatureException {
+        JavaUtils.checkRegisterPermission();
         if (log.isLoggable(java.util.logging.Level.FINE)) {
             log.log(java.util.logging.Level.FINE, "Try to register " + algorithmURI + " " + implementingClass);
         }
@@ -211,6 +213,7 @@ public class SignatureAlgorithm extends Algorithm {
     public static void register(String algorithmURI, Class<? extends SignatureAlgorithmSpi> implementingClass)
        throws AlgorithmAlreadyRegisteredException, ClassNotFoundException,
            XMLSignatureException {
+        JavaUtils.checkRegisterPermission();
         if (log.isLoggable(java.util.logging.Level.FINE)) {
             log.log(java.util.logging.Level.FINE, "Try to register " + algorithmURI + " " + implementingClass);
         }
