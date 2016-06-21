@@ -1,38 +1,38 @@
-  
 
-  package java.io;
 
-  
-  final class SerialCallbackContext {
-      private final Object obj;
-      private final ObjectStreamClass desc;
-      
-      private Thread thread;
+package java.io;
 
-      public SerialCallbackContext(Object obj, ObjectStreamClass desc) {
-          this.obj = obj;
-          this.desc = desc;
-          this.thread = Thread.currentThread();
-      }
 
-      public Object getObj() throws NotActiveException {
-          checkAndSetUsed();
-          return obj;
-      }
+final class SerialCallbackContext {
+    private final Object obj;
+    private final ObjectStreamClass desc;
+    
+    private Thread thread;
 
-      public ObjectStreamClass getDesc() {
-          return desc;
-      }
+    public SerialCallbackContext(Object obj, ObjectStreamClass desc) {
+        this.obj = obj;
+        this.desc = desc;
+        this.thread = Thread.currentThread();
+    }
 
-      private void checkAndSetUsed() throws NotActiveException {
-          if (thread != Thread.currentThread()) {
-               throw new NotActiveException(
-                "not in readObject invocation or fields already read");
-          }
-          thread = null;
-      }
+    public Object getObj() throws NotActiveException {
+        checkAndSetUsed();
+        return obj;
+    }
 
-      public void setUsed() {
-          thread = null;
-      }
-  }
+    public ObjectStreamClass getDesc() {
+        return desc;
+    }
+
+    private void checkAndSetUsed() throws NotActiveException {
+        if (thread != Thread.currentThread()) {
+             throw new NotActiveException(
+              "not in readObject invocation or fields already read");
+        }
+        thread = null;
+    }
+
+    public void setUsed() {
+        thread = null;
+    }
+}

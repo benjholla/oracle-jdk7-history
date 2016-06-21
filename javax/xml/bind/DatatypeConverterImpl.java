@@ -265,7 +265,7 @@ final class DatatypeConverterImpl implements DatatypeConverterInterface {
         if (i == len) {
             return value;
         } else {
-            return false;
+            return null;
         }
 
     }

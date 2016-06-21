@@ -83,11 +83,11 @@ public abstract class AbstractUnmarshallerImpl implements Unmarshaller
     
     private Object unmarshal( SAXSource source ) throws JAXBException {
 
-        XMLReader reader = source.getXMLReader();
-        if( reader == null )
-            reader = getXMLReader();
+        XMLReader r = source.getXMLReader();
+        if( r == null )
+            r = getXMLReader();
 
-        return unmarshal( reader, source.getInputSource() );
+        return unmarshal( r, source.getInputSource() );
     }
 
     

@@ -19,7 +19,7 @@ import javax.management.StandardMBean;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.HashSet;
 import java.security.AccessController;
 import java.security.Permission;
 import java.security.PrivilegedAction;
@@ -249,7 +249,7 @@ public class ManagementFactory {
            getPlatformManagementInterfaces()
     {
         Set<Class<? extends PlatformManagedObject>> result =
-            new TreeSet<>();
+            new HashSet<>();
         for (PlatformComponent component: PlatformComponent.values()) {
             result.add(component.getMXBeanInterface());
         }

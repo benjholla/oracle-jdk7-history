@@ -254,5 +254,13 @@ public class VetoableChangeSupport implements Serializable {
         protected VetoableChangeListener newProxy(String name, VetoableChangeListener listener) {
             return new VetoableChangeListenerProxy(name, listener);
         }
+
+        
+        public final VetoableChangeListener extract(VetoableChangeListener listener) {
+            while (listener instanceof VetoableChangeListenerProxy) {
+                listener = ((VetoableChangeListenerProxy) listener).getListener();
+            }
+            return listener;
+        }
     }
 }

@@ -236,7 +236,7 @@ public class XMLDocumentScannerImpl
         fDoctypeSystemId = null;
         fSeenDoctypeDecl = false;
         fNamespaceContext.reset();
-        fDisallowDoctype = !((Boolean)propertyManager.getProperty(XMLInputFactory.SUPPORT_DTD)).booleanValue();
+        fSupportDTD = ((Boolean)propertyManager.getProperty(XMLInputFactory.SUPPORT_DTD)).booleanValue();
 
         
         fLoadExternalDTD = !((Boolean)propertyManager.getProperty(Constants.ZEPHYR_PROPERTY_PREFIX + Constants.IGNORE_EXTERNAL_DTD)).booleanValue();
@@ -496,7 +496,7 @@ public class XMLDocumentScannerImpl
     
 
     
-    protected boolean scanDoctypeDecl(boolean ignore) throws IOException, XNIException {
+    protected boolean scanDoctypeDecl(boolean supportDTD) throws IOException, XNIException {
 
         
         if (!fEntityScanner.skipSpaces()) {
@@ -521,7 +521,7 @@ public class XMLDocumentScannerImpl
         fHasExternalDTD = fDoctypeSystemId != null;
 
         
-        if (!ignore && !fHasExternalDTD && fExternalSubsetResolver != null) {
+        if (supportDTD && !fHasExternalDTD && fExternalSubsetResolver != null) {
             fDTDDescription.setValues(null, null, fEntityManager.getCurrentResourceIdentifier().getExpandedSystemId(), null);
             fDTDDescription.setRootName(fDoctypeName);
             fExternalSubsetSource = fExternalSubsetResolver.getExternalSubset(fDTDDescription);
@@ -529,7 +529,7 @@ public class XMLDocumentScannerImpl
         }
 
         
-        if (!ignore && fDocumentHandler != null) {
+        if (supportDTD && fDocumentHandler != null) {
             
             
             
@@ -746,6 +746,10 @@ public class XMLDocumentScannerImpl
                     }
 
                     case SCANNER_STATE_DOCTYPE: {
+                        if (fDisallowDoctype) {
+                            reportFatalError("DoctypeNotAllowed", null);
+                        }
+
 
                         if (fSeenDoctypeDecl) {
                             reportFatalError("AlreadySeenDoctype", null);
@@ -754,7 +758,7 @@ public class XMLDocumentScannerImpl
 
                         
                         
-                        if (scanDoctypeDecl(fDisallowDoctype)) {
+                        if (scanDoctypeDecl(fSupportDTD)) {
                             
                             setScannerState(SCANNER_STATE_DTD_INTERNAL_DECLS);
                             fSeenInternalSubset = true;
@@ -764,8 +768,6 @@ public class XMLDocumentScannerImpl
                             setDriver(fContentDriver);
                             
                             return fDTDDriver.next();
-                            
-                            
                         }
 
                         if(fSeenDoctypeDecl){
@@ -780,7 +782,7 @@ public class XMLDocumentScannerImpl
                         if (fDoctypeSystemId != null) {
                             if (((fValidation || fLoadExternalDTD)
                                 && (fValidationManager == null || !fValidationManager.isCachedDTD()))) {
-                            if (!fDisallowDoctype)
+                            if (fSupportDTD)
                                 setScannerState(SCANNER_STATE_DTD_EXTERNAL);
                             else
                                 setScannerState(SCANNER_STATE_PROLOG);
@@ -797,7 +799,7 @@ public class XMLDocumentScannerImpl
                                 
                                 fDTDScanner.setInputSource(fExternalSubsetSource);
                                 fExternalSubsetSource = null;
-                            if (!fDisallowDoctype)
+                            if (fSupportDTD)
                                 setScannerState(SCANNER_STATE_DTD_EXTERNAL_DECLS);
                             else
                                 setScannerState(SCANNER_STATE_PROLOG);
@@ -920,7 +922,7 @@ public class XMLDocumentScannerImpl
                                 }
                                 fMarkupDepth--;
 
-                                if (fDisallowDoctype) {
+                                if (!fSupportDTD) {
                                     
                                     
                                     fEntityStore = fEntityManager.getEntityStore();

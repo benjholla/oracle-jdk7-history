@@ -35,7 +35,7 @@ import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 import org.omg.PortableInterceptor.TRANSPORT_RETRY;
 import org.omg.PortableInterceptor.USER_EXCEPTION;
 import org.omg.PortableInterceptor.PolicyFactory;
-import org.omg.PortableInterceptor.ObjectReferenceTemplate ;
+import org.omg.PortableInterceptor.ObjectReferenceTemplate;
 
 import com.sun.corba.se.pept.encoding.OutputObject;
 
@@ -87,10 +87,10 @@ public class PIHandlerImpl implements PIHandler
         }
     }
 
-    private ORB orb ;
-    InterceptorsSystemException wrapper ;
-    ORBUtilSystemException orbutilWrapper ;
-    OMGSystemException omgWrapper ;
+    private ORB orb;
+    InterceptorsSystemException wrapper;
+    ORBUtilSystemException orbutilWrapper;
+    OMGSystemException omgWrapper;
 
     
     
@@ -152,6 +152,21 @@ public class PIHandlerImpl implements PIHandler
                 return new RequestInfoStack();
             }
         };
+
+    public void close() {
+        orb = null;
+        wrapper = null;
+        orbutilWrapper = null;
+        omgWrapper = null;
+        codecFactory = null;
+        arguments = null;
+        interceptorList = null;
+        interceptorInvoker = null;
+        current = null;
+        policyFactoryTable = null;
+        threadLocalClientRequestInfoStack = null;
+        threadLocalServerRequestInfoStack = null;
+    }
 
     
     

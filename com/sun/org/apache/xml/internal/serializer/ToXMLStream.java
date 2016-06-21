@@ -23,7 +23,7 @@ public final class ToXMLStream extends ToStream
 
 
     
-    private CharInfo m_xmlcharInfo =
+    private static CharInfo m_xmlcharInfo =
 
         CharInfo.getCharInfo(CharInfo.XML_ENTITIES_RESOURCE, Method.XML);
 
@@ -247,6 +247,7 @@ public final class ToXMLStream extends ToStream
                 
                 if (m_elemContext.m_currentElemDepth <= 0 && m_isStandalone)
                     writer.write(m_lineSep, 0, m_lineSepLen);
+
 
                 
                 m_startNewLine = true;

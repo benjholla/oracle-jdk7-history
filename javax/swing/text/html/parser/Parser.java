@@ -1755,8 +1755,6 @@ class Parser implements DTDConstants {
 
                 
                 
-                ch = readCh();
-                
                 return;
             } else {
 
@@ -1826,6 +1824,8 @@ class Parser implements DTDConstants {
                 handleComment(str.toCharArray());
                 endTag(false);
                 lastBlockStartPos = currentPosition;
+
+                continue;
             } else {
                 switch (c) {
                   case '<':

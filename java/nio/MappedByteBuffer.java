@@ -68,6 +68,9 @@ public abstract class MappedByteBuffer
     }
 
     
+    private static byte unused;
+
+    
     public final MappedByteBuffer load() {
         checkMapped();
         if ((address == 0) || (capacity() == 0))
@@ -77,14 +80,19 @@ public abstract class MappedByteBuffer
         load0(mappingAddress(offset), length);
 
         
+        
+        
         Unsafe unsafe = Unsafe.getUnsafe();
         int ps = Bits.pageSize();
         int count = Bits.pageCount(length);
         long a = mappingAddress(offset);
+        byte x = 0;
         for (int i=0; i<count; i++) {
-            unsafe.getByte(a);
+            x ^= unsafe.getByte(a);
             a += ps;
         }
+        if (unused != 0)
+            unused = x;
 
         return this;
     }

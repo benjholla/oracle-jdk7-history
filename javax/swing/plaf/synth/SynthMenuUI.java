@@ -220,7 +220,8 @@ public class SynthMenuUI extends BasicMenuUI
     
     @Override
     public void propertyChange(PropertyChangeEvent e) {
-        if (SynthLookAndFeel.shouldUpdateStyle(e)) {
+        if (SynthLookAndFeel.shouldUpdateStyle(e) ||
+                (e.getPropertyName().equals("ancestor") && UIManager.getBoolean("Menu.useMenuBarForTopLevelMenus"))) {
             updateStyle((JMenu)e.getSource());
         }
     }

@@ -2,6 +2,18 @@
 
 package com.sun.corba.se.impl.orbutil.threadpool;
 
+import java.io.IOException;
+import java.io.Closeable;
+
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+
+import java.util.List;
+import java.util.ArrayList;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+
 import com.sun.corba.se.spi.orbutil.threadpool.NoSuchWorkQueueException;
 import com.sun.corba.se.spi.orbutil.threadpool.ThreadPool;
 import com.sun.corba.se.spi.orbutil.threadpool.Work;
@@ -13,12 +25,27 @@ import com.sun.corba.se.impl.orbutil.threadpool.WorkQueueImpl;
 import com.sun.corba.se.spi.monitoring.MonitoringConstants;
 import com.sun.corba.se.spi.monitoring.MonitoredObject;
 import com.sun.corba.se.spi.monitoring.MonitoringFactories;
+import com.sun.corba.se.spi.orb.ORB;
 import com.sun.corba.se.spi.monitoring.LongMonitoredAttributeBase;
+
+import com.sun.corba.se.impl.logging.ORBUtilSystemException;
+import com.sun.corba.se.impl.orbutil.ORBConstants;
+import com.sun.corba.se.spi.logging.CORBALogDomains;
 
 public class ThreadPoolImpl implements ThreadPool
 {
-    private static int threadCounter = 0; 
+    
+    private static AtomicInteger threadCounter = new AtomicInteger(0);
+    private static final ORBUtilSystemException wrapper =
+        ORBUtilSystemException.get(CORBALogDomains.RPC_TRANSPORT);
 
+
+    
+    
+    
+    
+    
+    
     private WorkQueue workQueue;
 
     
@@ -42,14 +69,11 @@ public class ThreadPoolImpl implements ThreadPool
     
     
     
-    private long processedCount = 1;
+    private AtomicLong processedCount = new AtomicLong(1);
 
     
     
-    private long totalTimeTaken = 0;
-
-    
-    private Object lock = new Object();
+    private AtomicLong totalTimeTaken = new AtomicLong(0);
 
     
     private String name;
@@ -58,14 +82,17 @@ public class ThreadPoolImpl implements ThreadPool
     private MonitoredObject threadpoolMonitoredObject;
 
     
-    private ThreadGroup threadGroup ;
+    private ThreadGroup threadGroup;
+
+    Object workersLock = new Object();
+    List<WorkerThread> workers = new ArrayList<>();
 
     
     public ThreadPoolImpl(ThreadGroup tg, String threadpoolName) {
         inactivityTimeout = ORBConstants.DEFAULT_INACTIVITY_TIMEOUT;
         maxWorkerThreads = Integer.MAX_VALUE;
         workQueue = new WorkQueueImpl(this);
-        threadGroup = tg ;
+        threadGroup = tg;
         name = threadpoolName;
         initializeMonitoring();
     }
@@ -90,6 +117,30 @@ public class ThreadPoolImpl implements ThreadPool
         }
         initializeMonitoring();
     }
+
+    
+    public void close() throws IOException {
+
+        
+        List<WorkerThread> copy = null;
+        synchronized (workersLock) {
+            copy = new ArrayList<>(workers);
+        }
+
+        for (WorkerThread wt : copy) {
+            wt.close();
+            while (wt.getState() != Thread.State.TERMINATED) {
+                try {
+                    wt.join();
+                } catch (InterruptedException exc) {
+                    wrapper.interruptedJoinCallWhileClosingThreadPool(exc, wt, this);
+                }
+            }
+        }
+
+        threadGroup = null;
+    }
+
 
     
     private void initializeMonitoring() {
@@ -183,8 +234,8 @@ public class ThreadPoolImpl implements ThreadPool
 
     
     void notifyForAvailableWork(WorkQueue aWorkQueue) {
-        synchronized (lock) {
-            if (availableWorkerThreads == 0) {
+        synchronized (aWorkQueue) {
+            if (availableWorkerThreads < aWorkQueue.workItemsInQueue()) {
                 createWorkerThread();
             } else {
                 aWorkQueue.notify();
@@ -193,93 +244,142 @@ public class ThreadPoolImpl implements ThreadPool
     }
 
 
-    
-    void createWorkerThread() {
-        WorkerThread thread;
-
-        synchronized (lock) {
-            if (boundedThreadPool) {
-                if (currentThreadCount < maxWorkerThreads) {
-                    thread = new WorkerThread(threadGroup, getName());
-                    currentThreadCount++;
-                } else {
-                    
-                    
-                    
-                    
-                    
-                    return;
-                }
-            } else {
-                thread = new WorkerThread(threadGroup, getName());
-                currentThreadCount++;
-            }
+    private Thread createWorkerThreadHelper( String name ) {
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        WorkerThread thread = new WorkerThread(threadGroup, name);
+        synchronized (workersLock) {
+            workers.add(thread);
         }
 
         
         
         
         
+        
+        
+        thread.setDaemon(true);
 
-        
-        
-        
-        try {
-            thread.setDaemon(true);
-        } catch (Exception e) {
-            
-        }
+        wrapper.workerThreadCreated(thread, thread.getContextClassLoader());
 
         thread.start();
+        return null;
     }
 
+
     
+    void createWorkerThread() {
+        final String name = getName();
+        synchronized (workQueue) {
+            try {
+                if (System.getSecurityManager() == null) {
+                    createWorkerThreadHelper(name);
+                } else {
+                    
+                    AccessController.doPrivileged(
+                            new PrivilegedAction() {
+                        public Object run() {
+                            return createWorkerThreadHelper(name);
+                        }
+                    }
+                    );
+                }
+            } catch (Throwable t) {
+                
+                
+                decrementCurrentNumberOfThreads();
+                wrapper.workerThreadCreationFailure(t);
+            } finally {
+                incrementCurrentNumberOfThreads();
+            }
+        }
+    }
+
     public int minimumNumberOfThreads() {
         return minWorkerThreads;
     }
 
-    
     public int maximumNumberOfThreads() {
         return maxWorkerThreads;
     }
 
-    
     public long idleTimeoutForThreads() {
         return inactivityTimeout;
     }
 
-    
     public int currentNumberOfThreads() {
-        synchronized (lock) {
+        synchronized (workQueue) {
             return currentThreadCount;
         }
     }
 
-    
+    void decrementCurrentNumberOfThreads() {
+        synchronized (workQueue) {
+            currentThreadCount--;
+        }
+    }
+
+    void incrementCurrentNumberOfThreads() {
+        synchronized (workQueue) {
+            currentThreadCount++;
+        }
+    }
+
     public int numberOfAvailableThreads() {
-        synchronized (lock) {
+        synchronized (workQueue) {
             return availableWorkerThreads;
         }
     }
 
-    
     public int numberOfBusyThreads() {
-        synchronized (lock) {
+        synchronized (workQueue) {
             return (currentThreadCount - availableWorkerThreads);
         }
     }
 
-    
     public long averageWorkCompletionTime() {
-        synchronized (lock) {
-            return (totalTimeTaken / processedCount);
+        synchronized (workQueue) {
+            return (totalTimeTaken.get() / processedCount.get());
         }
     }
 
-    
     public long currentProcessedCount() {
-        synchronized (lock) {
-            return processedCount;
+        synchronized (workQueue) {
+            return processedCount.get();
         }
     }
 
@@ -294,15 +394,29 @@ public class ThreadPoolImpl implements ThreadPool
 
 
     private static synchronized int getUniqueThreadId() {
-        return ThreadPoolImpl.threadCounter++;
+        return ThreadPoolImpl.threadCounter.incrementAndGet();
+    }
+
+    
+    void decrementNumberOfAvailableThreads() {
+        synchronized (workQueue) {
+            availableWorkerThreads--;
+        }
+    }
+
+    
+    void incrementNumberOfAvailableThreads() {
+        synchronized (workQueue) {
+            availableWorkerThreads++;
+        }
     }
 
 
-    private class WorkerThread extends Thread
+    private class WorkerThread extends Thread implements Closeable
     {
         private Work currentWork;
         private int threadId = 0; 
-        
+        private volatile boolean closeCalled = false;
         private String threadPoolName;
         
         private StringBuffer workerThreadName = new StringBuffer();
@@ -314,100 +428,61 @@ public class ThreadPoolImpl implements ThreadPool
             setName(composeWorkerThreadName(threadPoolName, "Idle"));
         }
 
+        public synchronized void close() {
+            closeCalled = true;
+            interrupt();
+        }
+
+        private void resetClassLoader() {
+
+        }
+
+        private void performWork() {
+            long start = System.currentTimeMillis();
+            try {
+                currentWork.doWork();
+            } catch (Throwable t) {
+                wrapper.workerThreadDoWorkThrowable(this, t);
+            }
+            long elapsedTime = System.currentTimeMillis() - start;
+            totalTimeTaken.addAndGet(elapsedTime);
+            processedCount.incrementAndGet();
+        }
+
         public void run() {
-            while (true) {
-                try {
-
-                    synchronized (lock) {
-                        availableWorkerThreads++;
-                    }
-
-                    
-                    currentWork = ((WorkQueueImpl)workQueue).requestWork(inactivityTimeout);
-
-                    synchronized (lock) {
-                        availableWorkerThreads--;
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        if  ((availableWorkerThreads == 0) &&
-                                (workQueue.workItemsInQueue() > 0)) {
-                            createWorkerThread();
-                        }
-                    }
-
-                    
-                    setName(composeWorkerThreadName(threadPoolName,
-                                      Integer.toString(this.threadId)));
-
-                    long start = System.currentTimeMillis();
-
+            try  {
+                while (!closeCalled) {
                     try {
-                        
-                        currentWork.doWork();
+                        currentWork = ((WorkQueueImpl)workQueue).requestWork(
+                            inactivityTimeout);
+                        if (currentWork == null)
+                            continue;
+                    } catch (InterruptedException exc) {
+                        wrapper.workQueueThreadInterrupted( exc, getName(),
+                           Boolean.valueOf(closeCalled));
+
+                        continue ;
                     } catch (Throwable t) {
-                        
-                        ;
+                         wrapper.workerThreadThrowableFromRequestWork(this, t,
+                                workQueue.getName());
+
+                        continue;
                     }
 
-                    long end = System.currentTimeMillis();
-
-
-                    synchronized (lock) {
-                        totalTimeTaken += (end - start);
-                        processedCount++;
-                    }
+                    performWork();
 
                     
                     
                     currentWork = null;
 
-                    setName(composeWorkerThreadName(threadPoolName, "Idle"));
-
-                } catch (TimeoutException e) {
-                    
-
-                    synchronized (lock) {
-                        availableWorkerThreads--;
-
-                        
-                        if (currentThreadCount > minWorkerThreads) {
-                            currentThreadCount--;
-                            
-                            return;
-                        } else {
-                            
-                            continue;
-                        }
-                    }
-                } catch (InterruptedException ie) {
-                    
-                    
-                    
-                    
-                    
-                    
-                    synchronized (lock) {
-                        availableWorkerThreads--;
-                    }
-
-                } catch (Throwable e) {
-
-                    
-                    
-                    
-                    synchronized (lock) {
-                        availableWorkerThreads--;
-                    }
-
+                    resetClassLoader();
+                }
+            } catch (Throwable e) {
+                
+                wrapper.workerThreadCaughtUnexpectedThrowable(this,e);
+            } finally {
+                synchronized (workersLock) {
+                    workers.remove(this);
                 }
             }
         }

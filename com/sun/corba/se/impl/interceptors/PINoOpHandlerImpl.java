@@ -41,6 +41,9 @@ public class PINoOpHandlerImpl implements PIHandler
     public PINoOpHandlerImpl( ) {
     }
 
+    public void close() {
+    }
+
     public void initialize() {
     }
 

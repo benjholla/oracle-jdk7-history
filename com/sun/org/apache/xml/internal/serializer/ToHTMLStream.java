@@ -26,7 +26,7 @@ public final class ToHTMLStream extends ToStream
     private boolean m_inBlockElem = false;
 
     
-    private final CharInfo m_htmlcharInfo =
+    private static final CharInfo m_htmlcharInfo =
 
         CharInfo.getCharInfo(CharInfo.HTML_ENTITIES_RESOURCE, Method.HTML);
 
@@ -1208,7 +1208,7 @@ public final class ToHTMLStream extends ToStream
             
             
             
-            if (escapingNotNeeded(ch) && (!m_charInfo.shouldMapAttrChar(ch)))
+            if (escapingNotNeeded(ch) && (!m_charInfo.isSpecialAttrChar(ch)))
             {
                 cleanLength++;
             }

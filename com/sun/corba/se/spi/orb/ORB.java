@@ -148,7 +148,7 @@ public abstract class ORB extends com.sun.corba.se.org.omg.CORBA.ORB
 
     private static Map staticWrapperMap = new ConcurrentHashMap();
 
-    private MonitoringManager monitoringManager;
+    protected MonitoringManager monitoringManager;
 
     
     
@@ -201,6 +201,14 @@ public abstract class ORB extends com.sun.corba.se.org.omg.CORBA.ORB
         globalPM.setStubFactoryFactory( false,
             PresentationDefaults.getStaticStubFactoryFactory() ) ;
         globalPM.setStubFactoryFactory( true, dynamicStubFactoryFactory ) ;
+    }
+
+    public void destroy() {
+        wrapper = null;
+        omgWrapper = null;
+        typeCodeMap = null;
+        primitiveTypeCodeConstants = null;
+        byteBufferPool = null;
     }
 
     
@@ -275,6 +283,9 @@ public abstract class ORB extends com.sun.corba.se.org.omg.CORBA.ORB
     
     public TypeCodeImpl get_primitive_tc(int kind)
     {
+        synchronized (this) {
+            checkShutdownState();
+        }
         try {
             return primitiveTypeCodeConstants[kind] ;
         } catch (Throwable t) {
@@ -284,15 +295,20 @@ public abstract class ORB extends com.sun.corba.se.org.omg.CORBA.ORB
 
     public synchronized void setTypeCode(String id, TypeCodeImpl code)
     {
+        checkShutdownState();
         typeCodeMap.put(id, code);
     }
 
     public synchronized TypeCodeImpl getTypeCode(String id)
     {
+        checkShutdownState();
         return (TypeCodeImpl)typeCodeMap.get(id);
     }
 
     public MonitoringManager getMonitoringManager( ) {
+        synchronized (this) {
+            checkShutdownState();
+        }
         return monitoringManager;
     }
 
@@ -383,6 +399,9 @@ public abstract class ORB extends com.sun.corba.se.org.omg.CORBA.ORB
     
     public Logger getLogger( String domain )
     {
+        synchronized (this) {
+            checkShutdownState();
+        }
         ORBData odata = getORBData() ;
 
         
@@ -455,6 +474,9 @@ public abstract class ORB extends com.sun.corba.se.org.omg.CORBA.ORB
     
     public ByteBufferPool getByteBufferPool()
     {
+        synchronized (this) {
+            checkShutdownState();
+        }
         if (byteBufferPool == null)
             byteBufferPool = new ByteBufferPoolImpl(this);
 

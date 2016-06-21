@@ -135,7 +135,8 @@ protected static final String PARSER_SETTINGS =
                 EXTERNAL_GENERAL_ENTITIES,
                 EXTERNAL_PARAMETER_ENTITIES,
                 ALLOW_JAVA_ENCODINGS,
-                WARN_ON_DUPLICATE_ENTITYDEF
+                WARN_ON_DUPLICATE_ENTITYDEF,
+                STANDARD_URI_CONFORMANT
     };
 
     
@@ -145,6 +146,7 @@ protected static final String PARSER_SETTINGS =
                 Boolean.TRUE,
                 Boolean.TRUE,
                 Boolean.FALSE,
+                Boolean.FALSE
     };
 
     

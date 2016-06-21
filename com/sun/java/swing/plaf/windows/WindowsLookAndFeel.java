@@ -562,6 +562,9 @@ public class WindowsLookAndFeel extends BasicLookAndFeel
                    "released SPACE", "released"
                  }),
 
+            "Caret.width",
+                  new DesktopProperty("win.caret.width", null),
+
             "CheckBox.font", ControlFont,
             "CheckBox.interiorBackground", WindowBackgroundColor,
             "CheckBox.background", ControlBackgroundColor,

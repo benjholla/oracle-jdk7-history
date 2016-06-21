@@ -3,6 +3,7 @@
 package com.sun.corba.se.impl.monitoring;
 
 import com.sun.corba.se.spi.monitoring.MonitoringManager;
+import com.sun.corba.se.spi.monitoring.MonitoringManagerFactory;
 import com.sun.corba.se.spi.monitoring.MonitoredObject;
 import com.sun.corba.se.spi.monitoring.MonitoredObjectFactory;
 import com.sun.corba.se.spi.monitoring.MonitoringFactories;
@@ -10,18 +11,24 @@ import com.sun.corba.se.spi.monitoring.MonitoringFactories;
 public class MonitoringManagerImpl implements MonitoringManager {
     private final MonitoredObject rootMonitoredObject;
 
-    MonitoringManagerImpl( String nameOfTheRoot, String description ) {
+    MonitoringManagerImpl(String nameOfTheRoot, String description) {
         MonitoredObjectFactory f =
             MonitoringFactories.getMonitoredObjectFactory();
         rootMonitoredObject =
-            f.createMonitoredObject( nameOfTheRoot, description );
+            f.createMonitoredObject(nameOfTheRoot, description);
     }
 
-    public void clearState( ) {
-        rootMonitoredObject.clearState( );
+    public void clearState() {
+        rootMonitoredObject.clearState();
     }
 
-    public MonitoredObject getRootMonitoredObject( ) {
+    public MonitoredObject getRootMonitoredObject() {
         return rootMonitoredObject;
+    }
+
+    public void close() {
+        MonitoringManagerFactory f =
+            MonitoringFactories.getMonitoringManagerFactory();
+        f.remove(rootMonitoredObject.getName());
     }
 }

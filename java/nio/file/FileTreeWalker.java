@@ -56,7 +56,7 @@ class FileTreeWalker {
             (System.getSecurityManager() == null))
         {
             BasicFileAttributes cached = ((BasicFileAttributesHolder)file).get();
-            if (!followLinks || !cached.isSymbolicLink())
+            if (cached != null && (!followLinks || !cached.isSymbolicLink()))
                 attrs = cached;
         }
         IOException exc = null;

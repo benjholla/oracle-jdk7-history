@@ -143,6 +143,10 @@ public class DefaultListSelectionModel implements ListSelectionModel, Cloneable,
 
     
     private void markAsDirty(int r) {
+        if (r == -1) {
+            return;
+        }
+
         firstAdjustedIndex = Math.min(firstAdjustedIndex, r);
         lastAdjustedIndex =  Math.max(lastAdjustedIndex, r);
     }
@@ -205,16 +209,12 @@ public class DefaultListSelectionModel implements ListSelectionModel, Cloneable,
     private void updateLeadAnchorIndices(int anchorIndex, int leadIndex) {
         if (leadAnchorNotificationEnabled) {
             if (this.anchorIndex != anchorIndex) {
-                if (this.anchorIndex != -1) { 
-                    markAsDirty(this.anchorIndex);
-                }
+                markAsDirty(this.anchorIndex);
                 markAsDirty(anchorIndex);
             }
 
             if (this.leadIndex != leadIndex) {
-                if (this.leadIndex != -1) { 
-                    markAsDirty(this.leadIndex);
-                }
+                markAsDirty(this.leadIndex);
                 markAsDirty(leadIndex);
             }
         }

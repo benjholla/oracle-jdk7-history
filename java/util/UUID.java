@@ -17,7 +17,9 @@ public final class UUID implements java.io.Serializable, Comparable<UUID> {
     private final long leastSigBits;
 
     
-    private static volatile SecureRandom numberGenerator = null;
+    private static class Holder {
+        static final SecureRandom numberGenerator = new SecureRandom();
+    }
 
     
 
@@ -42,10 +44,7 @@ public final class UUID implements java.io.Serializable, Comparable<UUID> {
 
     
     public static UUID randomUUID() {
-        SecureRandom ng = numberGenerator;
-        if (ng == null) {
-            numberGenerator = ng = new SecureRandom();
-        }
+        SecureRandom ng = Holder.numberGenerator;
 
         byte[] randomBytes = new byte[16];
         ng.nextBytes(randomBytes);

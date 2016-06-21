@@ -27,7 +27,7 @@ import com.sun.org.apache.xalan.internal.utils.ObjectFactory;
 final class CharInfo
 {
     
-    private HashMap m_charToString;
+    private HashMap m_charToString = new HashMap();
 
     
     public static final String HTML_ENTITIES_RESOURCE =
@@ -38,34 +38,30 @@ final class CharInfo
                 "com.sun.org.apache.xml.internal.serializer.XMLEntities";
 
     
-    static final char S_HORIZONAL_TAB = 0x09;
+    public static final char S_HORIZONAL_TAB = 0x09;
 
     
-    static final char S_LINEFEED = 0x0A;
+    public static final char S_LINEFEED = 0x0A;
 
     
-    static final char S_CARRIAGERETURN = 0x0D;
-    static final char S_SPACE = 0x20;
-    static final char S_QUOTE = 0x22;
-    static final char S_LT = 0x3C;
-    static final char S_GT = 0x3E;
-    static final char S_NEL = 0x85;
-    static final char S_LINE_SEPARATOR = 0x2028;
+    public static final char S_CARRIAGERETURN = 0x0D;
 
     
-    boolean onlyQuotAmpLtGt;
+    final boolean onlyQuotAmpLtGt;
 
     
-    static final int ASCII_MAX = 128;
+    private static final int ASCII_MAX = 128;
 
     
-    private final boolean[] shouldMapAttrChar_ASCII;
+    private boolean[] isSpecialAttrASCII = new boolean[ASCII_MAX];
 
     
-    private final boolean[] shouldMapTextChar_ASCII;
+    private boolean[] isSpecialTextASCII = new boolean[ASCII_MAX];
+
+    private boolean[] isCleanTextASCII = new boolean[ASCII_MAX];
 
     
-    private final int array_of_bits[];
+    private int array_of_bits[] = createEmptySetOfIntegers(65535);
 
 
     
@@ -80,29 +76,13 @@ final class CharInfo
 
 
     
-    private CharInfo()
+    private CharInfo(String entitiesResource, String method)
     {
-        this.array_of_bits = createEmptySetOfIntegers(65535);
-        this.firstWordNotUsed = 0;
-        this.shouldMapAttrChar_ASCII = new boolean[ASCII_MAX];
-        this.shouldMapTextChar_ASCII = new boolean[ASCII_MAX];
-        this.m_charKey = new CharKey();
-
-        
-        
-
-        this.onlyQuotAmpLtGt = true;
-
-
-        return;
+        this(entitiesResource, method, false);
     }
 
     private CharInfo(String entitiesResource, String method, boolean internal)
     {
-        
-        this();
-        m_charToString = new HashMap();
-
         ResourceBundle entities = null;
         boolean noExtraEntities = true;
 
@@ -128,10 +108,12 @@ final class CharInfo
                 String name = (String) keys.nextElement();
                 String value = entities.getString(name);
                 int code = Integer.parseInt(value);
-                boolean extra = defineEntity(name, (char) code);
-                if (extra)
+                defineEntity(name, (char) code);
+                if (extraEntity(code))
                     noExtraEntities = false;
             }
+            set(S_LINEFEED);
+            set(S_CARRIAGERETURN);
         } else {
             InputStream is = null;
 
@@ -215,8 +197,8 @@ final class CharInfo
 
                             int code = Integer.parseInt(value);
 
-                            boolean extra = defineEntity(name, (char) code);
-                            if (extra)
+                            defineEntity(name, (char) code);
+                            if (extraEntity(code))
                                 noExtraEntities = false;
                         }
                     }
@@ -225,6 +207,8 @@ final class CharInfo
                 }
 
                 is.close();
+                set(S_LINEFEED);
+                set(S_CARRIAGERETURN);
             } catch (Exception e) {
                 throw new RuntimeException(
                     Utils.messages.createMessage(
@@ -242,40 +226,44 @@ final class CharInfo
             }
         }
 
+        
+        for (int ch = 0; ch <ASCII_MAX; ch++)
+        if((((0x20 <= ch || (0x0A == ch || 0x0D == ch || 0x09 == ch)))
+             && (!get(ch))) || ('"' == ch))
+        {
+            isCleanTextASCII[ch] = true;
+            isSpecialTextASCII[ch] = false;
+        }
+        else {
+            isCleanTextASCII[ch] = false;
+            isSpecialTextASCII[ch] = true;
+        }
+
+
+
         onlyQuotAmpLtGt = noExtraEntities;
+
+        
+        for (int i=0; i<ASCII_MAX; i++)
+            isSpecialAttrASCII[i] = get(i);
 
         
         if (Method.XML.equals(method))
         {
-            
-            shouldMapTextChar_ASCII[S_QUOTE] = false;
+            isSpecialAttrASCII[S_HORIZONAL_TAB] = true;
         }
-
-        if (Method.HTML.equals(method)) {
-                
-                
-                
-                shouldMapAttrChar_ASCII['<'] = false;
-
-                
-            shouldMapTextChar_ASCII[S_QUOTE] = false;
-    }
     }
 
     
-    private boolean defineEntity(String name, char value)
+    private void defineEntity(String name, char value)
     {
         StringBuilder sb = new StringBuilder("&");
         sb.append(name);
         sb.append(';');
         String entityString = sb.toString();
 
-        boolean extra = defineChar2StringMapping(entityString, value);
-        return extra;
+        defineChar2StringMapping(entityString, value);
     }
-
-    
-    private final CharKey m_charKey;
 
     
     String getOutputStringForChar(char value)
@@ -286,13 +274,13 @@ final class CharInfo
     }
 
     
-    final boolean shouldMapAttrChar(int value)
+    final boolean isSpecialAttrChar(int value)
     {
         
         
 
         if (value < ASCII_MAX)
-            return shouldMapAttrChar_ASCII[value];
+            return isSpecialAttrASCII[value];
 
         
         
@@ -300,18 +288,33 @@ final class CharInfo
     }
 
     
-    final boolean shouldMapTextChar(int value)
+    final boolean isSpecialTextChar(int value)
     {
         
         
 
         if (value < ASCII_MAX)
-            return shouldMapTextChar_ASCII[value];
+            return isSpecialTextASCII[value];
 
         
         
         return get(value);
     }
+
+    
+    final boolean isTextASCIIClean(int value)
+    {
+        return isCleanTextASCII[value];
+    }
+
+
+
+
+
+
+
+
+
 
     private static CharInfo getCharInfoBasedOnPrivilege(
         final String entitiesFileName, final String method,
@@ -329,17 +332,15 @@ final class CharInfo
     {
         CharInfo charInfo = (CharInfo) m_getCharInfoCache.get(entitiesFileName);
         if (charInfo != null) {
-            return mutableCopyOf(charInfo);
+            return charInfo;
         }
 
         
         try {
             charInfo = getCharInfoBasedOnPrivilege(entitiesFileName,
                                         method, true);
-            
-            
             m_getCharInfoCache.put(entitiesFileName, charInfo);
-            return mutableCopyOf(charInfo);
+            return charInfo;
         } catch (Exception e) {}
 
         
@@ -367,30 +368,6 @@ final class CharInfo
     }
 
     
-    private static CharInfo mutableCopyOf(CharInfo charInfo) {
-        CharInfo copy = new CharInfo();
-
-        int max = charInfo.array_of_bits.length;
-        System.arraycopy(charInfo.array_of_bits,0,copy.array_of_bits,0,max);
-
-        copy.firstWordNotUsed = charInfo.firstWordNotUsed;
-
-        max = charInfo.shouldMapAttrChar_ASCII.length;
-        System.arraycopy(charInfo.shouldMapAttrChar_ASCII,0,copy.shouldMapAttrChar_ASCII,0,max);
-
-        max = charInfo.shouldMapTextChar_ASCII.length;
-        System.arraycopy(charInfo.shouldMapTextChar_ASCII,0,copy.shouldMapTextChar_ASCII,0,max);
-
-        
-
-        copy.m_charToString = (HashMap) charInfo.m_charToString.clone();
-
-        copy.onlyQuotAmpLtGt = charInfo.onlyQuotAmpLtGt;
-
-                return copy;
-        }
-
-        
     private static HashMap m_getCharInfoCache = new HashMap();
 
     
@@ -415,8 +392,7 @@ final class CharInfo
 
     
     private final void set(int i) {
-        setASCIItextDirty(i);
-        setASCIIattrDirty(i);
+        setASCIIdirty(i);
 
         int j = (i >> SHIFT_PER_WORD); 
         int k = j + 1;
@@ -443,28 +419,19 @@ final class CharInfo
     }
 
     
-    private boolean extraEntity(String outputString, int charToMap)
+    
+    
+    private boolean extraEntity(int entityValue)
     {
         boolean extra = false;
-        if (charToMap < ASCII_MAX)
+        if (entityValue < 128)
         {
-            switch (charToMap)
+            switch (entityValue)
             {
-                case '"' : 
-                        if (!outputString.equals("&quot;"))
-                                extra = true;
-                    break;
-                case '&' : 
-                        if (!outputString.equals("&amp;"))
-                                extra = true;
-                        break;
-                case '<' : 
-                        if (!outputString.equals("&lt;"))
-                                extra = true;
-                        break;
-                case '>' : 
-                        if (!outputString.equals("&gt;"))
-                                extra = true;
+                case 34 : 
+                case 38 : 
+                case 60 : 
+                case 62 : 
                     break;
                 default : 
                     extra = true;
@@ -474,33 +441,30 @@ final class CharInfo
     }
 
     
-    private void setASCIItextDirty(int j)
+    private void setASCIIdirty(int j)
     {
         if (0 <= j && j < ASCII_MAX)
         {
-            shouldMapTextChar_ASCII[j] = true;
+            isCleanTextASCII[j] = false;
+            isSpecialTextASCII[j] = true;
         }
     }
 
     
-    private void setASCIIattrDirty(int j)
+    private void setASCIIclean(int j)
     {
         if (0 <= j && j < ASCII_MAX)
         {
-            shouldMapAttrChar_ASCII[j] = true;
+            isCleanTextASCII[j] = true;
+            isSpecialTextASCII[j] = false;
         }
     }
 
-    
-    boolean defineChar2StringMapping(String outputString, char inputChar)
+    private void defineChar2StringMapping(String outputString, char inputChar)
     {
         CharKey character = new CharKey(inputChar);
         m_charToString.put(character, outputString);
-        set(inputChar);  
-
-        boolean extraMapping = extraEntity(outputString, inputChar);
-        return extraMapping;
-
+        set(inputChar);
     }
 
     

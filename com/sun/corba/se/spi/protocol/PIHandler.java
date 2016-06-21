@@ -2,6 +2,8 @@
 
 package com.sun.corba.se.spi.protocol;
 
+import java.io.Closeable;
+
 import org.omg.PortableInterceptor.ObjectReferenceTemplate ;
 import org.omg.PortableInterceptor.Interceptor ;
 import org.omg.PortableInterceptor.Current ;
@@ -26,7 +28,7 @@ import com.sun.corba.se.impl.corba.RequestImpl ;
 import com.sun.corba.se.impl.protocol.giopmsgheaders.ReplyMessage ;
 
 
-public interface PIHandler {
+public interface PIHandler extends Closeable {
     
     public void initialize() ;
 

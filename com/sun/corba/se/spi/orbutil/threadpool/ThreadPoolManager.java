@@ -2,7 +2,9 @@
 
 package com.sun.corba.se.spi.orbutil.threadpool;
 
-public interface ThreadPoolManager
+import java.io.Closeable;
+
+public interface ThreadPoolManager extends Closeable
 {
     
     public ThreadPool getThreadPool(String threadpoolId) throws NoSuchThreadPoolException;

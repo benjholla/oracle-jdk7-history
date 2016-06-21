@@ -37,6 +37,47 @@ public class WeakHashMap<K,V>
     
     int modCount;
 
+    
+    static final int ALTERNATIVE_HASHING_THRESHOLD_DEFAULT = Integer.MAX_VALUE;
+
+    
+    private static class Holder {
+
+        
+        static final int ALTERNATIVE_HASHING_THRESHOLD;
+
+        static {
+            String altThreshold = java.security.AccessController.doPrivileged(
+                new sun.security.action.GetPropertyAction(
+                    "jdk.map.althashing.threshold"));
+
+            int threshold;
+            try {
+                threshold = (null != altThreshold)
+                        ? Integer.parseInt(altThreshold)
+                        : ALTERNATIVE_HASHING_THRESHOLD_DEFAULT;
+
+                
+                if (threshold == -1) {
+                    threshold = Integer.MAX_VALUE;
+                }
+
+                if (threshold < 0) {
+                    throw new IllegalArgumentException("value must be positive integer.");
+                }
+            } catch(IllegalArgumentException failed) {
+                throw new Error("Illegal value for 'jdk.map.althashing.threshold'", failed);
+            }
+            ALTERNATIVE_HASHING_THRESHOLD = threshold;
+        }
+    }
+
+    
+    transient boolean useAltHashing;
+
+    
+    transient final int hashSeed = sun.misc.Hashing.randomHashSeed(this);
+
     @SuppressWarnings("unchecked")
     private Entry<K,V>[] newTable(int n) {
         return (Entry<K,V>[]) new Entry[n];
@@ -59,6 +100,8 @@ public class WeakHashMap<K,V>
         table = newTable(capacity);
         this.loadFactor = loadFactor;
         threshold = (int)(capacity * loadFactor);
+        useAltHashing = sun.misc.VM.isBooted() &&
+                (capacity >= Holder.ALTERNATIVE_HASHING_THRESHOLD);
     }
 
     
@@ -68,14 +111,13 @@ public class WeakHashMap<K,V>
 
     
     public WeakHashMap() {
-        this.loadFactor = DEFAULT_LOAD_FACTOR;
-        threshold = DEFAULT_INITIAL_CAPACITY;
-        table = newTable(DEFAULT_INITIAL_CAPACITY);
+        this(DEFAULT_INITIAL_CAPACITY, DEFAULT_LOAD_FACTOR);
     }
 
     
     public WeakHashMap(Map<? extends K, ? extends V> m) {
-        this(Math.max((int) (m.size() / DEFAULT_LOAD_FACTOR) + 1, 16),
+        this(Math.max((int) (m.size() / DEFAULT_LOAD_FACTOR) + 1,
+                DEFAULT_INITIAL_CAPACITY),
              DEFAULT_LOAD_FACTOR);
         putAll(m);
     }
@@ -98,6 +140,28 @@ public class WeakHashMap<K,V>
     
     private static boolean eq(Object x, Object y) {
         return x == y || x.equals(y);
+    }
+
+    
+    int hash(Object k) {
+
+        int h;
+        if (useAltHashing) {
+            h = hashSeed;
+            if (k instanceof String) {
+                return sun.misc.Hashing.stringHash32((String) k);
+            } else {
+                h ^= k.hashCode();
+            }
+        } else  {
+            h = k.hashCode();
+        }
+
+        
+        
+        
+        h ^= (h >>> 20) ^ (h >>> 12);
+        return h ^ (h >>> 7) ^ (h >>> 4);
     }
 
     
@@ -157,7 +221,7 @@ public class WeakHashMap<K,V>
     
     public V get(Object key) {
         Object k = maskNull(key);
-        int h = HashMap.hash(k.hashCode());
+        int h = hash(k);
         Entry<K,V>[] tab = getTable();
         int index = indexFor(h, tab.length);
         Entry<K,V> e = tab[index];
@@ -177,7 +241,7 @@ public class WeakHashMap<K,V>
     
     Entry<K,V> getEntry(Object key) {
         Object k = maskNull(key);
-        int h = HashMap.hash(k.hashCode());
+        int h = hash(k);
         Entry<K,V>[] tab = getTable();
         int index = indexFor(h, tab.length);
         Entry<K,V> e = tab[index];
@@ -189,7 +253,7 @@ public class WeakHashMap<K,V>
     
     public V put(K key, V value) {
         Object k = maskNull(key);
-        int h = HashMap.hash(k.hashCode());
+        int h = hash(k);
         Entry<K,V>[] tab = getTable();
         int i = indexFor(h, tab.length);
 
@@ -220,7 +284,11 @@ public class WeakHashMap<K,V>
         }
 
         Entry<K,V>[] newTable = newTable(newCapacity);
-        transfer(oldTable, newTable);
+        boolean oldAltHashing = useAltHashing;
+        useAltHashing |= sun.misc.VM.isBooted() &&
+                (newCapacity >= Holder.ALTERNATIVE_HASHING_THRESHOLD);
+        boolean rehash = oldAltHashing ^ useAltHashing;
+        transfer(oldTable, newTable, rehash);
         table = newTable;
 
         
@@ -228,13 +296,13 @@ public class WeakHashMap<K,V>
             threshold = (int)(newCapacity * loadFactor);
         } else {
             expungeStaleEntries();
-            transfer(newTable, oldTable);
+            transfer(newTable, oldTable, false);
             table = oldTable;
         }
     }
 
     
-    private void transfer(Entry<K,V>[] src, Entry<K,V>[] dest) {
+    private void transfer(Entry<K,V>[] src, Entry<K,V>[] dest, boolean rehash) {
         for (int j = 0; j < src.length; ++j) {
             Entry<K,V> e = src[j];
             src[j] = null;
@@ -246,6 +314,9 @@ public class WeakHashMap<K,V>
                     e.value = null; 
                     size--;
                 } else {
+                    if (rehash) {
+                        e.hash = hash(key);
+                    }
                     int i = indexFor(e.hash, dest.length);
                     e.next = dest[i];
                     dest[i] = e;
@@ -280,7 +351,7 @@ public class WeakHashMap<K,V>
     
     public V remove(Object key) {
         Object k = maskNull(key);
-        int h = HashMap.hash(k.hashCode());
+        int h = hash(k);
         Entry<K,V>[] tab = getTable();
         int i = indexFor(h, tab.length);
         Entry<K,V> prev = tab[i];
@@ -311,7 +382,7 @@ public class WeakHashMap<K,V>
         Entry<K,V>[] tab = getTable();
         Map.Entry<?,?> entry = (Map.Entry<?,?>)o;
         Object k = maskNull(entry.getKey());
-        int h = HashMap.hash(k.hashCode());
+        int h = hash(k);
         int i = indexFor(h, tab.length);
         Entry<K,V> prev = tab[i];
         Entry<K,V> e = prev;
@@ -378,7 +449,7 @@ public class WeakHashMap<K,V>
     
     private static class Entry<K,V> extends WeakReference<Object> implements Map.Entry<K,V> {
         V value;
-        final int hash;
+        int hash;
         Entry<K,V> next;
 
         

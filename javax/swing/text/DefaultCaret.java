@@ -933,9 +933,14 @@ public class DefaultCaret extends Rectangle implements Caret, FocusListener, Mou
 
         if (caretWidth > -1) {
             return caretWidth;
+        } else {
+            Object property = UIManager.get("Caret.width");
+            if (property instanceof Integer) {
+                return ((Integer) property).intValue();
+            } else {
+                return 1;
+            }
         }
-
-        return 1;
     }
 
     

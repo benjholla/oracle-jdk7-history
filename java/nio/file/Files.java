@@ -68,16 +68,22 @@ public final class Files {
 
     
 
+    private static class AcceptAllFilter
+        implements DirectoryStream.Filter<Path>
+    {
+        private AcceptAllFilter() { }
+
+        @Override
+        public boolean accept(Path entry) { return true; }
+
+        static final AcceptAllFilter FILTER = new AcceptAllFilter();
+    }
+
     
     public static DirectoryStream<Path> newDirectoryStream(Path dir)
         throws IOException
     {
-        return provider(dir).newDirectoryStream(dir, new DirectoryStream.Filter<Path>() {
-            @Override
-            public boolean accept(Path entry) {
-                return true;
-            }
-        });
+        return provider(dir).newDirectoryStream(dir, AcceptAllFilter.FILTER);
     }
 
     

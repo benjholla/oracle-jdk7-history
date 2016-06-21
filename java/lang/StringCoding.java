@@ -225,6 +225,7 @@ class StringCoding {
     static char[] decode(byte[] ba, int off, int len) {
         String csn = Charset.defaultCharset().name();
         try {
+            
             return decode(csn, ba, off, len);
         } catch (UnsupportedEncodingException x) {
             warnUnsupportedCharset(csn);
@@ -357,6 +358,7 @@ class StringCoding {
     static byte[] encode(char[] ca, int off, int len) {
         String csn = Charset.defaultCharset().name();
         try {
+            
             return encode(csn, ca, off, len);
         } catch (UnsupportedEncodingException x) {
             warnUnsupportedCharset(csn);

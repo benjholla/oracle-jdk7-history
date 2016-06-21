@@ -634,8 +634,7 @@ abstract public class ToStream extends SerializerBase
         {
             
             
-            if (ch >= CharInfo.S_SPACE || (CharInfo.S_LINEFEED == ch ||
-                    CharInfo.S_CARRIAGERETURN == ch || CharInfo.S_HORIZONAL_TAB == ch))
+            if (ch >= 0x20 || (0x0A == ch || 0x0D == ch || 0x09 == ch))
                 ret= true;
             else
                 ret = false;
@@ -702,7 +701,7 @@ abstract public class ToStream extends SerializerBase
     }
 
     
-    int accumDefaultEntity(
+    protected int accumDefaultEntity(
         java.io.Writer writer,
         char ch,
         int i,
@@ -721,7 +720,7 @@ abstract public class ToStream extends SerializerBase
         {
             
             
-            if ((fromTextNode && m_charInfo.shouldMapTextChar(ch)) || (!fromTextNode && m_charInfo.shouldMapAttrChar(ch)))
+            if ((fromTextNode && m_charInfo.isSpecialTextChar(ch)) || (!fromTextNode && m_charInfo.isSpecialAttrChar(ch)))
             {
                 String outputStringForChar = m_charInfo.getOutputStringForChar(ch);
 
@@ -968,6 +967,7 @@ abstract public class ToStream extends SerializerBase
 
         if (m_cdataTagOpen)
             closeCDATA();
+        
 
         if (m_disableOutputEscapingStates.peekOrFalse() || (!m_escaping))
         {
@@ -990,171 +990,73 @@ abstract public class ToStream extends SerializerBase
         try
         {
             int i;
+            char ch1;
             int startClean;
 
             
             
             
             final int end = start + length;
-            int lastDirtyCharProcessed = start - 1; 
-                                                                                                        
-            final Writer writer = m_writer;
-            boolean isAllWhitespace = true;
-
-            
-            i = start;
-            while (i < end && isAllWhitespace) {
-                char ch1 = chars[i];
-
-                if (m_charInfo.shouldMapTextChar(ch1)) {
-                    
-                    
-                    
-                    
-                    writeOutCleanChars(chars, i, lastDirtyCharProcessed);
-                    String outputStringForChar = m_charInfo
-                            .getOutputStringForChar(ch1);
-                    writer.write(outputStringForChar);
-                    
-                    
-                    isAllWhitespace = false;
-                    lastDirtyCharProcessed = i; 
-                    
-                    i++;
-                } else {
-                    
-                    switch (ch1) {
-                    
-                    case CharInfo.S_SPACE:
-                        
-                        i++;
-                        break;
-                    case CharInfo.S_LINEFEED:
-                        lastDirtyCharProcessed = processLineFeed(chars, i,
-                                lastDirtyCharProcessed, writer);
-                        i++;
-                        break;
-                    case CharInfo.S_CARRIAGERETURN:
-                        writeOutCleanChars(chars, i, lastDirtyCharProcessed);
-                        writer.write("&#13;");
-                        lastDirtyCharProcessed = i;
-                        i++;
-                        break;
-                    case CharInfo.S_HORIZONAL_TAB:
-                        
-                        i++;
-                        break;
-                    default:
-                        
-                        
-                        
-                        isAllWhitespace = false;
-                        break;
+            int lastDirty = start - 1; 
+            for (i = start;
+                ((i < end)
+                    && ((ch1 = chars[i]) == 0x20
+                        || (ch1 == 0xA && m_lineSepUse)
+                        || ch1 == 0xD
+                        || ch1 == 0x09));
+                i++)
+            {
+                
+                if (!m_charInfo.isTextASCIIClean(ch1))
+                {
+                    lastDirty = processDirty(chars,end, i,ch1, lastDirty, true);
+                    i = lastDirty;
                 }
             }
-            }
             
-            if (i < end || !isAllWhitespace)
+            if (i < end)
                 m_ispreserve = true;
 
+
+
+
+
+            final boolean isXML10 = XMLVERSION10.equals(getVersion());
+            
             for (; i < end; i++)
             {
-                char ch = chars[i];
-
-                if (m_charInfo.shouldMapTextChar(ch)) {
+                {
                     
                     
                     
-                    writeOutCleanChars(chars, i, lastDirtyCharProcessed);
-                    String outputStringForChar = m_charInfo.getOutputStringForChar(ch);
-                    writer.write(outputStringForChar);
-                    lastDirtyCharProcessed = i;
-                }
-                else {
-                    if (ch <= 0x1F) {
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-
-                        
-                        
-                        
-                        switch (ch) {
-
-                        case CharInfo.S_HORIZONAL_TAB:
-                            
+                    char ch2;
+                    while (i<end
+                            && ((ch2 = chars[i])<127)
+                            && m_charInfo.isTextASCIIClean(ch2))
+                            i++;
+                    if (i == end)
                         break;
-                        case CharInfo.S_LINEFEED:
-                            lastDirtyCharProcessed = processLineFeed(chars, i, lastDirtyCharProcessed, writer);
-                            break;
-                        case CharInfo.S_CARRIAGERETURN:
-                                writeOutCleanChars(chars, i, lastDirtyCharProcessed);
-                                writer.write("&#13;");
-                                lastDirtyCharProcessed = i;
-                            
-                            break;
-                        default:
-                            writeOutCleanChars(chars, i, lastDirtyCharProcessed);
-                            writer.write("&#");
-                            writer.write(Integer.toString(ch));
-                            writer.write(';');
-                            lastDirtyCharProcessed = i;
-                            break;
-
                 }
-                    }
-                    else if (ch < 0x7F) {
-                        
-                        
-                        
 
+                final char ch = chars[i];
+                
+                if (!isCharacterInC0orC1Range(ch) &&
+                    (isXML10 || !isNELorLSEPCharacter(ch)) &&
+                    (escapingNotNeeded(ch) && (!m_charInfo.isSpecialTextChar(ch)))
+                        || ('"' == ch))
+                {
+                    ; 
                 }
-                    else if (ch <= 0x9F){
-                        
-                        
-                        writeOutCleanChars(chars, i, lastDirtyCharProcessed);
-                        writer.write("&#");
-                        writer.write(Integer.toString(ch));
-                        writer.write(';');
-                        lastDirtyCharProcessed = i;
-                }
-                    else if (ch == CharInfo.S_LINE_SEPARATOR) {
-                        
-                        writeOutCleanChars(chars, i, lastDirtyCharProcessed);
-                        writer.write("&#8232;");
-                        lastDirtyCharProcessed = i;
-            }
-                    else if (m_encodingInfo.isInEncoding(ch)) {
-                        
-                        
-                        
-
-                    }
-                    else {
-                        
-                        
-                        
-                        
-                        writeOutCleanChars(chars, i, lastDirtyCharProcessed);
-                        writer.write("&#");
-                        writer.write(Integer.toString(ch));
-                        writer.write(';');
-                        lastDirtyCharProcessed = i;
-                    }
+                else
+                {
+                    lastDirty = processDirty(chars,end, i, ch, lastDirty, true);
+                    i = lastDirty;
                 }
             }
 
             
             
-            startClean = lastDirtyCharProcessed + 1;
+            startClean = lastDirty + 1;
             if (i > startClean)
             {
                 int lengthClean = i - startClean;
@@ -1173,32 +1075,6 @@ abstract public class ToStream extends SerializerBase
         if (m_tracer != null)
             super.fireCharEvent(chars, start, length);
     }
-
-        private int processLineFeed(final char[] chars, int i, int lastProcessed, final Writer writer) throws IOException {
-                if (!m_lineSepUse
-                || (m_lineSepLen ==1 && m_lineSep[0] == CharInfo.S_LINEFEED)){
-                    
-                    
-                        
-                }
-                else {
-                    writeOutCleanChars(chars, i, lastProcessed);
-                    writer.write(m_lineSep, 0, m_lineSepLen);
-                    lastProcessed = i;
-                }
-                return lastProcessed;
-        }
-
-    private void writeOutCleanChars(final char[] chars, int i, int lastProcessed) throws IOException {
-        int startClean;
-        startClean = lastProcessed + 1;
-        if (startClean < i)
-        {
-            int lengthClean = i - startClean;
-            m_writer.write(chars, startClean, lengthClean);
-        }
-     }
-
     
     private static boolean isCharacterInC0orC1Range(char ch)
     {
@@ -1268,7 +1144,7 @@ abstract public class ToStream extends SerializerBase
     }
 
     
-    private int accumDefaultEscape(
+    protected int accumDefaultEscape(
         Writer writer,
         char ch,
         int i,
@@ -1328,15 +1204,16 @@ abstract public class ToStream extends SerializerBase
             else
             {
                 
-                if (isCharacterInC0orC1Range(ch) || isNELorLSEPCharacter(ch))
+                if (isCharacterInC0orC1Range(ch) ||
+                        (XMLVERSION11.equals(getVersion()) && isNELorLSEPCharacter(ch)))
                 {
                     writer.write("&#");
                     writer.write(Integer.toString(ch));
                     writer.write(';');
                 }
                 else if ((!escapingNotNeeded(ch) ||
-                    (  (fromTextNode && m_charInfo.shouldMapTextChar(ch))
-                     || (!fromTextNode && m_charInfo.shouldMapAttrChar(ch))))
+                    (  (fromTextNode && m_charInfo.isSpecialTextChar(ch))
+                     || (!fromTextNode && m_charInfo.isSpecialAttrChar(ch))))
                 && m_elemContext.m_currentElemDepth > 0)
                 {
                     writer.write("&#");
@@ -1527,86 +1404,28 @@ abstract public class ToStream extends SerializerBase
         string.getChars(0,len, m_attrBuff, 0);
         final char[] stringChars = m_attrBuff;
 
-        for (int i = 0; i < len;)
+        for (int i = 0; i < len; )
         {
             char ch = stringChars[i];
+            if (escapingNotNeeded(ch) && (!m_charInfo.isSpecialAttrChar(ch)))
+            {
+                writer.write(ch);
+                i++;
+            }
+            else
+            { 
 
-            if (m_charInfo.shouldMapAttrChar(ch) || !(escapingNotNeeded(ch))) {
-                
-                
-                
+
+
+
+
+
+
+
                 i = accumDefaultEscape(writer, ch, i, stringChars, len, false, true);
             }
-            else {
-                i++;
-                if (0x0 <= ch && ch <= 0x1F) {
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-
-                    
-                    
-                    
-                    switch (ch) {
-
-                    case CharInfo.S_HORIZONAL_TAB:
-                        writer.write("&#9;");
-                        break;
-                    case CharInfo.S_LINEFEED:
-                        writer.write("&#10;");
-                        break;
-                    case CharInfo.S_CARRIAGERETURN:
-                        writer.write("&#13;");
-                        break;
-                    default:
-                        writer.write("&#");
-                        writer.write(Integer.toString(ch));
-                        writer.write(';');
-                        break;
-
         }
-                }
-                else if (ch < 0x7F) {
-                    
-                    
-                        writer.write(ch);
-                }
-                else if (ch <= 0x9F){
-                    
-                    
-                    writer.write("&#");
-                    writer.write(Integer.toString(ch));
-                    writer.write(';');
-                }
-                else if (ch == CharInfo.S_LINE_SEPARATOR) {
-                    
-                    writer.write("&#8232;");
-                }
-                else if (m_encodingInfo.isInEncoding(ch)) {
-                    
-                    
-                    
-                    writer.write(ch);
-                }
-                else {
-                    
-                    
-                    
-                    
-                    writer.write("&#");
-                    writer.write(Integer.toString(ch));
-                    writer.write(';');
-                }
 
-    }
-        }
     }
 
     
@@ -2157,14 +1976,6 @@ abstract public class ToStream extends SerializerBase
             {
                 closeCDATA();
                 m_cdataTagOpen = false;
-            }
-            if (m_writer != null) {
-                try {
-                    m_writer.flush();
-    }
-                catch(IOException e) {
-                    
-                }
             }
     }
 

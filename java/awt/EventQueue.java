@@ -13,6 +13,8 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 import java.util.EmptyStackException;
+
+import sun.awt.dnd.SunDropTargetEvent;
 import sun.util.logging.PlatformLogger;
 
 import sun.awt.AppContext;
@@ -222,6 +224,10 @@ public class EventQueue {
     }
 
     private boolean coalesceMouseEvent(MouseEvent e) {
+        if (e instanceof SunDropTargetEvent) {
+            
+            return false;
+        }
         EventQueueItem[] cache = ((Component)e.getSource()).eventCache;
         if (cache == null) {
             return false;
@@ -295,6 +301,10 @@ public class EventQueue {
     }
 
     private void cacheEQItem(EventQueueItem entry) {
+        if(entry.event instanceof SunDropTargetEvent) {
+            
+            return;
+        }
         int index = eventToCacheIndex(entry.event);
         if (index != -1 && entry.event.getSource() instanceof Component) {
             Component source = (Component)entry.event.getSource();

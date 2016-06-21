@@ -345,16 +345,17 @@ public final class System {
 
         
         
-        
-        sun.misc.VM.booted();
-
-        
-        
         Thread current = Thread.currentThread();
         current.getThreadGroup().add(current);
 
         
         setJavaLangAccess();
+
+        
+        
+        
+        
+        sun.misc.VM.booted();
     }
 
     private static void setJavaLangAccess() {
@@ -384,6 +385,9 @@ public final class System {
             }
             public StackTraceElement getStackTraceElement(Throwable t, int i) {
                 return t.getStackTraceElement(i);
+            }
+            public int getStringHash32(String string) {
+                return string.hash32();
             }
         });
     }

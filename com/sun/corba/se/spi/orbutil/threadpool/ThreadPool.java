@@ -2,9 +2,12 @@
 
 package com.sun.corba.se.spi.orbutil.threadpool;
 
+import java.io.Closeable;
 
-public interface ThreadPool
+
+public interface ThreadPool extends Closeable
 {
+
     
     public WorkQueue getAnyWorkQueue();
 

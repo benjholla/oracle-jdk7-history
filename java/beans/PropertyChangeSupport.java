@@ -248,5 +248,13 @@ public class PropertyChangeSupport implements Serializable {
         protected PropertyChangeListener newProxy(String name, PropertyChangeListener listener) {
             return new PropertyChangeListenerProxy(name, listener);
         }
+
+        
+        public final PropertyChangeListener extract(PropertyChangeListener listener) {
+            while (listener instanceof PropertyChangeListenerProxy) {
+                listener = ((PropertyChangeListenerProxy) listener).getListener();
+            }
+            return listener;
+        }
     }
 }

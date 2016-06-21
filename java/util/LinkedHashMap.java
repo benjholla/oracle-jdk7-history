@@ -51,15 +51,19 @@ public class LinkedHashMap<K,V>
     }
 
     
+    @Override
     void init() {
         header = new Entry<>(-1, null, null, null);
         header.before = header.after = header;
     }
 
     
-    void transfer(HashMap.Entry[] newTable) {
+    @Override
+    void transfer(HashMap.Entry[] newTable, boolean rehash) {
         int newCapacity = newTable.length;
         for (Entry<K,V> e = header.after; e != header; e = e.after) {
+            if (rehash)
+                e.hash = (e.key == null) ? 0 : hash(e.key);
             int index = indexFor(e.hash, newCapacity);
             e.next = newTable[index];
             newTable[index] = e;
@@ -188,15 +192,12 @@ public class LinkedHashMap<K,V>
 
     
     void addEntry(int hash, K key, V value, int bucketIndex) {
-        createEntry(hash, key, value, bucketIndex);
+        super.addEntry(hash, key, value, bucketIndex);
 
         
         Entry<K,V> eldest = header.after;
         if (removeEldestEntry(eldest)) {
             removeEntryForKey(eldest.key);
-        } else {
-            if (size >= threshold)
-                resize(2 * table.length);
         }
     }
 

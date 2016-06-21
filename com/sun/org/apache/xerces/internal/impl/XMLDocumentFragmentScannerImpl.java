@@ -249,6 +249,7 @@ public class XMLDocumentFragmentScannerImpl
 
     
     
+    protected boolean fSupportDTD = true;
     protected boolean fReplaceEntityReferences = true;
     protected boolean fSupportExternalEntities = false;
     protected boolean fReportCdataEvent = false ;
@@ -1430,6 +1431,7 @@ public class XMLDocumentFragmentScannerImpl
         String name = fEntityScanner.scanName();
         if (name == null) {
             reportFatalError("NameRequiredInReference", null);
+            return;
         }
         if (!fEntityScanner.skipChar(';')) {
             reportFatalError("SemicolonRequiredInReference", new Object []{name});
@@ -1473,7 +1475,7 @@ public class XMLDocumentFragmentScannerImpl
         
         if (!fEntityStore.isDeclaredEntity(name)) {
             
-            if (fDisallowDoctype && fReplaceEntityReferences) {
+            if (!fSupportDTD && fReplaceEntityReferences) {
                 reportFatalError("EntityNotDeclared", new Object[]{name});
                 return;
             }

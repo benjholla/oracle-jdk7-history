@@ -55,7 +55,13 @@ class GTKStyleFactory extends SynthStyleFactory {
                 boolean defaultCapable = btn.isDefaultCapable();
                 key = new ComplexKey(wt, toolButton, defaultCapable);
             }
+        } else if (id == Region.MENU) {
+            if (c instanceof JMenu && ((JMenu) c).isTopLevelMenu() &&
+                    UIManager.getBoolean("Menu.useMenuBarForTopLevelMenus")) {
+                wt = WidgetType.MENU_BAR;
+            }
         }
+
         if (key == null) {
             
             key = wt;
