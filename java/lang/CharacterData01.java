@@ -1,4 +1,4 @@
-// This file was generated AUTOMATICALLY from a template file Wed Jan 30 01:10:41 PST 2013
+// This file was generated AUTOMATICALLY from a template file Fri Feb 15 13:04:27 PST 2013
 /*
  * Copyright (c) 2003, 2010, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
@@ -352,7 +352,7 @@ class CharacterData01 extends CharacterData {
     private CharacterData01() {};
 
     // The following tables and code generated using:
-  // java GenerateCharacter -plane 1 -template ../../tools/GenerateCharacter/CharacterData01.java.template -spec ../../tools/UnicodeData/UnicodeData.txt -specialcasing ../../tools/UnicodeData/SpecialCasing.txt -proplist ../../tools/UnicodeData/PropList.txt -o /HUDSON/workspace/jdk7u13-2-build-linux-amd64-product/jdk7u13/build/linux-amd64/gensrc/java/lang/CharacterData01.java -string -usecharforbyte 11 4 1
+  // java GenerateCharacter -plane 1 -template ../../tools/GenerateCharacter/CharacterData01.java.template -spec ../../tools/UnicodeData/UnicodeData.txt -specialcasing ../../tools/UnicodeData/SpecialCasing.txt -proplist ../../tools/UnicodeData/PropList.txt -o /HUDSON/workspace/jdk7u15-2-build-linux-amd64-product/jdk7u15/build/linux-amd64/gensrc/java/lang/CharacterData01.java -string -usecharforbyte 11 4 1
   // The X table has 2048 entries for a total of 4096 bytes.
 
   static final char X[] = (
