@@ -1504,8 +1504,8 @@ public class SocketOrChannelConnectionImpl
     {
         
         CDROutputObject outputObject =
-            new CDROutputObject((ORB)orb, null, giopVersion, this, msg,
-                                ORBConstants.STREAM_FORMAT_VERSION_1);
+            sun.corba.OutputStreamFactory.newCDROutputObject((ORB)orb, null, giopVersion,
+                                this, msg, ORBConstants.STREAM_FORMAT_VERSION_1);
         msg.write(outputObject);
 
         outputObject.writeTo(this);

@@ -3,10 +3,17 @@
 
 package java.util.logging;
 
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.security.*;
 import java.lang.ref.WeakReference;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+import java.util.concurrent.CopyOnWriteArrayList;
+import sun.reflect.CallerSensitive;
+import sun.reflect.Reflection;
 
 
 
@@ -36,6 +43,7 @@ public class Logger {
     private ArrayList<LogManager.LoggerWeakRef> kids;   
     private volatile Level levelObject;
     private volatile int levelValue;  
+    private WeakReference<ClassLoader> callersClassLoaderRef;
 
     
     public static final String GLOBAL_LOGGER_NAME = "global";
@@ -51,13 +59,29 @@ public class Logger {
 
     
     protected Logger(String name, String resourceBundleName) {
+        this(name, resourceBundleName, null);
+    }
+
+    Logger(String name, String resourceBundleName, Class<?> caller) {
         this.manager = LogManager.getLogManager();
-        if (resourceBundleName != null) {
-            
-            setupResourceInfo(resourceBundleName);
-        }
+        setupResourceInfo(resourceBundleName, caller);
         this.name = name;
         levelValue = Level.INFO.intValue();
+    }
+
+    private void setCallersClassLoaderRef(Class<?> caller) {
+        ClassLoader callersClassLoader = ((caller != null)
+                                         ? caller.getClassLoader()
+                                         : null);
+        if (callersClassLoader != null) {
+            this.callersClassLoaderRef = new WeakReference(callersClassLoader);
+        }
+    }
+
+    private ClassLoader getCallersClassLoader() {
+        return (callersClassLoaderRef != null)
+                ? callersClassLoaderRef.get()
+                : null;
     }
 
     
@@ -93,8 +117,13 @@ public class Logger {
     
     
     
-    private static class SystemLoggerHelper {
-        static boolean disableCallerCheck = getBooleanProperty("sun.util.logging.disableCallerCheck");
+    private static class LoggerHelper {
+        static boolean disableCallerCheck =
+            getBooleanProperty("sun.util.logging.disableCallerCheck");
+
+        
+        static boolean allowStackWalkSearch =
+            getBooleanProperty("jdk.logging.allowStackWalkSearch");
         private static boolean getBooleanProperty(final String key) {
             String s = AccessController.doPrivileged(new PrivilegedAction<String>() {
                 public String run() {
@@ -105,24 +134,24 @@ public class Logger {
         }
     }
 
-    private static Logger demandLogger(String name, String resourceBundleName) {
+    private static Logger demandLogger(String name, String resourceBundleName, Class<?> caller) {
         LogManager manager = LogManager.getLogManager();
         SecurityManager sm = System.getSecurityManager();
-        if (sm != null && !SystemLoggerHelper.disableCallerCheck) {
-            
-            final int SKIP_FRAMES = 3;
-            Class<?> caller = sun.reflect.Reflection.getCallerClass(SKIP_FRAMES);
+        if (sm != null && !LoggerHelper.disableCallerCheck) {
             if (caller.getClassLoader() == null) {
                 return manager.demandSystemLogger(name, resourceBundleName);
             }
         }
-        return manager.demandLogger(name, resourceBundleName);
+        return manager.demandLogger(name, resourceBundleName, caller);
+        
+        
     }
 
     
 
     
     
+    @CallerSensitive
     public static Logger getLogger(String name) {
         
         
@@ -134,19 +163,33 @@ public class Logger {
         
         
         
-        return demandLogger(name, null);
+        return demandLogger(name, null, Reflection.getCallerClass());
     }
 
     
 
     
     
+    @CallerSensitive
     public static Logger getLogger(String name, String resourceBundleName) {
-        Logger result = demandLogger(name, resourceBundleName);
+        Class<?> callerClass = Reflection.getCallerClass();
+        Logger result = demandLogger(name, resourceBundleName, callerClass);
+
         if (result.resourceBundleName == null) {
             
-            result.setupResourceInfo(resourceBundleName);
+
+            
+            
+            
+            
+            
+            
+
+            
+            result.setupResourceInfo(resourceBundleName, callerClass);
         } else if (!result.resourceBundleName.equals(resourceBundleName)) {
+            
+            
             throw new IllegalArgumentException(result.resourceBundleName +
                                 " != " + resourceBundleName);
         }
@@ -174,11 +217,13 @@ public class Logger {
 
     
     
+    @CallerSensitive
     public static Logger getAnonymousLogger(String resourceBundleName) {
         LogManager manager = LogManager.getLogManager();
         
         manager.drainLoggerRefQueueBounded();
-        Logger result = new Logger(null, resourceBundleName);
+        Logger result = new Logger(null, resourceBundleName,
+                                   Reflection.getCallerClass());
         result.anonymous = true;
         Logger root = manager.getLogger("");
         result.doSetParent(root);
@@ -187,7 +232,7 @@ public class Logger {
 
     
     public ResourceBundle getResourceBundle() {
-        return findResourceBundle(getResourceBundleName());
+        return findResourceBundle(getResourceBundleName(), true);
     }
 
     
@@ -241,7 +286,7 @@ public class Logger {
         String ebname = getEffectiveResourceBundleName();
         if (ebname != null && !ebname.equals(SYSTEM_LOGGER_RB_NAME)) {
             lr.setResourceBundleName(ebname);
-            lr.setResourceBundle(findResourceBundle(ebname));
+            lr.setResourceBundle(findResourceBundle(ebname, true));
         }
         log(lr);
     }
@@ -358,13 +403,12 @@ public class Logger {
         lr.setLoggerName(name);
         if (rbname != null) {
             lr.setResourceBundleName(rbname);
-            lr.setResourceBundle(findResourceBundle(rbname));
+            lr.setResourceBundle(findResourceBundle(rbname, false));
         }
         log(lr);
     }
 
     
-
     public void logrb(Level level, String sourceClass, String sourceMethod,
                                 String bundleName, String msg) {
         if (level.intValue() < levelValue || levelValue == offValue) {
@@ -608,12 +652,6 @@ public class Logger {
         return useParentHandlers;
     }
 
-    
-    
-    
-    
-    
-
     static final String SYSTEM_LOGGER_RB_NAME = "sun.util.logging.resources.logging";
 
     private static ResourceBundle findSystemResourceBundle(final Locale locale) {
@@ -631,7 +669,16 @@ public class Logger {
         });
     }
 
-    private synchronized ResourceBundle findResourceBundle(String name) {
+    
+    private synchronized ResourceBundle findResourceBundle(String name,
+                                                           boolean useCallersClassLoader) {
+        
+        
+        
+        
+        
+        
+
         
         if (name == null) {
             return null;
@@ -640,8 +687,8 @@ public class Logger {
         Locale currentLocale = Locale.getDefault();
 
         
-        if (catalog != null && currentLocale == catalogLocale
-                                        && name == catalogName) {
+        if (catalog != null && currentLocale.equals(catalogLocale)
+                && name.equals(catalogName)) {
             return catalog;
         }
 
@@ -668,10 +715,38 @@ public class Logger {
             
         }
 
+        if (useCallersClassLoader) {
+            
+            ClassLoader callersClassLoader = getCallersClassLoader();
+            if (callersClassLoader != null && callersClassLoader != cl) {
+                try {
+                    catalog = ResourceBundle.getBundle(name, currentLocale,
+                                                       callersClassLoader);
+                    catalogName = name;
+                    catalogLocale = currentLocale;
+                    return catalog;
+                } catch (MissingResourceException ex) {
+                }
+            }
+        }
+
         
         
+        if (LoggerHelper.allowStackWalkSearch) {
+            return findResourceBundleFromStack(name, currentLocale, cl);
+        } else {
+            return null;
+        }
+    }
+
+    
+    @CallerSensitive
+    private synchronized ResourceBundle findResourceBundleFromStack(String name,
+                                                                    Locale locale,
+                                                                    ClassLoader cl)
+    {
         for (int ix = 0; ; ix++) {
-            Class clz = sun.reflect.Reflection.getCallerClass(ix);
+            Class<?> clz = sun.reflect.Reflection.getCallerClass(ix);
             if (clz == null) {
                 break;
             }
@@ -685,22 +760,13 @@ public class Logger {
             }
             cl = cl2;
             try {
-                catalog = ResourceBundle.getBundle(name, currentLocale, cl);
+                catalog = ResourceBundle.getBundle(name, locale, cl);
                 catalogName = name;
-                catalogLocale = currentLocale;
+                catalogLocale = locale;
                 return catalog;
             } catch (MissingResourceException ex) {
-                
-                
             }
         }
-
-        if (name.equals(catalogName)) {
-            
-            
-            return catalog;
-        }
-        
         return null;
     }
 
@@ -709,14 +775,21 @@ public class Logger {
     
     
     
-    private synchronized void setupResourceInfo(String name) {
+    
+    private synchronized void setupResourceInfo(String name,
+                                                Class<?> callersClass) {
         if (name == null) {
             return;
         }
-        ResourceBundle rb = findResourceBundle(name);
-        if (rb == null) {
+
+        setCallersClassLoaderRef(callersClass);
+        if (findResourceBundle(name, true) == null) {
             
-            throw new MissingResourceException("Can't find " + name + " bundle", name, "");
+            
+            
+            this.callersClassLoaderRef = null;
+            throw new MissingResourceException("Can't find " + name + " bundle",
+                                                name, "");
         }
         resourceBundleName = name;
     }

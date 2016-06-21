@@ -47,6 +47,8 @@ public class CompositeDataInvocationHandler implements InvocationHandler {
                 return equals(proxy, args[0]);
             else {
                 
+                
+                
                 return method.invoke(this, args);
             }
         }

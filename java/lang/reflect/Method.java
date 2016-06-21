@@ -2,6 +2,7 @@
 
 package java.lang.reflect;
 
+import sun.reflect.CallerSensitive;
 import sun.reflect.MethodAccessor;
 import sun.reflect.Reflection;
 import sun.reflect.generics.repository.MethodRepository;
@@ -292,14 +293,18 @@ public final
     }
 
     
+    @CallerSensitive
     public Object invoke(Object obj, Object... args)
         throws IllegalAccessException, IllegalArgumentException,
            InvocationTargetException
     {
         if (!override) {
             if (!Reflection.quickCheckMemberAccess(clazz, modifiers)) {
-                Class<?> caller = Reflection.getCallerClass(1);
-
+                
+                
+                
+                
+                Class<?> caller = getCallerClass();
                 checkAccess(caller, clazz, obj, modifiers);
             }
         }
@@ -308,6 +313,14 @@ public final
             ma = acquireMethodAccessor();
         }
         return ma.invoke(obj, args);
+    }
+
+    
+    @CallerSensitive
+    private Class<?> getCallerClass() {
+        
+        
+        return Reflection.getCallerClass();
     }
 
     

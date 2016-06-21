@@ -37,8 +37,9 @@ import com.sun.corba.se.impl.encoding.CDRInputStream_1_0;
 import com.sun.corba.se.impl.logging.ORBUtilSystemException ;
 import com.sun.corba.se.impl.orbutil.ORBUtility;
 import com.sun.corba.se.impl.orbutil.ORBConstants;
-import com.sun.corba.se.impl.orbutil.ORBClassLoader;
 import com.sun.corba.se.impl.protocol.AddressingDispositionException;
+
+import sun.corba.SharedSecrets;
 
 
 
@@ -845,7 +846,8 @@ public abstract class MessageBase implements Message{
         SystemException sysEx = null;
 
         try {
-            Class clazz = ORBClassLoader.loadClass(exClassName);
+            Class<?> clazz =
+                SharedSecrets.getJavaCorbaAccess().loadClass(exClassName);
             if (message == null) {
                 sysEx = (SystemException) clazz.newInstance();
             } else {

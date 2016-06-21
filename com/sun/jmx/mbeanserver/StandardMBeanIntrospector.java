@@ -15,6 +15,7 @@ import javax.management.MBeanOperationInfo;
 import javax.management.NotCompliantMBeanException;
 import javax.management.NotificationBroadcaster;
 import javax.management.NotificationBroadcasterSupport;
+import sun.reflect.misc.MethodUtil;
 
 
 class StandardMBeanIntrospector extends MBeanIntrospector<Method> {
@@ -83,7 +84,7 @@ class StandardMBeanIntrospector extends MBeanIntrospector<Method> {
     Object invokeM2(Method m, Object target, Object[] args, Object cookie)
             throws InvocationTargetException, IllegalAccessException,
                    MBeanException {
-        return m.invoke(target, args);
+        return MethodUtil.invoke(m, target, args);
     }
 
     @Override

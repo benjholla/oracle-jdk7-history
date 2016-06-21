@@ -405,6 +405,33 @@ public class Font implements java.io.Serializable
     public static Font createFont(int fontFormat, InputStream fontStream)
         throws java.awt.FontFormatException, java.io.IOException {
 
+        if (hasTempPermission()) {
+            return createFont0(fontFormat, fontStream, null);
+        }
+
+        
+        
+        CreatedFontTracker tracker = CreatedFontTracker.getTracker();
+        boolean acquired = false;
+        try {
+            acquired = tracker.acquirePermit();
+            if (!acquired) {
+                throw new IOException("Timed out waiting for resources.");
+            }
+            return createFont0(fontFormat, fontStream, tracker);
+        } catch (InterruptedException e) {
+            throw new IOException("Problem reading font data.");
+        } finally {
+            if (acquired) {
+                tracker.releasePermit();
+            }
+        }
+    }
+
+    private static Font createFont0(int fontFormat, InputStream fontStream,
+                                    CreatedFontTracker tracker)
+        throws java.awt.FontFormatException, java.io.IOException {
+
         if (fontFormat != Font.TRUETYPE_FONT &&
             fontFormat != Font.TYPE1_FONT) {
             throw new IllegalArgumentException ("font format not recognized");
@@ -418,9 +445,11 @@ public class Font implements java.io.Serializable
                     }
                 }
             );
+            if (tracker != null) {
+                tracker.add(tFile);
+            }
 
             int totalSize = 0;
-            CreatedFontTracker tracker = null;
             try {
                 final OutputStream outStream =
                     AccessController.doPrivileged(
@@ -430,8 +459,8 @@ public class Font implements java.io.Serializable
                             }
                         }
                     );
-                if (!hasTempPermission()) {
-                    tracker = CreatedFontTracker.getTracker();
+                if (tracker != null) {
+                    tracker.set(tFile, outStream);
                 }
                 try {
                     byte[] buf = new byte[8192];
@@ -446,7 +475,7 @@ public class Font implements java.io.Serializable
                             }
                             if (totalSize+tracker.getNumBytes() >
                                 tracker.MAX_TOTAL_BYTES)
-                              {
+                            {
                                 throw new IOException("Total files too big.");
                             }
                             totalSize += bytesRead;
@@ -463,6 +492,9 @@ public class Font implements java.io.Serializable
                 Font font = new Font(tFile, fontFormat, true, tracker);
                 return font;
             } finally {
+                if (tracker != null) {
+                    tracker.remove(tFile);
+                }
                 if (!copiedFontData) {
                     if (tracker != null) {
                         tracker.subBytes(totalSize);

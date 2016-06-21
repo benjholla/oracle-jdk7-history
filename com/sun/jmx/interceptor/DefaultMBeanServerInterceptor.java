@@ -1669,8 +1669,7 @@ public class DefaultMBeanServerInterceptor implements MBeanServerInterceptor {
     private void addClassLoader(ClassLoader loader,
             final ObjectName logicalName) {
         
-        final ModifiableClassLoaderRepository clr =
-                instantiator.getClassLoaderRepository();
+        final ModifiableClassLoaderRepository clr = getInstantiatorCLR();
         if (clr == null) {
             final RuntimeException wrapped =
                     new IllegalArgumentException(
@@ -1688,8 +1687,7 @@ public class DefaultMBeanServerInterceptor implements MBeanServerInterceptor {
             final ObjectName logicalName) {
         
         if (loader != server.getClass().getClassLoader()) {
-            final ModifiableClassLoaderRepository clr =
-                    instantiator.getClassLoaderRepository();
+            final ModifiableClassLoaderRepository clr = getInstantiatorCLR();
             if (clr != null) {
                 clr.removeClassLoader(logicalName);
             }
@@ -1726,5 +1724,12 @@ public class DefaultMBeanServerInterceptor implements MBeanServerInterceptor {
         return ResourceContext.NONE;
     }
 
-
+    private ModifiableClassLoaderRepository getInstantiatorCLR() {
+        return AccessController.doPrivileged(new PrivilegedAction<ModifiableClassLoaderRepository>() {
+            @Override
+            public ModifiableClassLoaderRepository run() {
+                return instantiator != null ? instantiator.getClassLoaderRepository() : null;
+            }
+        });
+    }
 }

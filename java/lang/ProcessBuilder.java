@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.FileOutputStream;
 import java.security.AccessControlException;
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -347,10 +346,10 @@ public final class ProcessBuilder
                                      dir,
                                      redirects,
                                      redirectErrorStream);
-        } catch (IOException e) {
+        } catch (IOException | IllegalArgumentException e) {
             String exceptionInfo = ": " + e.getMessage();
             Throwable cause = e;
-            if (security != null) {
+            if ((e instanceof IOException) && security != null) {
                 
                 try {
                     security.checkRead(prog);

@@ -67,6 +67,8 @@ import com.sun.corba.se.impl.logging.ORBUtilSystemException ;
 import com.sun.corba.se.impl.logging.OMGSystemException ;
 import com.sun.corba.se.impl.ior.iiop.JavaSerializationComponent;
 
+import sun.corba.SharedSecrets;
+
 
 public final class ORBUtility {
     private ORBUtility() {}
@@ -209,8 +211,8 @@ public final class ORBUtility {
     {
         try {
             String name = classNameOf(strm.read_string());
-            SystemException ex
-                = (SystemException)ORBClassLoader.loadClass(name).newInstance();
+            SystemException ex = (SystemException)SharedSecrets.
+                getJavaCorbaAccess().loadClass(name).newInstance();
             ex.minor = strm.read_long();
             ex.completed = CompletionStatus.from_int(strm.read_long());
             return ex;

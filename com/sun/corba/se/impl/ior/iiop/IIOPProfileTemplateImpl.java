@@ -106,8 +106,9 @@ public class IIOPProfileTemplateImpl extends TaggedProfileTemplateBase
         
 
         
-        OutputStream encapsulatedOS = new EncapsOutputStream( (ORB)os.orb(),
-            ((CDROutputStream)os).isLittleEndian() ) ;
+        OutputStream encapsulatedOS =
+            sun.corba.OutputStreamFactory.newEncapsOutputStream(
+                (ORB)os.orb(), ((CDROutputStream)os).isLittleEndian() ) ;
 
         okeyTemplate.write( id, encapsulatedOS ) ;
         EncapsulationUtility.writeOutputStream( encapsulatedOS, os ) ;

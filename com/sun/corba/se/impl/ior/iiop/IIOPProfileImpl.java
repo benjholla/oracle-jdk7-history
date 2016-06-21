@@ -222,7 +222,8 @@ public class IIOPProfileImpl extends IdentifiableBase implements IIOPProfile
 
     public org.omg.IOP.TaggedProfile getIOPProfile()
     {
-        EncapsOutputStream os = new EncapsOutputStream( orb ) ;
+        EncapsOutputStream os =
+            sun.corba.OutputStreamFactory.newEncapsOutputStream(orb);
         os.write_long( getId() ) ;
         write( os ) ;
         InputStream is = (InputStream)(os.create_input_stream()) ;

@@ -23,9 +23,10 @@ import static java.util.zip.ZipConstants64.*;
 
 public
 class ZipFile implements ZipConstants, Closeable {
-    private long jzfile;  
-    private String name;  
-    private int total;    
+    private long jzfile;           
+    private final String name;     
+    private final int total;       
+    private final boolean locsig;  
     private volatile boolean closeRequested = false;
 
     private static final int STORED = ZipEntry.STORED;
@@ -96,6 +97,7 @@ class ZipFile implements ZipConstants, Closeable {
         sun.misc.PerfCounter.getZipFileCount().increment();
         this.name = name;
         this.total = getTotal(jzfile);
+        this.locsig = startsWithLOC(jzfile);
     }
 
     
@@ -513,10 +515,25 @@ class ZipFile implements ZipConstants, Closeable {
         }
     }
 
+    static {
+        sun.misc.SharedSecrets.setJavaUtilZipFileAccess(
+            new sun.misc.JavaUtilZipFileAccess() {
+                public boolean startsWithLocHeader(ZipFile zip) {
+                    return zip.startsWithLocHeader();
+                }
+             }
+        );
+    }
+
+    
+    private boolean startsWithLocHeader() {
+        return locsig;
+    }
 
     private static native long open(String name, int mode, long lastModified,
                                     boolean usemmap) throws IOException;
     private static native int getTotal(long jzfile);
+    private static native boolean startsWithLOC(long jzfile);
     private static native int read(long jzfile, long jzentry,
                                    long pos, byte[] b, int off, int len);
 

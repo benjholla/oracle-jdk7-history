@@ -114,7 +114,7 @@ public class ORBSingleton extends ORB
     }
 
     public OutputStream create_output_stream() {
-        return new EncapsOutputStream(this);
+        return sun.corba.OutputStreamFactory.newEncapsOutputStream(this);
     }
 
     public TypeCode create_struct_tc(String id,

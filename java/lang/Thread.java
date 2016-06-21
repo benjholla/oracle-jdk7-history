@@ -14,6 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.LockSupport;
 import sun.nio.ch.Interruptible;
+import sun.reflect.CallerSensitive;
+import sun.reflect.Reflection;
 import sun.security.util.SecurityConstants;
 
 
@@ -512,16 +514,15 @@ class Thread implements Runnable {
     }
 
     
+    @CallerSensitive
     public ClassLoader getContextClassLoader() {
         if (contextClassLoader == null)
             return null;
+
         SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
-            ClassLoader ccl = ClassLoader.getCallerClassLoader();
-            if (ccl != null && ccl != contextClassLoader &&
-                    !contextClassLoader.isAncestor(ccl)) {
-                sm.checkPermission(SecurityConstants.GET_CLASSLOADER_PERMISSION);
-            }
+            ClassLoader.checkClassLoaderPermission(contextClassLoader,
+                                                   Reflection.getCallerClass());
         }
         return contextClassLoader;
     }

@@ -3,6 +3,9 @@
 package java.io;
 
 import java.lang.reflect.Field;
+import sun.reflect.CallerSensitive;
+import sun.reflect.Reflection;
+import sun.reflect.misc.ReflectUtil;
 
 
 public class ObjectStreamField
@@ -80,7 +83,14 @@ public class ObjectStreamField
     }
 
     
+    @CallerSensitive
     public Class<?> getType() {
+        if (System.getSecurityManager() != null) {
+            Class<?> caller = Reflection.getCallerClass();
+            if (ReflectUtil.needsPackageAccessCheck(caller.getClassLoader(), type.getClassLoader())) {
+                ReflectUtil.checkPackageAccess(type);
+            }
+        }
         return type;
     }
 

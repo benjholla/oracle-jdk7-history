@@ -5,11 +5,12 @@ package com.sun.org.apache.xml.internal.security.utils.resolver.implementations;
 
 
 import com.sun.org.apache.xml.internal.security.signature.XMLSignatureInput;
-import com.sun.org.apache.xml.internal.security.utils.IdResolver;
+import com.sun.org.apache.xml.internal.security.utils.XMLUtils;
 import com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolverException;
 import com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolverSpi;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 
@@ -24,46 +25,54 @@ public class ResolverFragment extends ResourceResolverSpi {
            return true;
    }
    
-   public XMLSignatureInput engineResolve(Attr uri, String BaseURI)
+   public XMLSignatureInput engineResolve(Attr uri, String baseURI)
        throws ResourceResolverException
    {
+        String uriNodeValue = uri.getNodeValue();
+        Document doc = uri.getOwnerElement().getOwnerDocument();
 
-      String uriNodeValue = uri.getNodeValue();
-      Document doc = uri.getOwnerElement().getOwnerDocument();
+        Node selectedElem = null;
+        if (uriNodeValue.equals("")) {
 
+           
 
-      Node selectedElem = null;
-      if (uriNodeValue.equals("")) {
+            log.log(java.util.logging.Level.FINE, "ResolverFragment with empty URI (means complete document)");
+            selectedElem = doc;
+        } else {
 
-         
+            
+            String id = uriNodeValue.substring(1);
 
-         log.log(java.util.logging.Level.FINE, "ResolverFragment with empty URI (means complete document)");
-         selectedElem = doc;
-      } else {
-
-         
-         String id = uriNodeValue.substring(1);
-
-         
-         selectedElem = IdResolver.getElementById(doc, id);
-         if (selectedElem==null) {
+            selectedElem = doc.getElementById(id);
+            if (selectedElem == null) {
                 Object exArgs[] = { id };
-            throw new ResourceResolverException(
-               "signature.Verification.MissingID", exArgs, uri, BaseURI);
-         }
-         if (log.isLoggable(java.util.logging.Level.FINE))
+                throw new ResourceResolverException(
+                    "signature.Verification.MissingID", exArgs, uri, baseURI);
+            }
+            if (secureValidation) {
+                Element start = uri.getOwnerDocument().getDocumentElement();
+                if (!XMLUtils.protectAgainstWrappingAttack(start, id)) {
+                    Object exArgs[] = { id };
+                    throw new ResourceResolverException(
+                        "signature.Verification.MultipleIDs", exArgs,
+                        uri, baseURI);
+                }
+            }
+            if (log.isLoggable(java.util.logging.Level.FINE))
                 log.log(java.util.logging.Level.FINE, "Try to catch an Element with ID " + id + " and Element was " + selectedElem);
-      }
+        }
 
-      XMLSignatureInput result = new XMLSignatureInput(selectedElem);
-      result.setExcludeComments(true);
+        XMLSignatureInput result = new XMLSignatureInput(selectedElem);
+        result.setExcludeComments(true);
 
-      
-      result.setMIMEType("text/xml");
-          result.setSourceURI((BaseURI != null) ? BaseURI.concat(uri.getNodeValue()) :
-                  uri.getNodeValue());
-      return result;
-   }
+        result.setMIMEType("text/xml");
+        if (baseURI != null && baseURI.length() > 0) {
+            result.setSourceURI(baseURI.concat(uri.getNodeValue()));
+        } else {
+            result.setSourceURI(uri.getNodeValue());
+        }
+        return result;
+    }
 
    
    public boolean engineCanResolve(Attr uri, String BaseURI) {

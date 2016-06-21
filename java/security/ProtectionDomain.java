@@ -151,6 +151,11 @@ public class ProtectionDomain {
     }
 
     
+    boolean impliesCreateAccessControlContext() {
+        return implies(SecurityConstants.CREATE_ACC_PERMISSION);
+    }
+
+    
     @Override public String toString() {
         String pals = "<no principals>";
         if (principals != null && principals.length > 0) {

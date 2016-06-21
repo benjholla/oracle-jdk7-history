@@ -4,6 +4,8 @@ package java.lang;
 
 import java.io.*;
 import java.util.StringTokenizer;
+import sun.reflect.CallerSensitive;
+import sun.reflect.Reflection;
 
 
 
@@ -141,8 +143,9 @@ public class Runtime {
     public native void traceMethodCalls(boolean on);
 
     
+    @CallerSensitive
     public void load(String filename) {
-        load0(System.getCallerClass(), filename);
+        load0(Reflection.getCallerClass(), filename);
     }
 
     synchronized void load0(Class fromClass, String filename) {
@@ -158,8 +161,9 @@ public class Runtime {
     }
 
     
+    @CallerSensitive
     public void loadLibrary(String libname) {
-        loadLibrary0(System.getCallerClass(), libname);
+        loadLibrary0(Reflection.getCallerClass(), libname);
     }
 
     synchronized void loadLibrary0(Class fromClass, String libname) {

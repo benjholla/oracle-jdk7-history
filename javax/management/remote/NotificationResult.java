@@ -24,7 +24,7 @@ public class NotificationResult implements Serializable {
 
         this.earliestSequenceNumber = earliestSequenceNumber;
         this.nextSequenceNumber = nextSequenceNumber;
-        this.targetedNotifications = targetedNotifications;
+        this.targetedNotifications = (targetedNotifications.length == 0 ? targetedNotifications : targetedNotifications.clone());
     }
 
     
@@ -39,7 +39,7 @@ public class NotificationResult implements Serializable {
 
     
     public TargetedNotification[] getTargetedNotifications() {
-        return targetedNotifications;
+        return targetedNotifications.length == 0 ? targetedNotifications : targetedNotifications.clone();
     }
 
     

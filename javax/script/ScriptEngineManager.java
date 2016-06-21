@@ -7,8 +7,6 @@ import java.io.*;
 import java.security.*;
 import sun.misc.Service;
 import sun.misc.ServiceConfigurationError;
-import sun.reflect.Reflection;
-import sun.security.util.SecurityConstants;
 
 
 public class ScriptEngineManager  {
@@ -16,13 +14,7 @@ public class ScriptEngineManager  {
     
     public ScriptEngineManager() {
         ClassLoader ctxtLoader = Thread.currentThread().getContextClassLoader();
-        if (canCallerAccessLoader(ctxtLoader)) {
-            if (DEBUG) System.out.println("using " + ctxtLoader);
-            init(ctxtLoader);
-        } else {
-            if (DEBUG) System.out.println("using bootstrap loader");
-            init(null);
-        }
+        init(ctxtLoader);
     }
 
     
@@ -277,42 +269,4 @@ public class ScriptEngineManager  {
 
     
     private Bindings globalScope;
-
-    private boolean canCallerAccessLoader(ClassLoader loader) {
-        SecurityManager sm = System.getSecurityManager();
-        if (sm != null) {
-            ClassLoader callerLoader = getCallerClassLoader();
-            if (callerLoader != null) {
-                if (loader != callerLoader || !isAncestor(loader, callerLoader)) {
-                    try {
-                        sm.checkPermission(SecurityConstants.GET_CLASSLOADER_PERMISSION);
-                    } catch (SecurityException exp) {
-                        if (DEBUG) exp.printStackTrace();
-                        return false;
-                    }
-                } 
-            } 
-        } 
-
-        return true;
-    }
-
-    
-    
-    private ClassLoader getCallerClassLoader() {
-        Class caller = Reflection.getCallerClass(3);
-        if (caller == null) {
-            return null;
-        }
-        return caller.getClassLoader();
-    }
-
-    
-    private boolean isAncestor(ClassLoader cl1, ClassLoader cl2) {
-        do {
-            cl2 = cl2.getParent();
-            if (cl1 == cl2) return true;
-        } while (cl2 != null);
-        return false;
-    }
 }

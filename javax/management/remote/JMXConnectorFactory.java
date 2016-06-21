@@ -16,6 +16,7 @@ import java.security.PrivilegedAction;
 
 import com.sun.jmx.remote.util.ClassLogger;
 import com.sun.jmx.remote.util.EnvHelp;
+import sun.reflect.misc.ReflectUtil;
 
 
 
@@ -174,10 +175,10 @@ public class JMXConnectorFactory {
     }
 
     static <T> T getProvider(JMXServiceURL serviceURL,
-                             Map<String, Object> environment,
+                             final Map<String, Object> environment,
                              String providerClassName,
                              Class<T> targetInterface,
-                             ClassLoader loader)
+                             final ClassLoader loader)
             throws IOException {
 
         final String protocol = serviceURL.getProtocol();
@@ -187,11 +188,14 @@ public class JMXConnectorFactory {
         T instance = null;
 
         if (pkgs != null) {
-            environment.put(PROTOCOL_PROVIDER_CLASS_LOADER, loader);
-
             instance =
                 getProvider(protocol, pkgs, loader, providerClassName,
                             targetInterface);
+
+            if (instance != null) {
+                boolean needsWrap = (loader != instance.getClass().getClassLoader());
+                environment.put(PROTOCOL_PROVIDER_CLASS_LOADER, needsWrap ? wrap(loader) : loader);
+            }
         }
 
         return instance;
@@ -202,6 +206,21 @@ public class JMXConnectorFactory {
        ServiceLoader<T> serviceLoader =
                 ServiceLoader.load(providerClass, loader);
        return serviceLoader.iterator();
+    }
+
+    private static ClassLoader wrap(final ClassLoader parent) {
+        return parent != null ? AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+            @Override
+            public ClassLoader run() {
+                return new ClassLoader(parent) {
+                    @Override
+                    protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+                        ReflectUtil.checkPackageAccess(name);
+                        return super.loadClass(name, resolve);
+                    }
+                };
+            }
+        }) : null;
     }
 
     private static JMXConnector getConnectorAsService(ClassLoader loader,
@@ -304,14 +323,9 @@ public class JMXConnectorFactory {
             }
         }
 
-        if (loader == null)
-            loader = AccessController.doPrivileged(
-                    new PrivilegedAction<ClassLoader>() {
-                        public ClassLoader run() {
-                            return
-                                Thread.currentThread().getContextClassLoader();
-                        }
-                    });
+        if (loader == null) {
+            loader = Thread.currentThread().getContextClassLoader();
+        }
 
         return loader;
     }
@@ -319,5 +333,4 @@ public class JMXConnectorFactory {
     private static String protocol2package(String protocol) {
         return protocol.replace('+', '.').replace('-', '_');
     }
-
 }

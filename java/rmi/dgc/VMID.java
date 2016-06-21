@@ -2,16 +2,13 @@
 
 package java.rmi.dgc;
 
-import java.io.*;
-import java.net.*;
 import java.rmi.server.UID;
-import java.security.*;
+import java.security.SecureRandom;
 
 
 public final class VMID implements java.io.Serializable {
-
     
-    private static byte[] localAddr = computeAddressHash();
+    private static final byte[] randomBytes;
 
     
     private byte[] addr;
@@ -22,9 +19,17 @@ public final class VMID implements java.io.Serializable {
     
     private static final long serialVersionUID = -538642295484486218L;
 
+    static {
+        
+        SecureRandom secureRandom = new SecureRandom();
+        byte bytes[] = new byte[8];
+        secureRandom.nextBytes(bytes);
+        randomBytes = bytes;
+    }
+
     
     public VMID() {
-        addr = localAddr;
+        addr = randomBytes;
         uid = new UID();
     }
 
@@ -72,46 +77,5 @@ public final class VMID implements java.io.Serializable {
         result.append(':');
         result.append(uid.toString());
         return result.toString();
-    }
-
-    
-    private static byte[] computeAddressHash() {
-
-        
-        byte[] addr = java.security.AccessController.doPrivileged(
-            new PrivilegedAction<byte[]>() {
-            public byte[] run() {
-                try {
-                    return InetAddress.getLocalHost().getAddress();
-                } catch (Exception e) {
-                }
-                return new byte[] { 0, 0, 0, 0 };
-            }
-        });
-
-        byte[] addrHash;
-        final int ADDR_HASH_LENGTH = 8;
-
-        try {
-            
-            MessageDigest md = MessageDigest.getInstance("SHA");
-            ByteArrayOutputStream sink = new ByteArrayOutputStream(64);
-            DataOutputStream out = new DataOutputStream(
-                new DigestOutputStream(sink, md));
-            out.write(addr, 0, addr.length);
-            out.flush();
-
-            byte digest[] = md.digest();
-            int hashlength = Math.min(ADDR_HASH_LENGTH, digest.length);
-            addrHash = new byte[hashlength];
-            System.arraycopy(digest, 0, addrHash, 0, hashlength);
-
-        } catch (IOException ignore) {
-            
-            addrHash = new byte[0];
-        } catch (NoSuchAlgorithmException complain) {
-            throw new InternalError(complain.toString());
-        }
-        return addrHash;
     }
 }

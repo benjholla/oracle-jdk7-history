@@ -27,7 +27,7 @@ import org.omg.CORBA.Principal;
 import org.omg.CORBA.CompletionStatus;
 
 
-public class IDLJavaSerializationOutputStream extends CDROutputStreamBase {
+final class IDLJavaSerializationOutputStream extends CDROutputStreamBase {
 
     private ORB orb;
     private byte encodingVersion;

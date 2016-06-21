@@ -90,6 +90,7 @@ class MethodHandleNatives {
         OP_ROT_ARGS_DOWN_LIMIT_BIAS = (k != 0) ? (byte)k : -1;
         HAVE_RICOCHET_FRAMES        = (CONV_OP_IMPLEMENTED_MASK & (1<<OP_COLLECT_ARGS)) != 0;
         COUNT_GWT                   = getConstant(Constants.GC_COUNT_GWT) != 0;
+
         
     }
 
@@ -121,6 +122,7 @@ class MethodHandleNatives {
                 MN_IS_CONSTRUCTOR      = 0x00020000, 
                 MN_IS_FIELD            = 0x00040000, 
                 MN_IS_TYPE             = 0x00080000, 
+                MN_CALLER_SENSITIVE    = 0x00100000, 
                 MN_SEARCH_SUPERCLASSES = 0x00100000, 
                 MN_SEARCH_INTERFACES   = 0x00200000, 
                 VM_INDEX_UNINITIALIZED = -99;
@@ -334,36 +336,29 @@ class MethodHandleNatives {
         return true;
     }
 
-    
+
     
     static boolean isCallerSensitive(MemberName mem) {
-        if (!mem.isInvocable())  return false;  
-        Class<?> defc = mem.getDeclaringClass();
-        switch (mem.getName()) {
+        if (!mem.isMethod())  return false;  
+
+        
+        return isCallerSensitiveMethod(mem.getDeclaringClass(), mem.getName()) ||
+                  canBeCalledVirtual(mem);
+    }
+
+    
+    
+    private static boolean isCallerSensitiveMethod(Class<?> defc, String method) {
+        switch (method) {
         case "doPrivileged":
         case "doPrivilegedWithCombiner":
             return defc == java.security.AccessController.class;
         case "checkMemberAccess":
-            return canBeCalledVirtual(mem, java.lang.SecurityManager.class);
+            return defc == java.lang.SecurityManager.class;
         case "getUnsafe":
             return defc == sun.misc.Unsafe.class;
         case "lookup":
             return defc == java.lang.invoke.MethodHandles.class;
-        case "findStatic":
-        case "findVirtual":
-        case "findConstructor":
-        case "findSpecial":
-        case "findGetter":
-        case "findSetter":
-        case "findStaticGetter":
-        case "findStaticSetter":
-        case "bind":
-        case "unreflect":
-        case "unreflectSpecial":
-        case "unreflectConstructor":
-        case "unreflectGetter":
-        case "unreflectSetter":
-            return defc == java.lang.invoke.MethodHandles.Lookup.class;
         case "invoke":
             return defc == java.lang.reflect.Method.class;
         case "get":
@@ -389,10 +384,12 @@ class MethodHandleNatives {
             if (defc == java.lang.reflect.Constructor.class)  return true;
             if (defc == java.lang.Class.class)  return true;
             break;
+        case "getFields":
+            return defc == java.lang.Class.class ||
+                   defc == javax.sql.rowset.serial.SerialJavaObject.class;
         case "forName":
         case "getClassLoader":
         case "getClasses":
-        case "getFields":
         case "getMethods":
         case "getConstructors":
         case "getDeclaredClasses":
@@ -405,19 +402,23 @@ class MethodHandleNatives {
         case "getDeclaredField":
         case "getDeclaredMethod":
         case "getDeclaredConstructor":
+        case "getEnclosingClass":
+        case "getEnclosingMethod":
+        case "getEnclosingConstructor":
             return defc == java.lang.Class.class;
         case "getConnection":
         case "getDriver":
         case "getDrivers":
         case "deregisterDriver":
             return defc == java.sql.DriverManager.class;
+
         case "newUpdater":
             if (defc == java.util.concurrent.atomic.AtomicIntegerFieldUpdater.class)  return true;
             if (defc == java.util.concurrent.atomic.AtomicLongFieldUpdater.class)  return true;
             if (defc == java.util.concurrent.atomic.AtomicReferenceFieldUpdater.class)  return true;
             break;
         case "getContextClassLoader":
-            return canBeCalledVirtual(mem, java.lang.Thread.class);
+            return defc == java.lang.Thread.class;
         case "getPackage":
         case "getPackages":
             return defc == java.lang.Package.class;
@@ -436,7 +437,7 @@ class MethodHandleNatives {
         case "getCallerClassLoader":
             return defc == java.lang.ClassLoader.class;
         case "registerAsParallelCapable":
-            return canBeCalledVirtual(mem, java.lang.ClassLoader.class);
+            return defc == java.lang.ClassLoader.class;
         case "getProxyClass":
         case "newProxyInstance":
             return defc == java.lang.reflect.Proxy.class;
@@ -445,9 +446,30 @@ class MethodHandleNatives {
         case "getBundle":
         case "clearCache":
             return defc == java.util.ResourceBundle.class;
+        case "getType":
+            return defc == java.io.ObjectStreamField.class;
+        case "forClass":
+            return defc == java.io.ObjectStreamClass.class;
+        case "getLogger":
+            return defc == java.util.logging.Logger.class;
+        case "getAnonymousLogger":
+            return defc == java.util.logging.Logger.class;
         }
         return false;
     }
+
+    private static boolean canBeCalledVirtual(MemberName mem) {
+        assert(mem.isInvocable());
+        Class<?> defc = mem.getDeclaringClass();
+        switch (mem.getName()) {
+        case "checkMemberAccess":
+            return canBeCalledVirtual(mem, java.lang.SecurityManager.class);
+        case "getContextClassLoader":
+            return canBeCalledVirtual(mem, java.lang.Thread.class);
+        }
+        return false;
+    }
+
     static boolean canBeCalledVirtual(MemberName symbolicRef, Class<?> definingClass) {
         Class<?> symbolicRefClass = symbolicRef.getDeclaringClass();
         if (symbolicRefClass == definingClass)  return true;

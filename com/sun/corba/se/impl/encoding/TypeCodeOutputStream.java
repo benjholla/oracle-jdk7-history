@@ -162,7 +162,8 @@ public final class TypeCodeOutputStream extends EncapsOutputStream
     }
 
     public TypeCodeOutputStream createEncapsulation(org.omg.CORBA.ORB _orb) {
-        TypeCodeOutputStream encap = new TypeCodeOutputStream((ORB)_orb, isLittleEndian());
+        TypeCodeOutputStream encap =
+            sun.corba.OutputStreamFactory.newTypeCodeOutputStream((ORB)_orb, isLittleEndian());
         encap.setEnclosingOutputStream(this);
         encap.makeEncapsulation();
         
@@ -177,7 +178,8 @@ public final class TypeCodeOutputStream extends EncapsOutputStream
 
     public static TypeCodeOutputStream wrapOutputStream(OutputStream os) {
         boolean littleEndian = ((os instanceof CDROutputStream) ? ((CDROutputStream)os).isLittleEndian() : false);
-        TypeCodeOutputStream tos = new TypeCodeOutputStream((ORB)os.orb(), littleEndian);
+        TypeCodeOutputStream tos =
+            sun.corba.OutputStreamFactory.newTypeCodeOutputStream((ORB)os.orb(), littleEndian);
         tos.setEnclosingOutputStream(os);
         
         return tos;

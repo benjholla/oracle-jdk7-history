@@ -30,6 +30,7 @@ import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 import sun.misc.Unsafe;
+import sun.reflect.CallerSensitive;
 import sun.reflect.ConstantPool;
 import sun.reflect.Reflection;
 import sun.reflect.ReflectionFactory;
@@ -73,13 +74,16 @@ public final
 
 
     
+    @CallerSensitive
     public static Class<?> forName(String className)
                 throws ClassNotFoundException {
-        return forName0(className, true, ClassLoader.getCallerClassLoader());
+        return forName0(className, true,
+                        ClassLoader.getClassLoader(Reflection.getCallerClass()));
     }
 
 
     
+    @CallerSensitive
     public static Class<?> forName(String name, boolean initialize,
                                    ClassLoader loader)
         throws ClassNotFoundException
@@ -87,7 +91,7 @@ public final
         if (loader == null) {
             SecurityManager sm = System.getSecurityManager();
             if (sm != null) {
-                ClassLoader ccl = ClassLoader.getCallerClassLoader();
+                ClassLoader ccl = ClassLoader.getClassLoader(Reflection.getCallerClass());
                 if (ccl != null) {
                     sm.checkPermission(
                         SecurityConstants.GET_CLASSLOADER_PERMISSION);
@@ -103,18 +107,14 @@ public final
         throws ClassNotFoundException;
 
     
+    @CallerSensitive
     public T newInstance()
         throws InstantiationException, IllegalAccessException
     {
         if (System.getSecurityManager() != null) {
-            checkMemberAccess(Member.PUBLIC, ClassLoader.getCallerClassLoader(), false);
+            checkMemberAccess(Member.PUBLIC, Reflection.getCallerClass(), false);
         }
-        return newInstance0();
-    }
 
-    private T newInstance0()
-        throws InstantiationException, IllegalAccessException
-    {
         
         
 
@@ -148,7 +148,7 @@ public final
         
         int modifiers = tmpConstructor.getModifiers();
         if (!Reflection.quickCheckMemberAccess(this, modifiers)) {
-            Class<?> caller = Reflection.getCallerClass(3);
+            Class<?> caller = Reflection.getCallerClass();
             if (newInstanceCallerCache != caller) {
                 Reflection.ensureMemberAccess(caller, this, null, modifiers);
                 newInstanceCallerCache = caller;
@@ -209,16 +209,14 @@ public final
     private native String getName0();
 
     
+    @CallerSensitive
     public ClassLoader getClassLoader() {
         ClassLoader cl = getClassLoader0();
         if (cl == null)
             return null;
         SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
-            ClassLoader ccl = ClassLoader.getCallerClassLoader();
-            if (ccl != null && ccl != cl && !cl.isAncestor(ccl)) {
-                sm.checkPermission(SecurityConstants.GET_CLASSLOADER_PERMISSION);
-            }
+            ClassLoader.checkClassLoaderPermission(cl, Reflection.getCallerClass());
         }
         return cl;
     }
@@ -288,6 +286,7 @@ public final
 
 
     
+    @CallerSensitive
     public Method getEnclosingMethod() {
         EnclosingMethodInfo enclosingInfo = getEnclosingMethodInfo();
 
@@ -310,7 +309,16 @@ public final
                 parameterClasses[i] = toClass(parameterTypes[i]);
 
             
-            for(Method m: enclosingInfo.getEnclosingClass().getDeclaredMethods()) {
+            Class<?> enclosingCandidate = enclosingInfo.getEnclosingClass();
+            
+            
+            
+            
+            
+            enclosingCandidate.checkMemberAccess(Member.DECLARED,
+                                                 Reflection.getCallerClass(), true);
+            
+            for(Method m: enclosingCandidate.getDeclaredMethods()) {
                 if (m.getName().equals(enclosingInfo.getName()) ) {
                     Class<?>[] candidateParamClasses = m.getParameterTypes();
                     if (candidateParamClasses.length == parameterClasses.length) {
@@ -398,6 +406,7 @@ public final
      }
 
     
+    @CallerSensitive
     public Constructor<?> getEnclosingConstructor() {
         EnclosingMethodInfo enclosingInfo = getEnclosingMethodInfo();
 
@@ -419,7 +428,16 @@ public final
                 parameterClasses[i] = toClass(parameterTypes[i]);
 
             
-            for(Constructor<?> c: enclosingInfo.getEnclosingClass().getDeclaredConstructors()) {
+            Class<?> enclosingCandidate = enclosingInfo.getEnclosingClass();
+            
+            
+            
+            
+            
+            enclosingCandidate.checkMemberAccess(Member.DECLARED,
+                                                 Reflection.getCallerClass(), true);
+            
+            for(Constructor<?> c: enclosingCandidate.getDeclaredConstructors()) {
                 Class<?>[] candidateParamClasses = c.getParameterTypes();
                 if (candidateParamClasses.length == parameterClasses.length) {
                     boolean matches = true;
@@ -445,6 +463,7 @@ public final
 
 
     
+    @CallerSensitive
     public Class<?> getEnclosingClass() {
         
         
@@ -458,18 +477,24 @@ public final
         
         
         EnclosingMethodInfo enclosingInfo = getEnclosingMethodInfo();
+        Class<?> enclosingCandidate;
 
         if (enclosingInfo == null) {
             
-            return getDeclaringClass();
+            enclosingCandidate = getDeclaringClass();
         } else {
             Class<?> enclosingClass = enclosingInfo.getEnclosingClass();
             
             if (enclosingClass == this || enclosingClass == null)
                 throw new InternalError("Malformed enclosing method information");
             else
-                return enclosingClass;
+                enclosingCandidate = enclosingClass;
         }
+
+        if (enclosingCandidate != null)
+            enclosingCandidate.checkPackageAccess(
+                    ClassLoader.getClassLoader(Reflection.getCallerClass()), true);
+        return enclosingCandidate;
     }
 
     
@@ -570,11 +595,12 @@ public final
     }
 
     
+    @CallerSensitive
     public Class<?>[] getClasses() {
         
         
         
-        checkMemberAccess(Member.PUBLIC, ClassLoader.getCallerClassLoader(), false);
+        checkMemberAccess(Member.PUBLIC, Reflection.getCallerClass(), false);
 
         
         
@@ -603,42 +629,46 @@ public final
 
 
     
+    @CallerSensitive
     public Field[] getFields() throws SecurityException {
         
         
         
-        checkMemberAccess(Member.PUBLIC, ClassLoader.getCallerClassLoader(), true);
+        checkMemberAccess(Member.PUBLIC, Reflection.getCallerClass(), true);
         return copyFields(privateGetPublicFields(null));
     }
 
 
     
+    @CallerSensitive
     public Method[] getMethods() throws SecurityException {
         
         
         
-        checkMemberAccess(Member.PUBLIC, ClassLoader.getCallerClassLoader(), true);
+        checkMemberAccess(Member.PUBLIC, Reflection.getCallerClass(), true);
         return copyMethods(privateGetPublicMethods());
     }
 
 
     
+    @CallerSensitive
     public Constructor<?>[] getConstructors() throws SecurityException {
         
         
         
-        checkMemberAccess(Member.PUBLIC, ClassLoader.getCallerClassLoader(), true);
+        checkMemberAccess(Member.PUBLIC, Reflection.getCallerClass(), true);
         return copyConstructors(privateGetDeclaredConstructors(true));
     }
 
 
     
+    @CallerSensitive
     public Field getField(String name)
         throws NoSuchFieldException, SecurityException {
         
         
         
-        checkMemberAccess(Member.PUBLIC, ClassLoader.getCallerClassLoader(), true);
+        checkMemberAccess(Member.PUBLIC, Reflection.getCallerClass(), true);
         Field field = getField0(name);
         if (field == null) {
             throw new NoSuchFieldException(name);
@@ -648,12 +678,13 @@ public final
 
 
     
+    @CallerSensitive
     public Method getMethod(String name, Class<?>... parameterTypes)
         throws NoSuchMethodException, SecurityException {
         
         
         
-        checkMemberAccess(Member.PUBLIC, ClassLoader.getCallerClassLoader(), true);
+        checkMemberAccess(Member.PUBLIC, Reflection.getCallerClass(), true);
         Method method = getMethod0(name, parameterTypes);
         if (method == null) {
             throw new NoSuchMethodException(getName() + "." + name + argumentTypesToString(parameterTypes));
@@ -663,63 +694,69 @@ public final
 
 
     
+    @CallerSensitive
     public Constructor<T> getConstructor(Class<?>... parameterTypes)
         throws NoSuchMethodException, SecurityException {
         
         
         
-        checkMemberAccess(Member.PUBLIC, ClassLoader.getCallerClassLoader(), true);
+        checkMemberAccess(Member.PUBLIC, Reflection.getCallerClass(), true);
         return getConstructor0(parameterTypes, Member.PUBLIC);
     }
 
 
     
+    @CallerSensitive
     public Class<?>[] getDeclaredClasses() throws SecurityException {
         
         
         
-        checkMemberAccess(Member.DECLARED, ClassLoader.getCallerClassLoader(), false);
+        checkMemberAccess(Member.DECLARED, Reflection.getCallerClass(), false);
         return getDeclaredClasses0();
     }
 
 
     
+    @CallerSensitive
     public Field[] getDeclaredFields() throws SecurityException {
         
         
         
-        checkMemberAccess(Member.DECLARED, ClassLoader.getCallerClassLoader(), true);
+        checkMemberAccess(Member.DECLARED, Reflection.getCallerClass(), true);
         return copyFields(privateGetDeclaredFields(false));
     }
 
 
     
+    @CallerSensitive
     public Method[] getDeclaredMethods() throws SecurityException {
         
         
         
-        checkMemberAccess(Member.DECLARED, ClassLoader.getCallerClassLoader(), true);
+        checkMemberAccess(Member.DECLARED, Reflection.getCallerClass(), true);
         return copyMethods(privateGetDeclaredMethods(false));
     }
 
 
     
+    @CallerSensitive
     public Constructor<?>[] getDeclaredConstructors() throws SecurityException {
         
         
         
-        checkMemberAccess(Member.DECLARED, ClassLoader.getCallerClassLoader(), true);
+        checkMemberAccess(Member.DECLARED, Reflection.getCallerClass(), true);
         return copyConstructors(privateGetDeclaredConstructors(false));
     }
 
 
     
+    @CallerSensitive
     public Field getDeclaredField(String name)
         throws NoSuchFieldException, SecurityException {
         
         
         
-        checkMemberAccess(Member.DECLARED, ClassLoader.getCallerClassLoader(), true);
+        checkMemberAccess(Member.DECLARED, Reflection.getCallerClass(), true);
         Field field = searchFields(privateGetDeclaredFields(false), name);
         if (field == null) {
             throw new NoSuchFieldException(name);
@@ -729,12 +766,13 @@ public final
 
 
     
+    @CallerSensitive
     public Method getDeclaredMethod(String name, Class<?>... parameterTypes)
         throws NoSuchMethodException, SecurityException {
         
         
         
-        checkMemberAccess(Member.DECLARED, ClassLoader.getCallerClassLoader(), true);
+        checkMemberAccess(Member.DECLARED, Reflection.getCallerClass(), true);
         Method method = searchMethods(privateGetDeclaredMethods(false), name, parameterTypes);
         if (method == null) {
             throw new NoSuchMethodException(getName() + "." + name + argumentTypesToString(parameterTypes));
@@ -744,12 +782,13 @@ public final
 
 
     
+    @CallerSensitive
     public Constructor<T> getDeclaredConstructor(Class<?>... parameterTypes)
         throws NoSuchMethodException, SecurityException {
         
         
         
-        checkMemberAccess(Member.DECLARED, ClassLoader.getCallerClassLoader(), true);
+        checkMemberAccess(Member.DECLARED, Reflection.getCallerClass(), true);
         return getConstructor0(parameterTypes, Member.DECLARED);
     }
 
@@ -813,20 +852,49 @@ public final
     
     static native Class getPrimitiveClass(String name);
 
+    private static boolean isCheckMemberAccessOverridden(SecurityManager smgr) {
+        if (smgr.getClass() == SecurityManager.class) return false;
+
+        Class<?>[] paramTypes = new Class<?>[] {Class.class, int.class};
+        return smgr.getClass().getMethod0("checkMemberAccess", paramTypes).
+                getDeclaringClass() != SecurityManager.class;
+    }
+
 
     
-    private void checkMemberAccess(int which, ClassLoader ccl, boolean checkProxyInterfaces) {
-        SecurityManager s = System.getSecurityManager();
+    private void checkMemberAccess(int which, Class<?> caller, boolean checkProxyInterfaces) {
+        final SecurityManager s = System.getSecurityManager();
         if (s != null) {
-            s.checkMemberAccess(this, which);
-            ClassLoader cl = getClassLoader0();
+            final ClassLoader ccl = ClassLoader.getClassLoader(caller);
+            final ClassLoader cl = getClassLoader0();
+            if (!isCheckMemberAccessOverridden(s)) {
+                
+                if (which != Member.PUBLIC) {
+                    if (ccl != cl) {
+                        s.checkPermission(SecurityConstants.CHECK_MEMBER_ACCESS_PERMISSION);
+                    }
+                }
+            } else {
+                
+                
+                s.checkMemberAccess(this, which);
+            }
+            this.checkPackageAccess(ccl, checkProxyInterfaces);
+        }
+    }
+
+    
+    private void checkPackageAccess(final ClassLoader ccl, boolean checkProxyInterfaces) {
+        final SecurityManager s = System.getSecurityManager();
+        if (s != null) {
+            final ClassLoader cl = getClassLoader0();
             if (ReflectUtil.needsPackageAccessCheck(ccl, cl)) {
                 String name = this.getName();
                 int i = name.lastIndexOf('.');
                 if (i != -1) {
                     
                     String pkg = name.substring(0, i);
-                    if (!Proxy.isProxyClass(this) || !pkg.equals(ReflectUtil.PROXY_PACKAGE)) {
+                    if (!Proxy.isProxyClass(this) || ReflectUtil.isNonPublicProxyClass(this)) {
                         s.checkPackageAccess(pkg);
                     }
                 }

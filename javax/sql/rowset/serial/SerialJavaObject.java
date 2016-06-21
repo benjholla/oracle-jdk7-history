@@ -5,6 +5,9 @@ package javax.sql.rowset.serial;
 import java.io.*;
 import java.lang.reflect.*;
 import javax.sql.rowset.RowSetWarning;
+import sun.reflect.CallerSensitive;
+import sun.reflect.Reflection;
+import sun.reflect.misc.ReflectUtil;
 
 
 public class SerialJavaObject implements Serializable, Cloneable {
@@ -60,9 +63,19 @@ public class SerialJavaObject implements Serializable, Cloneable {
     }
 
     
+    @CallerSensitive
     public Field[] getFields() throws SerialException {
         if (fields != null) {
             Class<?> c = this.obj.getClass();
+            SecurityManager sm = System.getSecurityManager();
+            if (sm != null) {
+                
+                Class<?> caller = sun.reflect.Reflection.getCallerClass();
+                if (ReflectUtil.needsPackageAccessCheck(caller.getClassLoader(),
+                                                        c.getClassLoader())) {
+                    ReflectUtil.checkPackageAccess(c);
+                }
+            }
             return c.getFields();
         } else {
             throw new SerialException("SerialJavaObject does not contain" +

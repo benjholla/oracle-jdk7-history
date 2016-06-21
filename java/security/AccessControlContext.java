@@ -15,7 +15,10 @@ import sun.misc.SharedSecrets;
 public final class AccessControlContext {
 
     private ProtectionDomain context[];
+    
+    
     private boolean isPrivileged;
+    private boolean isAuthorized = false;
 
     
     
@@ -70,6 +73,7 @@ public final class AccessControlContext {
         SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
             sm.checkPermission(SecurityConstants.CREATE_ACC_PERMISSION);
+            this.isAuthorized = true;
         }
 
         this.context = acc.context;
@@ -89,15 +93,17 @@ public final class AccessControlContext {
             this.context = context.clone();
         }
         this.combiner = combiner;
+        this.isAuthorized = true;
     }
 
     
 
     AccessControlContext(ProtectionDomain context[],
-                                 boolean isPrivileged)
+                         boolean isPrivileged)
     {
         this.context = context;
         this.isPrivileged = isPrivileged;
+        this.isAuthorized = true;
     }
 
     
@@ -328,7 +334,7 @@ public final class AccessControlContext {
     }
 
     private AccessControlContext goCombiner(ProtectionDomain[] current,
-                                        AccessControlContext assigned) {
+                                            AccessControlContext assigned) {
 
         
         
@@ -350,6 +356,7 @@ public final class AccessControlContext {
         this.context = combinedPds;
         this.combiner = assigned.combiner;
         this.isPrivileged = false;
+        this.isAuthorized = assigned.isAuthorized;
 
         return this;
     }

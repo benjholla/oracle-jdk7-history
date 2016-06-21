@@ -106,8 +106,7 @@ public class Transforms extends SignatureElementProxy {
             if (log.isLoggable(java.util.logging.Level.FINE))
                 log.log(java.util.logging.Level.FINE, "Transforms.addTransform(" + transformURI + ")");
 
-            Transform transform =
-                Transform.getInstance(this._doc, transformURI);
+            Transform transform = new Transform(this._doc, transformURI);
 
             this.addTransform(transform);
         } catch (InvalidTransformException ex) {
@@ -123,8 +122,7 @@ public class Transforms extends SignatureElementProxy {
             if (log.isLoggable(java.util.logging.Level.FINE))
                 log.log(java.util.logging.Level.FINE, "Transforms.addTransform(" + transformURI + ")");
 
-            Transform transform =
-                Transform.getInstance(this._doc, transformURI, contextElement);
+            Transform transform = new Transform(this._doc, transformURI, contextElement);
 
             this.addTransform(transform);
         } catch (InvalidTransformException ex) {
@@ -137,8 +135,7 @@ public class Transforms extends SignatureElementProxy {
            throws TransformationException {
 
         try {
-            Transform transform =
-                Transform.getInstance(this._doc, transformURI, contextNodes);
+            Transform transform = new Transform(this._doc, transformURI, contextNodes);
             this.addTransform(transform);
         } catch (InvalidTransformException ex) {
             throw new TransformationException("empty", ex);

@@ -55,13 +55,14 @@ import com.sun.corba.se.impl.encoding.OSFCodeSetRegistry ;
 import com.sun.corba.se.impl.legacy.connection.USLPort ;
 import com.sun.corba.se.impl.logging.ORBUtilSystemException ;
 import com.sun.corba.se.impl.oa.poa.BadServerIdHandler ;
-import com.sun.corba.se.impl.orbutil.ORBClassLoader ;
 import com.sun.corba.se.impl.orbutil.ORBConstants ;
 import com.sun.corba.se.impl.protocol.giopmsgheaders.KeyAddr ;
 import com.sun.corba.se.impl.protocol.giopmsgheaders.ProfileAddr ;
 import com.sun.corba.se.impl.protocol.giopmsgheaders.ReferenceAddr ;
 import com.sun.corba.se.impl.transport.DefaultIORToSocketInfoImpl;
 import com.sun.corba.se.impl.transport.DefaultSocketFactoryImpl;
+
+import sun.corba.SharedSecrets;
 
 
 public class ParserTable {
@@ -614,8 +615,8 @@ public class ParserTable {
                 String param = (String)value ;
 
                 try {
-                    Class legacySocketFactoryClass =
-                        ORBClassLoader.loadClass(param);
+                    Class<?> legacySocketFactoryClass =
+                        SharedSecrets.getJavaCorbaAccess().loadClass(param);
                     
                     
                     
@@ -644,7 +645,8 @@ public class ParserTable {
                 String param = (String)value ;
 
                 try {
-                    Class socketFactoryClass = ORBClassLoader.loadClass(param);
+                    Class<?> socketFactoryClass =
+                        SharedSecrets.getJavaCorbaAccess().loadClass(param);
                     
                     
                     
@@ -673,7 +675,8 @@ public class ParserTable {
                 String param = (String)value ;
 
                 try {
-                    Class iorToSocketInfoClass = ORBClassLoader.loadClass(param);
+                    Class<?> iorToSocketInfoClass =
+                        SharedSecrets.getJavaCorbaAccess().loadClass(param);
                     
                     
                     
@@ -702,7 +705,8 @@ public class ParserTable {
                 String param = (String)value ;
 
                 try {
-                    Class iiopPrimaryToContactInfoClass = ORBClassLoader.loadClass(param);
+                    Class<?> iiopPrimaryToContactInfoClass =
+                        SharedSecrets.getJavaCorbaAccess().loadClass(param);
                     
                     
                     
@@ -731,8 +735,8 @@ public class ParserTable {
                 String param = (String)value ;
 
                 try {
-                    Class contactInfoListFactoryClass =
-                        ORBClassLoader.loadClass(param);
+                    Class<?> contactInfoListFactoryClass =
+                        SharedSecrets.getJavaCorbaAccess().loadClass(param);
                     
                     
                     

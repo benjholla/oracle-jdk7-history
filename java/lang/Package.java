@@ -24,9 +24,10 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import sun.net.www.ParseUtil;
-
 import java.lang.annotation.Annotation;
+import sun.net.www.ParseUtil;
+import sun.reflect.CallerSensitive;
+import sun.reflect.Reflection;
 
 
 public class Package implements java.lang.reflect.AnnotatedElement {
@@ -113,8 +114,9 @@ public class Package implements java.lang.reflect.AnnotatedElement {
     }
 
     
+    @CallerSensitive
     public static Package getPackage(String name) {
-        ClassLoader l = ClassLoader.getCallerClassLoader();
+        ClassLoader l = ClassLoader.getClassLoader(Reflection.getCallerClass());
         if (l != null) {
             return l.getPackage(name);
         } else {
@@ -123,8 +125,9 @@ public class Package implements java.lang.reflect.AnnotatedElement {
     }
 
     
+    @CallerSensitive
     public static Package[] getPackages() {
-        ClassLoader l = ClassLoader.getCallerClassLoader();
+        ClassLoader l = ClassLoader.getClassLoader(Reflection.getCallerClass());
         if (l != null) {
             return l.getPackages();
         } else {

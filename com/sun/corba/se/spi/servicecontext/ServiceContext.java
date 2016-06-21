@@ -35,7 +35,8 @@ public abstract class ServiceContext {
     
     public void write(OutputStream s, GIOPVersion gv) throws SystemException
     {
-        EncapsOutputStream os = new EncapsOutputStream( (ORB)(s.orb()), gv ) ;
+        EncapsOutputStream os =
+            sun.corba.OutputStreamFactory.newEncapsOutputStream((ORB)(s.orb()), gv);
         os.putEndian() ;
         writeData( os ) ;
         byte[] data = os.toByteArray() ;

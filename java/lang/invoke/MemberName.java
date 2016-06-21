@@ -208,10 +208,11 @@ import static java.lang.invoke.MethodHandleStatics.*;
 
     
     static final int
-            IS_METHOD      = MN_IS_METHOD,      
-            IS_CONSTRUCTOR = MN_IS_CONSTRUCTOR, 
-            IS_FIELD       = MN_IS_FIELD,       
-            IS_TYPE        = MN_IS_TYPE;        
+            IS_METHOD           = MN_IS_METHOD,        
+            IS_CONSTRUCTOR      = MN_IS_CONSTRUCTOR,   
+            IS_FIELD            = MN_IS_FIELD,         
+            IS_TYPE             = MN_IS_TYPE,          
+            IS_CALLER_SENSITIVE = MN_CALLER_SENSITIVE; 
     static final int  
             SEARCH_SUPERCLASSES = MN_SEARCH_SUPERCLASSES,
             SEARCH_INTERFACES   = MN_SEARCH_INTERFACES;
@@ -249,6 +250,10 @@ import static java.lang.invoke.MethodHandleStatics.*;
     
     public boolean isPackage() {
         return !testAnyFlags(ALL_ACCESS);
+    }
+    
+    public boolean isCallerSensitive() {
+        return testAllFlags(IS_CALLER_SENSITIVE);
     }
 
     

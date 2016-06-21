@@ -28,6 +28,7 @@ import javax.management.MBeanOperationInfo;
 import javax.management.NotCompliantMBeanException;
 import javax.management.NotificationBroadcaster;
 import javax.management.ReflectionException;
+import sun.reflect.misc.ReflectUtil;
 
 
 
@@ -89,7 +90,8 @@ abstract class MBeanIntrospector<M> {
     abstract Descriptor getMBeanDescriptor(Class<?> resourceClass);
 
     
-    List<Method> getMethods(final Class<?> mbeanType) {
+    final List<Method> getMethods(final Class<?> mbeanType) {
+        ReflectUtil.checkPackageAccess(mbeanType);
         return Arrays.asList(mbeanType.getMethods());
     }
 

@@ -193,8 +193,9 @@ public class ServerNotifForwarder {
     }
 
     
-    private final NotificationBufferFilter bufferFilter =
-            new NotificationBufferFilter() {
+    private final NotifForwarderBufferFilter bufferFilter = new NotifForwarderBufferFilter();
+
+    final class NotifForwarderBufferFilter implements NotificationBufferFilter {
         public void apply(List<TargetedNotification> targetedNotifs,
                           ObjectName source, Notification notif) {
             
@@ -325,9 +326,16 @@ public class ServerNotifForwarder {
     }
 
     
-    public void checkMBeanPermission(
+    public final void checkMBeanPermission(
             final ObjectName name, final String actions)
             throws InstanceNotFoundException, SecurityException {
+        checkMBeanPermission(mbeanServer,name,actions);
+    }
+
+    static void checkMBeanPermission(
+            final MBeanServer mbs, final ObjectName name, final String actions)
+            throws InstanceNotFoundException, SecurityException {
+
         SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
             AccessControlContext acc = AccessController.getContext();
@@ -337,7 +345,7 @@ public class ServerNotifForwarder {
                     new PrivilegedExceptionAction<ObjectInstance>() {
                         public ObjectInstance run()
                         throws InstanceNotFoundException {
-                            return mbeanServer.getObjectInstance(name);
+                            return mbs.getObjectInstance(name);
                         }
                 });
             } catch (PrivilegedActionException e) {

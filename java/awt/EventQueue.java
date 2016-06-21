@@ -79,6 +79,9 @@ public class EventQueue {
     
     private volatile int waitForID;
 
+    
+    private final AppContext appContext;
+
     private final String name = "AWT-EventQueue-" + threadInitNumber.getAndIncrement();
 
     private static final PlatformLogger eventLog = PlatformLogger.getLogger("java.awt.event.EventQueue");
@@ -118,13 +121,14 @@ public class EventQueue {
         }
         
 
-        pushPopLock = (Lock)AppContext.getAppContext().get(AppContext.EVENT_QUEUE_LOCK_KEY);
-        pushPopCond = (Condition)AppContext.getAppContext().get(AppContext.EVENT_QUEUE_COND_KEY);
+        appContext = AppContext.getAppContext();
+        pushPopLock = (Lock)appContext.get(AppContext.EVENT_QUEUE_LOCK_KEY);
+        pushPopCond = (Condition)appContext.get(AppContext.EVENT_QUEUE_COND_KEY);
     }
 
     
     public void postEvent(AWTEvent theEvent) {
-        SunToolkit.flushPendingEvents();
+        SunToolkit.flushPendingEvents(appContext);
         postEventPrivate(theEvent);
     }
 
@@ -379,7 +383,7 @@ public class EventQueue {
     public AWTEvent getNextEvent() throws InterruptedException {
         do {
             
-            SunToolkit.flushPendingEvents();
+            SunToolkit.flushPendingEvents(appContext);
             pushPopLock.lock();
             try {
                 AWTEvent event = getNextEventPrivate();
@@ -413,7 +417,7 @@ public class EventQueue {
     AWTEvent getNextEvent(int id) throws InterruptedException {
         do {
             
-            SunToolkit.flushPendingEvents();
+            SunToolkit.flushPendingEvents(appContext);
             pushPopLock.lock();
             try {
                 for (int i = 0; i < NUM_PRIORITIES; i++) {
@@ -623,7 +627,6 @@ public class EventQueue {
             newEventQueue.previousQueue = topQueue;
             topQueue.nextQueue = newEventQueue;
 
-            AppContext appContext = AppContext.getAppContext();
             if (appContext.get(AppContext.EVENT_QUEUE_KEY) == topQueue) {
                 appContext.put(AppContext.EVENT_QUEUE_KEY, newEventQueue);
             }
@@ -672,7 +675,6 @@ public class EventQueue {
                 topQueue.dispatchThread.setEventQueue(prevQueue);
             }
 
-            AppContext appContext = AppContext.getAppContext();
             if (appContext.get(AppContext.EVENT_QUEUE_KEY) == this) {
                 appContext.put(AppContext.EVENT_QUEUE_KEY, prevQueue);
             }
@@ -732,7 +734,6 @@ public class EventQueue {
     final void initDispatchThread() {
         pushPopLock.lock();
         try {
-            AppContext appContext = AppContext.getAppContext();
             if (dispatchThread == null && !threadGroup.isDestroyed() && !appContext.isDisposed()) {
                 dispatchThread = AccessController.doPrivileged(
                     new PrivilegedAction<EventDispatchThread>() {
@@ -786,7 +787,7 @@ public class EventQueue {
 
     
     final void removeSourceEvents(Object source, boolean removeAllEvents) {
-        SunToolkit.flushPendingEvents();
+        SunToolkit.flushPendingEvents(appContext);
         pushPopLock.lock();
         try {
             for (int i = 0; i < NUM_PRIORITIES; i++) {

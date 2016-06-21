@@ -10,10 +10,8 @@ import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.net.URL;
 import sun.misc.JavaAWTAccess;
 import sun.misc.SharedSecrets;
-import sun.security.action.GetPropertyAction;
 
 
 
@@ -21,7 +19,6 @@ public class LogManager {
     
     private static LogManager manager;
 
-    private final static Handler[] emptyHandlers = { };
     private Properties props = new Properties();
     private PropertyChangeSupport changes
                          = new PropertyChangeSupport(LogManager.class);
@@ -195,24 +192,20 @@ public class LogManager {
                     
                     ecx = javaAwtAccess.getContext();
                 }
-                context = (LoggerContext)javaAwtAccess.get(ecx, LoggerContext.class);
-                if (context == null) {
-                    if (javaAwtAccess.isMainAppContext()) {
-                        context = userContext;
-                    } else {
-                        context = new LoggerContext();
-                        
-                        
-                        if (manager.rootLogger != null)
-                            context.addLocalLogger(manager.rootLogger);
+                if (ecx != null) {
+                    context = (LoggerContext)javaAwtAccess.get(ecx, LoggerContext.class);
+                    if (context == null) {
+                        if (javaAwtAccess.isMainAppContext()) {
+                            context = userContext;
+                        } else {
+                            context = new LoggerContext();
+                        }
+                        javaAwtAccess.put(ecx, LoggerContext.class, context);
                     }
-                    javaAwtAccess.put(ecx, LoggerContext.class, context);
                 }
             }
-        } else {
-            context = userContext;
         }
-        return context;
+        return context != null ? context : userContext;
     }
 
     private List<LoggerContext> contexts() {
@@ -234,11 +227,11 @@ public class LogManager {
     
     
     
-    Logger demandLogger(String name, String resourceBundleName) {
+    Logger demandLogger(String name, String resourceBundleName, Class<?> caller) {
         Logger result = getLogger(name);
         if (result == null) {
             
-            Logger newLogger = new Logger(name, resourceBundleName);
+            Logger newLogger = new Logger(name, resourceBundleName, caller);
             do {
                 if (addLogger(newLogger)) {
                     
@@ -320,7 +313,7 @@ public class LogManager {
         Logger demandLogger(String name, String resourceBundleName) {
             
             
-            return manager.demandLogger(name, resourceBundleName);
+            return manager.demandLogger(name, resourceBundleName, null);
         }
 
         synchronized Logger findLogger(String name) {
@@ -337,16 +330,26 @@ public class LogManager {
             return logger;
         }
 
+        synchronized void ensureRootLogger(Logger logger) {
+            if (logger.getName().isEmpty())
+                return;
+
+            
+            
+            if (findLogger("") == null && manager.rootLogger != null) {
+                addLocalLogger(manager.rootLogger);
+            }
+        }
+
         
         
         synchronized boolean addLocalLogger(Logger logger) {
+            ensureRootLogger(logger);
+
             final String name = logger.getName();
             if (name == null) {
                 throw new NullPointerException();
             }
-
-            
-            manager.drainLoggerRefQueueBounded();
 
             LoggerWeakRef ref = namedLoggers.get(name);
             if (ref != null) {
@@ -400,6 +403,8 @@ public class LogManager {
             return true;
         }
 
+        
+        
         void removeLogger(String name) {
             namedLoggers.remove(name);
         }
@@ -667,6 +672,7 @@ public class LogManager {
         if (name == null) {
             throw new NullPointerException();
         }
+        drainLoggerRefQueueBounded();
         LoggerContext cx = getUserContext();
         if (cx.addLocalLogger(logger)) {
             

@@ -20,6 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.jar.JarEntry;
 
+import sun.reflect.CallerSensitive;
+import sun.reflect.Reflection;
 import sun.util.locale.BaseLocale;
 import sun.util.locale.LocaleObjectCache;
 
@@ -100,11 +102,8 @@ public abstract class ResourceBundle {
     }
 
     
-    private static ClassLoader getLoader() {
-        Class[] stack = getClassContext();
-        
-        Class c = stack[2];
-        ClassLoader cl = (c == null) ? null : c.getClassLoader();
+    private static ClassLoader getLoader(Class<?> caller) {
+        ClassLoader cl = caller == null ? null : caller.getClassLoader();
         if (cl == null) {
             
             
@@ -117,8 +116,6 @@ public abstract class ResourceBundle {
         }
         return cl;
     }
-
-    private static native Class[] getClassContext();
 
     
     private static class RBClassLoader extends ClassLoader {
@@ -363,39 +360,43 @@ public abstract class ResourceBundle {
     }
 
     
+    @CallerSensitive
     public static final ResourceBundle getBundle(String baseName)
     {
         return getBundleImpl(baseName, Locale.getDefault(),
                              
-                             getLoader(),
+                             getLoader(Reflection.getCallerClass()),
                              Control.INSTANCE);
     }
 
     
+    @CallerSensitive
     public static final ResourceBundle getBundle(String baseName,
                                                  Control control) {
         return getBundleImpl(baseName, Locale.getDefault(),
                              
-                             getLoader(),
+                             getLoader(Reflection.getCallerClass()),
                              control);
     }
 
     
+    @CallerSensitive
     public static final ResourceBundle getBundle(String baseName,
                                                  Locale locale)
     {
         return getBundleImpl(baseName, locale,
                              
-                             getLoader(),
+                             getLoader(Reflection.getCallerClass()),
                              Control.INSTANCE);
     }
 
     
+    @CallerSensitive
     public static final ResourceBundle getBundle(String baseName, Locale targetLocale,
                                                  Control control) {
         return getBundleImpl(baseName, targetLocale,
                              
-                             getLoader(),
+                             getLoader(Reflection.getCallerClass()),
                              control);
     }
 
@@ -817,8 +818,9 @@ public abstract class ResourceBundle {
     }
 
     
+    @CallerSensitive
     public static final void clearCache() {
-        clearCache(getLoader());
+        clearCache(getLoader(Reflection.getCallerClass()));
     }
 
     

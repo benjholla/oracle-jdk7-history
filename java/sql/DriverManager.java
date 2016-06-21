@@ -7,7 +7,8 @@ import java.util.ServiceLoader;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.concurrent.CopyOnWriteArrayList;
-
+import sun.reflect.CallerSensitive;
+import sun.reflect.Reflection;
 
 
 public class DriverManager {
@@ -57,24 +58,17 @@ public class DriverManager {
     
 
     
+    @CallerSensitive
     public static Connection getConnection(String url,
         java.util.Properties info) throws SQLException {
-
-        
-        
-        ClassLoader callerCL = DriverManager.getCallerClassLoader();
-
-        return (getConnection(url, info, callerCL));
+        return (getConnection(url, info, Reflection.getCallerClass()));
     }
 
     
+    @CallerSensitive
     public static Connection getConnection(String url,
         String user, String password) throws SQLException {
         java.util.Properties info = new java.util.Properties();
-
-        
-        
-        ClassLoader callerCL = DriverManager.getCallerClassLoader();
 
         if (user != null) {
             info.put("user", user);
@@ -83,38 +77,33 @@ public class DriverManager {
             info.put("password", password);
         }
 
-        return (getConnection(url, info, callerCL));
+        return (getConnection(url, info, Reflection.getCallerClass()));
     }
 
     
+    @CallerSensitive
     public static Connection getConnection(String url)
         throws SQLException {
 
         java.util.Properties info = new java.util.Properties();
-
-        
-        
-        ClassLoader callerCL = DriverManager.getCallerClassLoader();
-
-        return (getConnection(url, info, callerCL));
+        return (getConnection(url, info, Reflection.getCallerClass()));
     }
 
     
+    @CallerSensitive
     public static Driver getDriver(String url)
         throws SQLException {
 
         println("DriverManager.getDriver(\"" + url + "\")");
 
-        
-        
-        ClassLoader callerCL = DriverManager.getCallerClassLoader();
+        Class<?> callerClass = Reflection.getCallerClass();
 
         
         
         for (DriverInfo aDriver : registeredDrivers) {
             
             
-            if(isDriverAllowed(aDriver.driver, callerCL)) {
+            if(isDriverAllowed(aDriver.driver, callerClass)) {
                 try {
                     if(aDriver.driver.acceptsURL(url)) {
                         
@@ -153,20 +142,18 @@ public class DriverManager {
     }
 
     
+    @CallerSensitive
     public static synchronized void deregisterDriver(Driver driver)
         throws SQLException {
         if (driver == null) {
             return;
         }
 
-        
-        
-        ClassLoader callerCL = DriverManager.getCallerClassLoader();
         println("DriverManager.deregisterDriver: " + driver);
 
         DriverInfo aDriver = new DriverInfo(driver);
         if(registeredDrivers.contains(aDriver)) {
-            if (isDriverAllowed(driver, callerCL)) {
+            if (isDriverAllowed(driver, Reflection.getCallerClass())) {
                  registeredDrivers.remove(aDriver);
             } else {
                 
@@ -179,18 +166,17 @@ public class DriverManager {
     }
 
     
+    @CallerSensitive
     public static java.util.Enumeration<Driver> getDrivers() {
         java.util.Vector<Driver> result = new java.util.Vector<Driver>();
 
-        
-        
-        ClassLoader callerCL = DriverManager.getCallerClassLoader();
+        Class<?> callerClass = Reflection.getCallerClass();
 
         
         for(DriverInfo aDriver : registeredDrivers) {
             
             
-            if(isDriverAllowed(aDriver.driver, callerCL)) {
+            if(isDriverAllowed(aDriver.driver, callerClass)) {
                 result.addElement(aDriver.driver);
             } else {
                 println("    skipping: " + aDriver.getClass().getName());
@@ -246,6 +232,11 @@ public class DriverManager {
 
     
     
+    private static boolean isDriverAllowed(Driver driver, Class<?> caller) {
+        ClassLoader callerCL = caller != null ? caller.getClassLoader() : null;
+        return isDriverAllowed(driver, callerCL);
+    }
+
     private static boolean isDriverAllowed(Driver driver, ClassLoader classLoader) {
         boolean result = false;
         if(driver != null) {
@@ -317,13 +308,14 @@ public class DriverManager {
 
     
     private static Connection getConnection(
-        String url, java.util.Properties info, ClassLoader callerCL) throws SQLException {
+        String url, java.util.Properties info, Class<?> caller) throws SQLException {
         
-        synchronized(DriverManager.class) {
-          
-          if(callerCL == null) {
-              callerCL = Thread.currentThread().getContextClassLoader();
-           }
+        ClassLoader callerCL = caller != null ? caller.getClassLoader() : null;
+        synchronized (DriverManager.class) {
+            
+            if (callerCL == null) {
+                callerCL = Thread.currentThread().getContextClassLoader();
+            }
         }
 
         if(url == null) {
@@ -369,10 +361,6 @@ public class DriverManager {
         println("getConnection: no suitable driver found for "+ url);
         throw new SQLException("No suitable driver found for "+ url, "08001");
     }
-
-    
-    private static native ClassLoader getCallerClassLoader();
-
 }
 
 

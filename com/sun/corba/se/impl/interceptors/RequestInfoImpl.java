@@ -63,12 +63,13 @@ import com.sun.corba.se.impl.encoding.CDRInputStream_1_0;
 import com.sun.corba.se.impl.encoding.EncapsOutputStream;
 
 import com.sun.corba.se.impl.orbutil.ORBUtility;
-import com.sun.corba.se.impl.orbutil.ORBClassLoader;
 
 import com.sun.corba.se.impl.util.RepositoryId;
 
 import com.sun.corba.se.impl.logging.InterceptorsSystemException;
 import com.sun.corba.se.impl.logging.OMGSystemException;
+
+import sun.corba.SharedSecrets;
 
 
 public abstract class RequestInfoImpl
@@ -304,7 +305,8 @@ public abstract class RequestInfoImpl
 
             
             String helperClassName = className + "Helper";
-            Class helperClass = ORBClassLoader.loadClass( helperClassName );
+            Class<?> helperClass =
+                SharedSecrets.getJavaCorbaAccess().loadClass( helperClassName );
             Class[] readParams = new Class[1];
             readParams[0] = org.omg.CORBA.portable.InputStream.class;
             Method readMethod = helperClass.getMethod( "read", readParams );
@@ -359,7 +361,8 @@ public abstract class RequestInfoImpl
                 Class exceptionClass = userException.getClass();
                 String className = exceptionClass.getName();
                 String helperClassName = className + "Helper";
-                Class helperClass = ORBClassLoader.loadClass( helperClassName );
+                Class<?> helperClass =
+                    SharedSecrets.getJavaCorbaAccess().loadClass( helperClassName );
 
                 
                 Class[] insertMethodParams = new Class[2];
@@ -489,7 +492,8 @@ public abstract class RequestInfoImpl
             
             
             
-            EncapsOutputStream out = new EncapsOutputStream(myORB);
+            EncapsOutputStream out =
+                sun.corba.OutputStreamFactory.newEncapsOutputStream(myORB);
 
             context.write( out, GIOPVersion.V1_2 );
             InputStream inputStream = out.create_input_stream();
@@ -515,8 +519,8 @@ public abstract class RequestInfoImpl
     {
         int id = 0 ;
         
-        EncapsOutputStream outputStream = new EncapsOutputStream(
-            myORB );
+        EncapsOutputStream outputStream =
+           sun.corba.OutputStreamFactory.newEncapsOutputStream(myORB);
         InputStream inputStream = null;
         UnknownServiceContext coreServiceContext = null;
         ServiceContextHelper.write( outputStream, service_context );

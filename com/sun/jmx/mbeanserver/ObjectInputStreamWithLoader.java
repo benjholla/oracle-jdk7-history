@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
-import java.io.StreamCorruptedException;
+import sun.reflect.misc.ReflectUtil;
 
 
 class ObjectInputStreamWithLoader extends ObjectInputStream {
@@ -30,6 +30,7 @@ class ObjectInputStreamWithLoader extends ObjectInputStream {
             return super.resolveClass(aClass);
         } else {
             String name = aClass.getName();
+            ReflectUtil.checkPackageAccess(name);
             
             return Class.forName(name, false, loader);
         }

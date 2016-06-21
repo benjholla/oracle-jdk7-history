@@ -11,6 +11,7 @@ import java.security.AllPermission;
 import java.nio.channels.Channel;
 import java.nio.channels.spi.SelectorProvider;
 import sun.nio.ch.Interruptible;
+import sun.reflect.CallerSensitive;
 import sun.reflect.Reflection;
 import sun.security.util.SecurityConstants;
 import sun.reflect.annotation.AnnotationType;
@@ -278,13 +279,15 @@ public final class System {
     }
 
     
+    @CallerSensitive
     public static void load(String filename) {
-        Runtime.getRuntime().load0(getCallerClass(), filename);
+        Runtime.getRuntime().load0(Reflection.getCallerClass(), filename);
     }
 
     
+    @CallerSensitive
     public static void loadLibrary(String libname) {
-        Runtime.getRuntime().loadLibrary0(getCallerClass(), libname);
+        Runtime.getRuntime().loadLibrary0(Reflection.getCallerClass(), libname);
     }
 
     
@@ -390,11 +393,5 @@ public final class System {
                 return string.hash32();
             }
         });
-    }
-
-    
-    static Class<?> getCallerClass() {
-        
-        return Reflection.getCallerClass(3);
     }
 }

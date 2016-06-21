@@ -4,7 +4,9 @@ package javax.management;
 
 import com.sun.jmx.mbeanserver.Introspector;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
+import sun.reflect.misc.ReflectUtil;
 
 
 public class JMX {
@@ -52,11 +54,7 @@ public class JMX {
                                       ObjectName objectName,
                                       Class<T> interfaceClass,
                                       boolean notificationEmitter) {
-        return MBeanServerInvocationHandler.newProxyInstance(
-                connection,
-                objectName,
-                interfaceClass,
-                notificationEmitter);
+        return createProxy(connection, objectName, interfaceClass, notificationEmitter, false);
     }
 
     
@@ -71,26 +69,7 @@ public class JMX {
                                        ObjectName objectName,
                                        Class<T> interfaceClass,
                                        boolean notificationEmitter) {
-        
-        
-        try {
-            Introspector.testComplianceMXBeanInterface(interfaceClass);
-        } catch (NotCompliantMBeanException e) {
-            throw new IllegalArgumentException(e);
-        }
-        InvocationHandler handler = new MBeanServerInvocationHandler(
-                connection, objectName, true);
-        final Class<?>[] interfaces;
-        if (notificationEmitter) {
-            interfaces =
-                new Class<?>[] {interfaceClass, NotificationEmitter.class};
-        } else
-            interfaces = new Class<?>[] {interfaceClass};
-        Object proxy = Proxy.newProxyInstance(
-                interfaceClass.getClassLoader(),
-                interfaces,
-                handler);
-        return interfaceClass.cast(proxy);
+        return createProxy(connection, objectName, interfaceClass, notificationEmitter, true);
     }
 
     
@@ -104,5 +83,51 @@ public class JMX {
         
         
         
+    }
+
+    
+    private static <T> T createProxy(MBeanServerConnection connection,
+                                     ObjectName objectName,
+                                     Class<T> interfaceClass,
+                                     boolean notificationEmitter,
+                                     boolean isMXBean) {
+
+        if (System.getSecurityManager() != null) {
+            checkProxyInterface(interfaceClass);
+        }
+        try {
+            if (isMXBean) {
+                
+                Introspector.testComplianceMXBeanInterface(interfaceClass);
+            } else {
+                
+                Introspector.testComplianceMBeanInterface(interfaceClass);
+            }
+        } catch (NotCompliantMBeanException e) {
+            throw new IllegalArgumentException(e);
+        }
+
+        InvocationHandler handler = new MBeanServerInvocationHandler(
+                connection, objectName, isMXBean);
+        final Class<?>[] interfaces;
+        if (notificationEmitter) {
+            interfaces =
+                new Class<?>[] {interfaceClass, NotificationEmitter.class};
+        } else
+            interfaces = new Class<?>[] {interfaceClass};
+
+        Object proxy = Proxy.newProxyInstance(
+                interfaceClass.getClassLoader(),
+                interfaces,
+                handler);
+        return interfaceClass.cast(proxy);
+    }
+
+    
+    private static void checkProxyInterface(Class<?> interfaceClass) {
+        if (!Modifier.isPublic(interfaceClass.getModifiers())) {
+            throw new SecurityException("mbean proxy interface non-public");
+        }
+        ReflectUtil.checkPackageAccess(interfaceClass);
     }
 }

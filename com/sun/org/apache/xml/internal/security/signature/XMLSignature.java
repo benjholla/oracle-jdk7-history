@@ -31,9 +31,11 @@ import com.sun.org.apache.xml.internal.security.utils.UnsyncBufferedOutputStream
 import com.sun.org.apache.xml.internal.security.utils.XMLUtils;
 import com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolver;
 import com.sun.org.apache.xml.internal.security.utils.resolver.ResourceResolverSpi;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
 
@@ -122,14 +124,13 @@ private Element signatureValueElement;
 
       super(doc);
 
-      String xmlnsDsPrefix =
-         getDefaultPrefixBindings(Constants.SignatureSpecNS);
+      String xmlnsDsPrefix = getDefaultPrefix(Constants.SignatureSpecNS);
       if (xmlnsDsPrefix == null) {
          this._constructionElement.setAttributeNS
             (Constants.NamespaceSpecNS, "xmlns", Constants.SignatureSpecNS);
       } else {
          this._constructionElement.setAttributeNS
-            (Constants.NamespaceSpecNS, xmlnsDsPrefix, Constants.SignatureSpecNS);
+            (Constants.NamespaceSpecNS, "xmlns:" + xmlnsDsPrefix, Constants.SignatureSpecNS);
       }
       XMLUtils.addReturnToElement(this._constructionElement);
 
@@ -156,14 +157,13 @@ private Element signatureValueElement;
 
       super(doc);
 
-      String xmlnsDsPrefix =
-         getDefaultPrefixBindings(Constants.SignatureSpecNS);
+      String xmlnsDsPrefix = getDefaultPrefix(Constants.SignatureSpecNS);
       if (xmlnsDsPrefix == null) {
          this._constructionElement.setAttributeNS
             (Constants.NamespaceSpecNS, "xmlns", Constants.SignatureSpecNS);
       } else {
          this._constructionElement.setAttributeNS
-            (Constants.NamespaceSpecNS, xmlnsDsPrefix, Constants.SignatureSpecNS);
+            (Constants.NamespaceSpecNS, "xmlns:" + xmlnsDsPrefix, Constants.SignatureSpecNS);
       }
       XMLUtils.addReturnToElement(this._constructionElement);
 
@@ -214,6 +214,10 @@ private Element signatureValueElement;
 
          throw new XMLSignatureException("xml.WrongContent", exArgs);
       }
+      Attr signatureValueAttr = signatureValueElement.getAttributeNodeNS(null, "Id");
+      if (signatureValueAttr != null) {
+          signatureValueElement.setIdAttributeNode(signatureValueAttr, true);
+      }
 
       
       Element keyInfoElem = XMLUtils.getNextElement(signatureValueElement.getNextSibling());
@@ -224,14 +228,41 @@ private Element signatureValueElement;
                   keyInfoElem.getLocalName().equals(Constants._TAG_KEYINFO)) ) {
          this._keyInfo = new KeyInfo(keyInfoElem, BaseURI);
       }
+
+      
+      Element objectElem =
+          XMLUtils.getNextElement(signatureValueElement.getNextSibling());
+      while (objectElem != null) {
+          Attr objectAttr = objectElem.getAttributeNodeNS(null, "Id");
+          if (objectAttr != null) {
+              objectElem.setIdAttributeNode(objectAttr, true);
+          }
+
+          NodeList nodes = objectElem.getChildNodes();
+          int length = nodes.getLength();
+          
+          for (int i = 0; i < length; i++) {
+              Node child = nodes.item(i);
+              if (child.getNodeType() == Node.ELEMENT_NODE) {
+                  Element childElem = (Element)child;
+                  String tag = childElem.getLocalName();
+                  if (tag.equals("Manifest")) {
+                      new Manifest(childElem, BaseURI);
+                  } else if (tag.equals("SignatureProperties")) {
+                      new SignatureProperties(childElem, BaseURI);
+                  }
+              }
+          }
+
+          objectElem = XMLUtils.getNextElement(objectElem.getNextSibling());
+      }
    }
 
    
    public void setId(String Id) {
 
-      if ( (Id != null)) {
-         this._constructionElement.setAttributeNS(null, Constants._ATT_ID, Id);
-         IdResolver.registerElementById(this._constructionElement, Id);
+      if (Id != null) {
+          setLocalIdAttribute(Constants._ATT_ID, Id);
       }
    }
 

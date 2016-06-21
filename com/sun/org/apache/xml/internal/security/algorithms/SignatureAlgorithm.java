@@ -2,316 +2,285 @@
 
 package com.sun.org.apache.xml.internal.security.algorithms;
 
-
 import java.security.Key;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.sun.org.apache.xml.internal.security.algorithms.implementations.IntegrityHmac;
+import com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureBaseRSA;
+import com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureDSA;
+import com.sun.org.apache.xml.internal.security.algorithms.implementations.SignatureECDSA;
 import com.sun.org.apache.xml.internal.security.exceptions.AlgorithmAlreadyRegisteredException;
 import com.sun.org.apache.xml.internal.security.exceptions.XMLSecurityException;
+import com.sun.org.apache.xml.internal.security.signature.XMLSignature;
 import com.sun.org.apache.xml.internal.security.signature.XMLSignatureException;
 import com.sun.org.apache.xml.internal.security.utils.Constants;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 
-
 public class SignatureAlgorithm extends Algorithm {
 
-   
-    static java.util.logging.Logger log =
+    
+    private static java.util.logging.Logger log =
         java.util.logging.Logger.getLogger(SignatureAlgorithm.class.getName());
 
-   
-   static boolean _alreadyInitialized = false;
+    
+    private static Map<String, Class<? extends SignatureAlgorithmSpi>> algorithmHash =
+        new ConcurrentHashMap<String, Class<? extends SignatureAlgorithmSpi>>();
 
-   
-   static HashMap _algorithmHash = null;
+    
+    private final SignatureAlgorithmSpi signatureAlgorithm;
 
-   static ThreadLocal instancesSigning=new ThreadLocal() {
-           protected Object initialValue() {
-                   return new HashMap();
-           };
-   };
+    private final String algorithmURI;
 
-   static ThreadLocal instancesVerify=new ThreadLocal() {
-           protected Object initialValue() {
-                   return new HashMap();
-           };
-   };
+    
+    public SignatureAlgorithm(Document doc, String algorithmURI) throws XMLSecurityException {
+        super(doc, algorithmURI);
+        this.algorithmURI = algorithmURI;
 
-   static ThreadLocal keysSigning=new ThreadLocal() {
-           protected Object initialValue() {
-                   return new HashMap();
-           };
-   };
-   static ThreadLocal keysVerify=new ThreadLocal() {
-           protected Object initialValue() {
-                   return new HashMap();
-           };
-   };
+        signatureAlgorithm = getSignatureAlgorithmSpi(algorithmURI);
+        signatureAlgorithm.engineGetContextFromElement(this._constructionElement);
+    }
 
+    
+    public SignatureAlgorithm(
+        Document doc, String algorithmURI, int hmacOutputLength
+    ) throws XMLSecurityException {
+        super(doc, algorithmURI);
+        this.algorithmURI = algorithmURI;
 
-   
-   protected SignatureAlgorithmSpi _signatureAlgorithm = null;
+        signatureAlgorithm = getSignatureAlgorithmSpi(algorithmURI);
+        signatureAlgorithm.engineGetContextFromElement(this._constructionElement);
 
-   private String algorithmURI;
+        signatureAlgorithm.engineSetHMACOutputLength(hmacOutputLength);
+        ((IntegrityHmac)signatureAlgorithm).engineAddContextToElement(_constructionElement);
+    }
 
-   
-   public SignatureAlgorithm(Document doc, String algorithmURI)
-           throws XMLSecurityException {
-      super(doc, algorithmURI);
-      this.algorithmURI = algorithmURI;
-   }
+    
+    public SignatureAlgorithm(Element element, String baseURI) throws XMLSecurityException {
+        this(element, baseURI, false);
+    }
 
+    
+    public SignatureAlgorithm(
+        Element element, String baseURI, boolean secureValidation
+    ) throws XMLSecurityException {
+        super(element, baseURI);
+        algorithmURI = this.getURI();
 
-   private void initializeAlgorithm(boolean isForSigning) throws XMLSignatureException {
-           if (_signatureAlgorithm!=null) {
-                   return;
-           }
-           _signatureAlgorithm=isForSigning ? getInstanceForSigning(algorithmURI) : getInstanceForVerify(algorithmURI);
-                this._signatureAlgorithm
-                      .engineGetContextFromElement(this._constructionElement);
-   }
-   private static SignatureAlgorithmSpi getInstanceForSigning(String algorithmURI) throws XMLSignatureException {
-           SignatureAlgorithmSpi result=(SignatureAlgorithmSpi) ((Map)instancesSigning.get()).get(algorithmURI);
-           if (result!=null) {
-                   result.reset();
-                   return result;
-           }
-           result=buildSigner(algorithmURI, result);
-           ((Map)instancesSigning.get()).put(algorithmURI,result);
-           return result;
-   }
-   private static SignatureAlgorithmSpi getInstanceForVerify(String algorithmURI) throws XMLSignatureException {
-           SignatureAlgorithmSpi result=(SignatureAlgorithmSpi) ((Map)instancesVerify.get()).get(algorithmURI);
-           if (result!=null) {
-                   result.reset();
-                   return result;
-           }
-           result=buildSigner(algorithmURI, result);
-           ((Map)instancesVerify.get()).put(algorithmURI,result);
-           return result;
-   }
+        Attr attr = element.getAttributeNodeNS(null, "Id");
+        if (attr != null) {
+            element.setIdAttributeNode(attr, true);
+        }
 
-   private static SignatureAlgorithmSpi buildSigner(String algorithmURI, SignatureAlgorithmSpi result) throws XMLSignatureException {
+        if (secureValidation && (XMLSignature.ALGO_ID_MAC_HMAC_NOT_RECOMMENDED_MD5.equals(algorithmURI)
+            || XMLSignature.ALGO_ID_SIGNATURE_NOT_RECOMMENDED_RSA_MD5.equals(algorithmURI))) {
+            Object exArgs[] = { algorithmURI };
+
+            throw new XMLSecurityException("signature.signatureAlgorithm", exArgs);
+        }
+
+        signatureAlgorithm = getSignatureAlgorithmSpi(algorithmURI);
+        signatureAlgorithm.engineGetContextFromElement(this._constructionElement);
+    }
+
+    
+    private static SignatureAlgorithmSpi getSignatureAlgorithmSpi(String algorithmURI)
+        throws XMLSignatureException {
         try {
-         Class implementingClass =
-            SignatureAlgorithm.getImplementingClass(algorithmURI);
-         if (log.isLoggable(java.util.logging.Level.FINE))
+            Class<? extends SignatureAlgorithmSpi> implementingClass =
+                algorithmHash.get(algorithmURI);
+            if (log.isLoggable(java.util.logging.Level.FINE)) {
                 log.log(java.util.logging.Level.FINE, "Create URI \"" + algorithmURI + "\" class \""
                    + implementingClass + "\"");
-         result=(SignatureAlgorithmSpi) implementingClass.newInstance();
-         return   result;
-      }  catch (IllegalAccessException ex) {
-         Object exArgs[] = { algorithmURI, ex.getMessage() };
-
-         throw new XMLSignatureException("algorithms.NoSuchAlgorithm", exArgs,
-                                         ex);
-      } catch (InstantiationException ex) {
-         Object exArgs[] = { algorithmURI, ex.getMessage() };
-
-         throw new XMLSignatureException("algorithms.NoSuchAlgorithm", exArgs,
-                                         ex);
-      } catch (NullPointerException ex) {
-         Object exArgs[] = { algorithmURI, ex.getMessage() };
-
-         throw new XMLSignatureException("algorithms.NoSuchAlgorithm", exArgs,
-                                         ex);
-      }
-}
-
-   
-   public SignatureAlgorithm(
-           Document doc, String algorithmURI, int HMACOutputLength)
-              throws XMLSecurityException {
-
-      this(doc, algorithmURI);
-      this.algorithmURI=algorithmURI;
-      initializeAlgorithm(true);
-      this._signatureAlgorithm.engineSetHMACOutputLength(HMACOutputLength);
-      ((IntegrityHmac)this._signatureAlgorithm)
-         .engineAddContextToElement(this._constructionElement);
-   }
-
-   
-   public SignatureAlgorithm(Element element, String BaseURI)
-           throws XMLSecurityException {
-
-      super(element, BaseURI);
-      algorithmURI = this.getURI();
-   }
-
-   
-   public byte[] sign() throws XMLSignatureException {
-      return this._signatureAlgorithm.engineSign();
-   }
-
-   
-   public String getJCEAlgorithmString() {
-      try {
-                return getInstanceForVerify(algorithmURI).engineGetJCEAlgorithmString();
-        } catch (XMLSignatureException e) {
-                
-                return null;
+            }
+            return implementingClass.newInstance();
+        }  catch (IllegalAccessException ex) {
+            Object exArgs[] = { algorithmURI, ex.getMessage() };
+            throw new XMLSignatureException("algorithms.NoSuchAlgorithm", exArgs, ex);
+        } catch (InstantiationException ex) {
+            Object exArgs[] = { algorithmURI, ex.getMessage() };
+            throw new XMLSignatureException("algorithms.NoSuchAlgorithm", exArgs, ex);
+        } catch (NullPointerException ex) {
+            Object exArgs[] = { algorithmURI, ex.getMessage() };
+            throw new XMLSignatureException("algorithms.NoSuchAlgorithm", exArgs, ex);
         }
-   }
+    }
 
-   
-   public String getJCEProviderName() {
-      try {
-                return getInstanceForVerify(algorithmURI).engineGetJCEProviderName();
-        } catch (XMLSignatureException e) {
-                return null;
+
+    
+    public byte[] sign() throws XMLSignatureException {
+        return signatureAlgorithm.engineSign();
+    }
+
+    
+    public String getJCEAlgorithmString() {
+        return signatureAlgorithm.engineGetJCEAlgorithmString();
+    }
+
+    
+    public String getJCEProviderName() {
+        return signatureAlgorithm.engineGetJCEProviderName();
+    }
+
+    
+    public void update(byte[] input) throws XMLSignatureException {
+        signatureAlgorithm.engineUpdate(input);
+    }
+
+    
+    public void update(byte input) throws XMLSignatureException {
+        signatureAlgorithm.engineUpdate(input);
+    }
+
+    
+    public void update(byte buf[], int offset, int len) throws XMLSignatureException {
+        signatureAlgorithm.engineUpdate(buf, offset, len);
+    }
+
+    
+    public void initSign(Key signingKey) throws XMLSignatureException {
+        signatureAlgorithm.engineInitSign(signingKey);
+    }
+
+    
+    public void initSign(Key signingKey, SecureRandom secureRandom) throws XMLSignatureException {
+        signatureAlgorithm.engineInitSign(signingKey, secureRandom);
+    }
+
+    
+    public void initSign(
+        Key signingKey, AlgorithmParameterSpec algorithmParameterSpec
+    ) throws XMLSignatureException {
+        signatureAlgorithm.engineInitSign(signingKey, algorithmParameterSpec);
+    }
+
+    
+    public void setParameter(AlgorithmParameterSpec params) throws XMLSignatureException {
+        signatureAlgorithm.engineSetParameter(params);
+    }
+
+    
+    public void initVerify(Key verificationKey) throws XMLSignatureException {
+        signatureAlgorithm.engineInitVerify(verificationKey);
+    }
+
+    
+    public boolean verify(byte[] signature) throws XMLSignatureException {
+        return signatureAlgorithm.engineVerify(signature);
+    }
+
+    
+    public final String getURI() {
+        return _constructionElement.getAttributeNS(null, Constants._ATT_ALGORITHM);
+    }
+
+    
+    @SuppressWarnings("unchecked")
+    public static void register(String algorithmURI, String implementingClass)
+       throws AlgorithmAlreadyRegisteredException, ClassNotFoundException,
+           XMLSignatureException {
+        if (log.isLoggable(java.util.logging.Level.FINE)) {
+            log.log(java.util.logging.Level.FINE, "Try to register " + algorithmURI + " " + implementingClass);
         }
-   }
 
-   
-   public void update(byte[] input) throws XMLSignatureException {
-      this._signatureAlgorithm.engineUpdate(input);
-   }
+        
+        Class<? extends SignatureAlgorithmSpi> registeredClass = algorithmHash.get(algorithmURI);
+        if (registeredClass != null) {
+            Object exArgs[] = { algorithmURI, registeredClass };
+            throw new AlgorithmAlreadyRegisteredException(
+                "algorithm.alreadyRegistered", exArgs
+            );
+        }
+        try {
+            Class<? extends SignatureAlgorithmSpi> clazz =
+                (Class<? extends SignatureAlgorithmSpi>)
+                    ClassLoaderUtils.loadClass(implementingClass, SignatureAlgorithm.class);
+            algorithmHash.put(algorithmURI, clazz);
+        } catch (NullPointerException ex) {
+            Object exArgs[] = { algorithmURI, ex.getMessage() };
+            throw new XMLSignatureException("algorithms.NoSuchAlgorithm", exArgs, ex);
+        }
+    }
 
-   
-   public void update(byte input) throws XMLSignatureException {
-      this._signatureAlgorithm.engineUpdate(input);
-   }
+    
+    public static void register(String algorithmURI, Class<? extends SignatureAlgorithmSpi> implementingClass)
+       throws AlgorithmAlreadyRegisteredException, ClassNotFoundException,
+           XMLSignatureException {
+        if (log.isLoggable(java.util.logging.Level.FINE)) {
+            log.log(java.util.logging.Level.FINE, "Try to register " + algorithmURI + " " + implementingClass);
+        }
 
-   
-   public void update(byte buf[], int offset, int len)
-           throws XMLSignatureException {
-      this._signatureAlgorithm.engineUpdate(buf, offset, len);
-   }
+        
+        Class<? extends SignatureAlgorithmSpi> registeredClass = algorithmHash.get(algorithmURI);
+        if (registeredClass != null) {
+            Object exArgs[] = { algorithmURI, registeredClass };
+            throw new AlgorithmAlreadyRegisteredException(
+                "algorithm.alreadyRegistered", exArgs
+            );
+        }
+        algorithmHash.put(algorithmURI, implementingClass);
+    }
 
-   
-   public void initSign(Key signingKey) throws XMLSignatureException {
-           initializeAlgorithm(true);
-           Map map=(Map)keysSigning.get();
-       if (map.get(this.algorithmURI)==signingKey) {
-           return;
-       }
-       map.put(this.algorithmURI,signingKey);
-           this._signatureAlgorithm.engineInitSign(signingKey);
-   }
+    
+    public static void registerDefaultAlgorithms() {
+        algorithmHash.put(
+            XMLSignature.ALGO_ID_SIGNATURE_DSA, SignatureDSA.class
+        );
+        algorithmHash.put(
+            XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA1, SignatureBaseRSA.SignatureRSASHA1.class
+        );
+        algorithmHash.put(
+            XMLSignature.ALGO_ID_MAC_HMAC_SHA1, IntegrityHmac.IntegrityHmacSHA1.class
+        );
+        algorithmHash.put(
+            XMLSignature.ALGO_ID_SIGNATURE_NOT_RECOMMENDED_RSA_MD5,
+            SignatureBaseRSA.SignatureRSAMD5.class
+        );
+        algorithmHash.put(
+            XMLSignature.ALGO_ID_SIGNATURE_RSA_RIPEMD160,
+            SignatureBaseRSA.SignatureRSARIPEMD160.class
+        );
+        algorithmHash.put(
+            XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA256, SignatureBaseRSA.SignatureRSASHA256.class
+        );
+        algorithmHash.put(
+            XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA384, SignatureBaseRSA.SignatureRSASHA384.class
+        );
+        algorithmHash.put(
+            XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA512, SignatureBaseRSA.SignatureRSASHA512.class
+        );
+        algorithmHash.put(
+            XMLSignature.ALGO_ID_SIGNATURE_ECDSA_SHA1, SignatureECDSA.SignatureECDSASHA1.class
+        );
+        algorithmHash.put(
+            XMLSignature.ALGO_ID_MAC_HMAC_NOT_RECOMMENDED_MD5, IntegrityHmac.IntegrityHmacMD5.class
+        );
+        algorithmHash.put(
+            XMLSignature.ALGO_ID_MAC_HMAC_RIPEMD160, IntegrityHmac.IntegrityHmacRIPEMD160.class
+        );
+        algorithmHash.put(
+            XMLSignature.ALGO_ID_MAC_HMAC_SHA256, IntegrityHmac.IntegrityHmacSHA256.class
+        );
+        algorithmHash.put(
+            XMLSignature.ALGO_ID_MAC_HMAC_SHA384, IntegrityHmac.IntegrityHmacSHA384.class
+        );
+        algorithmHash.put(
+            XMLSignature.ALGO_ID_MAC_HMAC_SHA512, IntegrityHmac.IntegrityHmacSHA512.class
+        );
+    }
 
-   
-   public void initSign(Key signingKey, SecureRandom secureRandom)
-           throws XMLSignatureException {
-           initializeAlgorithm(true);
-      this._signatureAlgorithm.engineInitSign(signingKey, secureRandom);
-   }
+    
+    public String getBaseNamespace() {
+        return Constants.SignatureSpecNS;
+    }
 
-   
-   public void initSign(
-           Key signingKey, AlgorithmParameterSpec algorithmParameterSpec)
-              throws XMLSignatureException {
-           initializeAlgorithm(true);
-      this._signatureAlgorithm.engineInitSign(signingKey,
-                                              algorithmParameterSpec);
-   }
-
-   
-   public void setParameter(AlgorithmParameterSpec params)
-           throws XMLSignatureException {
-      this._signatureAlgorithm.engineSetParameter(params);
-   }
-
-   
-   public void initVerify(Key verificationKey) throws XMLSignatureException {
-           initializeAlgorithm(false);
-           Map map=(Map)keysVerify.get();
-           if (map.get(this.algorithmURI)==verificationKey) {
-           return;
-       }
-           map.put(this.algorithmURI,verificationKey);
-           this._signatureAlgorithm.engineInitVerify(verificationKey);
-   }
-
-   
-   public boolean verify(byte[] signature) throws XMLSignatureException {
-      return this._signatureAlgorithm.engineVerify(signature);
-   }
-
-   
-   public final String getURI() {
-      return this._constructionElement.getAttributeNS(null,
-              Constants._ATT_ALGORITHM);
-   }
-
-   
-   public static void providerInit() {
-
-      if (SignatureAlgorithm.log == null) {
-         SignatureAlgorithm.log =
-            java.util.logging.Logger
-               .getLogger(SignatureAlgorithm.class.getName());
-      }
-
-      log.log(java.util.logging.Level.FINE, "Init() called");
-
-      if (!SignatureAlgorithm._alreadyInitialized) {
-         SignatureAlgorithm._algorithmHash = new HashMap(10);
-         SignatureAlgorithm._alreadyInitialized = true;
-      }
-   }
-
-   
-   public static void register(String algorithmURI, String implementingClass)
-           throws AlgorithmAlreadyRegisteredException,XMLSignatureException {
-
-      {
-         if (log.isLoggable(java.util.logging.Level.FINE))
-                log.log(java.util.logging.Level.FINE, "Try to register " + algorithmURI + " " + implementingClass);
-
-         
-         Class registeredClassClass =
-            SignatureAlgorithm.getImplementingClass(algorithmURI);
-                 if (registeredClassClass!=null) {
-                         String registeredClass = registeredClassClass.getName();
-
-                         if ((registeredClass != null) && (registeredClass.length() != 0)) {
-                                 Object exArgs[] = { algorithmURI, registeredClass };
-
-                                 throw new AlgorithmAlreadyRegisteredException(
-                                                 "algorithm.alreadyRegistered", exArgs);
-                         }
-                 }
-                 try {
-                         SignatureAlgorithm._algorithmHash.put(algorithmURI, Class.forName(implementingClass));
-              } catch (ClassNotFoundException ex) {
-                 Object exArgs[] = { algorithmURI, ex.getMessage() };
-
-                 throw new XMLSignatureException("algorithms.NoSuchAlgorithm", exArgs,
-                                                 ex);
-              } catch (NullPointerException ex) {
-                 Object exArgs[] = { algorithmURI, ex.getMessage() };
-
-                 throw new XMLSignatureException("algorithms.NoSuchAlgorithm", exArgs,
-                                                 ex);
-              }
-
-      }
-   }
-
-   
-   private static Class getImplementingClass(String URI) {
-
-      if (SignatureAlgorithm._algorithmHash == null) {
-         return null;
-      }
-
-      return (Class) SignatureAlgorithm._algorithmHash.get(URI);
-   }
-
-   
-   public String getBaseNamespace() {
-      return Constants.SignatureSpecNS;
-   }
-
-   
-   public String getBaseLocalName() {
-      return Constants._TAG_SIGNATUREMETHOD;
-   }
+    
+    public String getBaseLocalName() {
+        return Constants._TAG_SIGNATUREMETHOD;
+    }
 }

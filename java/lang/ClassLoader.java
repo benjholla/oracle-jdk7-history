@@ -33,6 +33,7 @@ import sun.misc.CompoundEnumeration;
 import sun.misc.Resource;
 import sun.misc.URLClassPath;
 import sun.misc.VM;
+import sun.reflect.CallerSensitive;
 import sun.reflect.Reflection;
 import sun.security.util.SecurityConstants;
 
@@ -582,13 +583,11 @@ public abstract class ClassLoader {
     }
 
     
-    
-    
-    private static native Class<? extends ClassLoader> getCaller(int index);
-
-    
+    @CallerSensitive
     protected static boolean registerAsParallelCapable() {
-        return ParallelLoaders.register(getCaller(1));
+        Class<? extends ClassLoader> callerClass =
+            Reflection.getCallerClass().asSubclass(ClassLoader.class);
+        return ParallelLoaders.register(callerClass);
     }
 
     
@@ -664,20 +663,19 @@ public abstract class ClassLoader {
     
 
     
+    @CallerSensitive
     public final ClassLoader getParent() {
         if (parent == null)
             return null;
         SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
-            ClassLoader ccl = getCallerClassLoader();
-            if (ccl != null && !isAncestor(ccl)) {
-                sm.checkPermission(SecurityConstants.GET_CLASSLOADER_PERMISSION);
-            }
+            checkClassLoaderPermission(parent, Reflection.getCallerClass());
         }
         return parent;
     }
 
     
+    @CallerSensitive
     public static ClassLoader getSystemClassLoader() {
         initSystemClassLoader();
         if (scl == null) {
@@ -685,10 +683,7 @@ public abstract class ClassLoader {
         }
         SecurityManager sm = System.getSecurityManager();
         if (sm != null) {
-            ClassLoader ccl = getCallerClassLoader();
-            if (ccl != null && ccl != scl && !scl.isAncestor(ccl)) {
-                sm.checkPermission(SecurityConstants.GET_CLASSLOADER_PERMISSION);
-            }
+            checkClassLoaderPermission(scl, Reflection.getCallerClass());
         }
         return scl;
     }
@@ -740,15 +735,38 @@ public abstract class ClassLoader {
     
     
     
-    static ClassLoader getCallerClassLoader() {
-        
-        Class caller = Reflection.getCallerClass(3);
+    
+    private static boolean needsClassLoaderPermissionCheck(ClassLoader from,
+                                                           ClassLoader to)
+    {
+        if (from == to)
+            return false;
+
+        if (from == null)
+            return false;
+
+        return !to.isAncestor(from);
+    }
+
+    
+    static ClassLoader getClassLoader(Class<?> caller) {
         
         if (caller == null) {
             return null;
         }
         
         return caller.getClassLoader0();
+    }
+
+    static void checkClassLoaderPermission(ClassLoader cl, Class<?> caller) {
+        SecurityManager sm = System.getSecurityManager();
+        if (sm != null) {
+            
+            ClassLoader ccl = getClassLoader(caller);
+            if (needsClassLoaderPermissionCheck(ccl, cl)) {
+                sm.checkPermission(SecurityConstants.GET_CLASSLOADER_PERMISSION);
+            }
+        }
     }
 
     

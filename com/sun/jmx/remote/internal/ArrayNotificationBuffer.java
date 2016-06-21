@@ -274,6 +274,20 @@ public class ArrayNotificationBuffer implements NotificationBuffer {
 
                 if (nextSeq < nextSequenceNumber()) {
                     candidate = notificationAt(nextSeq);
+                    
+                    if (!(filter instanceof ServerNotifForwarder.NotifForwarderBufferFilter)) {
+                        try {
+                            ServerNotifForwarder.checkMBeanPermission(this.mBeanServer,
+                                                      candidate.getObjectName(),"addNotificationListener");
+                        } catch (InstanceNotFoundException | SecurityException e) {
+                            if (logger.debugOn()) {
+                                logger.debug("fetchNotifications", "candidate: " + candidate + " skipped. exception " + e);
+                            }
+                            ++nextSeq;
+                            continue;
+                        }
+                    }
+
                     if (logger.debugOn()) {
                         logger.debug("fetchNotifications", "candidate: " +
                                      candidate);

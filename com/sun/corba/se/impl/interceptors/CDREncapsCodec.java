@@ -99,7 +99,8 @@ public final class CDREncapsCodec
         
 
         
-        EncapsOutputStream cdrOut = new EncapsOutputStream(
+        EncapsOutputStream cdrOut =
+            sun.corba.OutputStreamFactory.newEncapsOutputStream(
             (com.sun.corba.se.spi.orb.ORB)orb, giopVersion );
 
         

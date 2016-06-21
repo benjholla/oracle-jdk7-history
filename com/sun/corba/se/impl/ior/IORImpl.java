@@ -172,7 +172,8 @@ public class IORImpl extends IdentifiableContainerBase implements IOR
     {
         StringWriter bs;
 
-        MarshalOutputStream s = new EncapsOutputStream(factory);
+        MarshalOutputStream s =
+            sun.corba.OutputStreamFactory.newEncapsOutputStream(factory);
         s.putEndian();
         write( (OutputStream)s );
         bs = new StringWriter();
@@ -196,7 +197,8 @@ public class IORImpl extends IdentifiableContainerBase implements IOR
     }
 
     public org.omg.IOP.IOR getIOPIOR() {
-        EncapsOutputStream os = new EncapsOutputStream(factory);
+        EncapsOutputStream os =
+            sun.corba.OutputStreamFactory.newEncapsOutputStream(factory);
         write(os);
         InputStream is = (InputStream) (os.create_input_stream());
         return org.omg.IOP.IORHelper.read(is);

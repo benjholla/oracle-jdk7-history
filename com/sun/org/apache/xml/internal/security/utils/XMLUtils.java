@@ -3,14 +3,15 @@
 package com.sun.org.apache.xml.internal.security.utils;
 
 
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,11 +39,28 @@ public class XMLUtils {
          }
       });
 
+    private static volatile String dsPrefix = "ds";
+    private static volatile String xencPrefix = "xenc";
+
+   private static final java.util.logging.Logger log =
+       java.util.logging.Logger.getLogger(XMLUtils.class.getName());
+
    
    private XMLUtils() {
 
       
    }
+
+    
+    public static void setDsPrefix(String prefix) {
+        dsPrefix = prefix;
+    }
+
+    
+    public static void setXencPrefix(String prefix) {
+        xencPrefix = prefix;
+    }
+
    public static Element getNextElement(Node el) {
            while ((el!=null) && (el.getNodeType()!=Node.ELEMENT_NODE)) {
                    el=el.getNextSibling();
@@ -52,13 +70,15 @@ public class XMLUtils {
    }
 
    
-   public static void getSet(Node rootNode,Set result,Node exclude ,boolean com) {
+   public static void getSet(Node rootNode,Set<Node> result,Node exclude ,boolean com) {
           if ((exclude!=null) && isDescendantOrSelf(exclude,rootNode)){
                 return;
       }
       getSetRec(rootNode,result,exclude,com);
    }
-   static final void getSetRec(final Node rootNode,final Set result,
+
+   @SuppressWarnings("fallthrough")
+   static final void getSetRec(final Node rootNode,final Set<Node> result,
         final Node exclude ,final boolean com) {
            
        if (rootNode==exclude) {
@@ -168,9 +188,8 @@ public class XMLUtils {
       return sb.toString();
    }
 
+   static Map<String, String> namePrefixes=new HashMap<String, String>();
 
-   static  String dsPrefix=null;
-   static Map namePrefixes=new HashMap();
    
    public static Element createElementInSignatureSpace(Document doc,
            String elementName) {
@@ -182,7 +201,7 @@ public class XMLUtils {
       if ((dsPrefix == null) || (dsPrefix.length() == 0)) {
          return doc.createElementNS(Constants.SignatureSpecNS, elementName);
       }
-      String namePrefix=(String) namePrefixes.get(elementName);
+      String namePrefix= namePrefixes.get(elementName);
       if (namePrefix==null) {
           StringBuffer tag=new StringBuffer(dsPrefix);
           tag.append(':');
@@ -193,17 +212,24 @@ public class XMLUtils {
       return doc.createElementNS(Constants.SignatureSpecNS, namePrefix);
    }
 
-   
-   public static boolean elementIsInSignatureSpace(Element element,
-           String localName) {
-      return ElementProxy.checker.isNamespaceElement(element, localName, Constants.SignatureSpecNS);
-   }
+    
+    public static boolean elementIsInSignatureSpace(Element element, String localName) {
+        if (element == null) {
+            return false;
+        }
 
-   
-   public static boolean elementIsInEncryptionSpace(Element element,
-           String localName) {
-           return ElementProxy.checker.isNamespaceElement(element, localName, EncryptionConstants.EncryptionSpecNS);
-   }
+        return Constants.SignatureSpecNS.equals(element.getNamespaceURI())
+            && element.getLocalName().equals(localName);
+    }
+
+    
+    public static boolean elementIsInEncryptionSpace(Element element, String localName) {
+        if (element == null) {
+            return false;
+        }
+        return EncryptionConstants.EncryptionSpecNS.equals(element.getNamespaceURI())
+            && element.getLocalName().equals(localName);
+    }
 
    
    public static Document getOwnerDocument(Node node) {
@@ -222,11 +248,9 @@ public class XMLUtils {
    }
 
     
-    public static Document getOwnerDocument(Set xpathNodeSet) {
+    public static Document getOwnerDocument(Set<Node> xpathNodeSet) {
        NullPointerException npe = null;
-       Iterator iterator = xpathNodeSet.iterator();
-       while(iterator.hasNext()) {
-           Node node = (Node) iterator.next();
+       for (Node node : xpathNodeSet) {
            int nodeType =node.getNodeType();
            if (nodeType == Node.DOCUMENT_NODE) {
               return (Document) node;
@@ -285,14 +309,14 @@ public class XMLUtils {
    }
 
    
-   public static Set convertNodelistToSet(NodeList xpathNodeSet) {
+   public static Set<Node> convertNodelistToSet(NodeList xpathNodeSet) {
 
       if (xpathNodeSet == null) {
-         return new HashSet();
+         return new HashSet<Node>();
       }
 
       int length = xpathNodeSet.getLength();
-      Set set = new HashSet(length);
+      Set<Node> set = new HashSet<Node>(length);
 
       for (int i = 0; i < length; i++) {
          set.add(xpathNodeSet.item(i));
@@ -319,6 +343,7 @@ public class XMLUtils {
    }
 
    
+   @SuppressWarnings("fallthrough")
    private static void circumventBug2650internal(Node node) {
            Node parent=null;
            Node sibling=null;
@@ -376,35 +401,35 @@ public class XMLUtils {
            } while (true);
    }
 
-   
-   public static Element selectDsNode(Node sibling, String nodeName, int number) {
-        while (sibling!=null) {
-                if (ElementProxy.checker.isNamespaceElement(sibling, nodeName, Constants.SignatureSpecNS )) {
-                        if (number==0){
-                                return (Element)sibling;
-                        }
-                        number--;
+    
+    public static Element selectDsNode(Node sibling, String nodeName, int number) {
+        while (sibling != null) {
+            if (Constants.SignatureSpecNS.equals(sibling.getNamespaceURI())
+                && sibling.getLocalName().equals(nodeName)) {
+                if (number == 0){
+                    return (Element)sibling;
                 }
-                sibling=sibling.getNextSibling();
+                number--;
+            }
+            sibling = sibling.getNextSibling();
         }
         return null;
-   }
+    }
 
-   
-
-   public static Element selectXencNode(Node sibling, String nodeName, int number) {
-        while (sibling!=null) {
-                if (ElementProxy.checker.isNamespaceElement(sibling, nodeName, EncryptionConstants.EncryptionSpecNS )) {
-                        if (number==0){
-                                return (Element)sibling;
-                        }
-                        number--;
+    
+    public static Element selectXencNode(Node sibling, String nodeName, int number) {
+        while (sibling != null) {
+            if (EncryptionConstants.EncryptionSpecNS.equals(sibling.getNamespaceURI())
+                && sibling.getLocalName().equals(nodeName)) {
+                if (number == 0){
+                    return (Element)sibling;
                 }
-                sibling=sibling.getNextSibling();
+                number--;
+            }
+            sibling = sibling.getNextSibling();
         }
         return null;
-   }
-
+    }
 
    
    public static Text selectDsNodeText(Node sibling, String nodeName, int number) {
@@ -432,55 +457,46 @@ public class XMLUtils {
     return (Text)n;
    }
 
-   
-   public static Element selectNode(Node sibling, String uri,String nodeName, int number) {
-        while (sibling!=null) {
-                if (ElementProxy.checker.isNamespaceElement(sibling, nodeName, uri)) {
-                        if (number==0){
-                                return (Element)sibling;
-                        }
-                        number--;
+    
+    public static Element selectNode(Node sibling, String uri, String nodeName, int number) {
+        while (sibling != null) {
+            if (sibling.getNamespaceURI() != null && sibling.getNamespaceURI().equals(uri)
+                && sibling.getLocalName().equals(nodeName)) {
+                if (number == 0){
+                    return (Element)sibling;
                 }
-                sibling=sibling.getNextSibling();
+                number--;
+            }
+            sibling = sibling.getNextSibling();
         }
         return null;
-   }
+    }
 
-   
-   public static Element[] selectDsNodes(Node sibling,String nodeName) {
-     return selectNodes(sibling,Constants.SignatureSpecNS,nodeName);
-   }
-   
-    public static Element[] selectNodes(Node sibling,String uri,String nodeName) {
-        int size=20;
-        Element[] a= new Element[size];
-        int curr=0;
-        
-        while (sibling!=null) {
-                if (ElementProxy.checker.isNamespaceElement(sibling, nodeName, uri)) {
-                        a[curr++]=(Element)sibling;
-                        if (size<=curr) {
-                                int cursize= size<<2;
-                                Element []cp=new Element[cursize];
-                                System.arraycopy(a,0,cp,0,size);
-                                a=cp;
-                                size=cursize;
-                        }
-                }
-                sibling=sibling.getNextSibling();
+    
+    public static Element[] selectDsNodes(Node sibling, String nodeName) {
+        return selectNodes(sibling,Constants.SignatureSpecNS, nodeName);
+    }
+
+    
+     public static Element[] selectNodes(Node sibling, String uri, String nodeName) {
+        List<Element> list = new ArrayList<Element>();
+        while (sibling != null) {
+            if (sibling.getNamespaceURI() != null && sibling.getNamespaceURI().equals(uri)
+                && sibling.getLocalName().equals(nodeName)) {
+                list.add((Element)sibling);
+            }
+            sibling = sibling.getNextSibling();
         }
-        Element []af=new Element[curr];
-        System.arraycopy(a,0,af,0,curr);
-        return af;
-   }
+        return list.toArray(new Element[list.size()]);
+    }
 
    
-    public static Set excludeNodeFromSet(Node signatureElement, Set inputSet) {
-          Set resultSet = new HashSet();
-          Iterator iterator = inputSet.iterator();
+    public static Set<Node> excludeNodeFromSet(Node signatureElement, Set<Node> inputSet) {
+          Set<Node> resultSet = new HashSet<Node>();
+          Iterator<Node> iterator = inputSet.iterator();
 
           while (iterator.hasNext()) {
-            Node inputNode = (Node) iterator.next();
+            Node inputNode = iterator.next();
 
             if (!XMLUtils
                     .isDescendantOrSelf(signatureElement, inputNode)) {
@@ -519,4 +535,116 @@ public class XMLUtils {
     public static boolean ignoreLineBreaks() {
         return ignoreLineBreaks;
     }
+
+    
+    public static boolean protectAgainstWrappingAttack(Node startNode,
+                                                       String value)
+    {
+        Node startParent = startNode.getParentNode();
+        Node processedNode = null;
+        Element foundElement = null;
+
+        String id = value.trim();
+        if (id.charAt(0) == '#') {
+            id = id.substring(1);
+        }
+
+        while (startNode != null) {
+            if (startNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element se = (Element) startNode;
+
+                NamedNodeMap attributes = se.getAttributes();
+                if (attributes != null) {
+                    for (int i = 0; i < attributes.getLength(); i++) {
+                        Attr attr = (Attr)attributes.item(i);
+                        if (attr.isId() && id.equals(attr.getValue())) {
+                            if (foundElement == null) {
+                                
+                                foundElement = attr.getOwnerElement();
+                            } else {
+                                log.log(java.util.logging.Level.FINE, "Multiple elements with the same 'Id' attribute value!");
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+
+            processedNode = startNode;
+            startNode = startNode.getFirstChild();
+
+            
+            if (startNode == null) {
+                
+                startNode = processedNode.getNextSibling();
+            }
+
+            
+            
+            while (startNode == null) {
+                processedNode = processedNode.getParentNode();
+                if (processedNode == startParent) {
+                    return true;
+                }
+                
+                startNode = processedNode.getNextSibling();
+            }
+        }
+        return true;
+    }
+
+    
+    public static boolean protectAgainstWrappingAttack(Node startNode,
+                                                       Element knownElement,
+                                                       String value)
+    {
+        Node startParent = startNode.getParentNode();
+        Node processedNode = null;
+
+        String id = value.trim();
+        if (id.charAt(0) == '#') {
+            id = id.substring(1);
+        }
+
+        while (startNode != null) {
+            if (startNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element se = (Element) startNode;
+
+                NamedNodeMap attributes = se.getAttributes();
+                if (attributes != null) {
+                    for (int i = 0; i < attributes.getLength(); i++) {
+                        Attr attr = (Attr)attributes.item(i);
+                        if (attr.isId() && id.equals(attr.getValue())
+                            && se != knownElement)
+                        {
+                            log.log(java.util.logging.Level.FINE, "Multiple elements with the same 'Id' attribute value!");
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            processedNode = startNode;
+            startNode = startNode.getFirstChild();
+
+            
+            if (startNode == null) {
+                
+                startNode = processedNode.getNextSibling();
+            }
+
+            
+            
+            while (startNode == null) {
+                processedNode = processedNode.getParentNode();
+                if (processedNode == startParent) {
+                    return true;
+                }
+                
+                startNode = processedNode.getNextSibling();
+            }
+        }
+        return true;
+    }
+
 }

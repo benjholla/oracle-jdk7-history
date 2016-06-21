@@ -21,11 +21,7 @@ public class DOMValidateContext extends DOMCryptoContext
         if (ks == null) {
             throw new NullPointerException("key selector is null");
         }
-        if (node == null) {
-            throw new NullPointerException("node is null");
-        }
-        setKeySelector(ks);
-        this.node = node;
+        init(node, ks);
     }
 
     
@@ -33,11 +29,20 @@ public class DOMValidateContext extends DOMCryptoContext
         if (validatingKey == null) {
             throw new NullPointerException("validatingKey is null");
         }
+        init(node, KeySelector.singletonKeySelector(validatingKey));
+    }
+
+    private void init(Node node, KeySelector ks) {
         if (node == null) {
             throw new NullPointerException("node is null");
         }
-        setKeySelector(KeySelector.singletonKeySelector(validatingKey));
+
         this.node = node;
+        super.setKeySelector(ks);
+        if (System.getSecurityManager() != null) {
+            super.setProperty("org.jcp.xml.dsig.secureValidation",
+                              Boolean.TRUE);
+        }
     }
 
     

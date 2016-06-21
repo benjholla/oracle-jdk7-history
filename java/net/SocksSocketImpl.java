@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.BufferedOutputStream;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedExceptionAction;
 import sun.net.SocksProxy;
 import sun.net.www.ParseUtil;
@@ -534,7 +535,13 @@ class SocksSocketImpl extends PlainSocketImpl implements SocksConsts {
         
         InetAddress naddr = baddr;
         if (naddr.isAnyLocalAddress()) {
-            naddr = cmdsock.getLocalAddress();
+            naddr = AccessController.doPrivileged(
+                        new PrivilegedAction<InetAddress>() {
+                            public InetAddress run() {
+                                return cmdsock.getLocalAddress();
+
+                            }
+                        });
             addr1 = naddr.getAddress();
         }
         out.write(PROTO_VERS4);

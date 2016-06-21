@@ -74,8 +74,8 @@ import com.sun.corba.se.impl.logging.OMGSystemException ;
 
 import com.sun.corba.se.impl.presentation.rmi.PresentationManagerImpl ;
 
-import com.sun.corba.se.impl.orbutil.ORBClassLoader ;
 import sun.awt.AppContext;
+import sun.corba.SharedSecrets;
 
 public abstract class ORB extends com.sun.corba.se.org.omg.CORBA.ORB
     implements Broker, TypeCodeFactory
@@ -178,7 +178,7 @@ public abstract class ORB extends com.sun.corba.se.org.omg.CORBA.ORB
 
                         try {
                             
-                            Class cls = ORBClassLoader.loadClass( className ) ;
+                            Class<?> cls = SharedSecrets.getJavaCorbaAccess().loadClass( className ) ;
                             sff = (PresentationManager.StubFactoryFactory)cls.newInstance() ;
                         } catch (Exception exc) {
                             

@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import static java.io.ObjectStreamClass.processQueue;
 import java.io.SerialCallbackContext;
+import sun.reflect.misc.ReflectUtil;
 
 
 public class ObjectOutputStream
@@ -558,6 +559,12 @@ public class ObjectOutputStream
         }
     }
 
+    private boolean isCustomSubclass() {
+        
+        return getClass().getClassLoader()
+                   != ObjectOutputStream.class.getClassLoader();
+    }
+
     
     private void writeProxyDesc(ObjectStreamClass desc, boolean unshared)
         throws IOException
@@ -573,6 +580,9 @@ public class ObjectOutputStream
         }
 
         bout.setBlockDataMode(true);
+        if (isCustomSubclass()) {
+            ReflectUtil.checkPackageAccess(cl);
+        }
         annotateProxyClass(cl);
         bout.setBlockDataMode(false);
         bout.writeByte(TC_ENDBLOCKDATA);
@@ -596,6 +606,9 @@ public class ObjectOutputStream
 
         Class cl = desc.forClass();
         bout.setBlockDataMode(true);
+        if (isCustomSubclass()) {
+            ReflectUtil.checkPackageAccess(cl);
+        }
         annotateClass(cl);
         bout.setBlockDataMode(false);
         bout.writeByte(TC_ENDBLOCKDATA);

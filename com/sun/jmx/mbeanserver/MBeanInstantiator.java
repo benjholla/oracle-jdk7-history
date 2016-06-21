@@ -10,7 +10,12 @@ import java.io.ObjectInputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.security.AccessControlContext;
+import java.security.AccessController;
 import java.security.Permission;
+import java.security.Permissions;
+import java.security.PrivilegedAction;
+import java.security.ProtectionDomain;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -84,9 +89,8 @@ public class MBeanInstantiator {
 
         
         ClassLoader loader = null;
-        synchronized(this) {
-            if (clr!=null)
-                loader = clr.getClassLoader(aLoader);
+        synchronized (this) {
+            loader = getClassLoader(aLoader);
         }
         if (loader == null) {
             throw new InstanceNotFoundException("The loader named " +
@@ -343,8 +347,7 @@ public class MBeanInstantiator {
             try {
                 ClassLoader instance = null;
 
-                if (clr!=null)
-                    instance = clr.getClassLoader(loaderName);
+                instance = getClassLoader(loaderName);
                 if (instance == null)
                     throw new ClassNotFoundException(className);
                 theClass = Class.forName(className, false, instance);
@@ -433,6 +436,7 @@ public class MBeanInstantiator {
 
     
     public ModifiableClassLoaderRepository getClassLoaderRepository() {
+        checkMBeanPermission((String)null, null, null, "getClassLoaderRepository");
         return clr;
     }
 
@@ -538,9 +542,19 @@ public class MBeanInstantiator {
                                              String member,
                                              ObjectName objectName,
                                              String actions) {
+        if (clazz != null) {
+            checkMBeanPermission(clazz.getName(), member, objectName, actions);
+        }
+    }
+
+    private static void checkMBeanPermission(String classname,
+                                             String member,
+                                             ObjectName objectName,
+                                             String actions)
+        throws SecurityException {
         SecurityManager sm = System.getSecurityManager();
-        if (clazz != null && sm != null) {
-            Permission perm = new MBeanPermission(clazz.getName(),
+        if (sm != null) {
+            Permission perm = new MBeanPermission(classname,
                                                   member,
                                                   objectName,
                                                   actions);
@@ -555,5 +569,23 @@ public class MBeanInstantiator {
         if (!Modifier.isPublic(mod)) {
             throw new IllegalAccessException("Class is not public and can't be instantiated");
         }
+    }
+
+    private ClassLoader getClassLoader(final ObjectName name) {
+        if(clr == null){
+            return null;
+        }
+        
+        Permissions permissions = new Permissions();
+        permissions.add(new MBeanPermission("*", null, name, "getClassLoader"));
+        ProtectionDomain protectionDomain = new ProtectionDomain(null, permissions);
+        ProtectionDomain[] domains = {protectionDomain};
+        AccessControlContext ctx = new AccessControlContext(domains);
+        ClassLoader loader = AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+            public ClassLoader run() {
+                return clr.getClassLoader(name);
+            }
+        }, ctx);
+        return loader;
     }
 }

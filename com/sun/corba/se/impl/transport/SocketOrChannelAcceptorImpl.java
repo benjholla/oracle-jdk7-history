@@ -504,9 +504,9 @@ public class SocketOrChannelAcceptorImpl
     {
         CorbaMessageMediator corbaMessageMediator = (CorbaMessageMediator)
             messageMediator;
-        return new CDROutputObject((ORB) broker, corbaMessageMediator,
-                                   corbaMessageMediator.getReplyHeader(),
-                                   corbaMessageMediator.getStreamFormatVersion());
+        return sun.corba.OutputStreamFactory.newCDROutputObject((ORB) broker,
+                       corbaMessageMediator, corbaMessageMediator.getReplyHeader(),
+                       corbaMessageMediator.getStreamFormatVersion());
     }
 
     

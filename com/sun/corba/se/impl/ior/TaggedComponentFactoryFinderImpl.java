@@ -36,7 +36,8 @@ public class TaggedComponentFactoryFinderImpl extends
     public TaggedComponent create( org.omg.CORBA.ORB orb,
         org.omg.IOP.TaggedComponent comp )
     {
-        EncapsOutputStream os = new EncapsOutputStream( (ORB)orb ) ;
+        EncapsOutputStream os =
+            sun.corba.OutputStreamFactory.newEncapsOutputStream((ORB)orb);
         org.omg.IOP.TaggedComponentHelper.write( os, comp ) ;
         InputStream is = (InputStream)(os.create_input_stream() ) ;
         

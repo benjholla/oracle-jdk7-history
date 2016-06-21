@@ -14,6 +14,8 @@ import sun.invoke.util.ValueConversions;
 import sun.invoke.util.VerifyType;
 import sun.invoke.util.Wrapper;
 import sun.misc.Unsafe;
+import sun.reflect.CallerSensitive;
+import sun.reflect.Reflection;
 import static java.lang.invoke.MethodHandleStatics.*;
 import static java.lang.invoke.MethodHandles.Lookup.IMPL_LOOKUP;
 
@@ -1299,9 +1301,11 @@ import static java.lang.invoke.MethodHandles.Lookup.IMPL_LOOKUP;
             }
         }
 
+        @CallerSensitive
         private static boolean checkCallerClass(Class<?> expected, Class<?> expected2) {
-            final int FRAME_COUNT_ARG = 2;  
-            Class<?> actual = sun.reflect.Reflection.getCallerClass(FRAME_COUNT_ARG);
+            
+            
+            Class<?> actual = Reflection.getCallerClass();
             if (actual != expected && actual != expected2)
                 throw new InternalError("found "+actual.getName()+", expected "+expected.getName()
                                         +(expected == expected2 ? "" : ", or else "+expected2.getName()));

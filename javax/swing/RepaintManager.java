@@ -243,7 +243,7 @@ public class RepaintManager
 
         
         
-        scheduleProcessingRunnable();
+        scheduleProcessingRunnable(SunToolkit.targetToAppContext(invalidComponent));
     }
 
 
@@ -316,7 +316,7 @@ public class RepaintManager
 
         
         
-        scheduleProcessingRunnable();
+        scheduleProcessingRunnable(SunToolkit.targetToAppContext(c));
     }
 
     
@@ -1083,10 +1083,6 @@ public class RepaintManager
             setPaintManager(paintManager);
         }
         return paintManager;
-    }
-
-    private void scheduleProcessingRunnable() {
-        scheduleProcessingRunnable(AppContext.getAppContext());
     }
 
     private void scheduleProcessingRunnable(AppContext context) {

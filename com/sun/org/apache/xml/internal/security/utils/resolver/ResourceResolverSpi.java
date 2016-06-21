@@ -19,7 +19,9 @@ public abstract class ResourceResolverSpi {
                     ResourceResolverSpi.class.getName());
 
    
-   protected java.util.Map _properties = null;
+   protected java.util.Map<String,String> _properties = null;
+
+   protected boolean secureValidation;
 
    
    public abstract XMLSignatureInput engineResolve(Attr uri, String BaseURI)
@@ -28,7 +30,7 @@ public abstract class ResourceResolverSpi {
    
    public void engineSetProperty(String key, String value) {
           if (_properties==null) {
-                  _properties=new HashMap();
+                  _properties=new HashMap<String,String>();
           }
       this._properties.put(key, value);
    }
@@ -38,14 +40,14 @@ public abstract class ResourceResolverSpi {
           if (_properties==null) {
                         return null;
           }
-      return (String) this._properties.get(key);
+      return this._properties.get(key);
    }
 
    
-   public void engineAddProperies(Map properties) {
+   public void engineAddProperies(Map<String,String> properties) {
           if (properties!=null) {
                   if (_properties==null) {
-                          _properties=new HashMap();
+                          _properties=new HashMap<String,String>();
                   }
                   this._properties.putAll(properties);
           }

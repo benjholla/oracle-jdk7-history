@@ -2,10 +2,6 @@
 
 package javax.sound.midi;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-
 
 
 
@@ -17,14 +13,6 @@ public class MetaMessage extends MidiMessage {
     
     public static final int META                                                = 0xFF; 
 
-
-    
-    
-
-    private static byte[] defaultMessage                                = { (byte)META, 0 };
-
-
-
     
 
     
@@ -34,7 +22,7 @@ public class MetaMessage extends MidiMessage {
     
     public MetaMessage() {
         
-        this(defaultMessage);
+        this(new byte[]{(byte) META, 0});
     }
 
     

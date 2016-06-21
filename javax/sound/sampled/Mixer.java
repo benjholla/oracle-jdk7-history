@@ -57,16 +57,16 @@ public interface Mixer extends Line {
     public static class Info {
 
         
-        private  String name;
+        private final String name;
 
         
-        private  String vendor;
+        private final String vendor;
 
         
-        private  String description;
+        private final String description;
 
         
-        private  String version;
+        private final String version;
 
         
         protected Info(String name, String vendor, String description, String version) {

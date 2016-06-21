@@ -81,12 +81,9 @@ import com.sun.corba.se.impl.logging.OMGSystemException;
 import com.sun.corba.se.impl.util.Utility;
 import com.sun.corba.se.impl.util.IdentityHashtable;
 import com.sun.corba.se.impl.util.JDKBridge;
-import com.sun.corba.se.impl.orbutil.ORBClassLoader;
 import com.sun.corba.se.impl.logging.UtilSystemException;
 import com.sun.corba.se.spi.logging.CORBALogDomains;
 import sun.corba.SharedSecrets;
-import sun.corba.JavaCorbaAccess;
-
 
 
 public class Util implements javax.rmi.CORBA.UtilDelegate
@@ -228,7 +225,7 @@ public class Util implements javax.rmi.CORBA.UtilDelegate
             return new MarshalException(message,inner);
         } else if (ex instanceof ACTIVITY_REQUIRED) {
             try {
-                Class cl = ORBClassLoader.loadClass(
+                Class<?> cl = SharedSecrets.getJavaCorbaAccess().loadClass(
                                "javax.activity.ActivityRequiredException");
                 Class[] params = new Class[2];
                 params[0] = java.lang.String.class;
@@ -244,7 +241,7 @@ public class Util implements javax.rmi.CORBA.UtilDelegate
             }
         } else if (ex instanceof ACTIVITY_COMPLETED) {
             try {
-                Class cl = ORBClassLoader.loadClass(
+                Class<?> cl = SharedSecrets.getJavaCorbaAccess().loadClass(
                                "javax.activity.ActivityCompletedException");
                 Class[] params = new Class[2];
                 params[0] = java.lang.String.class;
@@ -260,7 +257,7 @@ public class Util implements javax.rmi.CORBA.UtilDelegate
               }
         } else if (ex instanceof INVALID_ACTIVITY) {
             try {
-                Class cl = ORBClassLoader.loadClass(
+                Class<?> cl = SharedSecrets.getJavaCorbaAccess().loadClass(
                                "javax.activity.InvalidActivityException");
                 Class[] params = new Class[2];
                 params[0] = java.lang.String.class;

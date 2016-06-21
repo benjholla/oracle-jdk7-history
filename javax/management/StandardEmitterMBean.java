@@ -6,17 +6,16 @@ package javax.management;
 public class StandardEmitterMBean extends StandardMBean
         implements NotificationEmitter {
 
+    private static final MBeanNotificationInfo[] NO_NOTIFICATION_INFO =
+        new MBeanNotificationInfo[0];
+
     private final NotificationEmitter emitter;
     private final MBeanNotificationInfo[] notificationInfo;
 
     
     public <T> StandardEmitterMBean(T implementation, Class<T> mbeanInterface,
                                     NotificationEmitter emitter) {
-        super(implementation, mbeanInterface, false);
-        if (emitter == null)
-            throw new IllegalArgumentException("Null emitter");
-        this.emitter = emitter;
-        this.notificationInfo = emitter.getNotificationInfo();
+        this(implementation, mbeanInterface, false, emitter);
     }
 
     
@@ -27,17 +26,18 @@ public class StandardEmitterMBean extends StandardMBean
         if (emitter == null)
             throw new IllegalArgumentException("Null emitter");
         this.emitter = emitter;
-        this.notificationInfo = emitter.getNotificationInfo();
+        MBeanNotificationInfo[] infos = emitter.getNotificationInfo();
+        if (infos == null || infos.length == 0) {
+            this.notificationInfo = NO_NOTIFICATION_INFO;
+        } else {
+            this.notificationInfo = infos.clone();
+        }
     }
 
     
     protected StandardEmitterMBean(Class<?> mbeanInterface,
                                    NotificationEmitter emitter) {
-        super(mbeanInterface, false);
-        if (emitter == null)
-            throw new IllegalArgumentException("Null emitter");
-        this.emitter = emitter;
-        this.notificationInfo = emitter.getNotificationInfo();
+        this(mbeanInterface, false, emitter);
     }
 
     
@@ -47,7 +47,12 @@ public class StandardEmitterMBean extends StandardMBean
         if (emitter == null)
             throw new IllegalArgumentException("Null emitter");
         this.emitter = emitter;
-        this.notificationInfo = emitter.getNotificationInfo();
+        MBeanNotificationInfo[] infos = emitter.getNotificationInfo();
+        if (infos == null || infos.length == 0) {
+            this.notificationInfo = NO_NOTIFICATION_INFO;
+        } else {
+            this.notificationInfo = infos.clone();
+        }
     }
 
     public void removeNotificationListener(NotificationListener listener)
@@ -69,7 +74,16 @@ public class StandardEmitterMBean extends StandardMBean
     }
 
     public MBeanNotificationInfo[] getNotificationInfo() {
-        return notificationInfo;
+        
+        
+        if (notificationInfo == null) {
+            return NO_NOTIFICATION_INFO;
+        }
+        if (notificationInfo.length == 0) {
+            return notificationInfo;
+        } else {
+            return notificationInfo.clone();
+        }
     }
 
     

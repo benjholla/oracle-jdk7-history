@@ -577,7 +577,8 @@ public final class TypeCodeImpl extends TypeCode
     }
 
     public static CDROutputStream newOutputStream(ORB orb) {
-        TypeCodeOutputStream tcos = new TypeCodeOutputStream((ORB)orb);
+        TypeCodeOutputStream tcos =
+            sun.corba.OutputStreamFactory.newTypeCodeOutputStream(orb);
         
         
         return tcos;

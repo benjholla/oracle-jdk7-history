@@ -189,7 +189,7 @@ public abstract class CorbaContactInfoBase
             messageMediator;
 
         OutputObject outputObject =
-            new CDROutputObject(orb, messageMediator,
+            sun.corba.OutputStreamFactory.newCDROutputObject(orb, messageMediator,
                                 corbaMessageMediator.getRequestHeader(),
                                 corbaMessageMediator.getStreamFormatVersion());
 

@@ -11,6 +11,7 @@ import java.security.Permission;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import javax.management.loading.ClassLoaderRepository;
+import sun.reflect.misc.ReflectUtil;
 
 
 
@@ -166,7 +167,7 @@ public class MBeanServerFactory {
         }
 
         
-        return Class.forName(builderClassName);
+        return ReflectUtil.forName(builderClassName);
     }
 
     

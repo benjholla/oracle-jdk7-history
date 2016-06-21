@@ -1729,8 +1729,7 @@ public class CorbaMessageMediatorImpl
 
         if (msg.getGIOPVersion().lessThan(GIOPVersion.V1_2)) {
             
-            
-            outputObject = new CDROutputObject(
+            outputObject = sun.corba.OutputStreamFactory.newCDROutputObject(
                              (ORB) messageMediator.getBroker(),
                              this,
                              GIOPVersion.V1_0,
@@ -1739,8 +1738,7 @@ public class CorbaMessageMediatorImpl
                              ORBConstants.STREAM_FORMAT_VERSION_1);
         } else {
             
-            
-            outputObject = new CDROutputObject(
+            outputObject = sun.corba.OutputStreamFactory.newCDROutputObject(
                              (ORB) messageMediator.getBroker(),
                              messageMediator,
                              reply,
@@ -1889,7 +1887,8 @@ public class CorbaMessageMediatorImpl
                           ReplyMessage.NEEDS_ADDRESSING_MODE,
                           null, null);
             
-            CDROutputObject outputObject = new CDROutputObject(
+            CDROutputObject outputObject =
+                sun.corba.OutputStreamFactory.newCDROutputObject(
                 (ORB)messageMediator.getBroker(),
                 this,
                 messageMediator.getGIOPVersion(),
@@ -2056,7 +2055,7 @@ public class CorbaMessageMediatorImpl
         ex.printStackTrace(pw);
         pw.flush(); 
         EncapsOutputStream encapsOutputStream =
-            new EncapsOutputStream((ORB)mediator.getBroker());
+            sun.corba.OutputStreamFactory.newEncapsOutputStream((ORB)mediator.getBroker());
         encapsOutputStream.putEndian();
         encapsOutputStream.write_wstring(baos.toString());
         UnknownServiceContext serviceContext =
@@ -2133,12 +2132,11 @@ public class CorbaMessageMediatorImpl
         
         
         if (messageMediator.getConnection() == null) {
-            
             replyOutputObject =
-                new CDROutputObject(orb, messageMediator,
-                                    messageMediator.getReplyHeader(),
-                                    messageMediator.getStreamFormatVersion(),
-                                    BufferManagerFactory.GROW);
+                sun.corba.OutputStreamFactory.newCDROutputObject(orb,
+                            messageMediator, messageMediator.getReplyHeader(),
+                            messageMediator.getStreamFormatVersion(),
+                            BufferManagerFactory.GROW);
         } else {
             replyOutputObject = messageMediator.getConnection().getAcceptor()
              .createOutputObject(messageMediator.getBroker(), messageMediator);

@@ -3,6 +3,8 @@
 package java.security;
 
 import sun.security.util.Debug;
+import sun.reflect.CallerSensitive;
+import sun.reflect.Reflection;
 
 
 
@@ -13,31 +15,35 @@ public final class AccessController {
 
     
 
+    @CallerSensitive
     public static native <T> T doPrivileged(PrivilegedAction<T> action);
 
     
+    @CallerSensitive
     public static <T> T doPrivilegedWithCombiner(PrivilegedAction<T> action) {
-
         AccessControlContext acc = getStackAccessControlContext();
         if (acc == null) {
             return AccessController.doPrivileged(action);
         }
         DomainCombiner dc = acc.getAssignedCombiner();
-        return AccessController.doPrivileged(action, preserveCombiner(dc));
+        return AccessController.doPrivileged(action, preserveCombiner(dc, Reflection.getCallerClass()));
     }
 
 
     
+    @CallerSensitive
     public static native <T> T doPrivileged(PrivilegedAction<T> action,
                                             AccessControlContext context);
 
     
+    @CallerSensitive
     public static native <T> T
         doPrivileged(PrivilegedExceptionAction<T> action)
         throws PrivilegedActionException;
 
 
     
+    @CallerSensitive
     public static <T> T doPrivilegedWithCombiner
         (PrivilegedExceptionAction<T> action) throws PrivilegedActionException {
 
@@ -46,19 +52,16 @@ public final class AccessController {
             return AccessController.doPrivileged(action);
         }
         DomainCombiner dc = acc.getAssignedCombiner();
-        return AccessController.doPrivileged(action, preserveCombiner(dc));
+        return AccessController.doPrivileged(action, preserveCombiner(dc, Reflection.getCallerClass()));
     }
 
     
-    private static AccessControlContext preserveCombiner
-                                        (DomainCombiner combiner) {
-
-        
-        final Class callerClass = sun.reflect.Reflection.getCallerClass(3);
+    private static AccessControlContext preserveCombiner(DomainCombiner combiner,
+                                                         final Class<?> caller) {
         ProtectionDomain callerPd = doPrivileged
             (new PrivilegedAction<ProtectionDomain>() {
             public ProtectionDomain run() {
-                return callerClass.getProtectionDomain();
+                return caller.getProtectionDomain();
             }
         });
 
@@ -75,6 +78,7 @@ public final class AccessController {
 
 
     
+    @CallerSensitive
     public static native <T> T
         doPrivileged(PrivilegedExceptionAction<T> action,
                      AccessControlContext context)

@@ -111,7 +111,7 @@ public class SharedCDRContactInfoImpl
             messageMediator;
         
         OutputObject outputObject =
-            new CDROutputObject(orb, messageMediator,
+            sun.corba.OutputStreamFactory.newCDROutputObject(orb, messageMediator,
                                 corbaMessageMediator.getRequestHeader(),
                                 corbaMessageMediator.getStreamFormatVersion(),
                                 BufferManagerFactory.GROW);

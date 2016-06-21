@@ -3,17 +3,21 @@
 
 
 package java.util.concurrent.atomic;
-import sun.misc.Unsafe;
 import java.lang.reflect.*;
+import sun.misc.Unsafe;
+import sun.reflect.CallerSensitive;
+import sun.reflect.Reflection;
 
 
 public abstract class  AtomicLongFieldUpdater<T> {
     
+    @CallerSensitive
     public static <U> AtomicLongFieldUpdater<U> newUpdater(Class<U> tclass, String fieldName) {
+        Class<?> caller = Reflection.getCallerClass();
         if (AtomicLong.VM_SUPPORTS_LONG_CAS)
-            return new CASUpdater<U>(tclass, fieldName);
+            return new CASUpdater<U>(tclass, fieldName, caller);
         else
-            return new LockedUpdater<U>(tclass, fieldName);
+            return new LockedUpdater<U>(tclass, fieldName, caller);
     }
 
     
@@ -110,13 +114,11 @@ public abstract class  AtomicLongFieldUpdater<T> {
         private final Class<T> tclass;
         private final Class cclass;
 
-        CASUpdater(Class<T> tclass, String fieldName) {
+        CASUpdater(Class<T> tclass, String fieldName, Class<?> caller) {
             Field field = null;
-            Class caller = null;
             int modifiers = 0;
             try {
                 field = tclass.getDeclaredField(fieldName);
-                caller = sun.reflect.Reflection.getCallerClass(3);
                 modifiers = field.getModifiers();
                 sun.reflect.misc.ReflectUtil.ensureMemberAccess(
                     caller, tclass, null, modifiers);
@@ -193,13 +195,11 @@ public abstract class  AtomicLongFieldUpdater<T> {
         private final Class<T> tclass;
         private final Class cclass;
 
-        LockedUpdater(Class<T> tclass, String fieldName) {
+        LockedUpdater(Class<T> tclass, String fieldName, Class<?> caller) {
             Field field = null;
-            Class caller = null;
             int modifiers = 0;
             try {
                 field = tclass.getDeclaredField(fieldName);
-                caller = sun.reflect.Reflection.getCallerClass(3);
                 modifiers = field.getModifiers();
                 sun.reflect.misc.ReflectUtil.ensureMemberAccess(
                     caller, tclass, null, modifiers);
