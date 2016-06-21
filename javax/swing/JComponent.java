@@ -2229,6 +2229,17 @@ public abstract class JComponent extends Container implements Serializable,
 
         
         public AccessibleKeyBinding getAccessibleKeyBinding() {
+            
+            Object o = getClientProperty(JLabel.LABELED_BY_PROPERTY);
+            if (o instanceof Accessible){
+                AccessibleContext ac = ((Accessible) o).getAccessibleContext();
+                if (ac != null){
+                    AccessibleComponent comp = ac.getAccessibleComponent();
+                    if (! (comp instanceof AccessibleExtendedComponent))
+                        return null;
+                    return ((AccessibleExtendedComponent)comp).getAccessibleKeyBinding();
+                }
+            }
             return null;
         }
     } 

@@ -828,6 +828,11 @@ public class JTree extends JComponent implements Scrollable, Accessible
 
         leadPath = newPath;
         firePropertyChange(LEAD_SELECTION_PATH_PROPERTY, oldValue, newPath);
+
+        if (accessibleContext != null){
+            ((AccessibleJTree)accessibleContext).
+                fireActiveDescendantPropertyChange(oldValue, newPath);
+        }
     }
 
     
@@ -2384,23 +2389,6 @@ public class JTree extends JComponent implements Scrollable, Accessible
 
         
         public void valueChanged(TreeSelectionEvent e) {
-            
-            
-            TreePath oldLeadSelectionPath = e.getOldLeadSelectionPath();
-            leadSelectionPath = e.getNewLeadSelectionPath();
-
-            if (oldLeadSelectionPath != leadSelectionPath) {
-                
-                
-                Accessible oldLSA = leadSelectionAccessible;
-                leadSelectionAccessible = (leadSelectionPath != null)
-                        ? new AccessibleJTreeNode(JTree.this,
-                                                  leadSelectionPath,
-                                                  null) 
-                        : null;
-                firePropertyChange(AccessibleContext.ACCESSIBLE_ACTIVE_DESCENDANT_PROPERTY,
-                                   oldLSA, leadSelectionAccessible);
-            }
             firePropertyChange(AccessibleContext.ACCESSIBLE_SELECTION_PROPERTY,
                                Boolean.valueOf(false), Boolean.valueOf(true));
         }
@@ -2469,6 +2457,25 @@ public class JTree extends JComponent implements Scrollable, Accessible
                     AccessibleState.EXPANDED);
                 firePropertyChange(AccessibleContext.ACCESSIBLE_STATE_PROPERTY,
                                    null, pce);
+            }
+        }
+
+        
+        void fireActiveDescendantPropertyChange(TreePath oldPath, TreePath newPath){
+            if(oldPath != newPath){
+                Accessible oldLSA = (oldPath != null)
+                                    ? new AccessibleJTreeNode(JTree.this,
+                                                              oldPath,
+                                                              null)
+                                    : null;
+
+                Accessible newLSA = (newPath != null)
+                                    ? new AccessibleJTreeNode(JTree.this,
+                                                              newPath,
+                                                              null)
+                                    : null;
+                firePropertyChange(AccessibleContext.ACCESSIBLE_ACTIVE_DESCENDANT_PROPERTY,
+                                                                oldLSA, newLSA);
             }
         }
 

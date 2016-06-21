@@ -1847,6 +1847,13 @@ class Parser implements DTDConstants {
                         
                         endTag(false);
                         continue;
+                    } else if (textpos == 0) {
+                        if (!legalElementContext(dtd.pcdata)) {
+                            error("unexpected.pcdata");
+                        }
+                        if (last.breaksFlow()) {
+                            space = false;
+                        }
                     }
                     break;
 

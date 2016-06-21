@@ -2304,7 +2304,7 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
                 }
                 
                 int viewLeadIndex = modelSelection.getLeadSelectionIndex();
-                if (viewLeadIndex != -1) {
+                if (viewLeadIndex != -1 && !modelSelection.isSelectionEmpty()) {
                     viewLeadIndex = convertRowIndexToView(viewLeadIndex);
                 }
                 SwingUtilities2.setLeadAnchorWithoutSelection(
@@ -4123,8 +4123,8 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
     TableColumnModelListener, CellEditorListener, PropertyChangeListener,
     AccessibleExtendedTable {
 
-        int lastSelectedRow;
-        int lastSelectedCol;
+        int previousFocusedRow;
+        int previousFocusedCol;
 
         
         protected AccessibleJTable() {
@@ -4135,8 +4135,10 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
             tcm.addColumnModelListener(this);
             tcm.getSelectionModel().addListSelectionListener(this);
             JTable.this.getModel().addTableModelListener(this);
-            lastSelectedRow = JTable.this.getSelectedRow();
-            lastSelectedCol = JTable.this.getSelectedColumn();
+            previousFocusedRow = JTable.this.getSelectionModel().
+                                        getLeadSelectionIndex();
+            previousFocusedCol = JTable.this.getColumnModel().
+                                        getSelectionModel().getLeadSelectionIndex();
         }
 
     
@@ -4422,18 +4424,21 @@ public class JTable extends JComponent implements TableModelListener, Scrollable
             firePropertyChange(AccessibleContext.ACCESSIBLE_SELECTION_PROPERTY,
                                Boolean.valueOf(false), Boolean.valueOf(true));
 
-            int selectedRow = JTable.this.getSelectedRow();
-            int selectedCol = JTable.this.getSelectedColumn();
-            if (selectedRow != lastSelectedRow ||
-                selectedCol != lastSelectedCol) {
-                Accessible oldA = getAccessibleAt(lastSelectedRow,
-                                                  lastSelectedCol);
-                Accessible newA = getAccessibleAt(selectedRow, selectedCol);
+            
+            
+            int focusedRow = JTable.this.getSelectionModel().getLeadSelectionIndex();
+            int focusedCol = JTable.this.getColumnModel().getSelectionModel().
+                                                    getLeadSelectionIndex();
+
+            if (focusedRow != previousFocusedRow ||
+                focusedCol != previousFocusedCol){
+                Accessible oldA = getAccessibleAt(previousFocusedRow, previousFocusedCol);
+                Accessible newA = getAccessibleAt(focusedRow, focusedCol);
                 firePropertyChange(AccessibleContext.ACCESSIBLE_ACTIVE_DESCENDANT_PROPERTY,
-                                   oldA, newA);
-                 lastSelectedRow = selectedRow;
-                 lastSelectedCol = selectedCol;
-             }
+                                    oldA, newA);
+                previousFocusedRow = focusedRow;
+                previousFocusedCol = focusedCol;
+            }
         }
 
 
