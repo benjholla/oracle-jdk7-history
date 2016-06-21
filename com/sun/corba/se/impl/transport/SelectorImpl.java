@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2012, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2013, Oracle and/or its affiliates. All rights reserved.
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  *
  *
@@ -55,7 +55,7 @@ import com.sun.corba.se.impl.orbutil.ORBUtility;
 /**
  * @author Harold Carr
  */
-public class SelectorImpl
+class SelectorImpl
     extends
         Thread
     implements
